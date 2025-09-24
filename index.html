@@ -335,6 +335,164 @@
             text-wrap: balance; /* distribute words to avoid orphan lines */
             text-align: left;
         }
+
+        /* Mobile optimizations */
+        @media screen and (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+
+            .header {
+                padding: 15px 15px;
+                position: fixed;
+                background: rgba(8, 12, 28, 0.98);
+            }
+
+            h1 {
+                font-size: 1.3em;
+                margin-bottom: 5px;
+            }
+
+            .subtitle {
+                font-size: 0.85em;
+                margin-bottom: 10px;
+            }
+
+            /* Hide SMW toggle on mobile */
+            #smwToggle {
+                display: none;
+            }
+
+            .info-panel {
+                position: fixed;
+                top: auto;
+                bottom: 60px;
+                left: 10px;
+                right: 10px;
+                padding: 12px;
+                min-width: unset;
+                font-size: 0.85em;
+                max-height: 35vh;
+                overflow-y: auto;
+            }
+
+            .model-name {
+                font-size: 1.1em;
+                margin-bottom: 5px;
+            }
+
+            .metric {
+                margin-bottom: 4px;
+                font-size: 0.9em;
+            }
+
+            .metric-label {
+                min-width: 90px;
+            }
+
+            /* Hide factoid panel completely on mobile */
+            #factoidPanel {
+                display: none !important;
+            }
+
+            /* Hide efficiency box on mobile */
+            .efficiency-box {
+                display: none !important;
+            }
+
+            /* Hide instruction panel on mobile */
+            .instruction-panel {
+                display: none !important;
+            }
+
+            /* Hide critical event popup on mobile */
+            #criticalEvent {
+                display: none !important;
+            }
+
+            /* Simplify controls */
+            .controls {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 8px;
+                background: rgba(8, 12, 28, 0.98);
+                border-top: 1px solid var(--border);
+                display: flex;
+                gap: 5px;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+            }
+
+            .btn, button {
+                padding: 8px 10px;
+                font-size: 0.75em;
+                min-width: unset;
+                flex: 1;
+            }
+
+            .btn-two-line {
+                padding: 6px 8px;
+            }
+
+            .btn-two-line span:last-child {
+                display: none;
+            }
+
+            /* Hide less important controls on mobile */
+            #dataTypeBtn {
+                display: none;
+            }
+
+            /* Adjust canvas for mobile */
+            canvas {
+                margin-top: 70px;
+                height: calc(100vh - 250px);
+            }
+
+            /* Hide progress details */
+            .progress-details {
+                display: none;
+            }
+
+            /* Simplify GPU count display */
+            .gpu-count {
+                font-size: 0.85em;
+            }
+        }
+
+        /* Even smaller mobile screens */
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 1.1em;
+            }
+
+            .subtitle {
+                display: none;
+            }
+
+            .info-panel {
+                bottom: 50px;
+                padding: 10px;
+                font-size: 0.8em;
+            }
+
+            .controls {
+                padding: 5px;
+                gap: 3px;
+            }
+
+            .btn, button {
+                font-size: 0.7em;
+                padding: 6px 8px;
+            }
+
+            /* Show only play, model, and context buttons */
+            #speedBtn {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>

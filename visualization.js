@@ -7,6 +7,9 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+// Check if mobile
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
 // Model configurations from LMCache
 // Samsung brand colors
 const models = [
@@ -134,8 +137,14 @@ const dtypeConfigs = {
 
 // Resize canvas
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (isMobile) {
+        // On mobile, account for header and controls
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 250; // Leave room for header and controls
+    } else {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
 }
 
 // Calculate KV cache size (from LMCache logic)
@@ -295,6 +304,11 @@ function drawMemoryGrid() {
     const kvMaxGiB = calculateKVCacheSize(model, maxTokens);
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
     const totalGiB = kvGiB + weightsGiB;
+
+    // Skip complex rendering on mobile if performance is poor
+    if (isMobile && currentTokens > 1000000) {
+        return; // Skip heavy grid rendering on mobile for performance
+    }
     const totalMaxGiB = kvMaxGiB + weightsGiB;
     const fillRatio = totalMaxGiB > 0 ? (totalGiB / totalMaxGiB) : 0;
 
@@ -444,6 +458,9 @@ function generateFactoids() {
 
 // Update factoid display
 function updateFactoid() {
+    // Skip factoid updates on mobile
+    if (isMobile) return;
+
     const factoids = generateFactoids();
     const factoid = factoids[currentFactoidIndex % factoids.length];
 
@@ -565,6 +582,9 @@ function pickRelevantFactoid(state) {
 
 // Show critical popup
 function showCriticalPopup(state, metrics) {
+    // Skip critical popups on mobile
+    if (isMobile) return;
+
     const overlay = document.getElementById('criticalOverlay');
     if (!overlay) return;
     const title = document.getElementById('criticalTitle');
