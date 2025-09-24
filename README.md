@@ -16,15 +16,12 @@ An impactful, animated visualization demonstrating the exponential memory growth
 
 ## 🚀 Live Demo
 
-### GitHub HTML Preview (No Installation Required!)
-Simply replace `[username]` with your GitHub username:
-```
-https://htmlpreview.github.io/?https://github.com/[username]/kv-cache-visualization/blob/main/index.html
-```
+### View Online (No Installation Required!)
+**[View Live Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html)**
 
-Example:
+Or use the direct URL:
 ```
-https://htmlpreview.github.io/?https://github.com/mcgrof/kv-cache-visualization/blob/main/index.html
+https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html
 ```
 
 **Note:** GitHub's HTML preview may have slight performance limitations compared to running locally.
@@ -75,7 +72,7 @@ start index.html     # Windows
 ### Option 4: GitHub Pages
 Fork this repo and enable GitHub Pages in settings, then visit:
 ```
-https://[your-username].github.io/kv-cache-visualization/
+https://[your-username].github.io/kvcache-view/
 ```
 
 ## Controls
@@ -158,7 +155,7 @@ This visualization demonstrates why such optimizations are critical for the futu
 ## 📁 Project Structure
 
 ```
-kv-cache-visualization/
+kvcache-view/
 ├── index.html           # Main HTML file with UI
 ├── visualization.js     # Core visualization logic
 ├── README.md           # This file
