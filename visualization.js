@@ -81,6 +81,7 @@ let lastCriticalState = 'none';
 let lastPopupTime = 0;
 const POPUP_COOLDOWN_MS = 10000;
 let includeWeights = true; // Include model weights memory by default
+let batchSize = 1; // Number of concurrent queries per GPU
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
@@ -427,7 +428,9 @@ function generateFactoids() {
     const model = models[currentModelIndex];
     const kvGiB = calculateKVCacheSize(model, currentTokens);
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const totalGiB = kvGiB + weightsGiB;
+    const memoryPerQuery = kvGiB + weightsGiB;
+    // Total memory for all concurrent queries
+    const totalGiB = memoryPerQuery * batchSize;
     const gpusNeeded = calculateGPUsNeeded(totalGiB);
     const per = getCurrentGPUMemGiB();
     const efficiency = Math.min(100, (totalGiB / (gpusNeeded * per)) * 100);
@@ -492,7 +495,9 @@ function updateInfoPanel() {
     const model = models[currentModelIndex];
     const kvGiB = calculateKVCacheSize(model, currentTokens);
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const totalGiB = kvGiB + weightsGiB;
+    const memoryPerQuery = kvGiB + weightsGiB;
+    // Total memory for all concurrent queries
+    const totalGiB = memoryPerQuery * batchSize;
     const gpusNeeded = calculateGPUsNeeded(totalGiB);
 
     document.getElementById('modelName').textContent = model.name;
@@ -500,9 +505,20 @@ function updateInfoPanel() {
     const weightsEl = document.getElementById('weightsSize');
     const totalEl = document.getElementById('totalSize');
     if (weightsEl) weightsEl.textContent = includeWeights ? formatMemory(weightsGiB) : '—';
-    if (totalEl) totalEl.textContent = formatMemory(totalGiB);
+    if (totalEl) {
+        if (batchSize > 1) {
+            totalEl.textContent = `${formatMemory(totalGiB)} (${batchSize}x ${formatMemory(memoryPerQuery)})`;
+        } else {
+            totalEl.textContent = formatMemory(totalGiB);
+        }
+    }
     document.getElementById('cacheSize').textContent = formatMemory(kvGiB);
-    document.getElementById('gpusNeeded').textContent = gpusNeeded;
+
+    // Update GPU display to show batch processing info
+    const gpuText = batchSize > 1
+        ? `${gpusNeeded} (${batchSize} queries/GPU)`
+        : gpusNeeded;
+    document.getElementById('gpusNeeded').textContent = gpuText;
     document.getElementById('dataType').textContent = currentDtype;
 
     // Calculate efficiency based on GPU utilization
@@ -718,6 +734,18 @@ document.getElementById('playPause').addEventListener('click', function() {
     this.classList.toggle('active', isPlaying);
 });
 
+// Batch size control
+document.getElementById('batchControl').addEventListener('click', function() {
+    const batchSizes = [1, 2, 4, 8, 16, 32, 64, 128];
+    const currentIndex = batchSizes.indexOf(batchSize);
+    const nextIndex = (currentIndex + 1) % batchSizes.length;
+    batchSize = batchSizes[nextIndex];
+    this.textContent = `Batch: ${batchSize}`;
+
+    // Force update display to show new calculations
+    updateContinuously();
+});
+
 document.getElementById('speedControl').addEventListener('click', function() {
     const speeds = [0.5, 1, 2, 5, 10, 20, 50, 100];
     const currentIndex = speeds.indexOf(animationSpeed);
@@ -821,6 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const speedBtn = document.getElementById('speedControl');
     if (speedBtn) speedBtn.textContent = `Speed: ${animationSpeed}x`;
+    const batchBtn = document.getElementById('batchControl');
+    if (batchBtn) batchBtn.textContent = `Batch: ${batchSize}`;
     const dtypeBtn = document.getElementById('dtypeControl');
     if (dtypeBtn) dtypeBtn.textContent = `Type: ${currentDtype}`;
     const gpuBtn2 = document.getElementById('gpuControl');
