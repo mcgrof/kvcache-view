@@ -350,53 +350,71 @@
                 display: none;
             }
 
-            /* Move SMW toggle to bottom */
+            /* Keep SMW toggle inline with controls */
             #smwToggle {
-                position: fixed !important;
-                bottom: 10px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                z-index: 200 !important;
-                background: rgba(5, 8, 19, 0.9) !important;
-                border: 1px solid var(--border) !important;
-                padding: 8px 15px !important;
-                border-radius: 20px !important;
-                font-size: 0.75em !important;
+                display: inline-block !important;
+                position: static !important;
+                font-size: 0.65em !important;
+                padding: 6px 10px !important;
+                margin: 0 !important;
+                background: rgba(255, 255, 255, 0.1) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border-radius: 5px !important;
             }
 
             #smwToggle span:last-child {
                 display: none;
             }
 
-            /* Info panel at top left with memory info */
+            /* Top bar containing everything */
             .info-panel {
                 position: fixed;
-                top: 10px;
-                left: 10px;
-                right: auto;
-                bottom: auto;
-                padding: 10px;
-                min-width: unset;
-                font-size: 0.85em;
-                background: rgba(5, 8, 19, 0.85);
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 8px;
+                background: rgba(5, 8, 19, 0.95);
                 backdrop-filter: blur(10px);
-                border-radius: 10px;
+                border-bottom: 1px solid var(--border);
                 z-index: 100;
-                max-width: 60%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .model-info {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 0;
             }
 
             .model-name {
-                font-size: 1.1em;
-                margin-bottom: 5px;
+                font-size: 0.85em;
+                margin: 0;
+                font-weight: 600;
             }
 
             .metric {
-                margin-bottom: 4px;
-                font-size: 0.9em;
+                margin: 0;
+                font-size: 0.8em;
+                display: none;
+            }
+
+            /* Show only memory metric */
+            .metric:nth-child(3) {
+                display: inline-block;
             }
 
             .metric-label {
-                min-width: 90px;
+                display: none;
+            }
+
+            .metric-value {
+                font-weight: 600;
+                color: var(--accent-cyan);
             }
 
             /* Hide all non-essential elements on mobile */
@@ -405,7 +423,8 @@
             .instruction-panel,
             #criticalEvent,
             .progress-bar,
-            .progress-details {
+            .progress-details,
+            .legend {
                 display: none !important;
             }
 
@@ -414,31 +433,24 @@
                 display: none !important;
             }
 
-            /* Controls at top right */
+            /* Controls inline in top bar */
             .controls {
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                left: auto;
-                bottom: auto;
+                position: static;
+                display: flex;
+                gap: 5px;
                 padding: 0;
                 background: transparent;
                 border: none;
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-                z-index: 100;
-                max-width: 35%;
             }
 
             .btn, button {
-                padding: 8px 12px;
-                font-size: 0.7em;
+                padding: 6px 10px;
+                font-size: 0.65em;
                 min-width: unset;
-                background: rgba(5, 8, 19, 0.85);
-                backdrop-filter: blur(10px);
-                border: 1px solid var(--border);
-                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+                white-space: nowrap;
             }
 
             .btn-two-line span:last-child {
