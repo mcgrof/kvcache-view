@@ -1,6 +1,7 @@
 // KV Cache Growth Visualization
 // Memory calculations based on LMCache KV Cache Calculator
 // Source: https://lmcache.ai/kv_cache_calculator.html
+// Project: https://github.com/mcgrof/kvcache-view
 // This visualization uses the exact formulas from LMCache's calculator
 // to accurately compute KV cache memory requirements
 
