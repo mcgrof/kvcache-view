@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KV Cache Growth Visualization - The Memory Challenge</title>
+    <style>
+        :root {
+            --samsung-blue: #1428A0;
+            --samsung-light-blue: #5FA3E6;
+            --samsung-purple: #691FFF;
+            --samsung-cyan: #00D4FF;
+            --samsung-ink: #0B1026;
+            --surface: rgba(10, 16, 44, 0.92);
+            --surface-2: rgba(13, 22, 58, 0.85);
+            --border: rgba(95, 163, 230, 0.45);
+            --text-primary: #EAF2FF;
+            --text-secondary: #C7D4F8;
+            --text-muted: #A5B4E0;
+            --accent-warn: #FF6B00;
+            --accent-warn-bg: rgba(255, 107, 0, 0.12);
+            --accent-good: #00FF88;
+            --accent-mid: #FFB800;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Samsung One', 'SamsungSharpSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: radial-gradient(1200px 600px at 20% -10%, rgba(20, 40, 160, 0.35), transparent),
+                        radial-gradient(1000px 800px at 100% 10%, rgba(95, 163, 230, 0.25), transparent),
+                        linear-gradient(135deg, #050813 0%, #0E173A 55%, #0B1026 100%);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            flex: 1;
+            display: block;
+            background: transparent;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 30px 40px;
+            background: linear-gradient(to bottom, rgba(8, 12, 28, 0.95), transparent);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            text-shadow: 0 8px 40px rgba(20, 40, 160, 0.45);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 150px;
+            left: 40px;
+            background: linear-gradient(180deg, var(--surface), var(--surface-2));
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            min-width: 350px;
+            z-index: 10;
+            box-shadow: 0 10px 40px rgba(20, 40, 160, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .model-info {
+            margin-bottom: 20px;
+        }
+
+        .model-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--samsung-light-blue);
+            margin-bottom: 10px;
+            letter-spacing: 0.2px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .memory-value {
+            color: var(--accent-warn);
+            font-size: 1.2em;
+        }
+
+        .warning {
+            background: var(--accent-warn-bg);
+            border: 1px solid var(--accent-warn);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.92em;
+            color: var(--accent-warn);
+            text-shadow: 0 0 10px rgba(255, 107, 0, 0.15);
+        }
+
+        .controls {
+            position: fixed;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 30;
+            max-width: 240px;
+            align-items: stretch;
+        }
+        .btn-two-line { display: flex; flex-direction: column; line-height: 1.1; align-items: center; }
+        .btn-two-line .caption { font-size: 0.72em; opacity: 0.9; text-transform: none; letter-spacing: 0; }
+        .header-toggle { position: absolute; top: 36px; right: 40px; padding: 8px 14px; border-radius: 18px; font-size: 0.85em; }
+
+        button {
+            background: linear-gradient(180deg, rgba(20, 40, 160, 0.20), rgba(20, 40, 160, 0.10));
+            border: 2px solid var(--samsung-blue);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(20, 40, 160, 0.35);
+        }
+
+        button:hover {
+            background: linear-gradient(180deg, #1428A0, #0F1E6B);
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(20, 40, 160, 0.55);
+        }
+
+        button:focus-visible {
+            outline: 3px solid var(--samsung-light-blue);
+            outline-offset: 2px;
+        }
+
+        button.active {
+            background: #1428A0;
+            color: #FFFFFF;
+            border-color: var(--samsung-light-blue);
+            box-shadow: 0 6px 22px rgba(95, 163, 230, 0.45);
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: linear-gradient(180deg, var(--surface), var(--surface-2));
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            z-index: 10;
+            box-shadow: 0 10px 40px rgba(20, 40, 160, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            max-width: 360px;
+            width: 360px;
+        }
+
+        .legend h3 {
+            margin-bottom: 10px;
+            color: var(--samsung-light-blue);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .legend-note { color: var(--text-muted); font-size: 0.85em; margin-top: 8px; white-space: normal; text-wrap: balance; }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(95, 163, 230, 0.15);
+            z-index: 11;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--samsung-blue), var(--samsung-light-blue));
+            width: 0;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 12px rgba(95, 163, 230, 0.6);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        /* Critical popup */
+        #criticalOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(2px);
+        }
+        #criticalPopup {
+            background: linear-gradient(180deg, var(--surface), var(--surface-2));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            width: min(520px, 90vw);
+            color: var(--text-primary);
+            box-shadow: 0 20px 60px rgba(20, 40, 160, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        #criticalHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        #criticalTitle { color: var(--accent-warn); font-weight: 800; letter-spacing: 0.3px; }
+        #criticalClose { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+        #criticalClose:hover { color: #fff; border-color: var(--samsung-light-blue); }
+        #criticalMain { font-size: 1.1em; font-weight: 700; margin: 8px 0; }
+        #criticalDetail { color: var(--text-secondary); font-size: 0.95em; }
+
+        /* Factoid panel theme */
+        #factoidPanel {
+            background: linear-gradient(180deg, var(--surface), var(--surface-2)) !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: 0 10px 40px rgba(20, 40, 160, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+        }
+        #factoidTitle { color: var(--samsung-light-blue) !important; font-size: 1.11em !important; }
+        #factoidMain { color: var(--text-primary) !important; font-size: 1.50em !important; }
+        #factoidDetail { color: var(--text-secondary) !important; font-size: 0.90em !important; line-height: 1.45 !important; }
+
+        /* Separate efficiency box below model info */
+        .efficiency-box {
+            position: absolute;
+            left: 40px; /* will be overridden by JS to align with info panel */
+            top: 500px; /* fallback; JS positions precisely below .info-panel */
+            background: linear-gradient(180deg, rgba(20, 40, 160, 0.18), rgba(95, 163, 230, 0.07));
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            min-width: 350px;
+            z-index: 10;
+            box-shadow: 0 10px 40px rgba(20, 40, 160, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            font-size: 0.85em; /* reduce overall font size */
+        }
+
+        .efficiency-title { font-size: 0.95em; display: flex; align-items: center; margin-bottom: 10px; }
+        .efficiency-title .icon { font-size: 1.2em; margin-right: 10px; }
+        .efficiency-title .text { color: var(--samsung-light-blue); font-weight: 700; }
+        /* Elegant math-like equation styling */
+        .efficiency-eq {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-primary);
+            background: rgba(8, 12, 28, 0.35);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-variant-numeric: lining-nums;
+        }
+        .efficiency-eq .eta { font-weight: 800; color: var(--samsung-light-blue); font-size: 1.05em; letter-spacing: 0.5px; }
+        .efficiency-eq .equals, .efficiency-eq .times { opacity: 0.9; }
+        .efficiency-eq .hundred { font-weight: 600; }
+        .efficiency-eq .percent { opacity: 0.9; }
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 180px;
+            line-height: 1.2;
+        }
+        .fraction .top, .fraction .bottom { padding: 2px 8px; }
+        .fraction .bar { width: 100%; height: 1.5px; background: rgba(255,255,255,0.75); border-radius: 1px; }
+        .kv-label { color: var(--samsung-cyan); font-weight: 700; }
+        .gpu-label { color: #FFC24A; font-weight: 700; }
+        .efficiency-desc { color: var(--text-secondary); font-size: 0.85em; line-height: 1.6; }
+        .efficiency-example {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 0.8em;
+            text-wrap: balance; /* distribute words to avoid orphan lines */
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>KV Cache Memory Explosion</h1>
+        <div class="subtitle">Watch as context length grows, memory consumption becomes the bottleneck</div>
+        <button id="smwToggle" class="btn-two-line header-toggle" title="Skip accounting for model weights in memory">
+            <span>SMW — Skip Model Weights</span>
+            <span class="caption">do not load model weights</span>
+        </button>
+    </div>
+
+    <div class="info-panel">
+        <div class="model-info">
+            <div class="model-name" id="modelName">Loading...</div>
+            <div class="metric">
+                <span class="metric-label">Context Length:</span>
+                <span class="metric-value" id="contextLength">0 tokens</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Total Memory:</span>
+                <span class="metric-value memory-value" id="totalSize">0 GB</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Model Weights:</span>
+                <span class="metric-value" id="weightsSize">—</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">KV Cache Size:</span>
+                <span class="metric-value memory-value" id="cacheSize">0 GB</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Accelerators Required:</span>
+                <span class="metric-value" id="gpusNeeded">1</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Efficiency:</span>
+                <span class="metric-value" id="efficiency">100%</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Data Type:</span>
+                <span class="metric-value" id="dataType">FP16</span>
+            </div>
+        </div>
+
+        <div class="warning pulsing" id="warning" style="display: none;">
+            ⚠️ Memory exceeds single GPU capacity!
+        </div>
+    </div>
+
+    <!-- Separate Efficiency box below the model description -->
+    <div class="efficiency-box" id="efficiencyBox">
+        <div class="efficiency-title">
+            <span class="icon">📐</span>
+            <span class="text">Efficiency Formula</span>
+        </div>
+        <div class="efficiency-eq">
+            <span class="eta">η</span>
+            <span class="equals">=</span>
+            <span class="fraction" aria-label="Efficiency equals KV cache size divided by total GPU memory times 100 percent">
+                <span class="top"><span class="kv-label">KV Cache Size</span></span>
+                <span class="bar"></span>
+                <span class="bottom"><span class="gpu-label">Total GPU Memory</span></span>
+            </span>
+            <span class="times">×</span>
+            <span class="hundred">100<span class="percent">%</span></span>
+        </div>
+        <div class="efficiency-desc">
+            <span style="color: #00ff88;">High efficiency (>80%)</span> means optimal GPU utilization.<br>
+            <span style="color: #FFB800;">Medium efficiency (50-80%)</span> indicates some wasted resources.<br>
+            <span style="color: #FF6B00;">Low efficiency (<50%)</span> means you're paying for unused GPU memory!
+            <div class="efficiency-example">
+                💡 <em>Example: Needing 45 GiB but allocating an 80 GiB H100 = 56% efficiency = $1.10/hour&nbsp;wasted</em>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <!-- Datacenter capacity clarification panel (appears below memory grid) -->
+    <div id="datacenterNote" style="display:none; position: absolute; z-index: 12;">
+        <div style="background: linear-gradient(180deg, var(--surface), var(--surface-2)); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text-primary); box-shadow: 0 12px 36px rgba(20,40,160,0.35), inset 0 1px 0 rgba(255,255,255,0.06); max-width: 640px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="color: var(--accent-warn); font-weight: 800;">Exceeds Datacenter Capacity</span>
+            </div>
+            <div id="datacenterNoteBody" style="color: var(--text-secondary); font-size: 0.95em; line-height: 1.5;"></div>
+        </div>
+    </div>
+
+    <!-- Critical event popup -->
+    <div id="criticalOverlay" role="dialog" aria-modal="true" aria-labelledby="criticalTitle" style="display:none;">
+        <div id="criticalPopup">
+            <div id="criticalHeader">
+                <div id="criticalTitle">Critical Memory Event</div>
+                <button id="criticalClose" aria-label="Close">Close</button>
+            </div>
+            <div id="criticalMain">Context exceeds single-GPU capacity</div>
+            <div id="criticalDetail">Additional GPUs are required. See factoid for details.</div>
+        </div>
+    </div>
+
+    <!-- Factoid Panel on the right -->
+    <div id="factoidPanel" style="position: absolute; top: 150px; right: 40px; background: rgba(0, 0, 0, 0.85); padding: 25px; border-radius: 12px; border: 1px solid #1428A0; backdrop-filter: blur(10px); max-width: 380px; z-index: 10; box-shadow: 0 10px 40px rgba(20, 40, 160, 0.3); transition: opacity 0.8s ease;">
+        <div style="color: #5FA3E6; font-weight: 600; font-size: 1.1em; margin-bottom: 12px;" id="factoidTitle">💡 Did You Know?</div>
+        <div style="color: #fff; font-size: 1.5em; font-weight: bold; margin-bottom: 10px;" id="factoidMain">
+            Loading...
+        </div>
+        <div style="color: #aaa; font-size: 0.9em; line-height: 1.5;" id="factoidDetail">
+            Calculating insights...
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="playPause">Play</button>
+        <button id="speedControl">Speed: 50x</button>
+        <button id="modelSwitch">Next Model</button>
+        <button id="contextControl">Context: 1M</button>
+        <button id="dtypeControl">Type: FP16</button>
+        <button id="gpuControl">Device: H100 80G</button>
+    </div>
+
+    <div class="legend">
+        <h3>Visualization Guide</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(90deg, var(--samsung-blue), var(--samsung-light-blue)); box-shadow: 0 0 10px rgba(95, 163, 230, 0.4);"></div>
+            <span>Memory Grid (fill intensity)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(90deg, var(--samsung-light-blue), var(--samsung-purple)); box-shadow: 0 0 10px rgba(105, 31, 255, 0.35);"></div>
+            <span>KV Memory Growth Curve</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #FFFFFF; box-shadow: 0 0 10px rgba(255,255,255,0.6);"></div>
+            <span>Current Context Marker</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: var(--accent-warn); box-shadow: 0 0 10px rgba(255, 107, 0, 0.35);"></div>
+            <span>Critical Warning & Popup</span>
+        </div>
+        <div class="legend-note">
+            Warnings appear when context exceeds single-GPU memory<br>
+            or requires multi-node capacity.<br>
+            A popup explains the event with a relevant factoid.<br>
+            Grid and curve include model weights unless SMW is enabled.
+        </div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center; color: #999; font-size: 12px; z-index: 5;">
+        <div>Memory calculations based on <a href="https://lmcache.ai/kv_cache_calculator.html" target="_blank" style="color: var(--samsung-light-blue); text-decoration: none;">LMCache KV Cache Calculator</a> formulas</div>
+        <div style="margin-top: 4px;">Visualization inspired by <a href="https://lmcache.ai" target="_blank" style="color: var(--samsung-light-blue); text-decoration: none;">LMCache</a> research on KV cache optimization</div>
+    </div>
+
+    <script src="visualization.js"></script>
+    <script>
+        // Position the efficiency box just below the info panel
+        function positionEfficiencyBox() {
+            const info = document.querySelector('.info-panel');
+            const eff = document.getElementById('efficiencyBox');
+            if (!info || !eff) return;
+            const rect = info.getBoundingClientRect();
+            // Align left and subtly widen to avoid awkward single-word wraps
+            const widen = 12; // px
+            eff.style.left = (rect.left - widen/2) + 'px';
+            const gap = 28; // extra space below the model box
+            eff.style.top = (rect.bottom + gap) + 'px';
+            eff.style.width = (rect.width + widen) + 'px';
+        }
+
+        // Dock controls to the right side of the window (vertical stack)
+        function positionControls() {
+            const controls = document.querySelector('.controls');
+            if (!controls) return;
+            controls.style.position = 'fixed';
+            controls.style.right = '32px';
+            controls.style.left = 'auto';
+            controls.style.top = '50%';
+            controls.style.transform = 'translateY(-50%)';
+            controls.style.width = 'auto';
+        }
+        
+        // Position factoid panel centered above the memory grid area on the canvas
+        function positionFactoidPanel() {
+            const panel = document.getElementById('factoidPanel');
+            const canvasEl = document.getElementById('canvas');
+            if (!panel || !canvasEl) return;
+            const cRect = canvasEl.getBoundingClientRect();
+            const gridWidth = 24, gridHeight = 16, spacing = 25;
+            const gridPixelW = gridWidth * spacing; // 600px
+            const gridPixelH = gridHeight * spacing; // 400px
+            const startX = canvasEl.width / 2 - 300; // must match drawMemoryGrid
+            const startY = canvasEl.height / 2 - 200;
+
+            // Measure panel after ensuring it's visible
+            const panelW = panel.offsetWidth;
+            const panelH = panel.offsetHeight;
+            const gap = 48; // move further above the grid
+
+            const leftPx = cRect.left + startX + (gridPixelW / 2) - (panelW / 2);
+            const topPx = cRect.top + Math.max(20, startY - panelH - gap);
+
+            panel.style.right = 'auto';
+            panel.style.left = leftPx + 'px';
+            panel.style.top = topPx + 'px';
+        }
+
+        // Position datacenter note centered below the memory grid area
+        function positionDatacenterNote() {
+            const wrap = document.getElementById('datacenterNote');
+            const canvasEl = document.getElementById('canvas');
+            if (!wrap || !canvasEl || wrap.style.display === 'none') return;
+            const cRect = canvasEl.getBoundingClientRect();
+            const gridWidth = 24, gridHeight = 16, spacing = 25;
+            const gridPixelW = gridWidth * spacing; // 600px
+            const gridPixelH = gridHeight * spacing; // 400px
+            const startX = canvasEl.width / 2 - 300; // must match drawMemoryGrid
+            const startY = canvasEl.height / 2 - 200;
+
+            const noteW = wrap.offsetWidth;
+            const gap = 12;
+            const leftPx = cRect.left + startX + (gridPixelW / 2) - (noteW / 2);
+            const topPx = cRect.top + startY + gridPixelH + gap;
+
+            wrap.style.left = leftPx + 'px';
+            wrap.style.top = topPx + 'px';
+        }
+        // Expose for visualization.js to call after content updates
+        window.positionFactoidPanel = positionFactoidPanel;
+        window.positionControls = positionControls;
+        window.positionDatacenterNote = positionDatacenterNote;
+        window.addEventListener('resize', positionEfficiencyBox);
+        window.addEventListener('load', positionEfficiencyBox);
+        window.addEventListener('resize', positionControls);
+        window.addEventListener('load', positionControls);
+        window.addEventListener('resize', positionFactoidPanel);
+        window.addEventListener('load', positionFactoidPanel);
+        window.addEventListener('resize', positionDatacenterNote);
+        window.addEventListener('load', positionDatacenterNote);
+        // In case dynamic fonts/layout shift after load
+        setTimeout(positionEfficiencyBox, 200);
+        setTimeout(positionControls, 220);
+        setTimeout(positionFactoidPanel, 240);
+        setTimeout(positionDatacenterNote, 260);
+    </script>
+</body>
+</html>
