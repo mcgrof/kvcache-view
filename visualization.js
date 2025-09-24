@@ -8,7 +8,12 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 // Check if mobile
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
+let isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+// Update mobile check on resize
+window.addEventListener('resize', () => {
+    isMobile = window.matchMedia('(max-width: 768px)').matches;
+});
 
 // Model configurations from LMCache
 // Samsung brand colors
@@ -75,6 +80,14 @@ let memoryBlocks = [];
 let waves = [];
 let currentDtype = 'FP16';
 let currentFactoidIndex = 0;
+
+// Auto-play on mobile with slower speed
+setTimeout(() => {
+    if (isMobile && !isPlaying) {
+        isPlaying = true;
+        animationSpeed = 10; // Slower on mobile
+    }
+}, 1000);
 let lastFactoidUpdate = 0;
 let lastCriticalState = 'none';
 let lastPopupTime = 0;
@@ -137,14 +150,9 @@ const dtypeConfigs = {
 
 // Resize canvas
 function resizeCanvas() {
-    if (isMobile) {
-        // On mobile, account for header and controls
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - 250; // Leave room for header and controls
-    } else {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
+    // Full screen on all devices
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
 
 // Calculate KV cache size (from LMCache logic)
@@ -263,11 +271,12 @@ class Wave {
 
     draw() {
         ctx.strokeStyle = this.color;
-        ctx.lineWidth = 3;
-        ctx.globalAlpha = 0.6;
+        ctx.lineWidth = isMobile ? 2 : 3;
+        ctx.globalAlpha = isMobile ? 0.3 : 0.6;  // More subtle on mobile
         ctx.beginPath();
 
-        for (let x = 0; x < canvas.width; x += 5) {
+        const step = isMobile ? 10 : 5;  // Less detailed on mobile for performance
+        for (let x = 0; x < canvas.width; x += step) {
             const y = this.y + Math.sin((x * this.frequency) + this.phase) * this.amplitude;
             if (x === 0) {
                 ctx.moveTo(x, y);
@@ -286,13 +295,17 @@ function initWaves() {
     waves = [];
     const model = models[currentModelIndex];
 
-    for (let i = 0; i < 5; i++) {
+    // Fewer waves on mobile for performance
+    const waveCount = isMobile ? 3 : 5;
+    const waveSpacing = isMobile ? 80 : 50;
+
+    for (let i = 0; i < waveCount; i++) {
         waves.push(new Wave(
-            canvas.height / 2 + (i - 2) * 50,
+            canvas.height / 2 + (i - Math.floor(waveCount/2)) * waveSpacing,
             20 + i * 5,
             0.01 + i * 0.002,
             0.02 * animationSpeed,
-            model.color + '33'
+            model.color + (isMobile ? '22' : '33')
         ));
     }
 }
@@ -305,23 +318,58 @@ function drawMemoryGrid() {
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
     const totalGiB = kvGiB + weightsGiB;
 
-    // Skip complex rendering on mobile if performance is poor
-    if (isMobile && currentTokens > 1000000) {
-        return; // Skip heavy grid rendering on mobile for performance
-    }
+    // Always use simplified rendering on mobile
+    const mobileSimplified = isMobile;
     const totalMaxGiB = kvMaxGiB + weightsGiB;
     const fillRatio = totalMaxGiB > 0 ? (totalGiB / totalMaxGiB) : 0;
 
-    // Grid parameters
-    const gridSize = 20;
-    const spacing = 25;
-    const startX = canvas.width / 2 - 300;
-    const startY = canvas.height / 2 - 200;
-    const gridWidth = 24;
-    const gridHeight = 16;
+    // Grid parameters - adjust for mobile
+    const gridSize = isMobile ? 12 : 20;
+    const spacing = isMobile ? 15 : 25;
+    const gridWidth = isMobile ? 20 : 24;
+    const gridHeight = isMobile ? 24 : 16;
+    const startX = canvas.width / 2 - (gridWidth * spacing) / 2;
+    const startY = canvas.height / 2 - (gridHeight * spacing) / 2;
 
     const totalCells = gridWidth * gridHeight;
     const filledCells = Math.floor(totalCells * fillRatio);
+
+    // Clean mobile visualization
+    if (mobileSimplified) {
+        // Clear background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw a clean horizontal bar
+        const barWidth = canvas.width * 0.85;
+        const barHeight = 40;
+        const barX = (canvas.width - barWidth) / 2;
+        const barY = canvas.height / 2;
+
+        // Background track
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Memory fill
+        const gradient = ctx.createLinearGradient(barX, 0, barX + barWidth * fillRatio, 0);
+        gradient.addColorStop(0, model.color);
+        gradient.addColorStop(1, model.color + 'AA');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(barX, barY, barWidth * fillRatio, barHeight);
+
+        // Border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+        // Token count below bar
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${(currentTokens / 1000000).toFixed(1)}M / ${(maxTokens / 1000000).toFixed(1)}M tokens`, canvas.width / 2, barY + barHeight + 20);
+
+        return;
+    }
 
     // Draw grid cells
     for (let i = 0; i < gridHeight; i++) {
@@ -360,6 +408,9 @@ function drawMemoryGrid() {
 
 // Draw exponential curve
 function drawExponentialCurve() {
+    // Skip on mobile for cleaner view
+    if (isMobile) return;
+
     const model = models[currentModelIndex];
     const points = [];
     const steps = 100;
