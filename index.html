@@ -6,11 +6,11 @@
     <title>KV Cache Growth Visualization - The Memory Challenge</title>
     <style>
         :root {
-            --samsung-blue: #1428A0;
-            --samsung-light-blue: #5FA3E6;
-            --samsung-purple: #691FFF;
-            --samsung-cyan: #00D4FF;
-            --samsung-ink: #0B1026;
+            --primary-blue: #1428A0;
+            --light-blue: #5FA3E6;
+            --accent-purple: #691FFF;
+            --accent-cyan: #00D4FF;
+            --dark-ink: #0B1026;
             --surface: rgba(10, 16, 44, 0.92);
             --surface-2: rgba(13, 22, 58, 0.85);
             --border: rgba(95, 163, 230, 0.45);
@@ -29,7 +29,7 @@
         }
 
         body {
-            font-family: 'Samsung One', 'SamsungSharpSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
             background: radial-gradient(1200px 600px at 20% -10%, rgba(20, 40, 160, 0.35), transparent),
                         radial-gradient(1000px 800px at 100% 10%, rgba(95, 163, 230, 0.25), transparent),
                         linear-gradient(135deg, #050813 0%, #0E173A 55%, #0B1026 100%);
@@ -91,7 +91,7 @@
         .model-name {
             font-size: 1.4em;
             font-weight: 700;
-            color: var(--samsung-light-blue);
+            color: var(--light-blue);
             margin-bottom: 10px;
             letter-spacing: 0.2px;
         }
@@ -147,7 +147,7 @@
 
         button {
             background: linear-gradient(180deg, rgba(20, 40, 160, 0.20), rgba(20, 40, 160, 0.10));
-            border: 2px solid var(--samsung-blue);
+            border: 2px solid var(--primary-blue);
             color: var(--text-primary);
             padding: 12px 24px;
             border-radius: 24px;
@@ -168,14 +168,14 @@
         }
 
         button:focus-visible {
-            outline: 3px solid var(--samsung-light-blue);
+            outline: 3px solid var(--light-blue);
             outline-offset: 2px;
         }
 
         button.active {
             background: #1428A0;
             color: #FFFFFF;
-            border-color: var(--samsung-light-blue);
+            border-color: var(--light-blue);
             box-shadow: 0 6px 22px rgba(95, 163, 230, 0.45);
         }
 
@@ -195,7 +195,7 @@
 
         .legend h3 {
             margin-bottom: 10px;
-            color: var(--samsung-light-blue);
+            color: var(--light-blue);
         }
 
         .legend-item {
@@ -225,7 +225,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--samsung-blue), var(--samsung-light-blue));
+            background: linear-gradient(90deg, var(--primary-blue), var(--light-blue));
             width: 0;
             transition: width 0.3s ease;
             box-shadow: 0 0 12px rgba(95, 163, 230, 0.6);
@@ -264,7 +264,7 @@
         #criticalHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         #criticalTitle { color: var(--accent-warn); font-weight: 800; letter-spacing: 0.3px; }
         #criticalClose { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-        #criticalClose:hover { color: #fff; border-color: var(--samsung-light-blue); }
+        #criticalClose:hover { color: #fff; border-color: var(--light-blue); }
         #criticalMain { font-size: 1.1em; font-weight: 700; margin: 8px 0; }
         #criticalDetail { color: var(--text-secondary); font-size: 0.95em; }
 
@@ -274,7 +274,7 @@
             border: 1px solid var(--border) !important;
             box-shadow: 0 10px 40px rgba(20, 40, 160, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
         }
-        #factoidTitle { color: var(--samsung-light-blue) !important; font-size: 1.11em !important; }
+        #factoidTitle { color: var(--light-blue) !important; font-size: 1.11em !important; }
         #factoidMain { color: var(--text-primary) !important; font-size: 1.50em !important; }
         #factoidDetail { color: var(--text-secondary) !important; font-size: 0.90em !important; line-height: 1.45 !important; }
 
@@ -296,7 +296,7 @@
 
         .efficiency-title { font-size: 0.95em; display: flex; align-items: center; margin-bottom: 10px; }
         .efficiency-title .icon { font-size: 1.2em; margin-right: 10px; }
-        .efficiency-title .text { color: var(--samsung-light-blue); font-weight: 700; }
+        .efficiency-title .text { color: var(--light-blue); font-weight: 700; }
         /* Elegant math-like equation styling */
         .efficiency-eq {
             display: flex;
@@ -311,7 +311,7 @@
             text-align: center;
             font-variant-numeric: lining-nums;
         }
-        .efficiency-eq .eta { font-weight: 800; color: var(--samsung-light-blue); font-size: 1.05em; letter-spacing: 0.5px; }
+        .efficiency-eq .eta { font-weight: 800; color: var(--light-blue); font-size: 1.05em; letter-spacing: 0.5px; }
         .efficiency-eq .equals, .efficiency-eq .times { opacity: 0.9; }
         .efficiency-eq .hundred { font-weight: 600; }
         .efficiency-eq .percent { opacity: 0.9; }
@@ -324,7 +324,7 @@
         }
         .fraction .top, .fraction .bottom { padding: 2px 8px; }
         .fraction .bar { width: 100%; height: 1.5px; background: rgba(255,255,255,0.75); border-radius: 1px; }
-        .kv-label { color: var(--samsung-cyan); font-weight: 700; }
+        .kv-label { color: var(--accent-cyan); font-weight: 700; }
         .gpu-label { color: #FFC24A; font-weight: 700; }
         .efficiency-desc { color: var(--text-secondary); font-size: 0.85em; line-height: 1.6; }
         .efficiency-example {
@@ -336,44 +336,53 @@
             text-align: left;
         }
 
-        /* Mobile optimizations */
+        /* Mobile optimizations - Clean minimal layout */
         @media screen and (max-width: 768px) {
             body {
-                overflow-y: auto;
-            }
-
-            .header {
-                padding: 15px 15px;
+                overflow: hidden;
                 position: fixed;
-                background: rgba(8, 12, 28, 0.98);
+                width: 100%;
+                height: 100%;
             }
 
-            h1 {
-                font-size: 1.3em;
-                margin-bottom: 5px;
-            }
-
-            .subtitle {
-                font-size: 0.85em;
-                margin-bottom: 10px;
-            }
-
-            /* Hide SMW toggle on mobile */
-            #smwToggle {
+            /* Hide header completely on mobile */
+            .header {
                 display: none;
             }
 
+            /* Move SMW toggle to bottom */
+            #smwToggle {
+                position: fixed !important;
+                bottom: 10px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                z-index: 200 !important;
+                background: rgba(5, 8, 19, 0.9) !important;
+                border: 1px solid var(--border) !important;
+                padding: 8px 15px !important;
+                border-radius: 20px !important;
+                font-size: 0.75em !important;
+            }
+
+            #smwToggle span:last-child {
+                display: none;
+            }
+
+            /* Info panel at top left with memory info */
             .info-panel {
                 position: fixed;
-                top: auto;
-                bottom: 60px;
+                top: 10px;
                 left: 10px;
-                right: 10px;
-                padding: 12px;
+                right: auto;
+                bottom: auto;
+                padding: 10px;
                 min-width: unset;
                 font-size: 0.85em;
-                max-height: 35vh;
-                overflow-y: auto;
+                background: rgba(5, 8, 19, 0.85);
+                backdrop-filter: blur(10px);
+                border-radius: 10px;
+                z-index: 100;
+                max-width: 60%;
             }
 
             .model-name {
@@ -390,50 +399,46 @@
                 min-width: 90px;
             }
 
-            /* Hide factoid panel completely on mobile */
-            #factoidPanel {
+            /* Hide all non-essential elements on mobile */
+            #factoidPanel,
+            .efficiency-box,
+            .instruction-panel,
+            #criticalEvent,
+            .progress-bar,
+            .progress-details {
                 display: none !important;
             }
 
-            /* Hide efficiency box on mobile */
-            .efficiency-box {
+            /* Also hide the bottom attribution links on mobile */
+            div[style*="bottom: 10px"][style*="left: 50%"] {
                 display: none !important;
             }
 
-            /* Hide instruction panel on mobile */
-            .instruction-panel {
-                display: none !important;
-            }
-
-            /* Hide critical event popup on mobile */
-            #criticalEvent {
-                display: none !important;
-            }
-
-            /* Simplify controls */
+            /* Controls at top right */
             .controls {
                 position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                padding: 8px;
-                background: rgba(8, 12, 28, 0.98);
-                border-top: 1px solid var(--border);
+                top: 10px;
+                right: 10px;
+                left: auto;
+                bottom: auto;
+                padding: 0;
+                background: transparent;
+                border: none;
                 display: flex;
+                flex-direction: column;
                 gap: 5px;
-                justify-content: space-between;
-                flex-wrap: nowrap;
+                z-index: 100;
+                max-width: 35%;
             }
 
             .btn, button {
-                padding: 8px 10px;
-                font-size: 0.75em;
+                padding: 8px 12px;
+                font-size: 0.7em;
                 min-width: unset;
-                flex: 1;
-            }
-
-            .btn-two-line {
-                padding: 6px 8px;
+                background: rgba(5, 8, 19, 0.85);
+                backdrop-filter: blur(10px);
+                border: 1px solid var(--border);
+                border-radius: 8px;
             }
 
             .btn-two-line span:last-child {
@@ -441,56 +446,67 @@
             }
 
             /* Hide less important controls on mobile */
-            #dataTypeBtn {
+            #dataTypeBtn,
+            #speedBtn {
                 display: none;
             }
 
-            /* Adjust canvas for mobile */
+            /* Full screen canvas */
             canvas {
-                margin-top: 70px;
-                height: calc(100vh - 250px);
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 1;
             }
 
-            /* Hide progress details */
-            .progress-details {
-                display: none;
-            }
-
-            /* Simplify GPU count display */
+            /* GPU count in info panel */
             .gpu-count {
+                position: static;
+                display: inline-block;
+                background: transparent;
+                border: none;
+                padding: 0;
+                margin-left: 10px;
                 font-size: 0.85em;
             }
         }
 
-        /* Even smaller mobile screens */
+        /* Very small mobile screens */
         @media screen and (max-width: 480px) {
-            h1 {
-                font-size: 1.1em;
-            }
-
-            .subtitle {
-                display: none;
-            }
-
             .info-panel {
-                bottom: 50px;
-                padding: 10px;
-                font-size: 0.8em;
+                top: 5px;
+                left: 5px;
+                padding: 8px;
+                font-size: 0.75em;
+                max-width: 55%;
             }
 
             .controls {
-                padding: 5px;
+                top: 5px;
+                right: 5px;
                 gap: 3px;
+                max-width: 40%;
             }
 
             .btn, button {
-                font-size: 0.7em;
-                padding: 6px 8px;
+                font-size: 0.65em;
+                padding: 6px 10px;
             }
 
-            /* Show only play, model, and context buttons */
-            #speedBtn {
-                display: none;
+            #smwToggle {
+                bottom: 5px !important;
+                font-size: 0.7em !important;
+                padding: 6px 12px !important;
+            }
+
+            .model-name {
+                font-size: 0.9em;
+            }
+
+            .metric {
+                font-size: 0.75em;
             }
         }
     </style>
@@ -617,11 +633,11 @@
     <div class="legend">
         <h3>Visualization Guide</h3>
         <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(90deg, var(--samsung-blue), var(--samsung-light-blue)); box-shadow: 0 0 10px rgba(95, 163, 230, 0.4);"></div>
+            <div class="legend-color" style="background: linear-gradient(90deg, var(--primary-blue), var(--light-blue)); box-shadow: 0 0 10px rgba(95, 163, 230, 0.4);"></div>
             <span>Memory Grid (fill intensity)</span>
         </div>
         <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(90deg, var(--samsung-light-blue), var(--samsung-purple)); box-shadow: 0 0 10px rgba(105, 31, 255, 0.35);"></div>
+            <div class="legend-color" style="background: linear-gradient(90deg, var(--light-blue), var(--accent-purple)); box-shadow: 0 0 10px rgba(105, 31, 255, 0.35);"></div>
             <span>KV Memory Growth Curve</span>
         </div>
         <div class="legend-item">
@@ -645,9 +661,9 @@
     </div>
 
     <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center; color: #999; font-size: 12px; z-index: 5;">
-        <div><a href="https://github.com/mcgrof/kvcache-view" target="_blank" style="color: var(--samsung-light-blue); text-decoration: none;">kvcache-view</a></div>
-        <div>Memory calculations based on <a href="https://lmcache.ai/kv_cache_calculator.html" target="_blank" style="color: var(--samsung-light-blue); text-decoration: none;">LMCache KV Cache Calculator</a> formulas</div>
-        <div style="margin-top: 4px;">Visualization inspired by <a href="https://lmcache.ai" target="_blank" style="color: var(--samsung-light-blue); text-decoration: none;">LMCache</a> research on KV cache optimization</div>
+        <div><a href="https://github.com/mcgrof/kvcache-view" target="_blank" style="color: var(--light-blue); text-decoration: none;">kvcache-view</a></div>
+        <div>Memory calculations based on <a href="https://lmcache.ai/kv_cache_calculator.html" target="_blank" style="color: var(--light-blue); text-decoration: none;">LMCache KV Cache Calculator</a> formulas</div>
+        <div style="margin-top: 4px;">Visualization inspired by <a href="https://lmcache.ai" target="_blank" style="color: var(--light-blue); text-decoration: none;">LMCache</a> research on KV cache optimization</div>
     </div>
 
     <script src="visualization.js"></script>

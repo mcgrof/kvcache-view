@@ -12,7 +12,7 @@ const ctx = canvas.getContext('2d');
 const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
 // Model configurations from LMCache
-// Samsung brand colors
+// Using distinct colors for each model
 const models = [
     {
         name: "Llama-3.2-1B",
@@ -21,7 +21,7 @@ const models = [
         hidden_size: 2048,
         num_heads: 32,
         num_kv_heads: 8,
-        color: '#5FA3E6', // Samsung Light Blue
+        color: '#5FA3E6', // Light Blue
         efficiency: 'high'
     },
     {
@@ -31,7 +31,7 @@ const models = [
         hidden_size: 4096,
         num_heads: 32,
         num_kv_heads: 8,
-        color: '#1428A0', // Samsung Blue
+        color: '#1428A0', // Deep Blue
         efficiency: 'medium'
     },
     {
@@ -41,7 +41,7 @@ const models = [
         hidden_size: 8192,
         num_heads: 64,
         num_kv_heads: 8,
-        color: '#691FFF', // Samsung Purple
+        color: '#691FFF', // Purple
         efficiency: 'low'
     },
     {
@@ -50,7 +50,7 @@ const models = [
         layers: 61,
         kv_lora_rank: 512,
         qk_rope_head_dim: 64,
-        color: '#FF6B00', // Samsung Orange
+        color: '#FF6B00', // Orange
         efficiency: 'optimized',
         special: 'deepseek'
     },
@@ -61,7 +61,7 @@ const models = [
         hidden_size: 16384,
         num_heads: 128,
         num_kv_heads: 8,
-        color: '#E4002B', // Samsung Red
+        color: '#E4002B', // Red
         efficiency: 'very-low'
     }
 ];
