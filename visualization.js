@@ -198,6 +198,8 @@ let batchSize = 1; // Number of concurrent queries per GPU
 let dataFlowParticles = []; // Particles flowing between HBM and GPU
 let continuousBatching = false; // Enable continuous batching with variable sequence lengths
 let batchSequenceLengths = []; // Array of sequence lengths for each request in batch
+let pagedAttention = false; // Enable paged attention for memory fragmentation visualization
+let sequenceColors = []; // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
@@ -289,6 +291,34 @@ function calculateKVCacheSize(model, tokens, dtype = null) {
 
     const total_bytes = total_elements * dtype_size;
     return total_bytes / (1024 * 1024 * 1024); // Convert to GiB
+}
+
+// Generate distinct colors for each sequence in continuous batching
+function generateSequenceColors(batchSize) {
+    const colors = [
+        '#FFD700', // Gold - prompt tokens
+        '#00CED1', // Dark Turquoise - sequence 2
+        '#FF69B4', // Hot Pink - sequence 3
+        '#32CD32', // Lime Green - sequence 4
+        '#FF6347', // Tomato - sequence 5
+        '#BA55D3', // Medium Orchid - sequence 6
+        '#4169E1', // Royal Blue - sequence 7
+        '#FF8C00', // Dark Orange - sequence 8
+        '#20B2AA', // Light Sea Green - sequence 9
+        '#DC143C', // Crimson - sequence 10
+        '#9370DB', // Medium Purple - sequence 11
+        '#00FA9A', // Medium Spring Green - sequence 12
+        '#FFA500', // Orange - sequence 13
+        '#87CEEB', // Sky Blue - sequence 14
+        '#FF1493', // Deep Pink - sequence 15
+        '#ADFF2F'  // Green Yellow - sequence 16
+    ];
+
+    const result = [];
+    for (let i = 0; i < batchSize; i++) {
+        result.push(colors[i % colors.length]);
+    }
+    return result;
 }
 
 // Generate deterministic sequence length ratios for continuous batching
@@ -628,6 +658,13 @@ function drawMemoryGrid() {
         ctx.stroke();
     }
 
+    // Generate sequence colors if continuous batching is enabled
+    if (continuousBatching && batchSize > 1) {
+        if (sequenceColors.length !== batchSize) {
+            sequenceColors = generateSequenceColors(batchSize);
+        }
+    }
+
     // Draw HBM modules
     for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
         const hbm = hbmModules[i];
@@ -649,31 +686,170 @@ function drawMemoryGrid() {
         const totalBanks = banksX * banksY;
         const filledBanks = Math.floor(totalBanks * hbmFillRatio);
 
-        for (let by = 0; by < banksY; by++) {
-            for (let bx = 0; bx < banksX; bx++) {
-                const bankIndex = by * banksX + bx;
-                const x = hbm.x + bx * bankSpacing + 2;
-                const y = hbm.y + by * bankSpacing + 2;
+        // Calculate how many banks are used for model weights
+        const weightBanks = includeWeights ? Math.floor(totalBanks * (weightsGiB / totalMaxGiB)) : 0;
 
-                if (bankIndex < filledBanks) {
-                    // Filled memory bank with heat effect
-                    const heat = 0.5 + hbmFillRatio * 0.5;
-                    const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+        if (continuousBatching && batchSize > 1 && !pagedAttention) {
+            // Continuous batching: show different colors for each sequence
+            let banksFilled = 0;
+            let currentSeq = 0;
 
-                    // Heat gradient based on fill
-                    if (hbmFillRatio > 0.8) {
-                        ctx.fillStyle = `rgba(255, ${Math.floor(100 - hbmFillRatio * 50)}, 0, ${pulse})`;
-                    } else if (hbmFillRatio > 0.5) {
-                        ctx.fillStyle = `rgba(255, ${Math.floor(200 - hbmFillRatio * 100)}, 0, ${pulse})`;
+            for (let by = 0; by < banksY; by++) {
+                for (let bx = 0; bx < banksX; bx++) {
+                    const bankIndex = by * banksX + bx;
+                    const x = hbm.x + bx * bankSpacing + 2;
+                    const y = hbm.y + by * bankSpacing + 2;
+
+                    if (bankIndex < filledBanks) {
+                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+
+                        // Check if this bank contains model weights
+                        if (bankIndex < weightBanks) {
+                            // Model weights - use purple/violet color
+                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})`; // Purple for weights
+                            ctx.fillRect(x, y, bankSize, bankSize);
+
+                            // Add subtle border
+                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)';
+                            ctx.lineWidth = 0.5;
+                            ctx.strokeRect(x, y, bankSize, bankSize);
+                        } else {
+                            // KV cache - determine which sequence this bank belongs to
+                            const kvBankIndex = bankIndex - weightBanks;
+                            const kvTotalBanks = filledBanks - weightBanks;
+                            const seqProgress = kvBankIndex / kvTotalBanks;
+                            let cumulative = 0;
+                            currentSeq = 0;
+
+                            for (let s = 0; s < batchSize; s++) {
+                                const seqRatio = getSequenceLengthRatio(s, batchSize);
+                                const normalizedRatio = seqRatio / batchSequenceLengths.reduce((sum, len, idx) =>
+                                    sum + getSequenceLengthRatio(idx, batchSize), 0);
+                                cumulative += normalizedRatio;
+                                if (seqProgress <= cumulative) {
+                                    currentSeq = s;
+                                    break;
+                                }
+                            }
+
+                            const color = sequenceColors[currentSeq % sequenceColors.length];
+
+                            // Convert hex to RGB for manipulation
+                            const r = parseInt(color.substr(1,2), 16);
+                            const g = parseInt(color.substr(3,2), 16);
+                            const b = parseInt(color.substr(5,2), 16);
+
+                            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
+                            ctx.fillRect(x, y, bankSize, bankSize);
+                        }
                     } else {
-                        ctx.fillStyle = `rgba(0, ${Math.floor(200 + hbmFillRatio * 55)}, 255, ${pulse})`;
+                        // Empty memory bank
+                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(x, y, bankSize, bankSize);
                     }
-                    ctx.fillRect(x, y, bankSize, bankSize);
-                } else {
-                    // Empty memory bank
-                    ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
-                    ctx.lineWidth = 0.5;
-                    ctx.strokeRect(x, y, bankSize, bankSize);
+                }
+            }
+        } else if (pagedAttention) {
+            // Paged attention: show fragmented memory with gaps
+            for (let by = 0; by < banksY; by++) {
+                for (let bx = 0; bx < banksX; bx++) {
+                    const bankIndex = by * banksX + bx;
+                    const x = hbm.x + bx * bankSpacing + 2;
+                    const y = hbm.y + by * bankSpacing + 2;
+
+                    if (bankIndex < filledBanks) {
+                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+
+                        // Check if this bank contains model weights
+                        if (bankIndex < weightBanks) {
+                            // Model weights - always contiguous, purple color
+                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})`; // Purple for weights
+                            ctx.fillRect(x, y, bankSize, bankSize);
+                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)';
+                            ctx.lineWidth = 0.5;
+                            ctx.strokeRect(x, y, bankSize, bankSize);
+                        } else {
+                            // KV cache with paging
+                            // Simulate fragmentation - some blocks are non-contiguous
+                            const kvBankIndex = bankIndex - weightBanks;
+                            const isFragmented = Math.random() < 0.15 && kvBankIndex > (filledBanks - weightBanks) * 0.3;
+
+                            if (isFragmented) {
+                                // Show as empty (fragmented)
+                                ctx.strokeStyle = 'rgba(255, 100, 100, 0.3)';
+                                ctx.lineWidth = 0.5;
+                                ctx.strokeRect(x, y, bankSize, bankSize);
+                            } else {
+                                // Filled with paged blocks
+                                if (continuousBatching && batchSize > 1) {
+                                    // Use sequence colors with paging
+                                    const kvTotalBanks = filledBanks - weightBanks;
+                                    const seqIndex = Math.floor((kvBankIndex / kvTotalBanks) * batchSize);
+                                    const color = sequenceColors[seqIndex % sequenceColors.length];
+                                    const r = parseInt(color.substr(1,2), 16);
+                                    const g = parseInt(color.substr(3,2), 16);
+                                    const b = parseInt(color.substr(5,2), 16);
+                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.8})`;
+                                } else {
+                                    // Standard paged color for KV cache
+                                    ctx.fillStyle = `rgba(100, 200, 255, ${pulse})`;
+                                }
+                                ctx.fillRect(x, y, bankSize, bankSize);
+
+                                // Draw page border
+                                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                                ctx.lineWidth = 0.5;
+                                ctx.strokeRect(x, y, bankSize, bankSize);
+                            }
+                        }
+                    } else {
+                        // Empty memory bank
+                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(x, y, bankSize, bankSize);
+                    }
+                }
+            }
+        } else {
+            // Traditional batching: uniform color for KV cache, but separate color for weights
+            for (let by = 0; by < banksY; by++) {
+                for (let bx = 0; bx < banksX; bx++) {
+                    const bankIndex = by * banksX + bx;
+                    const x = hbm.x + bx * bankSpacing + 2;
+                    const y = hbm.y + by * bankSpacing + 2;
+
+                    if (bankIndex < filledBanks) {
+                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+
+                        // Check if this bank contains model weights
+                        if (bankIndex < weightBanks) {
+                            // Model weights - purple color
+                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})`; // Purple for weights
+                            ctx.fillRect(x, y, bankSize, bankSize);
+                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)';
+                            ctx.lineWidth = 0.5;
+                            ctx.strokeRect(x, y, bankSize, bankSize);
+                        } else {
+                            // KV cache - heat gradient based on fill
+                            const heat = 0.5 + hbmFillRatio * 0.5;
+
+                            // Heat gradient based on fill
+                            if (hbmFillRatio > 0.8) {
+                                ctx.fillStyle = `rgba(255, ${Math.floor(100 - hbmFillRatio * 50)}, 0, ${pulse})`;
+                            } else if (hbmFillRatio > 0.5) {
+                                ctx.fillStyle = `rgba(255, ${Math.floor(200 - hbmFillRatio * 100)}, 0, ${pulse})`;
+                            } else {
+                                ctx.fillStyle = `rgba(0, ${Math.floor(200 + hbmFillRatio * 55)}, 255, ${pulse})`;
+                            }
+                            ctx.fillRect(x, y, bankSize, bankSize);
+                        }
+                    } else {
+                        // Empty memory bank
+                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(x, y, bankSize, bankSize);
+                    }
                 }
             }
         }
@@ -1263,9 +1439,10 @@ document.getElementById('batchControl').addEventListener('click', function() {
     batchSize = batchSizes[nextIndex];
     this.textContent = `Batch: ${batchSize}`;
 
-    // Regenerate sequence lengths when batch size changes
+    // Regenerate sequence lengths and colors when batch size changes
     if (continuousBatching && batchSize > 1) {
         batchSequenceLengths = [];
+        sequenceColors = generateSequenceColors(batchSize);
         for (let i = 0; i < batchSize; i++) {
             const ratio = getSequenceLengthRatio(i, batchSize);
             batchSequenceLengths.push(Math.floor(currentTokens * ratio));
@@ -1290,13 +1467,30 @@ if (cbBtn) {
         // Regenerate sequence lengths when toggling
         if (continuousBatching && batchSize > 1) {
             batchSequenceLengths = [];
+            sequenceColors = generateSequenceColors(batchSize);
             for (let i = 0; i < batchSize; i++) {
                 const ratio = getSequenceLengthRatio(i, batchSize);
                 batchSequenceLengths.push(Math.floor(currentTokens * ratio));
             }
         } else {
             batchSequenceLengths = [];
+            sequenceColors = [];
         }
+
+        updateInfoPanel();
+    });
+}
+
+// Paged attention toggle
+const paBtn = document.getElementById('paToggle');
+if (paBtn) {
+    paBtn.addEventListener('click', function() {
+        pagedAttention = !pagedAttention;
+        const spanEl = this.querySelector('span:first-child');
+        if (spanEl) {
+            spanEl.textContent = pagedAttention ? 'PA: ON' : 'PA: OFF';
+        }
+        this.classList.toggle('active', pagedAttention);
 
         updateInfoPanel();
     });
