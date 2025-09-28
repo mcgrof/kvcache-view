@@ -195,6 +195,7 @@ let lastPopupTime = 0;
 const POPUP_COOLDOWN_MS = 10000;
 let includeWeights = true; // Include model weights memory by default
 let batchSize = 1; // Number of concurrent queries per GPU
+let dataFlowParticles = []; // Particles flowing between HBM and GPU
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
@@ -370,6 +371,75 @@ class MemoryBlock {
     }
 }
 
+// Data flow particle class
+class DataFlowParticle {
+    constructor(startX, startY, endX, endY, color, speed = 0.02) {
+        this.startX = startX;
+        this.startY = startY;
+        this.endX = endX;
+        this.endY = endY;
+        this.x = startX;
+        this.y = startY;
+        this.progress = 0;
+        this.speed = speed;
+        this.color = color;
+        this.size = 3 + Math.random() * 3;
+        this.life = 1;
+        this.trail = [];
+        this.maxTrailLength = 10;
+    }
+
+    update() {
+        this.progress += this.speed;
+
+        // Move along path
+        this.x = this.startX + (this.endX - this.startX) * this.progress;
+        this.y = this.startY + (this.endY - this.startY) * this.progress;
+
+        // Add to trail
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > this.maxTrailLength) {
+            this.trail.shift();
+        }
+
+        // Check if reached destination
+        if (this.progress >= 1) {
+            this.life = 0;
+        }
+    }
+
+    draw() {
+        // Draw trail
+        ctx.strokeStyle = this.color + '33';
+        ctx.lineWidth = this.size * 0.5;
+        ctx.beginPath();
+        this.trail.forEach((point, i) => {
+            if (i === 0) {
+                ctx.moveTo(point.x, point.y);
+            } else {
+                ctx.lineTo(point.x, point.y);
+            }
+        });
+        ctx.stroke();
+
+        // Draw particle
+        ctx.globalAlpha = 0.8;
+        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
+        glow.addColorStop(0, this.color);
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+}
+
 // Create wave effect
 class Wave {
     constructor(y, amplitude, frequency, speed, color) {
@@ -421,7 +491,7 @@ function initWaves() {
     }
 }
 
-// Draw memory grid visualization
+// Draw GPU architecture visualization
 function drawMemoryGrid() {
     const model = models[currentModelIndex];
     const kvGiB = calculateKVCacheSize(model, currentTokens);
@@ -431,53 +501,273 @@ function drawMemoryGrid() {
 
     // Skip complex rendering on mobile if performance is poor
     if (isMobile && currentTokens > 1000000) {
-        return; // Skip heavy grid rendering on mobile for performance
+        return; // Skip heavy GPU rendering on mobile for performance
     }
     const totalMaxGiB = kvMaxGiB + weightsGiB;
     const fillRatio = totalMaxGiB > 0 ? (totalGiB / totalMaxGiB) : 0;
 
-    // Grid parameters
-    const gridSize = 20;
-    const spacing = 25;
-    const startX = canvas.width / 2 - 300;
-    const startY = canvas.height / 2 - 200;
-    const gridWidth = 24;
-    const gridHeight = 16;
+    // GPU Architecture Layout
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
 
-    const totalCells = gridWidth * gridHeight;
-    const filledCells = Math.floor(totalCells * fillRatio);
+    // GPU Die dimensions (center chip)
+    const dieWidth = 280;
+    const dieHeight = 280;
+    const dieX = centerX - dieWidth / 2;
+    const dieY = centerY - dieHeight / 2;
 
-    // Draw grid cells
-    for (let i = 0; i < gridHeight; i++) {
-        for (let j = 0; j < gridWidth; j++) {
-            const cellIndex = i * gridWidth + j;
-            const x = startX + j * spacing;
-            const y = startY + i * spacing;
+    // HBM Module dimensions
+    const hbmWidth = 60;
+    const hbmHeight = 240;
+    const hbmGap = 30; // Gap between HBM and die
 
-            if (cellIndex < filledCells) {
-                // Filled cell with pulsing effect
-                const pulse = Math.sin(Date.now() * 0.001 + cellIndex * 0.1) * 0.3 + 0.7;
-                ctx.fillStyle = model.color;
-                ctx.globalAlpha = pulse;
-                ctx.fillRect(x, y, gridSize, gridSize);
+    // Calculate HBM positions (4 modules on each side for high-end GPUs)
+    const hbmModules = [
+        // Left side HBM stacks
+        { x: dieX - hbmGap - hbmWidth, y: centerY - hbmHeight/2, side: 'left', index: 0 },
+        { x: dieX - hbmGap - hbmWidth*2 - 10, y: centerY - hbmHeight/2, side: 'left', index: 1 },
 
-                // Glow effect
-                const glow = ctx.createRadialGradient(
-                    x + gridSize/2, y + gridSize/2, 0,
-                    x + gridSize/2, y + gridSize/2, gridSize
-                );
-                glow.addColorStop(0, model.color);
-                glow.addColorStop(1, 'transparent');
-                ctx.fillStyle = glow;
-                ctx.fillRect(x - 5, y - 5, gridSize + 10, gridSize + 10);
+        // Right side HBM stacks
+        { x: dieX + dieWidth + hbmGap, y: centerY - hbmHeight/2, side: 'right', index: 2 },
+        { x: dieX + dieWidth + hbmGap + hbmWidth + 10, y: centerY - hbmHeight/2, side: 'right', index: 3 },
+
+        // Top HBM stacks (for very high memory configs)
+        { x: centerX - hbmHeight/2, y: dieY - hbmGap - hbmWidth, side: 'top', index: 4, width: hbmHeight, height: hbmWidth },
+
+        // Bottom HBM stacks
+        { x: centerX - hbmHeight/2, y: dieY + dieHeight + hbmGap, side: 'bottom', index: 5, width: hbmHeight, height: hbmWidth }
+    ];
+
+    // Determine how many HBM modules to show based on GPU memory
+    const memGiB = getCurrentGPUMemGiB();
+    let activeHBMs = 4; // Default to 4 HBM stacks
+    if (memGiB >= 80) activeHBMs = 6; // H100/A100 80GB have 5-6 HBM stacks
+    else if (memGiB >= 40) activeHBMs = 4; // A100 40GB has 4-5 HBM stacks
+    else if (memGiB >= 24) activeHBMs = 2; // Consumer GPUs have 2 memory modules
+
+    // Draw PCB substrate
+    ctx.fillStyle = 'rgba(20, 30, 45, 0.8)';
+    ctx.fillRect(centerX - 450, centerY - 350, 900, 700);
+    ctx.strokeStyle = 'rgba(95, 163, 230, 0.2)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(centerX - 450, centerY - 350, 900, 700);
+
+    // Draw power delivery traces
+    ctx.strokeStyle = 'rgba(255, 200, 0, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.moveTo(centerX - 450 + i * 45, centerY - 350);
+        ctx.lineTo(centerX - 450 + i * 45, centerY + 350);
+        ctx.stroke();
+    }
+
+    // Draw HBM modules
+    for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
+        const hbm = hbmModules[i];
+        const w = hbm.width || hbmWidth;
+        const h = hbm.height || hbmHeight;
+
+        // Calculate fill level for this HBM module
+        const hbmFillRatio = Math.min(1, Math.max(0, (fillRatio * activeHBMs - i) / 1));
+
+        // HBM base (dark silicon)
+        ctx.fillStyle = 'rgba(30, 35, 50, 0.9)';
+        ctx.fillRect(hbm.x, hbm.y, w, h);
+
+        // HBM memory banks (grid pattern)
+        const bankSize = 8;
+        const bankSpacing = 10;
+        const banksX = Math.floor(w / bankSpacing);
+        const banksY = Math.floor(h / bankSpacing);
+        const totalBanks = banksX * banksY;
+        const filledBanks = Math.floor(totalBanks * hbmFillRatio);
+
+        for (let by = 0; by < banksY; by++) {
+            for (let bx = 0; bx < banksX; bx++) {
+                const bankIndex = by * banksX + bx;
+                const x = hbm.x + bx * bankSpacing + 2;
+                const y = hbm.y + by * bankSpacing + 2;
+
+                if (bankIndex < filledBanks) {
+                    // Filled memory bank with heat effect
+                    const heat = 0.5 + hbmFillRatio * 0.5;
+                    const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+
+                    // Heat gradient based on fill
+                    if (hbmFillRatio > 0.8) {
+                        ctx.fillStyle = `rgba(255, ${Math.floor(100 - hbmFillRatio * 50)}, 0, ${pulse})`;
+                    } else if (hbmFillRatio > 0.5) {
+                        ctx.fillStyle = `rgba(255, ${Math.floor(200 - hbmFillRatio * 100)}, 0, ${pulse})`;
+                    } else {
+                        ctx.fillStyle = `rgba(0, ${Math.floor(200 + hbmFillRatio * 55)}, 255, ${pulse})`;
+                    }
+                    ctx.fillRect(x, y, bankSize, bankSize);
+                } else {
+                    // Empty memory bank
+                    ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(x, y, bankSize, bankSize);
+                }
+            }
+        }
+
+        // HBM label
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('HBM', hbm.x + w/2, hbm.y - 5);
+
+        // Draw data paths from HBM to GPU die
+        if (hbmFillRatio > 0) {
+            ctx.strokeStyle = model.color + '66';
+            ctx.lineWidth = 2 + hbmFillRatio * 3;
+            ctx.setLineDash([5, 5]);
+            ctx.globalAlpha = 0.3 + hbmFillRatio * 0.4;
+            ctx.beginPath();
+
+            let startX, startY, endX, endY;
+            if (hbm.side === 'left') {
+                startX = hbm.x + w;
+                startY = hbm.y + h/2;
+                endX = dieX;
+                endY = centerY;
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+            } else if (hbm.side === 'right') {
+                startX = hbm.x;
+                startY = hbm.y + h/2;
+                endX = dieX + dieWidth;
+                endY = centerY;
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+            } else if (hbm.side === 'top') {
+                startX = hbm.x + w/2;
+                startY = hbm.y + h;
+                endX = centerX;
+                endY = dieY;
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
             } else {
-                // Empty cell
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x, y, gridSize, gridSize);
+                startX = hbm.x + w/2;
+                startY = hbm.y;
+                endX = centerX;
+                endY = dieY + dieHeight;
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+            }
+
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+
+            // Generate data flow particles for active HBM modules
+            if (Math.random() < 0.1 * hbmFillRatio && isPlaying) {
+                dataFlowParticles.push(new DataFlowParticle(
+                    startX, startY, endX, endY,
+                    model.color,
+                    0.02 + Math.random() * 0.02
+                ));
             }
         }
     }
+
+    // Draw GPU Die
+    // Die substrate
+    const gradient = ctx.createLinearGradient(dieX, dieY, dieX + dieWidth, dieY + dieHeight);
+    gradient.addColorStop(0, 'rgba(60, 70, 90, 0.95)');
+    gradient.addColorStop(0.5, 'rgba(80, 90, 110, 0.95)');
+    gradient.addColorStop(1, 'rgba(60, 70, 90, 0.95)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(dieX, dieY, dieWidth, dieHeight);
+
+    // Die border
+    ctx.strokeStyle = 'rgba(150, 200, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(dieX, dieY, dieWidth, dieHeight);
+
+    // Draw compute units grid on the die
+    const cuSize = 12;
+    const cuSpacing = 16;
+    const cuStartX = dieX + 20;
+    const cuStartY = dieY + 20;
+    const cuCols = Math.floor((dieWidth - 40) / cuSpacing);
+    const cuRows = Math.floor((dieHeight - 40) / cuSpacing);
+
+    // Calculate compute unit activity based on memory usage
+    const activity = fillRatio;
+
+    for (let row = 0; row < cuRows; row++) {
+        for (let col = 0; col < cuCols; col++) {
+            const x = cuStartX + col * cuSpacing;
+            const y = cuStartY + row * cuSpacing;
+
+            // Compute unit activity visualization
+            const pulse = Math.sin(Date.now() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7;
+            const active = Math.random() < activity;
+
+            if (active) {
+                // Active compute unit
+                const heat = activity;
+                if (heat > 0.8) {
+                    ctx.fillStyle = `rgba(255, ${Math.floor(100 - heat * 100)}, 0, ${pulse})`;
+                } else if (heat > 0.5) {
+                    ctx.fillStyle = `rgba(255, 255, ${Math.floor(100 - heat * 100)}, ${pulse})`;
+                } else {
+                    ctx.fillStyle = `rgba(0, ${Math.floor(150 + heat * 105)}, 255, ${pulse})`;
+                }
+                ctx.fillRect(x, y, cuSize, cuSize);
+
+                // Glow effect for active units
+                const glow = ctx.createRadialGradient(
+                    x + cuSize/2, y + cuSize/2, 0,
+                    x + cuSize/2, y + cuSize/2, cuSize
+                );
+                glow.addColorStop(0, ctx.fillStyle);
+                glow.addColorStop(1, 'transparent');
+                ctx.fillStyle = glow;
+                ctx.fillRect(x - 2, y - 2, cuSize + 4, cuSize + 4);
+            } else {
+                // Idle compute unit
+                ctx.fillStyle = 'rgba(50, 80, 120, 0.3)';
+                ctx.fillRect(x, y, cuSize, cuSize);
+                ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cuSize, cuSize);
+            }
+        }
+    }
+
+    // GPU die label
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('GPU DIE', centerX, dieY - 15);
+    ctx.font = '11px monospace';
+    ctx.fillText(`${Math.floor(activity * 100)}% Active`, centerX, dieY - 2);
+
+    // Draw heat sink representation (subtle)
+    ctx.strokeStyle = 'rgba(150, 150, 150, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    for (let i = 0; i < 5; i++) {
+        ctx.strokeRect(
+            dieX - 10 - i * 5,
+            dieY - 10 - i * 5,
+            dieWidth + 20 + i * 10,
+            dieHeight + 20 + i * 10
+        );
+    }
+    ctx.setLineDash([]);
+
+    // Add utilization indicator
+    const utilX = centerX;
+    const utilY = dieY + dieHeight + 60;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Memory: ${formatMemory(totalGiB)} / ${formatMemory(totalMaxGiB)}`, utilX, utilY);
+    ctx.fillText(`Fill: ${(fillRatio * 100).toFixed(1)}%`, utilX, utilY + 15);
 
     ctx.globalAlpha = 1;
 }
@@ -808,6 +1098,13 @@ function animate() {
         // Draw visualizations
         drawMemoryGrid();
         drawExponentialCurve();
+
+        // Update and draw data flow particles
+        dataFlowParticles = dataFlowParticles.filter(particle => particle.life > 0);
+        dataFlowParticles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
 
         // Update and draw particles
         memoryBlocks = memoryBlocks.filter(block => block.life > 0);

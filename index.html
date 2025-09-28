@@ -707,47 +707,50 @@
             controls.style.width = 'auto';
         }
         
-        // Position factoid panel centered above the memory grid area on the canvas
+        // Position factoid panel centered above the GPU architecture visualization
         function positionFactoidPanel() {
             const panel = document.getElementById('factoidPanel');
             const canvasEl = document.getElementById('canvas');
             if (!panel || !canvasEl) return;
             const cRect = canvasEl.getBoundingClientRect();
-            const gridWidth = 24, gridHeight = 16, spacing = 25;
-            const gridPixelW = gridWidth * spacing; // 600px
-            const gridPixelH = gridHeight * spacing; // 400px
-            const startX = canvasEl.width / 2 - 300; // must match drawMemoryGrid
-            const startY = canvasEl.height / 2 - 200;
+
+            // GPU architecture dimensions (matching visualization.js)
+            const dieWidth = 280;
+            const dieHeight = 280;
+            const centerX = canvasEl.width / 2;
+            const centerY = canvasEl.height / 2;
+            const dieY = centerY - dieHeight / 2;
 
             // Measure panel after ensuring it's visible
             const panelW = panel.offsetWidth;
             const panelH = panel.offsetHeight;
-            const gap = 48; // move further above the grid
+            const gap = 180; // Position well above the top HBM module
 
-            const leftPx = cRect.left + startX + (gridPixelW / 2) - (panelW / 2);
-            const topPx = cRect.top + Math.max(20, startY - panelH - gap);
+            const leftPx = cRect.left + centerX - (panelW / 2);
+            const topPx = cRect.top + Math.max(20, dieY - panelH - gap);
 
             panel.style.right = 'auto';
             panel.style.left = leftPx + 'px';
             panel.style.top = topPx + 'px';
         }
 
-        // Position datacenter note centered below the memory grid area
+        // Position datacenter note centered below the GPU architecture
         function positionDatacenterNote() {
             const wrap = document.getElementById('datacenterNote');
             const canvasEl = document.getElementById('canvas');
             if (!wrap || !canvasEl || wrap.style.display === 'none') return;
             const cRect = canvasEl.getBoundingClientRect();
-            const gridWidth = 24, gridHeight = 16, spacing = 25;
-            const gridPixelW = gridWidth * spacing; // 600px
-            const gridPixelH = gridHeight * spacing; // 400px
-            const startX = canvasEl.width / 2 - 300; // must match drawMemoryGrid
-            const startY = canvasEl.height / 2 - 200;
+
+            // GPU architecture dimensions (matching visualization.js)
+            const dieHeight = 280;
+            const centerX = canvasEl.width / 2;
+            const centerY = canvasEl.height / 2;
+            const dieBottom = centerY + dieHeight / 2;
 
             const noteW = wrap.offsetWidth;
-            const gap = 12;
-            const leftPx = cRect.left + startX + (gridPixelW / 2) - (noteW / 2);
-            const topPx = cRect.top + startY + gridPixelH + gap;
+            const gap = 100; // Position below the utilization text
+            const leftPx = cRect.left + centerX - (noteW / 2);
+            const topPx = cRect.top + dieBottom + gap;
 
             wrap.style.left = leftPx + 'px';
             wrap.style.top = topPx + 'px';
