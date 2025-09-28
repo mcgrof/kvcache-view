@@ -671,9 +671,6 @@ function drawMemoryGrid() {
         const w = hbm.width || hbmWidth;
         const h = hbm.height || hbmHeight;
 
-        // Calculate fill level for this HBM module
-        const hbmFillRatio = Math.min(1, Math.max(0, (fillRatio * activeHBMs - i) / 1));
-
         // HBM base (dark silicon)
         ctx.fillStyle = 'rgba(30, 35, 50, 0.9)';
         ctx.fillRect(hbm.x, hbm.y, w, h);
@@ -684,17 +681,18 @@ function drawMemoryGrid() {
         const banksX = Math.floor(w / bankSpacing);
         const banksY = Math.floor(h / bankSpacing);
         const totalBanks = banksX * banksY;
-        const filledBanks = Math.floor(totalBanks * hbmFillRatio);
 
-        // Calculate how many banks are used for model weights
-        // Model weights are ABSOLUTE - they don't change with batching mode
-        // Calculate based on the GPU's total memory capacity, not current usage
+        // Calculate banks for model weights - FIXED absolute amount
         const gpuMemGiB = getCurrentGPUMemGiB();
         const memoryPerHBM = gpuMemGiB / activeHBMs; // Memory capacity per HBM module
-        const weightBanksAbsolute = includeWeights ?
+        const weightBanks = includeWeights ?
             Math.floor(totalBanks * (weightsGiB / memoryPerHBM)) : 0;
-        // Only show weights if they fit in the filled portion
-        const weightBanks = Math.min(weightBanksAbsolute, filledBanks);
+
+        // Calculate banks for KV cache - this varies with batch size and CB
+        const kvBanks = Math.floor(totalBanks * (kvGiB / memoryPerHBM));
+
+        // Total filled banks = weights + KV cache
+        const filledBanks = Math.min(weightBanks + kvBanks, totalBanks);
 
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
             // Continuous batching: show different colors for each sequence
@@ -838,16 +836,17 @@ function drawMemoryGrid() {
                             ctx.lineWidth = 0.5;
                             ctx.strokeRect(x, y, bankSize, bankSize);
                         } else {
-                            // KV cache - heat gradient based on fill
-                            const heat = 0.5 + hbmFillRatio * 0.5;
+                            // KV cache - heat gradient based on overall fill ratio
+                            const overallFillRatio = filledBanks / totalBanks;
+                            const heat = 0.5 + overallFillRatio * 0.5;
 
                             // Heat gradient based on fill
-                            if (hbmFillRatio > 0.8) {
-                                ctx.fillStyle = `rgba(255, ${Math.floor(100 - hbmFillRatio * 50)}, 0, ${pulse})`;
-                            } else if (hbmFillRatio > 0.5) {
-                                ctx.fillStyle = `rgba(255, ${Math.floor(200 - hbmFillRatio * 100)}, 0, ${pulse})`;
+                            if (overallFillRatio > 0.8) {
+                                ctx.fillStyle = `rgba(255, ${Math.floor(100 - overallFillRatio * 50)}, 0, ${pulse})`;
+                            } else if (overallFillRatio > 0.5) {
+                                ctx.fillStyle = `rgba(255, ${Math.floor(200 - overallFillRatio * 100)}, 0, ${pulse})`;
                             } else {
-                                ctx.fillStyle = `rgba(0, ${Math.floor(200 + hbmFillRatio * 55)}, 255, ${pulse})`;
+                                ctx.fillStyle = `rgba(0, ${Math.floor(200 + overallFillRatio * 55)}, 255, ${pulse})`;
                             }
                             ctx.fillRect(x, y, bankSize, bankSize);
                         }
