@@ -196,6 +196,8 @@ const POPUP_COOLDOWN_MS = 10000;
 let includeWeights = true; // Include model weights memory by default
 let batchSize = 1; // Number of concurrent queries per GPU
 let dataFlowParticles = []; // Particles flowing between HBM and GPU
+let continuousBatching = false; // Enable continuous batching with variable sequence lengths
+let batchSequenceLengths = []; // Array of sequence lengths for each request in batch
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
@@ -263,6 +265,34 @@ function resizeCanvas() {
     }
 }
 
+// Generate random sequence lengths for continuous batching
+function generateBatchSequenceLengths(batchSize, maxTokens) {
+    const lengths = [];
+    if (continuousBatching) {
+        // Continuous batching: variable sequence lengths
+        // Simulate realistic distribution: some short, some medium, some long
+        for (let i = 0; i < batchSize; i++) {
+            const r = Math.random();
+            if (r < 0.3) {
+                // 30% short sequences (10-20% of max)
+                lengths.push(Math.floor(maxTokens * (0.1 + Math.random() * 0.1)));
+            } else if (r < 0.7) {
+                // 40% medium sequences (20-60% of max)
+                lengths.push(Math.floor(maxTokens * (0.2 + Math.random() * 0.4)));
+            } else {
+                // 30% long sequences (60-100% of max)
+                lengths.push(Math.floor(maxTokens * (0.6 + Math.random() * 0.4)));
+            }
+        }
+    } else {
+        // Traditional batching: all sequences same length
+        for (let i = 0; i < batchSize; i++) {
+            lengths.push(maxTokens);
+        }
+    }
+    return lengths;
+}
+
 // Calculate KV cache size (from LMCache logic)
 function calculateKVCacheSize(model, tokens, dtype = null) {
     const selectedDtype = dtype || currentDtype;
@@ -286,6 +316,24 @@ function calculateKVCacheSize(model, tokens, dtype = null) {
 
     const total_bytes = total_elements * dtype_size;
     return total_bytes / (1024 * 1024 * 1024); // Convert to GiB
+}
+
+// Calculate total KV cache for batch with continuous batching support
+function calculateBatchKVCache(model, currentTokens, dtype = null) {
+    if (continuousBatching && batchSize > 1) {
+        // Calculate based on variable sequence lengths
+        let totalKV = 0;
+        if (batchSequenceLengths.length !== batchSize) {
+            batchSequenceLengths = generateBatchSequenceLengths(batchSize, currentTokens);
+        }
+        for (const seqLen of batchSequenceLengths) {
+            totalKV += calculateKVCacheSize(model, seqLen, dtype);
+        }
+        return totalKV;
+    } else {
+        // Traditional batching: all sequences same length
+        return calculateKVCacheSize(model, currentTokens, dtype) * batchSize;
+    }
 }
 
 // Calculate model weights memory in GiB
@@ -494,8 +542,8 @@ function initWaves() {
 // Draw GPU architecture visualization
 function drawMemoryGrid() {
     const model = models[currentModelIndex];
-    const kvGiB = calculateKVCacheSize(model, currentTokens);
-    const kvMaxGiB = calculateKVCacheSize(model, maxTokens);
+    const kvGiB = calculateBatchKVCache(model, currentTokens);
+    const kvMaxGiB = calculateBatchKVCache(model, maxTokens);
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
     const totalGiB = kvGiB + weightsGiB;
 
@@ -781,8 +829,9 @@ function drawExponentialCurve() {
     // Calculate points
     for (let i = 0; i <= steps; i++) {
         const tokens = (i / steps) * maxTokens;
-        const kvGiB = calculateKVCacheSize(model, tokens);
-        const kvMaxGiB = calculateKVCacheSize(model, maxTokens);
+        // For the curve, we'll show the average case for continuous batching
+        const kvGiB = continuousBatching ? calculateBatchKVCache(model, tokens) : calculateKVCacheSize(model, tokens) * batchSize;
+        const kvMaxGiB = continuousBatching ? calculateBatchKVCache(model, maxTokens) : calculateKVCacheSize(model, maxTokens) * batchSize;
         const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
         const memory = kvGiB + weightsGiB;
         const maxMemory = kvMaxGiB + weightsGiB;
@@ -811,8 +860,8 @@ function drawExponentialCurve() {
     // Draw current position
     const currentRatio = currentTokens / maxTokens;
     const currentX = currentRatio * (canvas.width - 200) + 100;
-    const kvGiBNow = calculateKVCacheSize(model, currentTokens);
-    const kvGiBMax = calculateKVCacheSize(model, maxTokens);
+    const kvGiBNow = calculateBatchKVCache(model, currentTokens);
+    const kvGiBMax = calculateBatchKVCache(model, maxTokens);
     const weightsGiBNow = includeWeights ? calculateWeightMemoryGiB(model) : 0;
     const currentMemory = kvGiBNow + weightsGiBNow;
     const maxMemory = kvGiBMax + weightsGiBNow;
@@ -905,11 +954,9 @@ function updateFactoid() {
 // Update info panel
 function updateInfoPanel() {
     const model = models[currentModelIndex];
-    const kvGiB = calculateKVCacheSize(model, currentTokens);
+    const kvGiB = calculateBatchKVCache(model, currentTokens);
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const memoryPerQuery = kvGiB + weightsGiB;
-    // Total memory for all concurrent queries
-    const totalGiB = memoryPerQuery * batchSize;
+    const totalGiB = kvGiB + weightsGiB;
     const gpusNeeded = calculateGPUsNeeded(totalGiB);
 
     document.getElementById('modelName').textContent = model.name;
@@ -918,7 +965,12 @@ function updateInfoPanel() {
     const totalEl = document.getElementById('totalSize');
     if (weightsEl) weightsEl.textContent = includeWeights ? formatMemory(weightsGiB) : '—';
     if (totalEl) {
-        if (batchSize > 1) {
+        if (continuousBatching && batchSize > 1) {
+            // Show average sequence length for continuous batching
+            const avgSeqLen = batchSequenceLengths.reduce((a, b) => a + b, 0) / batchSequenceLengths.length;
+            totalEl.textContent = `${formatMemory(totalGiB)} (CB: ${batchSize} reqs, avg ${Math.floor(avgSeqLen)} tok)`;
+        } else if (batchSize > 1) {
+            const memoryPerQuery = kvGiB / batchSize + weightsGiB;
             totalEl.textContent = `${formatMemory(totalGiB)} (${batchSize}x ${formatMemory(memoryPerQuery)})`;
         } else {
             totalEl.textContent = formatMemory(totalGiB);
@@ -1161,9 +1213,34 @@ document.getElementById('batchControl').addEventListener('click', function() {
     batchSize = batchSizes[nextIndex];
     this.textContent = `Batch: ${batchSize}`;
 
+    // Regenerate sequence lengths when batch size changes
+    if (continuousBatching) {
+        batchSequenceLengths = generateBatchSequenceLengths(batchSize, currentTokens);
+    }
+
     // Force update display to show new calculations
-    updateContinuously();
+    updateInfoPanel();
 });
+
+// Continuous batching toggle
+const cbBtn = document.getElementById('cbToggle');
+if (cbBtn) {
+    cbBtn.addEventListener('click', function() {
+        continuousBatching = !continuousBatching;
+        const spanEl = this.querySelector('span:first-child');
+        if (spanEl) {
+            spanEl.textContent = continuousBatching ? 'CB: ON' : 'CB: OFF';
+        }
+        this.classList.toggle('active', continuousBatching);
+
+        // Regenerate sequence lengths when toggling
+        if (continuousBatching) {
+            batchSequenceLengths = generateBatchSequenceLengths(batchSize, currentTokens);
+        }
+
+        updateInfoPanel();
+    });
+}
 
 document.getElementById('speedControl').addEventListener('click', function() {
     const speeds = [0.5, 1, 2, 5, 10, 20, 50, 100];
