@@ -665,6 +665,9 @@ function drawMemoryGrid() {
         }
     }
 
+    // Calculate total memory distribution across ALL HBM modules
+    const gpuMemGiB = getCurrentGPUMemGiB();
+
     // Draw HBM modules
     for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
         const hbm = hbmModules[i];
@@ -682,20 +685,16 @@ function drawMemoryGrid() {
         const banksY = Math.floor(h / bankSpacing);
         const totalBanks = banksX * banksY;
 
-        // Calculate banks based on actual GPU memory capacity
-        const gpuMemGiB = getCurrentGPUMemGiB();
-        const memoryPerHBM = gpuMemGiB / activeHBMs; // Memory capacity per HBM module
+        // Calculate what percentage of total GPU memory is used
+        const memoryUsageRatio = totalGiB / gpuMemGiB;
 
-        // Each HBM module represents its portion of total GPU memory
-        // Scale banks to actual memory usage vs capacity
-        const weightBanks = includeWeights ?
-            Math.floor(totalBanks * (weightsGiB / memoryPerHBM)) : 0;
+        // Each HBM module should show the same fill percentage
+        // This represents distributed memory across all modules
+        const filledBanks = Math.floor(totalBanks * memoryUsageRatio);
 
-        // Calculate banks for KV cache - this varies with batch size and CB
-        const kvBanks = Math.floor(totalBanks * (kvGiB / memoryPerHBM));
-
-        // Total filled banks = weights + KV cache (capped at total available)
-        const filledBanks = Math.min(weightBanks + kvBanks, totalBanks);
+        // Calculate how many banks are for weights vs KV cache
+        const weightRatio = includeWeights ? (weightsGiB / totalGiB) : 0;
+        const weightBanks = Math.floor(filledBanks * weightRatio);
 
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
             // Continuous batching: show different colors for each sequence
