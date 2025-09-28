@@ -1005,10 +1005,14 @@ function updateInfoPanel() {
         if (continuousBatching && batchSize > 1) {
             // Show average sequence length for continuous batching
             const avgSeqLen = batchSequenceLengths.reduce((a, b) => a + b, 0) / batchSequenceLengths.length;
-            totalEl.textContent = `${formatMemory(totalGiB)} (CB: ${batchSize} reqs, avg ${Math.floor(avgSeqLen)} tok)`;
+            if (includeWeights) {
+                totalEl.textContent = `${formatMemory(totalGiB)} (${formatMemory(weightsGiB)} weights + ${formatMemory(kvGiB)} CB-KV)`;
+            } else {
+                totalEl.textContent = `${formatMemory(totalGiB)} (CB: ${batchSize} reqs, avg ${Math.floor(avgSeqLen)} tok)`;
+            }
         } else if (batchSize > 1) {
-            const memoryPerQuery = kvGiB / batchSize + weightsGiB;
-            totalEl.textContent = `${formatMemory(totalGiB)} (${batchSize}x ${formatMemory(memoryPerQuery)})`;
+            const kvPerQuery = kvGiB / batchSize;
+            totalEl.textContent = `${formatMemory(totalGiB)} (${formatMemory(weightsGiB)} weights + ${batchSize}×${formatMemory(kvPerQuery)} KV)`;
         } else {
             totalEl.textContent = formatMemory(totalGiB);
         }
