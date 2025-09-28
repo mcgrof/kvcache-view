@@ -687,10 +687,14 @@ function drawMemoryGrid() {
         const filledBanks = Math.floor(totalBanks * hbmFillRatio);
 
         // Calculate how many banks are used for model weights
-        // Model weights are constant regardless of batching mode
-        // Use the proportion of weights to total filled memory
-        const weightBanks = includeWeights && filledBanks > 0 ?
-            Math.floor(filledBanks * (weightsGiB / totalGiB)) : 0;
+        // Model weights are ABSOLUTE - they don't change with batching mode
+        // Calculate based on the GPU's total memory capacity, not current usage
+        const gpuMemGiB = getCurrentGPUMemGiB();
+        const memoryPerHBM = gpuMemGiB / activeHBMs; // Memory capacity per HBM module
+        const weightBanksAbsolute = includeWeights ?
+            Math.floor(totalBanks * (weightsGiB / memoryPerHBM)) : 0;
+        // Only show weights if they fit in the filled portion
+        const weightBanks = Math.min(weightBanksAbsolute, filledBanks);
 
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
             // Continuous batching: show different colors for each sequence
