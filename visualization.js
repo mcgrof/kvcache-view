@@ -867,11 +867,12 @@ function drawMemoryGrid() {
         ctx.fillText('HBM', hbm.x + w/2, hbm.y - 5);
 
         // Draw data paths from HBM to GPU die
-        if (hbmFillRatio > 0) {
+        const moduleFillRatio = filledBanks / totalBanks;
+        if (moduleFillRatio > 0) {
             ctx.strokeStyle = model.color + '66';
-            ctx.lineWidth = 2 + hbmFillRatio * 3;
+            ctx.lineWidth = 2 + moduleFillRatio * 3;
             ctx.setLineDash([5, 5]);
-            ctx.globalAlpha = 0.3 + hbmFillRatio * 0.4;
+            ctx.globalAlpha = 0.3 + moduleFillRatio * 0.4;
             ctx.beginPath();
 
             let startX, startY, endX, endY;
@@ -910,7 +911,7 @@ function drawMemoryGrid() {
             ctx.globalAlpha = 1;
 
             // Generate data flow particles for active HBM modules
-            if (Math.random() < 0.1 * hbmFillRatio && isPlaying) {
+            if (Math.random() < 0.1 * moduleFillRatio && isPlaying) {
                 dataFlowParticles.push(new DataFlowParticle(
                     startX, startY, endX, endY,
                     model.color,
