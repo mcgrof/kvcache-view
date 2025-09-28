@@ -687,7 +687,10 @@ function drawMemoryGrid() {
         const filledBanks = Math.floor(totalBanks * hbmFillRatio);
 
         // Calculate how many banks are used for model weights
-        const weightBanks = includeWeights ? Math.floor(totalBanks * (weightsGiB / totalMaxGiB)) : 0;
+        // Model weights are constant regardless of batching mode
+        // Use the proportion of weights to total filled memory
+        const weightBanks = includeWeights && filledBanks > 0 ?
+            Math.floor(filledBanks * (weightsGiB / totalGiB)) : 0;
 
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
             // Continuous batching: show different colors for each sequence
