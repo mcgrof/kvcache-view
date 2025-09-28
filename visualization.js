@@ -682,16 +682,19 @@ function drawMemoryGrid() {
         const banksY = Math.floor(h / bankSpacing);
         const totalBanks = banksX * banksY;
 
-        // Calculate banks for model weights - FIXED absolute amount
+        // Calculate banks based on actual GPU memory capacity
         const gpuMemGiB = getCurrentGPUMemGiB();
         const memoryPerHBM = gpuMemGiB / activeHBMs; // Memory capacity per HBM module
+
+        // Each HBM module represents its portion of total GPU memory
+        // Scale banks to actual memory usage vs capacity
         const weightBanks = includeWeights ?
             Math.floor(totalBanks * (weightsGiB / memoryPerHBM)) : 0;
 
         // Calculate banks for KV cache - this varies with batch size and CB
         const kvBanks = Math.floor(totalBanks * (kvGiB / memoryPerHBM));
 
-        // Total filled banks = weights + KV cache
+        // Total filled banks = weights + KV cache (capped at total available)
         const filledBanks = Math.min(weightBanks + kvBanks, totalBanks);
 
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
@@ -1018,24 +1021,26 @@ function drawMemoryGrid() {
     ctx.font = 'bold 12px monospace';
     ctx.textAlign = 'center';
 
-    // Show different info based on batching mode
+    // Always show usage vs GPU capacity
+    const gpuCapacityGiB = getCurrentGPUMemGiB();
+    const usagePercent = (totalGiB / gpuCapacityGiB * 100).toFixed(1);
+
+    // First line: current usage vs GPU capacity
+    ctx.fillText(`Memory: ${formatMemory(totalGiB)} / ${formatMemory(gpuCapacityGiB)} (${usagePercent}% of ${currentGPU})`, utilX, utilY);
+
+    // Second line: breakdown details
     if (continuousBatching && batchSize > 1) {
-        ctx.fillText(`KV Cache: ${formatMemory(kvGiB)} (${batchSize} variable sequences)`, utilX, utilY);
-        if (includeWeights) {
-            ctx.fillText(`Total: ${formatMemory(totalGiB)} (KV + ${formatMemory(weightsGiB)} weights)`, utilX, utilY + 15);
-        } else {
-            ctx.fillText(`Total: ${formatMemory(totalGiB)}`, utilX, utilY + 15);
-        }
+        ctx.font = '10px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillText(`KV: ${formatMemory(kvGiB)} (${batchSize} variable seq) + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15);
     } else if (batchSize > 1) {
-        ctx.fillText(`KV Cache: ${formatMemory(kvGiB)} (${batchSize}×${Math.floor(currentTokens)} tokens)`, utilX, utilY);
-        if (includeWeights) {
-            ctx.fillText(`Total: ${formatMemory(totalGiB)} (KV + ${formatMemory(weightsGiB)} weights)`, utilX, utilY + 15);
-        } else {
-            ctx.fillText(`Total: ${formatMemory(totalGiB)}`, utilX, utilY + 15);
-        }
+        ctx.font = '10px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillText(`KV: ${formatMemory(kvGiB)} (${batchSize}×${Math.floor(currentTokens)} tok) + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15);
     } else {
-        ctx.fillText(`Memory: ${formatMemory(totalGiB)} / ${formatMemory(totalMaxGiB)}`, utilX, utilY);
-        ctx.fillText(`Fill: ${(fillRatio * 100).toFixed(1)}%`, utilX, utilY + 15);
+        ctx.font = '10px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillText(`KV: ${formatMemory(kvGiB)} + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15);
     }
 
     ctx.globalAlpha = 1;
