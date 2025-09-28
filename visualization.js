@@ -265,33 +265,6 @@ function resizeCanvas() {
     }
 }
 
-// Generate random sequence lengths for continuous batching
-function generateBatchSequenceLengths(batchSize, maxTokens) {
-    const lengths = [];
-    if (continuousBatching) {
-        // Continuous batching: variable sequence lengths
-        // Simulate realistic distribution: some short, some medium, some long
-        for (let i = 0; i < batchSize; i++) {
-            const r = Math.random();
-            if (r < 0.3) {
-                // 30% short sequences (10-20% of max)
-                lengths.push(Math.floor(maxTokens * (0.1 + Math.random() * 0.1)));
-            } else if (r < 0.7) {
-                // 40% medium sequences (20-60% of max)
-                lengths.push(Math.floor(maxTokens * (0.2 + Math.random() * 0.4)));
-            } else {
-                // 30% long sequences (60-100% of max)
-                lengths.push(Math.floor(maxTokens * (0.6 + Math.random() * 0.4)));
-            }
-        }
-    } else {
-        // Traditional batching: all sequences same length
-        for (let i = 0; i < batchSize; i++) {
-            lengths.push(maxTokens);
-        }
-    }
-    return lengths;
-}
 
 // Calculate KV cache size (from LMCache logic)
 function calculateKVCacheSize(model, tokens, dtype = null) {
@@ -318,17 +291,37 @@ function calculateKVCacheSize(model, tokens, dtype = null) {
     return total_bytes / (1024 * 1024 * 1024); // Convert to GiB
 }
 
+// Generate deterministic sequence length ratios for continuous batching
+function getSequenceLengthRatio(index, batchSize) {
+    // Use a deterministic pattern based on index to ensure consistency
+    const pattern = [0.15, 0.35, 0.25, 0.75, 0.45, 0.90, 0.20, 0.60, 0.85, 0.30, 0.55, 0.70, 0.40, 0.95, 0.10, 0.50];
+    return pattern[index % pattern.length];
+}
+
 // Calculate total KV cache for batch with continuous batching support
 function calculateBatchKVCache(model, currentTokens, dtype = null) {
     if (continuousBatching && batchSize > 1) {
-        // Calculate based on variable sequence lengths
+        // Calculate based on variable sequence lengths with deterministic ratios
         let totalKV = 0;
-        if (batchSequenceLengths.length !== batchSize) {
-            batchSequenceLengths = generateBatchSequenceLengths(batchSize, currentTokens);
-        }
-        for (const seqLen of batchSequenceLengths) {
+        let totalSeqLength = 0;
+
+        for (let i = 0; i < batchSize; i++) {
+            // Use deterministic ratio for consistent calculations
+            const ratio = getSequenceLengthRatio(i, batchSize);
+            const seqLen = Math.floor(currentTokens * ratio);
+            totalSeqLength += seqLen;
             totalKV += calculateKVCacheSize(model, seqLen, dtype);
         }
+
+        // Store average for display purposes
+        if (!batchSequenceLengths.length || batchSequenceLengths.length !== batchSize) {
+            batchSequenceLengths = [];
+            for (let i = 0; i < batchSize; i++) {
+                const ratio = getSequenceLengthRatio(i, batchSize);
+                batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+            }
+        }
+
         return totalKV;
     } else {
         // Traditional batching: all sequences same length
@@ -1175,6 +1168,15 @@ function animate() {
             if (currentTokens >= maxTokens) {
                 currentTokens = 0; // Loop
             }
+
+            // Update sequence lengths when tokens change in continuous batching mode
+            if (continuousBatching && batchSize > 1) {
+                batchSequenceLengths = [];
+                for (let i = 0; i < batchSize; i++) {
+                    const ratio = getSequenceLengthRatio(i, batchSize);
+                    batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+                }
+            }
         }
 
         // Update info panel
@@ -1214,8 +1216,12 @@ document.getElementById('batchControl').addEventListener('click', function() {
     this.textContent = `Batch: ${batchSize}`;
 
     // Regenerate sequence lengths when batch size changes
-    if (continuousBatching) {
-        batchSequenceLengths = generateBatchSequenceLengths(batchSize, currentTokens);
+    if (continuousBatching && batchSize > 1) {
+        batchSequenceLengths = [];
+        for (let i = 0; i < batchSize; i++) {
+            const ratio = getSequenceLengthRatio(i, batchSize);
+            batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+        }
     }
 
     // Force update display to show new calculations
@@ -1234,8 +1240,14 @@ if (cbBtn) {
         this.classList.toggle('active', continuousBatching);
 
         // Regenerate sequence lengths when toggling
-        if (continuousBatching) {
-            batchSequenceLengths = generateBatchSequenceLengths(batchSize, currentTokens);
+        if (continuousBatching && batchSize > 1) {
+            batchSequenceLengths = [];
+            for (let i = 0; i < batchSize; i++) {
+                const ratio = getSequenceLengthRatio(i, batchSize);
+                batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+            }
+        } else {
+            batchSequenceLengths = [];
         }
 
         updateInfoPanel();
