@@ -977,7 +977,6 @@ function updateFactoid() {
         // Fade in
         panel.style.opacity = '1';
         if (window.positionFactoidPanel) window.positionFactoidPanel();
-        if (window.positionControls) window.positionControls();
     }, 400);
 
     currentFactoidIndex++;
