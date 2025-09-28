@@ -293,8 +293,27 @@ function calculateKVCacheSize(model, tokens, dtype = null) {
 
 // Generate deterministic sequence length ratios for continuous batching
 function getSequenceLengthRatio(index, batchSize) {
-    // Use a deterministic pattern based on index to ensure consistency
-    const pattern = [0.15, 0.35, 0.25, 0.75, 0.45, 0.90, 0.20, 0.60, 0.85, 0.30, 0.55, 0.70, 0.40, 0.95, 0.10, 0.50];
+    // Use a deterministic pattern that simulates realistic production workloads
+    // Pattern averages to ~0.5 to represent mixed short/long sequences
+    // In production, sequences vary from very short (prompts) to very long (completions)
+    const pattern = [
+        0.10, // Very short prompt
+        0.85, // Long generation
+        0.25, // Short query
+        0.95, // Near-max context
+        0.40, // Medium query
+        0.75, // Long conversation
+        0.15, // Short prompt
+        0.60, // Medium generation
+        0.30, // Short-medium
+        0.90, // Very long
+        0.50, // Average
+        0.70, // Long-medium
+        0.20, // Short
+        0.80, // Long
+        0.35, // Medium-short
+        0.65  // Medium-long
+    ];
     return pattern[index % pattern.length];
 }
 
@@ -801,14 +820,34 @@ function drawMemoryGrid() {
     }
     ctx.setLineDash([]);
 
-    // Add utilization indicator
+    // Add utilization indicator (positioned below bottom HBM module)
     const utilX = centerX;
-    const utilY = dieY + dieHeight + 60;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '12px monospace';
+    // Position well below the bottom HBM module (which is at dieY + dieHeight + hbmGap + hbmWidth)
+    const bottomHBMBottom = dieY + dieHeight + hbmGap + hbmWidth;
+    const utilY = bottomHBMBottom + 40; // Add spacing below HBM
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = 'bold 12px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(`Memory: ${formatMemory(totalGiB)} / ${formatMemory(totalMaxGiB)}`, utilX, utilY);
-    ctx.fillText(`Fill: ${(fillRatio * 100).toFixed(1)}%`, utilX, utilY + 15);
+
+    // Show different info based on batching mode
+    if (continuousBatching && batchSize > 1) {
+        ctx.fillText(`KV Cache: ${formatMemory(kvGiB)} (${batchSize} variable sequences)`, utilX, utilY);
+        if (includeWeights) {
+            ctx.fillText(`Total: ${formatMemory(totalGiB)} (KV + ${formatMemory(weightsGiB)} weights)`, utilX, utilY + 15);
+        } else {
+            ctx.fillText(`Total: ${formatMemory(totalGiB)}`, utilX, utilY + 15);
+        }
+    } else if (batchSize > 1) {
+        ctx.fillText(`KV Cache: ${formatMemory(kvGiB)} (${batchSize}×${Math.floor(currentTokens)} tokens)`, utilX, utilY);
+        if (includeWeights) {
+            ctx.fillText(`Total: ${formatMemory(totalGiB)} (KV + ${formatMemory(weightsGiB)} weights)`, utilX, utilY + 15);
+        } else {
+            ctx.fillText(`Total: ${formatMemory(totalGiB)}`, utilX, utilY + 15);
+        }
+    } else {
+        ctx.fillText(`Memory: ${formatMemory(totalGiB)} / ${formatMemory(totalMaxGiB)}`, utilX, utilY);
+        ctx.fillText(`Fill: ${(fillRatio * 100).toFixed(1)}%`, utilX, utilY + 15);
+    }
 
     ctx.globalAlpha = 1;
 }
