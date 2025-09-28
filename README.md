@@ -7,7 +7,7 @@ An impactful, animated visualization demonstrating the exponential memory growth
 ## ✨ Features
 
 - 🚀 **Real-time Animation**: Watch KV cache grow from 0 to 100M tokens
-- 🔄 **Model Comparison**: Switch between 5 models (1B to 671B parameters)
+- 🔄 **Model Comparison**: Switch between 15+ models including Llama, Qwen, Gemma, Mixtral MOE, and DeepSeek
 - 📊 **SOTA Context Lengths**: 128K, 200K, 1M, 2M, 10M, up to 100M tokens
 - 🎚️ **Dynamic Data Types**: FP32, FP16, BF16, INT8, INT4 quantization
 - ⚡ **Speed Control**: 0.5x to 100x animation speed
@@ -33,7 +33,7 @@ As context lengths grow from thousands to millions of tokens, KV cache memory be
 ## What It Shows
 
 - **Real-time Memory Growth**: Watch as KV cache memory explodes with increasing context length
-- **Model Comparisons**: Switch between different models (1B to 671B parameters) to see scaling challenges
+- **Model Comparisons**: Switch between 15+ models from 1B to 671B parameters including MOE architectures
 - **GPU Requirements**: Live calculation of H100 GPUs needed as memory exceeds single-GPU capacity
 - **Visual Metaphors**:
   - Memory grid fills up showing utilization
@@ -43,10 +43,12 @@ As context lengths grow from thousands to millions of tokens, KV cache memory be
 
 ## Key Insights Visualized
 
-1. **Small Models (1-3B)**: Can handle 1M context on single datacenter GPUs
-2. **Medium Models (8-70B)**: Quickly exceed single GPU at moderate context lengths
-3. **Large Models (405B)**: Require 6+ H100s for 1M context (480 GiB)
-4. **DeepSeek-V3**: 7x memory reduction through KV-LoRA compression
+1. **Small Models (1-4B)**: Can handle 1M context on single datacenter GPUs
+2. **Medium Models (8-32B)**: Quickly exceed single GPU at moderate context lengths
+3. **MOE Models (Mixtral, Phi-3.5 MoE)**: Efficient inference with sparse activation
+4. **Large Models (70-405B)**: Require 6+ H100s for 1M context
+5. **DeepSeek-V3 (671B)**: 7x memory reduction through KV-LoRA compression
+6. **Qwen3-Next (80B)**: Hybrid attention reduces KV cache by 75%
 
 ## 🎯 Quick Start
 

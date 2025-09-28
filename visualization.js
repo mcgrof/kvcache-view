@@ -25,6 +25,16 @@ const models = [
         efficiency: 'high'
     },
     {
+        name: "Phi-3.5-mini",
+        params: 3.8,
+        layers: 32,
+        hidden_size: 3072,
+        num_heads: 32,
+        num_kv_heads: 32,
+        color: '#00C853', // Green
+        efficiency: 'high'
+    },
+    {
         name: "Llama-3.1-8B",
         params: 8,
         layers: 32,
@@ -33,6 +43,72 @@ const models = [
         num_kv_heads: 8,
         color: '#1428A0', // Deep Blue
         efficiency: 'medium'
+    },
+    {
+        name: "Gemma-2-9B",
+        params: 9,
+        layers: 42,
+        hidden_size: 3584,
+        num_heads: 16,
+        num_kv_heads: 8,
+        color: '#4285F4', // Google Blue
+        efficiency: 'high'
+    },
+    {
+        name: "Qwen2.5-14B",
+        params: 14,
+        layers: 48,
+        hidden_size: 5120,
+        num_heads: 40,
+        num_kv_heads: 8,
+        color: '#FF9800', // Orange
+        efficiency: 'medium'
+    },
+    {
+        name: "Phi-3.5-MoE",
+        params: 41.9, // 16 experts, 2 active
+        layers: 32,
+        hidden_size: 4096,
+        num_heads: 32,
+        num_kv_heads: 8,
+        num_local_experts: 16,
+        num_experts_per_tok: 2,
+        architecture: 'moe',
+        color: '#00BCD4', // Cyan
+        efficiency: 'high'
+    },
+    {
+        name: "Gemma-2-27B",
+        params: 27,
+        layers: 46,
+        hidden_size: 4608,
+        num_heads: 32,
+        num_kv_heads: 16,
+        color: '#34A853', // Google Green
+        efficiency: 'medium'
+    },
+    {
+        name: "Qwen2.5-32B",
+        params: 32,
+        layers: 64,
+        hidden_size: 5120,
+        num_heads: 40,
+        num_kv_heads: 8,
+        color: '#FFC107', // Amber
+        efficiency: 'medium'
+    },
+    {
+        name: "Mixtral-8x7B",
+        params: 46.7, // 8 experts, 2 active = 12.9B active
+        layers: 32,
+        hidden_size: 4096,
+        num_heads: 32,
+        num_kv_heads: 8,
+        num_local_experts: 8,
+        num_experts_per_tok: 2,
+        architecture: 'moe',
+        color: '#9C27B0', // Deep Purple
+        efficiency: 'high'
     },
     {
         name: "Llama-3.1-70B",
@@ -45,14 +121,41 @@ const models = [
         efficiency: 'low'
     },
     {
-        name: "DeepSeek-V3 (671B)",
-        params: 671,
-        layers: 61,
-        kv_lora_rank: 512,
-        qk_rope_head_dim: 64,
-        color: '#FF6B00', // Orange
-        efficiency: 'optimized',
-        special: 'deepseek'
+        name: "Qwen2.5-72B",
+        params: 72,
+        layers: 80,
+        hidden_size: 8192,
+        num_heads: 64,
+        num_kv_heads: 8,
+        color: '#FF5722', // Deep Orange
+        efficiency: 'low'
+    },
+    {
+        name: "Qwen3-Next-80B",
+        params: 80,
+        active_params: 3,
+        layers: 48,
+        hidden_size: 2048,
+        num_heads: 16,
+        num_kv_heads: 2,
+        num_local_experts: 512,
+        num_experts_per_tok: 11,
+        architecture: 'qwen3-next',
+        color: '#795548', // Brown
+        efficiency: 'optimized'
+    },
+    {
+        name: "Mixtral-8x22B",
+        params: 141, // 8 experts, 2 active = 39.1B active
+        layers: 56,
+        hidden_size: 6144,
+        num_heads: 48,
+        num_kv_heads: 8,
+        num_local_experts: 8,
+        num_experts_per_tok: 2,
+        architecture: 'moe',
+        color: '#7B1FA2', // Dark Purple
+        efficiency: 'medium'
     },
     {
         name: "Llama-3.1-405B",
@@ -63,6 +166,16 @@ const models = [
         num_kv_heads: 8,
         color: '#E4002B', // Red
         efficiency: 'very-low'
+    },
+    {
+        name: "DeepSeek-V3 (671B)",
+        params: 671,
+        layers: 61,
+        kv_lora_rank: 512,
+        qk_rope_head_dim: 64,
+        color: '#FF6B00', // Orange
+        efficiency: 'optimized',
+        special: 'deepseek'
     }
 ];
 
@@ -158,8 +271,14 @@ function calculateKVCacheSize(model, tokens, dtype = null) {
     if (model.special === 'deepseek') {
         // DeepSeek uses KV-LoRA compression
         total_elements = model.layers * tokens * (model.kv_lora_rank + model.qk_rope_head_dim);
+    } else if (model.architecture === 'qwen3-next') {
+        // Qwen3-Next uses hybrid attention (1/4 layers use traditional attention, rest use linear)
+        // Only 1/4 of layers have KV cache
+        const head_size = model.hidden_size / model.num_heads;
+        const layers_with_kv = Math.floor(model.layers / 4);
+        total_elements = 2 * layers_with_kv * tokens * model.num_kv_heads * head_size;
     } else {
-        // Standard calculation
+        // Standard calculation (includes MOE models - expert count doesn't affect KV cache)
         const head_size = model.hidden_size / model.num_heads;
         total_elements = 2 * model.layers * tokens * model.num_kv_heads * head_size;
     }
@@ -172,8 +291,11 @@ function calculateKVCacheSize(model, tokens, dtype = null) {
 function calculateWeightMemoryGiB(model, dtype = null) {
     const selectedDtype = dtype || currentDtype;
     const bytesPerParam = dtypeConfigs[selectedDtype] ? dtypeConfigs[selectedDtype].bytes : 2;
+    // For MOE models with active_params specified, use active params for inference memory
+    // Otherwise use total params
+    const paramsToUse = model.active_params || model.params || 0;
     // params is in Billions (e.g., 70 for 70B). Convert to number of parameters
-    const numParams = (model.params || 0) * 1e9;
+    const numParams = paramsToUse * 1e9;
     const totalBytes = numParams * bytesPerParam;
     return totalBytes / (1024 * 1024 * 1024); // GiB
 }
