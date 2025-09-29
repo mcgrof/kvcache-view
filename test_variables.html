@@ -1,31 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <title>Variable Test</title>
-</head>
-<body>
-    <canvas id="canvas" width="800" height="600"></canvas>
-    <div id="error-log"></div>
+    <head>
+        <title>Variable Test</title>
+    </head>
+    <body>
+        <canvas id="canvas" width="800" height="600"></canvas>
+        <div id="error-log"></div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        <script>
+            const canvas = document.getElementById('canvas')
+            const ctx = canvas.getContext('2d')
 
-        // Test if activeMemModules variable works
-        function testVariables() {
-            try {
-                let activeMemModules = 4;
-                console.log('activeMemModules:', activeMemModules);
-                document.getElementById('error-log').innerHTML = 'Variables work fine: ' + activeMemModules;
-                return activeMemModules;
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('error-log').innerHTML = 'Error: ' + error.message;
-                return null;
+            // Test if activeMemModules variable works
+            function testVariables() {
+                try {
+                    let activeMemModules = 4
+                    console.log('activeMemModules:', activeMemModules)
+                    document.getElementById('error-log').innerHTML = 'Variables work fine: ' + activeMemModules
+                    return activeMemModules
+                } catch (error) {
+                    console.error('Error:', error)
+                    document.getElementById('error-log').innerHTML = 'Error: ' + error.message
+                    return null
+                }
             }
-        }
 
-        testVariables();
-    </script>
-</body>
+            testVariables()
+        </script>
+    </body>
 </html>

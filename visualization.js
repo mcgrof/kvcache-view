@@ -5,67 +5,67 @@
 // This visualization uses the exact formulas from LMCache's calculator
 // to accurately compute KV cache memory requirements
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
 
 // Check if mobile
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
+const isMobile = window.matchMedia('(max-width: 768px)').matches
 
 // Model configurations from LMCache
 // Using distinct colors for each model
 const models = [
     {
-        name: "Llama-3.2-1B",
+        name: 'Llama-3.2-1B',
         params: 1.2,
         layers: 16,
         hidden_size: 2048,
         num_heads: 32,
         num_kv_heads: 8,
         color: '#5FA3E6', // Light Blue
-        efficiency: 'high'
+        efficiency: 'high',
     },
     {
-        name: "Phi-3.5-mini",
+        name: 'Phi-3.5-mini',
         params: 3.8,
         layers: 32,
         hidden_size: 3072,
         num_heads: 32,
         num_kv_heads: 32,
         color: '#00C853', // Green
-        efficiency: 'high'
+        efficiency: 'high',
     },
     {
-        name: "Llama-3.1-8B",
+        name: 'Llama-3.1-8B',
         params: 8,
         layers: 32,
         hidden_size: 4096,
         num_heads: 32,
         num_kv_heads: 8,
         color: '#1428A0', // Deep Blue
-        efficiency: 'medium'
+        efficiency: 'medium',
     },
     {
-        name: "Gemma-2-9B",
+        name: 'Gemma-2-9B',
         params: 9,
         layers: 42,
         hidden_size: 3584,
         num_heads: 16,
         num_kv_heads: 8,
         color: '#4285F4', // Google Blue
-        efficiency: 'high'
+        efficiency: 'high',
     },
     {
-        name: "Qwen2.5-14B",
+        name: 'Qwen2.5-14B',
         params: 14,
         layers: 48,
         hidden_size: 5120,
         num_heads: 40,
         num_kv_heads: 8,
         color: '#FF9800', // Orange
-        efficiency: 'medium'
+        efficiency: 'medium',
     },
     {
-        name: "Phi-3.5-MoE",
+        name: 'Phi-3.5-MoE',
         params: 41.9, // 16 experts, 2 active
         layers: 32,
         hidden_size: 4096,
@@ -75,30 +75,30 @@ const models = [
         num_experts_per_tok: 2,
         architecture: 'moe',
         color: '#00BCD4', // Cyan
-        efficiency: 'high'
+        efficiency: 'high',
     },
     {
-        name: "Gemma-2-27B",
+        name: 'Gemma-2-27B',
         params: 27,
         layers: 46,
         hidden_size: 4608,
         num_heads: 32,
         num_kv_heads: 16,
         color: '#34A853', // Google Green
-        efficiency: 'medium'
+        efficiency: 'medium',
     },
     {
-        name: "Qwen2.5-32B",
+        name: 'Qwen2.5-32B',
         params: 32,
         layers: 64,
         hidden_size: 5120,
         num_heads: 40,
         num_kv_heads: 8,
         color: '#FFC107', // Amber
-        efficiency: 'medium'
+        efficiency: 'medium',
     },
     {
-        name: "Mixtral-8x7B",
+        name: 'Mixtral-8x7B',
         params: 46.7, // 8 experts, 2 active = 12.9B active
         layers: 32,
         hidden_size: 4096,
@@ -108,30 +108,30 @@ const models = [
         num_experts_per_tok: 2,
         architecture: 'moe',
         color: '#9C27B0', // Deep Purple
-        efficiency: 'high'
+        efficiency: 'high',
     },
     {
-        name: "Llama-3.1-70B",
+        name: 'Llama-3.1-70B',
         params: 70,
         layers: 80,
         hidden_size: 8192,
         num_heads: 64,
         num_kv_heads: 8,
         color: '#691FFF', // Purple
-        efficiency: 'low'
+        efficiency: 'low',
     },
     {
-        name: "Qwen2.5-72B",
+        name: 'Qwen2.5-72B',
         params: 72,
         layers: 80,
         hidden_size: 8192,
         num_heads: 64,
         num_kv_heads: 8,
         color: '#FF5722', // Deep Orange
-        efficiency: 'low'
+        efficiency: 'low',
     },
     {
-        name: "Qwen3-Next-80B",
+        name: 'Qwen3-Next-80B',
         params: 80,
         active_params: 3,
         layers: 48,
@@ -142,10 +142,10 @@ const models = [
         num_experts_per_tok: 11,
         architecture: 'qwen3-next',
         color: '#795548', // Brown
-        efficiency: 'optimized'
+        efficiency: 'optimized',
     },
     {
-        name: "Mixtral-8x22B",
+        name: 'Mixtral-8x22B',
         params: 141, // 8 experts, 2 active = 39.1B active
         layers: 56,
         hidden_size: 6144,
@@ -155,281 +155,304 @@ const models = [
         num_experts_per_tok: 2,
         architecture: 'moe',
         color: '#7B1FA2', // Dark Purple
-        efficiency: 'medium'
+        efficiency: 'medium',
     },
     {
-        name: "Llama-3.1-405B",
+        name: 'Llama-3.1-405B',
         params: 405,
         layers: 126,
         hidden_size: 16384,
         num_heads: 128,
         num_kv_heads: 8,
         color: '#E4002B', // Red
-        efficiency: 'very-low'
+        efficiency: 'very-low',
     },
     {
-        name: "DeepSeek-V3 (671B)",
+        name: 'DeepSeek-V3 (671B)',
         params: 671,
         layers: 61,
         kv_lora_rank: 512,
         qk_rope_head_dim: 64,
         color: '#FF6B00', // Orange
         efficiency: 'optimized',
-        special: 'deepseek'
-    }
-];
+        special: 'deepseek',
+    },
+]
 
-let currentModelIndex = 0;
-let currentTokens = 0;
-let maxTokens = 128000; // 128K context default (industry standard)
-let animationSpeed = 50;
-let isPlaying = false; // start paused so first click plays
-let particles = [];
-let memoryBlocks = [];
-let waves = [];
-let currentDtype = 'FP16';
-let currentFactoidIndex = 0;
-let lastFactoidUpdate = 0;
-let lastCriticalState = 'none';
-let lastPopupTime = 0;
-const POPUP_COOLDOWN_MS = 10000;
-let includeWeights = true; // Include model weights memory by default
-let batchSize = 8; // Number of concurrent queries per GPU (modern production default)
-let dataFlowParticles = []; // Particles flowing between HBM and GPU
-let continuousBatching = false; // Enable continuous batching with variable sequence lengths
-let batchSequenceLengths = []; // Array of sequence lengths for each request in batch
-let pagedAttention = false; // Enable paged attention for memory fragmentation visualization
-let flashAttention = false; // Enable Flash Attention for tiled computation and reduced bandwidth
-let sequenceColors = []; // Colors for each sequence in continuous batching
+let currentModelIndex = 0
+let currentTokens = 0
+let maxTokens = 128000 // 128K context default (industry standard)
+let animationSpeed = 50
+let isPlaying = false // start paused so first click plays
+let particles = []
+let memoryBlocks = []
+let waves = []
+let currentDtype = 'FP16'
+let currentFactoidIndex = 0
+let lastFactoidUpdate = 0
+let lastCriticalState = 'none'
+let lastPopupTime = 0
+const POPUP_COOLDOWN_MS = 10000
+let includeWeights = true // Include model weights memory by default
+let batchSize = 8 // Number of concurrent queries per GPU (modern production default)
+let dataFlowParticles = [] // Particles flowing between HBM and GPU
+let continuousBatching = false // Enable continuous batching with variable sequence lengths
+let batchSequenceLengths = [] // Array of sequence lengths for each request in batch
+let pagedAttention = false // Enable paged attention for memory fragmentation visualization
+let flashAttention = false // Enable Flash Attention for tiled computation and reduced bandwidth
+let sequenceColors = [] // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
-    'Tesla T4 16G':   { memGiB: 16,  label: 'Tesla T4 16G', memType: 'GDDR6', l2Cache: 6, flashTileSize: 32 },
-    'RTX 4090 24G':   { memGiB: 24,  label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64 },
-    'L40S 48G':       { memGiB: 48,  label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
-    'A100 40G':       { memGiB: 40,  label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
-    'A100 80G':       { memGiB: 80,  label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
-    'H100 80G':       { memGiB: 80,  label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128 },
-    'H200 141G':      { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128 },
+    'Tesla T4 16G': { memGiB: 16, label: 'Tesla T4 16G', memType: 'GDDR6', l2Cache: 6, flashTileSize: 32 },
+    'RTX 4090 24G': { memGiB: 24, label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64 },
+    'L40S 48G': { memGiB: 48, label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
+    'A100 40G': { memGiB: 40, label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
+    'A100 80G': { memGiB: 80, label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
+    'H100 80G': { memGiB: 80, label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128 },
+    'H200 141G': { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128 },
     // AMD Radeon Pro (workstation)
-    'AMD W7800 32G':  { memGiB: 32,  label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64 },
-    'AMD W7900 48G':  { memGiB: 48,  label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
+    'AMD W7800 32G': { memGiB: 32, label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64 },
+    'AMD W7900 48G': { memGiB: 48, label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
     // AMD Instinct (data center)
-    'AMD MI210 64G':  { memGiB: 64,  label: 'AMD MI210 64G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
-    'AMD MI250X 128G':{ memGiB: 128, label: 'AMD MI250X 128G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
-    'AMD MI300X 192G':{ memGiB: 192, label: 'AMD MI300X 192G', memType: 'HBM3', l2Cache: 256, flashTileSize: 128 },
+    'AMD MI210 64G': { memGiB: 64, label: 'AMD MI210 64G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
+    'AMD MI250X 128G': { memGiB: 128, label: 'AMD MI250X 128G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
+    'AMD MI300X 192G': { memGiB: 192, label: 'AMD MI300X 192G', memType: 'HBM3', l2Cache: 256, flashTileSize: 128 },
     // Intel (GPU + AI accelerators)
-    'Intel Arc A770 16G':   { memGiB: 16,  label: 'Intel Arc A770 16G', memType: 'GDDR6', l2Cache: 16, flashTileSize: 32 },
-    'Intel Max 1550 128G':  { memGiB: 128, label: 'Intel Max 1550 128G', memType: 'HBM2e', l2Cache: 408, flashTileSize: 128 },
-    'Intel Gaudi2 96G':     { memGiB: 96,  label: 'Intel Gaudi2 96G', memType: 'HBM2e', l2Cache: 48, flashTileSize: 64 },
+    'Intel Arc A770 16G': { memGiB: 16, label: 'Intel Arc A770 16G', memType: 'GDDR6', l2Cache: 16, flashTileSize: 32 },
+    'Intel Max 1550 128G': {
+        memGiB: 128,
+        label: 'Intel Max 1550 128G',
+        memType: 'HBM2e',
+        l2Cache: 408,
+        flashTileSize: 128,
+    },
+    'Intel Gaudi2 96G': { memGiB: 96, label: 'Intel Gaudi2 96G', memType: 'HBM2e', l2Cache: 48, flashTileSize: 64 },
     // Google TPU (approx per-chip HBM)
-    'Google TPU v3 16G':    { memGiB: 16,  label: 'Google TPU v3 16G', memType: 'HBM2', l2Cache: 16, flashTileSize: 64 },
-    'Google TPU v4 32G':    { memGiB: 32,  label: 'Google TPU v4 32G', memType: 'HBM2', l2Cache: 32, flashTileSize: 128 },
+    'Google TPU v3 16G': { memGiB: 16, label: 'Google TPU v3 16G', memType: 'HBM2', l2Cache: 16, flashTileSize: 64 },
+    'Google TPU v4 32G': { memGiB: 32, label: 'Google TPU v4 32G', memType: 'HBM2', l2Cache: 32, flashTileSize: 128 },
     // Graphcore and Cerebras
-    'Graphcore IPU Mk2 0.9G': { memGiB: 0.9, label: 'Graphcore IPU Mk2 0.9G', memType: 'SRAM', l2Cache: 900, flashTileSize: 256 },
-    'Cerebras WSE-2 40G':   { memGiB: 40,  label: 'Cerebras WSE-2 40G', memType: 'SRAM', l2Cache: 40960, flashTileSize: 512 },
+    'Graphcore IPU Mk2 0.9G': {
+        memGiB: 0.9,
+        label: 'Graphcore IPU Mk2 0.9G',
+        memType: 'SRAM',
+        l2Cache: 900,
+        flashTileSize: 256,
+    },
+    'Cerebras WSE-2 40G': {
+        memGiB: 40,
+        label: 'Cerebras WSE-2 40G',
+        memType: 'SRAM',
+        l2Cache: 40960,
+        flashTileSize: 512,
+    },
     // Qualcomm Cloud AI
-    'Qualcomm Cloud AI 100 32G': { memGiB: 32, label: 'Qualcomm Cloud AI 100 32G', memType: 'LPDDR5', l2Cache: 32, flashTileSize: 64 }
-};
-let currentGPU = 'H100 80G';
+    'Qualcomm Cloud AI 100 32G': {
+        memGiB: 32,
+        label: 'Qualcomm Cloud AI 100 32G',
+        memType: 'LPDDR5',
+        l2Cache: 32,
+        flashTileSize: 64,
+    },
+}
+let currentGPU = 'H100 80G'
 
 // Set sane defaults based on GPU capabilities
 function setGPUDefaults(gpuKey) {
-    const config = gpuConfigs[gpuKey];
-    if (!config) return;
+    const config = gpuConfigs[gpuKey]
+    if (!config) return
 
-    const memGiB = config.memGiB;
-    const memType = config.memType;
+    const memGiB = config.memGiB
+    const memType = config.memType
 
     // Set appropriate context length based on GPU memory
     if (memGiB >= 128) {
         // High-end GPUs (MI300X, Max 1550): 1M context
-        maxTokens = 1000000;
-        currentTokens = Math.min(currentTokens, maxTokens * 0.5); // Start at 50%
+        maxTokens = 1000000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.5) // Start at 50%
     } else if (memGiB >= 80) {
         // Premium GPUs (H100, A100 80G): 512K context
-        maxTokens = 512000;
-        currentTokens = Math.min(currentTokens, maxTokens * 0.3); // Start at 30%
+        maxTokens = 512000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.3) // Start at 30%
     } else if (memGiB >= 40) {
         // High-end GPUs (A100 40G, L40S): 256K context
-        maxTokens = 256000;
-        currentTokens = Math.min(currentTokens, maxTokens * 0.25); // Start at 25%
+        maxTokens = 256000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.25) // Start at 25%
     } else if (memGiB >= 24) {
         // Enthusiast GPUs (RTX 4090): 128K context
-        maxTokens = 128000;
-        currentTokens = Math.min(currentTokens, maxTokens * 0.2); // Start at 20%
+        maxTokens = 128000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.2) // Start at 20%
     } else if (memGiB >= 16) {
         // Mid-range GPUs (Tesla T4, Arc A770): 64K context
-        maxTokens = 64000;
-        currentTokens = Math.min(currentTokens, maxTokens * 0.15); // Start at 15%
+        maxTokens = 64000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.15) // Start at 15%
     } else {
         // Lower-end or specialized (Graphcore): 32K context
-        maxTokens = 32000;
-        currentTokens = Math.min(currentTokens, maxTokens * 0.1); // Start at 10%
+        maxTokens = 32000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.1) // Start at 10%
     }
 
     // Set appropriate batch size based on memory and type
     if (memType.includes('SRAM')) {
         // Specialized accelerators: smaller batches, optimized for throughput
-        batchSize = memGiB > 10 ? 2 : 1;
+        batchSize = memGiB > 10 ? 2 : 1
     } else if (memGiB >= 80) {
         // High-memory GPUs: larger batches
-        batchSize = 8;
+        batchSize = 8
     } else if (memGiB >= 40) {
         // Mid-high memory: moderate batches
-        batchSize = 4;
+        batchSize = 4
     } else if (memGiB >= 16) {
         // Mid-range: conservative batches
-        batchSize = 2;
+        batchSize = 2
     } else {
         // Low memory: single batch
-        batchSize = 1;
+        batchSize = 1
     }
 
     // Enable appropriate optimizations based on GPU capabilities
     if (memType.includes('SRAM')) {
         // SRAM-based accelerators: all optimizations enabled by default
-        continuousBatching = true;
-        pagedAttention = true;
-        flashAttention = true;
+        continuousBatching = true
+        pagedAttention = true
+        flashAttention = true
     } else if (memType.includes('HBM')) {
         // HBM-based GPUs: enable CB and Flash by default
-        continuousBatching = true;
-        pagedAttention = false; // Start with just CB + Flash
-        flashAttention = true;
+        continuousBatching = true
+        pagedAttention = false // Start with just CB + Flash
+        flashAttention = true
     } else {
         // GDDR-based GPUs: more conservative defaults
-        continuousBatching = memGiB >= 24; // Only for high-memory GDDR
-        pagedAttention = false;
-        flashAttention = memGiB >= 16; // Flash for mid-range and up
+        continuousBatching = memGiB >= 24 // Only for high-memory GDDR
+        pagedAttention = false
+        flashAttention = memGiB >= 16 // Flash for mid-range and up
     }
 
     // Reset animation to start position
     if (currentTokens === 0) {
-        currentTokens = maxTokens * 0.01; // Start at 1% to show some progress
+        currentTokens = maxTokens * 0.01 // Start at 1% to show some progress
     }
 }
 
 function getCurrentGPUMemGiB() {
-    const cfg = gpuConfigs[currentGPU];
-    return cfg ? cfg.memGiB : 80;
+    const cfg = gpuConfigs[currentGPU]
+    return cfg ? cfg.memGiB : 80
 }
 
 // Update UI controls to reflect current state
 function updateControlStates() {
     // Update batch size control
-    const batchBtn = document.getElementById('batchControl');
+    const batchBtn = document.getElementById('batchControl')
     if (batchBtn) {
-        batchBtn.textContent = `Batch: ${batchSize}`;
+        batchBtn.textContent = `Batch: ${batchSize}`
     }
 
     // Update context length control
-    const contextBtn = document.getElementById('contextControl');
+    const contextBtn = document.getElementById('contextControl')
     if (contextBtn) {
-        contextBtn.textContent = `Context: ${formatMemoryValue(maxTokens)}`;
+        contextBtn.textContent = `Context: ${formatMemoryValue(maxTokens)}`
     }
 
     // Update optimization toggle states
-    const cbBtn = document.getElementById('cbToggle');
+    const cbBtn = document.getElementById('cbToggle')
     if (cbBtn) {
-        const span = cbBtn.querySelector('span');
+        const span = cbBtn.querySelector('span')
         if (span) {
-            span.textContent = `CB: ${continuousBatching ? 'ON' : 'OFF'}`;
+            span.textContent = `CB: ${continuousBatching ? 'ON' : 'OFF'}`
         }
-        cbBtn.classList.toggle('enabled', continuousBatching);
+        cbBtn.classList.toggle('enabled', continuousBatching)
     }
 
-    const paBtn = document.getElementById('paToggle');
+    const paBtn = document.getElementById('paToggle')
     if (paBtn) {
-        const span = paBtn.querySelector('span');
+        const span = paBtn.querySelector('span')
         if (span) {
-            span.textContent = `PA: ${pagedAttention ? 'ON' : 'OFF'}`;
+            span.textContent = `PA: ${pagedAttention ? 'ON' : 'OFF'}`
         }
-        paBtn.classList.toggle('enabled', pagedAttention);
+        paBtn.classList.toggle('enabled', pagedAttention)
     }
 
-    const faBtn = document.getElementById('faToggle');
+    const faBtn = document.getElementById('faToggle')
     if (faBtn) {
-        const span = faBtn.querySelector('span');
+        const span = faBtn.querySelector('span')
         if (span) {
-            span.textContent = `FA: ${flashAttention ? 'ON' : 'OFF'}`;
+            span.textContent = `FA: ${flashAttention ? 'ON' : 'OFF'}`
         }
-        faBtn.classList.toggle('enabled', flashAttention);
+        faBtn.classList.toggle('enabled', flashAttention)
     }
 }
 
 // Format large numbers for display
 function formatMemoryValue(value) {
     if (value >= 1000000) {
-        return (value / 1000000).toFixed(value % 1000000 === 0 ? 0 : 1) + 'M';
+        return (value / 1000000).toFixed(value % 1000000 === 0 ? 0 : 1) + 'M'
     } else if (value >= 1000) {
-        return (value / 1000).toFixed(value % 1000 === 0 ? 0 : 1) + 'K';
+        return (value / 1000).toFixed(value % 1000 === 0 ? 0 : 1) + 'K'
     }
-    return value.toString();
+    return value.toString()
 }
 
 // SOTA context length presets
 const contextPresets = {
-    '4K': 4096,         // Original GPT-3.5, older models
-    '8K': 8192,         // GPT-4 base
-    '16K': 16384,       // GPT-3.5 Turbo 16K
-    '32K': 32768,       // GPT-4 32K, Claude Instant
-    '64K': 64000,       // Current standard context
-    '100K': 100000,     // Claude 2.1
-    '128K': 128000,     // GPT-4 Turbo, GPT-4o, Llama 3
-    '200K': 200000,     // Claude 3 Opus/Sonnet/Haiku
-    '256K': 256000,     // High-end production context
-    '512K': 512000,     // H100/A100 80GB default
-    '1M': 1000000,      // Gemini 1.5 Pro (public), Claude 3.5 Sonnet
-    '2M': 2000000,      // Gemini 1.5 Pro (developer preview)
-    '10M': 10000000     // Research frontier (Magic, experimental)
-};
+    '4K': 4096, // Original GPT-3.5, older models
+    '8K': 8192, // GPT-4 base
+    '16K': 16384, // GPT-3.5 Turbo 16K
+    '32K': 32768, // GPT-4 32K, Claude Instant
+    '64K': 64000, // Current standard context
+    '100K': 100000, // Claude 2.1
+    '128K': 128000, // GPT-4 Turbo, GPT-4o, Llama 3
+    '200K': 200000, // Claude 3 Opus/Sonnet/Haiku
+    '256K': 256000, // High-end production context
+    '512K': 512000, // H100/A100 80GB default
+    '1M': 1000000, // Gemini 1.5 Pro (public), Claude 3.5 Sonnet
+    '2M': 2000000, // Gemini 1.5 Pro (developer preview)
+    '10M': 10000000, // Research frontier (Magic, experimental)
+}
 
 // Data type configurations
 const dtypeConfigs = {
-    'FP32': { bytes: 4, name: 'float32', color: '#ff6b6b' },
-    'FP16': { bytes: 2, name: 'float16', color: '#00d4ff' },
-    'BF16': { bytes: 2, name: 'bfloat16', color: '#00ff88' },
-    'INT8': { bytes: 1, name: 'int8', color: '#ffaa00' },
-    'INT4': { bytes: 0.5, name: 'int4', color: '#ff00ff' }
-};
+    FP32: { bytes: 4, name: 'float32', color: '#ff6b6b' },
+    FP16: { bytes: 2, name: 'float16', color: '#00d4ff' },
+    BF16: { bytes: 2, name: 'bfloat16', color: '#00ff88' },
+    INT8: { bytes: 1, name: 'int8', color: '#ffaa00' },
+    INT4: { bytes: 0.5, name: 'int4', color: '#ff00ff' },
+}
 
 // Resize canvas
 function resizeCanvas() {
     if (isMobile) {
         // On mobile, account for header and controls
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - 250; // Leave room for header and controls
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight - 250 // Leave room for header and controls
     } else {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
     }
 }
 
-
 // Calculate KV cache size (from LMCache logic)
 function calculateKVCacheSize(model, tokens, dtype = null) {
-    const selectedDtype = dtype || currentDtype;
-    const dtype_size = dtypeConfigs[selectedDtype] ? dtypeConfigs[selectedDtype].bytes : 2;
-    let total_elements;
+    const selectedDtype = dtype || currentDtype
+    const dtype_size = dtypeConfigs[selectedDtype] ? dtypeConfigs[selectedDtype].bytes : 2
+    let total_elements
 
     if (model.special === 'deepseek') {
         // DeepSeek uses KV-LoRA compression
-        total_elements = model.layers * tokens * (model.kv_lora_rank + model.qk_rope_head_dim);
+        total_elements = model.layers * tokens * (model.kv_lora_rank + model.qk_rope_head_dim)
     } else if (model.architecture === 'qwen3-next') {
         // Qwen3-Next uses hybrid attention (1/4 layers use traditional attention, rest use linear)
         // Only 1/4 of layers have KV cache
-        const head_size = model.hidden_size / model.num_heads;
-        const layers_with_kv = Math.floor(model.layers / 4);
-        total_elements = 2 * layers_with_kv * tokens * model.num_kv_heads * head_size;
+        const head_size = model.hidden_size / model.num_heads
+        const layers_with_kv = Math.floor(model.layers / 4)
+        total_elements = 2 * layers_with_kv * tokens * model.num_kv_heads * head_size
     } else {
         // Standard calculation (includes MOE models - expert count doesn't affect KV cache)
-        const head_size = model.hidden_size / model.num_heads;
-        total_elements = 2 * model.layers * tokens * model.num_kv_heads * head_size;
+        const head_size = model.hidden_size / model.num_heads
+        total_elements = 2 * model.layers * tokens * model.num_kv_heads * head_size
     }
 
-    const total_bytes = total_elements * dtype_size;
-    return total_bytes / (1024 * 1024 * 1024); // Convert to GiB
+    const total_bytes = total_elements * dtype_size
+    return total_bytes / (1024 * 1024 * 1024) // Convert to GiB
 }
 
 // Generate distinct colors for each sequence in continuous batching
@@ -450,14 +473,14 @@ function generateSequenceColors(batchSize) {
         '#FFA500', // Orange - sequence 13
         '#87CEEB', // Sky Blue - sequence 14
         '#FF1493', // Deep Pink - sequence 15
-        '#ADFF2F'  // Green Yellow - sequence 16
-    ];
+        '#ADFF2F', // Green Yellow - sequence 16
+    ]
 
-    const result = [];
+    const result = []
     for (let i = 0; i < batchSize; i++) {
-        result.push(colors[i % colors.length]);
+        result.push(colors[i % colors.length])
     }
-    return result;
+    return result
 }
 
 // Generate deterministic sequence length ratios for continuous batching
@@ -466,66 +489,63 @@ function getSequenceLengthRatio(index, batchSize) {
     if (batchSize <= 4) {
         // Small batch sizes: use well-distributed ratios for clear visualization
         const smallBatchPatterns = {
-            2: [0.3, 0.7],           // 30% vs 70%
-            3: [0.2, 0.4, 0.6],      // 20%, 40%, 60%
-            4: [0.15, 0.25, 0.35, 0.5] // 15%, 25%, 35%, 50%
-        };
-        const pattern = smallBatchPatterns[batchSize];
-        return pattern[index % pattern.length];
+            2: [0.3, 0.7], // 30% vs 70%
+            3: [0.2, 0.4, 0.6], // 20%, 40%, 60%
+            4: [0.15, 0.25, 0.35, 0.5], // 15%, 25%, 35%, 50%
+        }
+        const pattern = smallBatchPatterns[batchSize]
+        return pattern[index % pattern.length]
     }
 
     // For larger batch sizes, use a more varied but still visible pattern
-    const pattern = [
-        0.1, 0.2, 0.3, 0.4, 0.15, 0.45, 0.25, 0.55,
-        0.35, 0.65, 0.05, 0.5, 0.18, 0.7, 0.12, 0.85
-    ];
-    return pattern[index % pattern.length];
+    const pattern = [0.1, 0.2, 0.3, 0.4, 0.15, 0.45, 0.25, 0.55, 0.35, 0.65, 0.05, 0.5, 0.18, 0.7, 0.12, 0.85]
+    return pattern[index % pattern.length]
 }
 
 // Calculate attention matrix memory that would be needed without Flash Attention
 function calculateAttentionMatrixSize(sequenceLength, batchSize = 1, dtype = null) {
-    const config = dtypeConfigs[dtype || currentDtype];
-    const bytesPerElement = config.bytes;
-    const model = models[currentModelIndex];
-    const currentGPUConfig = gpuConfigs[currentGPU];
-    const totalGPUMemoryGiB = getCurrentGPUMemGiB();
+    const config = dtypeConfigs[dtype || currentDtype]
+    const bytesPerElement = config.bytes
+    const model = models[currentModelIndex]
+    const currentGPUConfig = gpuConfigs[currentGPU]
+    const totalGPUMemoryGiB = getCurrentGPUMemGiB()
 
     // Flash Attention saves intermediate attention computation memory, not the full O(n²) matrix
     // Traditional attention still uses chunking for very long sequences, so baseline isn't full matrix
 
     // Calculate realistic working memory for attention computation
     // This represents intermediate attention scores that would be held during computation
-    const numHeads = model.heads || 32;
+    const numHeads = model.heads || 32
 
     // For shorter sequences (<32k), traditional attention might materialize more of the matrix
     // For longer sequences, even traditional implementations use chunking
-    const effectiveSequenceLength = Math.min(sequenceLength, 65536); // Cap at 64k for realistic baseline
+    const effectiveSequenceLength = Math.min(sequenceLength, 65536) // Cap at 64k for realistic baseline
 
     // Chunk size that traditional attention would process at once (realistic: 1k-4k tokens)
-    const chunkSize = Math.min(4096, effectiveSequenceLength);
+    const chunkSize = Math.min(4096, effectiveSequenceLength)
 
     // Memory for attention scores during computation: chunk_size × seq_len × heads × batches
-    const workingMemoryBytes = chunkSize * effectiveSequenceLength * numHeads * batchSize * bytesPerElement;
+    const workingMemoryBytes = chunkSize * effectiveSequenceLength * numHeads * batchSize * bytesPerElement
 
     // Flash Attention reduces this by computing in smaller tiles (typically 64×64 or 128×128)
-    const flashTileSize = currentGPUConfig ? currentGPUConfig.flashTileSize : 64;
-    const traditionalChunkBytes = workingMemoryBytes;
-    const flashTileBytes = flashTileSize * flashTileSize * numHeads * batchSize * bytesPerElement;
+    const flashTileSize = currentGPUConfig ? currentGPUConfig.flashTileSize : 64
+    const traditionalChunkBytes = workingMemoryBytes
+    const flashTileBytes = flashTileSize * flashTileSize * numHeads * batchSize * bytesPerElement
 
     // Savings = traditional working memory - flash tile memory
-    const savingsBytes = Math.max(0, traditionalChunkBytes - flashTileBytes);
-    const savingsGiB = savingsBytes / (1024 ** 3);
+    const savingsBytes = Math.max(0, traditionalChunkBytes - flashTileBytes)
+    const savingsGiB = savingsBytes / 1024 ** 3
 
     // Cap savings at 50% of total GPU memory (can't save more than what's physically possible)
-    const maxSavingsGiB = totalGPUMemoryGiB * 0.5;
-    const cappedSavingsGiB = Math.min(savingsGiB, maxSavingsGiB);
+    const maxSavingsGiB = totalGPUMemoryGiB * 0.5
+    const cappedSavingsGiB = Math.min(savingsGiB, maxSavingsGiB)
 
     // For very short sequences, savings are minimal
     if (sequenceLength < 2048) {
-        return cappedSavingsGiB * 0.1; // Minimal savings for short sequences
+        return cappedSavingsGiB * 0.1 // Minimal savings for short sequences
     }
 
-    return cappedSavingsGiB;
+    return cappedSavingsGiB
 }
 
 // Calculate total KV cache for batch with continuous batching support
@@ -534,591 +554,607 @@ function calculateBatchKVCache(model, currentTokens, dtype = null) {
     // With batch size = 1, there's no difference between continuous and traditional
     if (continuousBatching && batchSize > 1) {
         // Calculate based on variable sequence lengths with deterministic ratios
-        let totalKV = 0;
-        let totalSeqLength = 0;
+        let totalKV = 0
+        let totalSeqLength = 0
 
         for (let i = 0; i < batchSize; i++) {
             // Use deterministic ratio for consistent calculations
-            const ratio = getSequenceLengthRatio(i, batchSize);
-            const seqLen = Math.floor(currentTokens * ratio);
-            totalSeqLength += seqLen;
-            totalKV += calculateKVCacheSize(model, seqLen, dtype);
+            const ratio = getSequenceLengthRatio(i, batchSize)
+            const seqLen = Math.floor(currentTokens * ratio)
+            totalSeqLength += seqLen
+            totalKV += calculateKVCacheSize(model, seqLen, dtype)
         }
 
         // Store average for display purposes
         if (!batchSequenceLengths.length || batchSequenceLengths.length !== batchSize) {
-            batchSequenceLengths = [];
+            batchSequenceLengths = []
             for (let i = 0; i < batchSize; i++) {
-                const ratio = getSequenceLengthRatio(i, batchSize);
-                batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+                const ratio = getSequenceLengthRatio(i, batchSize)
+                batchSequenceLengths.push(Math.floor(currentTokens * ratio))
             }
         }
 
-        return totalKV;
+        return totalKV
     } else {
         // Traditional batching: all sequences same length
         // Also used when batch size = 1 (continuous batching doesn't apply)
-        batchSequenceLengths = []; // Clear any stored lengths
-        return calculateKVCacheSize(model, currentTokens, dtype) * batchSize;
+        batchSequenceLengths = [] // Clear any stored lengths
+        return calculateKVCacheSize(model, currentTokens, dtype) * batchSize
     }
 }
 
 // Calculate model weights memory in GiB
 function calculateWeightMemoryGiB(model, dtype = null) {
-    const selectedDtype = dtype || currentDtype;
-    const bytesPerParam = dtypeConfigs[selectedDtype] ? dtypeConfigs[selectedDtype].bytes : 2;
+    const selectedDtype = dtype || currentDtype
+    const bytesPerParam = dtypeConfigs[selectedDtype] ? dtypeConfigs[selectedDtype].bytes : 2
     // For MOE models with active_params specified, use active params for inference memory
     // Otherwise use total params
-    const paramsToUse = model.active_params || model.params || 0;
+    const paramsToUse = model.active_params || model.params || 0
     // params is in Billions (e.g., 70 for 70B). Convert to number of parameters
-    const numParams = paramsToUse * 1e9;
-    const totalBytes = numParams * bytesPerParam;
-    return totalBytes / (1024 * 1024 * 1024); // GiB
+    const numParams = paramsToUse * 1e9
+    const totalBytes = numParams * bytesPerParam
+    return totalBytes / (1024 * 1024 * 1024) // GiB
 }
 
 // Calculate GPUs needed (H100 has 80GB memory)
 function calculateGPUsNeeded(memoryGiB) {
-    const per = getCurrentGPUMemGiB();
-    return Math.ceil(memoryGiB / per);
+    const per = getCurrentGPUMemGiB()
+    return Math.ceil(memoryGiB / per)
 }
 
 // Format memory size
 function formatMemory(gib) {
     if (gib < 1) {
-        return `${(gib * 1024).toFixed(1)} MiB`;
+        return `${(gib * 1024).toFixed(1)} MiB`
     } else if (gib < 1000) {
-        return `${gib.toFixed(1)} GiB`;
+        return `${gib.toFixed(1)} GiB`
     } else {
-        return `${(gib / 1024).toFixed(2)} TiB`;
+        return `${(gib / 1024).toFixed(2)} TiB`
     }
 }
 
 // Format number with commas
 function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 // Create memory block particle
 class MemoryBlock {
     constructor(x, y, size, color) {
-        this.x = x;
-        this.y = y;
-        this.size = size;
-        this.color = color;
-        this.opacity = 1;
+        this.x = x
+        this.y = y
+        this.size = size
+        this.color = color
+        this.opacity = 1
         this.velocity = {
             x: (Math.random() - 0.5) * 2,
-            y: -Math.random() * 3 - 1
-        };
-        this.life = 1;
-        this.rotation = Math.random() * Math.PI * 2;
-        this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+            y: -Math.random() * 3 - 1,
+        }
+        this.life = 1
+        this.rotation = Math.random() * Math.PI * 2
+        this.rotationSpeed = (Math.random() - 0.5) * 0.1
     }
 
     update() {
-        this.x += this.velocity.x;
-        this.y += this.velocity.y;
-        this.velocity.y += 0.05; // gravity
-        this.life -= 0.01;
-        this.opacity = this.life;
-        this.rotation += this.rotationSpeed;
+        this.x += this.velocity.x
+        this.y += this.velocity.y
+        this.velocity.y += 0.05 // gravity
+        this.life -= 0.01
+        this.opacity = this.life
+        this.rotation += this.rotationSpeed
     }
 
     draw() {
-        ctx.save();
-        ctx.globalAlpha = this.opacity;
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation);
+        ctx.save()
+        ctx.globalAlpha = this.opacity
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
 
         // Draw glowing block
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
-        gradient.addColorStop(0, this.color);
-        gradient.addColorStop(1, 'transparent');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size)
+        gradient.addColorStop(0, this.color)
+        gradient.addColorStop(1, 'transparent')
+        ctx.fillStyle = gradient
+        ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size)
 
         // Draw border
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
+        ctx.strokeStyle = this.color
+        ctx.lineWidth = 2
+        ctx.strokeRect(-this.size / 2, -this.size / 2, this.size, this.size)
 
-        ctx.restore();
+        ctx.restore()
     }
 }
 
 // Data flow particle class
 class DataFlowParticle {
     constructor(startX, startY, endX, endY, color, speed = 0.02) {
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
-        this.x = startX;
-        this.y = startY;
-        this.progress = 0;
-        this.speed = speed;
-        this.color = color;
-        this.size = 3 + Math.random() * 3;
-        this.life = 1;
-        this.trail = [];
-        this.maxTrailLength = 10;
+        this.startX = startX
+        this.startY = startY
+        this.endX = endX
+        this.endY = endY
+        this.x = startX
+        this.y = startY
+        this.progress = 0
+        this.speed = speed
+        this.color = color
+        this.size = 3 + Math.random() * 3
+        this.life = 1
+        this.trail = []
+        this.maxTrailLength = 10
     }
 
     update() {
-        this.progress += this.speed;
+        this.progress += this.speed
 
         // Move along path
-        this.x = this.startX + (this.endX - this.startX) * this.progress;
-        this.y = this.startY + (this.endY - this.startY) * this.progress;
+        this.x = this.startX + (this.endX - this.startX) * this.progress
+        this.y = this.startY + (this.endY - this.startY) * this.progress
 
         // Add to trail
-        this.trail.push({ x: this.x, y: this.y });
+        this.trail.push({ x: this.x, y: this.y })
         if (this.trail.length > this.maxTrailLength) {
-            this.trail.shift();
+            this.trail.shift()
         }
 
         // Check if reached destination
         if (this.progress >= 1) {
-            this.life = 0;
+            this.life = 0
         }
     }
 
     draw() {
         // Draw trail
-        ctx.strokeStyle = this.color + '33';
-        ctx.lineWidth = this.size * 0.5;
-        ctx.beginPath();
+        ctx.strokeStyle = this.color + '33'
+        ctx.lineWidth = this.size * 0.5
+        ctx.beginPath()
         this.trail.forEach((point, i) => {
             if (i === 0) {
-                ctx.moveTo(point.x, point.y);
+                ctx.moveTo(point.x, point.y)
             } else {
-                ctx.lineTo(point.x, point.y);
+                ctx.lineTo(point.x, point.y)
             }
-        });
-        ctx.stroke();
+        })
+        ctx.stroke()
 
         // Draw particle
-        ctx.globalAlpha = 0.8;
-        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
-        glow.addColorStop(0, this.color);
-        glow.addColorStop(1, 'transparent');
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.globalAlpha = 0.8
+        const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2)
+        glow.addColorStop(0, this.color)
+        glow.addColorStop(1, 'transparent')
+        ctx.fillStyle = glow
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2)
+        ctx.fill()
 
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.globalAlpha = 1
     }
 }
 
 // Create wave effect
 class Wave {
     constructor(y, amplitude, frequency, speed, color) {
-        this.y = y;
-        this.amplitude = amplitude;
-        this.frequency = frequency;
-        this.speed = speed;
-        this.color = color;
-        this.phase = 0;
+        this.y = y
+        this.amplitude = amplitude
+        this.frequency = frequency
+        this.speed = speed
+        this.color = color
+        this.phase = 0
     }
 
     update() {
-        this.phase += this.speed;
+        this.phase += this.speed
     }
 
     draw() {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 3;
-        ctx.globalAlpha = 0.6;
-        ctx.beginPath();
+        ctx.strokeStyle = this.color
+        ctx.lineWidth = 3
+        ctx.globalAlpha = 0.6
+        ctx.beginPath()
 
         for (let x = 0; x < canvas.width; x += 5) {
-            const y = this.y + Math.sin((x * this.frequency) + this.phase) * this.amplitude;
+            const y = this.y + Math.sin(x * this.frequency + this.phase) * this.amplitude
             if (x === 0) {
-                ctx.moveTo(x, y);
+                ctx.moveTo(x, y)
             } else {
-                ctx.lineTo(x, y);
+                ctx.lineTo(x, y)
             }
         }
 
-        ctx.stroke();
-        ctx.globalAlpha = 1;
+        ctx.stroke()
+        ctx.globalAlpha = 1
     }
 }
 
 // Initialize waves
 function initWaves() {
-    waves = [];
-    const model = models[currentModelIndex];
+    waves = []
+    const model = models[currentModelIndex]
 
     for (let i = 0; i < 5; i++) {
-        waves.push(new Wave(
-            canvas.height / 2 + (i - 2) * 50,
-            20 + i * 5,
-            0.01 + i * 0.002,
-            0.02 * animationSpeed,
-            model.color + '33'
-        ));
+        waves.push(
+            new Wave(
+                canvas.height / 2 + (i - 2) * 50,
+                20 + i * 5,
+                0.01 + i * 0.002,
+                0.02 * animationSpeed,
+                model.color + '33',
+            ),
+        )
     }
 }
 
 // Draw GPU architecture visualization
 function drawMemoryGrid() {
-    const model = models[currentModelIndex];
+    const model = models[currentModelIndex]
 
     // For traditional batching: show ALLOCATED memory (max context)
     // For continuous batching: show USED memory (current tokens)
-    let kvGiB, kvMaxGiB, allocatedGiB;
+    let kvGiB, kvMaxGiB, allocatedGiB
 
     if (!continuousBatching && !pagedAttention && batchSize > 1) {
         // Traditional batching: memory is pre-allocated for max context
-        kvGiB = calculateBatchKVCache(model, currentTokens); // Actually used
-        kvMaxGiB = calculateBatchKVCache(model, maxTokens);  // Max possible
-        allocatedGiB = kvMaxGiB; // In traditional batching, we allocate for max
+        kvGiB = calculateBatchKVCache(model, currentTokens) // Actually used
+        kvMaxGiB = calculateBatchKVCache(model, maxTokens) // Max possible
+        allocatedGiB = kvMaxGiB // In traditional batching, we allocate for max
     } else {
         // Continuous batching or paged attention: allocate as needed
-        kvGiB = calculateBatchKVCache(model, currentTokens);
-        kvMaxGiB = calculateBatchKVCache(model, maxTokens);
-        allocatedGiB = kvGiB; // Only allocate what's needed
+        kvGiB = calculateBatchKVCache(model, currentTokens)
+        kvMaxGiB = calculateBatchKVCache(model, maxTokens)
+        allocatedGiB = kvGiB // Only allocate what's needed
     }
 
-    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const totalGiB = allocatedGiB + weightsGiB; // Total allocated memory
-    const usedGiB = kvGiB + weightsGiB; // Actually used memory
+    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
+    const totalGiB = allocatedGiB + weightsGiB // Total allocated memory
+    const usedGiB = kvGiB + weightsGiB // Actually used memory
 
     // Skip complex rendering on mobile if performance is poor
     if (isMobile && currentTokens > 1000000) {
-        return; // Skip heavy GPU rendering on mobile for performance
+        return // Skip heavy GPU rendering on mobile for performance
     }
-    const totalMaxGiB = kvMaxGiB + weightsGiB;
-    const fillRatio = totalMaxGiB > 0 ? (totalGiB / totalMaxGiB) : 0;
+    const totalMaxGiB = kvMaxGiB + weightsGiB
+    const fillRatio = totalMaxGiB > 0 ? totalGiB / totalMaxGiB : 0
 
     // GPU Architecture Layout
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
 
     // GPU Die dimensions (center chip)
-    const dieWidth = 280;
-    const dieHeight = 280;
-    const dieX = centerX - dieWidth / 2;
-    const dieY = centerY - dieHeight / 2;
+    const dieWidth = 280
+    const dieHeight = 280
+    const dieX = centerX - dieWidth / 2
+    const dieY = centerY - dieHeight / 2
 
     // Memory Module dimensions (HBM, GDDR, etc.)
-    const memWidth = 60;
-    const memHeight = 240;
-    const memGap = 30; // Gap between memory and die
+    const memWidth = 60
+    const memHeight = 240
+    const memGap = 30 // Gap between memory and die
 
     // Calculate memory module positions (4 modules on each side for high-end GPUs)
     const memoryModules = [
         // Left side memory stacks
-        { x: dieX - memGap - memWidth, y: centerY - memHeight/2, side: 'left', index: 0 },
-        { x: dieX - memGap - memWidth*2 - 10, y: centerY - memHeight/2, side: 'left', index: 1 },
+        { x: dieX - memGap - memWidth, y: centerY - memHeight / 2, side: 'left', index: 0 },
+        { x: dieX - memGap - memWidth * 2 - 10, y: centerY - memHeight / 2, side: 'left', index: 1 },
 
         // Right side memory stacks
-        { x: dieX + dieWidth + memGap, y: centerY - memHeight/2, side: 'right', index: 2 },
-        { x: dieX + dieWidth + memGap + memWidth + 10, y: centerY - memHeight/2, side: 'right', index: 3 },
+        { x: dieX + dieWidth + memGap, y: centerY - memHeight / 2, side: 'right', index: 2 },
+        { x: dieX + dieWidth + memGap + memWidth + 10, y: centerY - memHeight / 2, side: 'right', index: 3 },
 
         // Top memory stacks (for very high memory configs)
-        { x: centerX - memHeight/2, y: dieY - memGap - memWidth, side: 'top', index: 4, width: memHeight, height: memWidth },
+        {
+            x: centerX - memHeight / 2,
+            y: dieY - memGap - memWidth,
+            side: 'top',
+            index: 4,
+            width: memHeight,
+            height: memWidth,
+        },
 
         // Bottom memory stacks
-        { x: centerX - memHeight/2, y: dieY + dieHeight + memGap, side: 'bottom', index: 5, width: memHeight, height: memWidth }
-    ];
+        {
+            x: centerX - memHeight / 2,
+            y: dieY + dieHeight + memGap,
+            side: 'bottom',
+            index: 5,
+            width: memHeight,
+            height: memWidth,
+        },
+    ]
 
     // Determine how many memory modules to show based on GPU memory and type
-    const memGiB = getCurrentGPUMemGiB();
-    const currentGPUConfig = gpuConfigs[currentGPU];
-    const memType = currentGPUConfig ? currentGPUConfig.memType : 'HBM';
-    let activeMemModules = 4; // Default to 4 memory stacks
+    const memGiB = getCurrentGPUMemGiB()
+    const currentGPUConfig = gpuConfigs[currentGPU]
+    const memType = currentGPUConfig ? currentGPUConfig.memType : 'HBM'
+    let activeMemModules = 4 // Default to 4 memory stacks
 
     if (memType.includes('HBM')) {
         // HBM configurations
-        if (memGiB >= 80) activeMemModules = 6; // H100/A100 80GB have 5-6 HBM stacks
-        else if (memGiB >= 40) activeMemModules = 4; // A100 40GB has 4-5 HBM stacks
-        else activeMemModules = 2; // Lower memory HBM configs
+        if (memGiB >= 80)
+            activeMemModules = 6 // H100/A100 80GB have 5-6 HBM stacks
+        else if (memGiB >= 40)
+            activeMemModules = 4 // A100 40GB has 4-5 HBM stacks
+        else activeMemModules = 2 // Lower memory HBM configs
     } else if (memType.includes('GDDR')) {
         // GDDR configurations (typically 2-4 modules for consumer GPUs)
-        if (memGiB >= 24) activeMemModules = 2; // Consumer GPUs have 2 memory modules
-        else activeMemModules = 2;
+        if (memGiB >= 24)
+            activeMemModules = 2 // Consumer GPUs have 2 memory modules
+        else activeMemModules = 2
     } else {
         // Other memory types (SRAM, LPDDR5, etc.)
-        activeMemModules = Math.min(4, Math.max(1, Math.floor(memGiB / 16)));
+        activeMemModules = Math.min(4, Math.max(1, Math.floor(memGiB / 16)))
     }
 
     // Draw PCB substrate
-    ctx.fillStyle = 'rgba(20, 30, 45, 0.8)';
-    ctx.fillRect(centerX - 450, centerY - 350, 900, 700);
-    ctx.strokeStyle = 'rgba(95, 163, 230, 0.2)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(centerX - 450, centerY - 350, 900, 700);
+    ctx.fillStyle = 'rgba(20, 30, 45, 0.8)'
+    ctx.fillRect(centerX - 450, centerY - 350, 900, 700)
+    ctx.strokeStyle = 'rgba(95, 163, 230, 0.2)'
+    ctx.lineWidth = 2
+    ctx.strokeRect(centerX - 450, centerY - 350, 900, 700)
 
     // Draw power delivery traces
-    ctx.strokeStyle = 'rgba(255, 200, 0, 0.1)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 200, 0, 0.1)'
+    ctx.lineWidth = 1
     for (let i = 0; i < 20; i++) {
-        ctx.beginPath();
-        ctx.moveTo(centerX - 450 + i * 45, centerY - 350);
-        ctx.lineTo(centerX - 450 + i * 45, centerY + 350);
-        ctx.stroke();
+        ctx.beginPath()
+        ctx.moveTo(centerX - 450 + i * 45, centerY - 350)
+        ctx.lineTo(centerX - 450 + i * 45, centerY + 350)
+        ctx.stroke()
     }
 
     // Generate sequence colors if continuous batching is enabled
     if (continuousBatching && batchSize > 1) {
         if (sequenceColors.length !== batchSize) {
-            sequenceColors = generateSequenceColors(batchSize);
+            sequenceColors = generateSequenceColors(batchSize)
         }
     } else {
         // Even for single batch, we need at least one color
-        sequenceColors = generateSequenceColors(1);
+        sequenceColors = generateSequenceColors(1)
     }
 
     // Calculate total memory distribution across ALL HBM modules
-    const gpuMemGiB = getCurrentGPUMemGiB();
+    const gpuMemGiB = getCurrentGPUMemGiB()
 
     // Flash Attention: Show dramatic visualization of attention matrix memory NOT being used
     if (flashAttention && currentTokens > 0) {
-        const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize);
-        const attentionRatio = Math.min(1.0, attentionMatrixGiB / gpuMemGiB);
+        const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize)
+        const attentionRatio = Math.min(1.0, attentionMatrixGiB / gpuMemGiB)
 
         // Draw a large dramatic warning-style indicator showing memory savings
-        ctx.save();
-        const savingsBoxWidth = 350;
-        const savingsBoxHeight = 100;
-        const savingsX = centerX - savingsBoxWidth/2;
-        const savingsY = centerY - 450;
+        ctx.save()
+        const savingsBoxWidth = 350
+        const savingsBoxHeight = 100
+        const savingsX = centerX - savingsBoxWidth / 2
+        const savingsY = centerY - 450
 
         // Pulsing glow effect around the savings indicator
-        const glowPulse = Math.sin(Date.now() * 0.003) * 20 + 30;
-        ctx.shadowColor = 'rgba(255, 50, 50, 0.8)';
-        ctx.shadowBlur = glowPulse;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
+        const glowPulse = Math.sin(Date.now() * 0.003) * 20 + 30
+        ctx.shadowColor = 'rgba(255, 50, 50, 0.8)'
+        ctx.shadowBlur = glowPulse
+        ctx.shadowOffsetX = 0
+        ctx.shadowOffsetY = 0
 
         // Main savings box with gradient
-        const gradient = ctx.createLinearGradient(savingsX, savingsY, savingsX, savingsY + savingsBoxHeight);
-        gradient.addColorStop(0, 'rgba(255, 50, 50, 0.9)');
-        gradient.addColorStop(0.5, 'rgba(255, 80, 80, 0.85)');
-        gradient.addColorStop(1, 'rgba(255, 50, 50, 0.9)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(savingsX, savingsY, savingsBoxWidth, savingsBoxHeight);
+        const gradient = ctx.createLinearGradient(savingsX, savingsY, savingsX, savingsY + savingsBoxHeight)
+        gradient.addColorStop(0, 'rgba(255, 50, 50, 0.9)')
+        gradient.addColorStop(0.5, 'rgba(255, 80, 80, 0.85)')
+        gradient.addColorStop(1, 'rgba(255, 50, 50, 0.9)')
+        ctx.fillStyle = gradient
+        ctx.fillRect(savingsX, savingsY, savingsBoxWidth, savingsBoxHeight)
 
         // Border
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(savingsX, savingsY, savingsBoxWidth, savingsBoxHeight);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
+        ctx.lineWidth = 3
+        ctx.strokeRect(savingsX, savingsY, savingsBoxWidth, savingsBoxHeight)
 
         // Text content
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-        ctx.font = 'bold 24px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('⚡ FLASH ATTENTION ACTIVE ⚡', centerX, savingsY + 25);
+        ctx.shadowBlur = 0
+        ctx.fillStyle = 'rgba(255, 255, 255, 1)'
+        ctx.font = 'bold 24px monospace'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('⚡ FLASH ATTENTION ACTIVE ⚡', centerX, savingsY + 25)
 
-        ctx.font = 'bold 32px monospace';
-        ctx.fillStyle = 'rgba(255, 255, 100, 1)';
-        ctx.fillText(`${attentionMatrixGiB.toFixed(1)} GiB`, centerX, savingsY + 55);
+        ctx.font = 'bold 32px monospace'
+        ctx.fillStyle = 'rgba(255, 255, 100, 1)'
+        ctx.fillText(`${attentionMatrixGiB.toFixed(1)} GiB`, centerX, savingsY + 55)
 
-        ctx.font = 'bold 16px monospace';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.fillText('MEMORY SAVED', centerX, savingsY + 80);
+        ctx.font = 'bold 16px monospace'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'
+        ctx.fillText('MEMORY SAVED', centerX, savingsY + 80)
 
-        ctx.restore();
+        ctx.restore()
 
         // Draw prominent ghost memory blocks showing what WOULD be used without Flash Attention
         for (let i = 0; i < activeMemModules && i < memoryModules.length; i++) {
-            const mem = memoryModules[i];
-            const w = mem.width || memWidth;
-            const h = mem.height || memHeight;
+            const mem = memoryModules[i]
+            const w = mem.width || memWidth
+            const h = mem.height || memHeight
 
             // Calculate how much of this memory would be consumed by attention matrix
-            const ghostHeight = Math.min(h, h * attentionRatio * activeMemModules);
+            const ghostHeight = Math.min(h, h * attentionRatio * activeMemModules)
 
             // Draw thick red border around what would be used
-            const borderPulse = Math.sin(Date.now() * 0.002) * 0.2 + 0.5;
-            ctx.strokeStyle = `rgba(255, 50, 50, ${borderPulse})`;
-            ctx.lineWidth = 4;
-            ctx.setLineDash([15, 10]);
-            ctx.strokeRect(mem.x - 2, mem.y - 2, w + 4, ghostHeight + 4);
-            ctx.setLineDash([]);
+            const borderPulse = Math.sin(Date.now() * 0.002) * 0.2 + 0.5
+            ctx.strokeStyle = `rgba(255, 50, 50, ${borderPulse})`
+            ctx.lineWidth = 4
+            ctx.setLineDash([15, 10])
+            ctx.strokeRect(mem.x - 2, mem.y - 2, w + 4, ghostHeight + 4)
+            ctx.setLineDash([])
 
             // Semi-transparent red overlay
-            const pulse = Math.sin(Date.now() * 0.002) * 0.1 + 0.25;
-            ctx.fillStyle = `rgba(255, 50, 50, ${pulse})`;
-            ctx.fillRect(mem.x, mem.y, w, ghostHeight);
+            const pulse = Math.sin(Date.now() * 0.002) * 0.1 + 0.25
+            ctx.fillStyle = `rgba(255, 50, 50, ${pulse})`
+            ctx.fillRect(mem.x, mem.y, w, ghostHeight)
 
             // Draw diagonal stripes to show it's saved/eliminated
-            ctx.save();
-            const region = new Path2D();
-            region.rect(mem.x, mem.y, w, ghostHeight);
-            ctx.clip(region);
+            ctx.save()
+            const region = new Path2D()
+            region.rect(mem.x, mem.y, w, ghostHeight)
+            ctx.clip(region)
 
-            ctx.strokeStyle = `rgba(255, 100, 100, 0.4)`;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([8, 8]);
+            ctx.strokeStyle = `rgba(255, 100, 100, 0.4)`
+            ctx.lineWidth = 2
+            ctx.setLineDash([8, 8])
 
             // Diagonal stripes
             for (let stripe = -h; stripe < w + h; stripe += 20) {
-                ctx.beginPath();
-                ctx.moveTo(mem.x + stripe, mem.y);
-                ctx.lineTo(mem.x + stripe + ghostHeight, mem.y + ghostHeight);
-                ctx.stroke();
+                ctx.beginPath()
+                ctx.moveTo(mem.x + stripe, mem.y)
+                ctx.lineTo(mem.x + stripe + ghostHeight, mem.y + ghostHeight)
+                ctx.stroke()
             }
 
-            ctx.restore();
-            ctx.setLineDash([]);
+            ctx.restore()
+            ctx.setLineDash([])
 
             // Draw "WOULD BE USED" text on each HBM module
             if (ghostHeight > 30) {
-                ctx.save();
-                ctx.font = 'bold 10px monospace';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('SAVED', mem.x + w/2, mem.y + ghostHeight/2);
-                ctx.restore();
+                ctx.save()
+                ctx.font = 'bold 10px monospace'
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+                ctx.textAlign = 'center'
+                ctx.textBaseline = 'middle'
+                ctx.fillText('SAVED', mem.x + w / 2, mem.y + ghostHeight / 2)
+                ctx.restore()
             }
         }
 
         // Draw arrows pointing from the savings box to the HBM modules
         if (activeMemModules >= 2) {
-            ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)'
+            ctx.lineWidth = 2
+            ctx.setLineDash([5, 5])
 
             // Left arrow
-            ctx.beginPath();
-            ctx.moveTo(savingsX, savingsY + savingsBoxHeight);
-            ctx.lineTo(memoryModules[0].x + (memoryModules[0].width || memWidth)/2, memoryModules[0].y - 10);
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.moveTo(savingsX, savingsY + savingsBoxHeight)
+            ctx.lineTo(memoryModules[0].x + (memoryModules[0].width || memWidth) / 2, memoryModules[0].y - 10)
+            ctx.stroke()
 
             // Right arrow if we have enough HBM modules
             if (activeMemModules > 2) {
-                ctx.beginPath();
-                ctx.moveTo(savingsX + savingsBoxWidth, savingsY + savingsBoxHeight);
-                ctx.lineTo(memoryModules[2].x + (memoryModules[2].width || memWidth)/2, memoryModules[2].y - 10);
-                ctx.stroke();
+                ctx.beginPath()
+                ctx.moveTo(savingsX + savingsBoxWidth, savingsY + savingsBoxHeight)
+                ctx.lineTo(memoryModules[2].x + (memoryModules[2].width || memWidth) / 2, memoryModules[2].y - 10)
+                ctx.stroke()
             }
 
-            ctx.setLineDash([]);
+            ctx.setLineDash([])
         }
     }
 
     // Draw HBM modules
     for (let i = 0; i < activeMemModules && i < memoryModules.length; i++) {
-        const mem = memoryModules[i];
-        const w = mem.width || memWidth;
-        const h = mem.height || memHeight;
+        const mem = memoryModules[i]
+        const w = mem.width || memWidth
+        const h = mem.height || memHeight
 
         // HBM base (dark silicon)
-        ctx.fillStyle = 'rgba(30, 35, 50, 0.9)';
-        ctx.fillRect(mem.x, mem.y, w, h);
+        ctx.fillStyle = 'rgba(30, 35, 50, 0.9)'
+        ctx.fillRect(mem.x, mem.y, w, h)
 
         // HBM memory banks (grid pattern)
-        const bankSize = 8;
-        const bankSpacing = 10;
-        const banksX = Math.floor(w / bankSpacing);
-        const banksY = Math.floor(h / bankSpacing);
-        const totalBanks = banksX * banksY;
+        const bankSize = 8
+        const bankSpacing = 10
+        const banksX = Math.floor(w / bankSpacing)
+        const banksY = Math.floor(h / bankSpacing)
+        const totalBanks = banksX * banksY
 
         // Calculate what percentage of total GPU memory is allocated
-        const memoryUsageRatio = totalGiB / gpuMemGiB;
+        const memoryUsageRatio = totalGiB / gpuMemGiB
 
         // Each HBM module should show the same fill percentage
         // This represents distributed memory across all modules
-        const filledBanks = Math.floor(totalBanks * memoryUsageRatio);
+        const filledBanks = Math.floor(totalBanks * memoryUsageRatio)
 
         // Calculate how many banks are for weights vs KV cache
-        const weightRatio = includeWeights ? (weightsGiB / totalGiB) : 0;
-        const weightBanks = Math.floor(filledBanks * weightRatio);
+        const weightRatio = includeWeights ? weightsGiB / totalGiB : 0
+        const weightBanks = Math.floor(filledBanks * weightRatio)
 
         // For traditional batching, calculate how much of allocated memory is actually used
-        const usageRatioWithinAllocation = (!continuousBatching && !pagedAttention && allocatedGiB > 0)
-            ? (usedGiB / allocatedGiB)
-            : 1.0; // For CB/paged, allocated = used
+        const usageRatioWithinAllocation =
+            !continuousBatching && !pagedAttention && allocatedGiB > 0 ? usedGiB / allocatedGiB : 1.0 // For CB/paged, allocated = used
 
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
             // Continuous batching: show different colors for each sequence
-            let banksFilled = 0;
-            let currentSeq = 0;
-
-
+            let banksFilled = 0
+            let currentSeq = 0
 
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
-                    const bankIndex = by * banksX + bx;
-                    const x = mem.x + bx * bankSpacing + 2;
-                    const y = mem.y + by * bankSpacing + 2;
+                    const bankIndex = by * banksX + bx
+                    const x = mem.x + bx * bankSpacing + 2
+                    const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
                             // Model weights - use purple/violet color
-                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})`; // Purple for weights
-                            ctx.fillRect(x, y, bankSize, bankSize);
+                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})` // Purple for weights
+                            ctx.fillRect(x, y, bankSize, bankSize)
 
                             // Add subtle border
-                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)';
-                            ctx.lineWidth = 0.5;
-                            ctx.strokeRect(x, y, bankSize, bankSize);
+                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)'
+                            ctx.lineWidth = 0.5
+                            ctx.strokeRect(x, y, bankSize, bankSize)
                         } else {
                             // KV cache - determine which sequence this bank belongs to
-                            const kvBankIndex = bankIndex - weightBanks;
-                            const kvTotalBanks = filledBanks - weightBanks;
+                            const kvBankIndex = bankIndex - weightBanks
+                            const kvTotalBanks = filledBanks - weightBanks
 
                             if (kvTotalBanks <= 0) {
-                                continue; // Skip if no KV banks
+                                continue // Skip if no KV banks
                             }
 
                             // Distribute banks among sequences based on their ratios
                             // Calculate total of all sequence ratios
-                            let totalRatios = 0;
+                            let totalRatios = 0
                             for (let s = 0; s < batchSize; s++) {
-                                totalRatios += getSequenceLengthRatio(s, batchSize);
+                                totalRatios += getSequenceLengthRatio(s, batchSize)
                             }
 
                             // Calculate which sequence this bank belongs to
-                            let bankStart = 0;
-                            currentSeq = 0;
+                            let bankStart = 0
+                            currentSeq = 0
                             for (let s = 0; s < batchSize; s++) {
-                                const seqRatio = getSequenceLengthRatio(s, batchSize);
-                                const seqBanks = Math.floor((seqRatio / totalRatios) * kvTotalBanks);
-                                const bankEnd = bankStart + seqBanks;
+                                const seqRatio = getSequenceLengthRatio(s, batchSize)
+                                const seqBanks = Math.floor((seqRatio / totalRatios) * kvTotalBanks)
+                                const bankEnd = bankStart + seqBanks
 
                                 if (kvBankIndex >= bankStart && kvBankIndex < bankEnd) {
-                                    currentSeq = s;
-                                    break;
+                                    currentSeq = s
+                                    break
                                 }
 
-                                bankStart = bankEnd;
+                                bankStart = bankEnd
 
                                 // Handle remaining banks for the last sequence
                                 if (s === batchSize - 1) {
-                                    currentSeq = s;
+                                    currentSeq = s
                                 }
                             }
 
-                            const color = sequenceColors[currentSeq % sequenceColors.length] || '#5FA3E6';
+                            const color = sequenceColors[currentSeq % sequenceColors.length] || '#5FA3E6'
 
                             // Convert hex to RGB for manipulation
-                            const r = parseInt(color.substr(1,2), 16);
-                            const g = parseInt(color.substr(3,2), 16);
-                            const b = parseInt(color.substr(5,2), 16);
+                            const r = parseInt(color.substr(1, 2), 16)
+                            const g = parseInt(color.substr(3, 2), 16)
+                            const b = parseInt(color.substr(5, 2), 16)
 
-                            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
-                            ctx.fillRect(x, y, bankSize, bankSize);
+                            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`
+                            ctx.fillRect(x, y, bankSize, bankSize)
                         }
                     } else {
                         // Empty memory bank
-                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
-                        ctx.lineWidth = 0.5;
-                        ctx.strokeRect(x, y, bankSize, bankSize);
+                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)'
+                        ctx.lineWidth = 0.5
+                        ctx.strokeRect(x, y, bankSize, bankSize)
                     }
                 }
             }
@@ -1127,111 +1163,118 @@ function drawMemoryGrid() {
             // Generate sequence colors if we have multiple batches
             if (batchSize > 1) {
                 if (sequenceColors.length !== batchSize) {
-                    sequenceColors = generateSequenceColors(batchSize);
+                    sequenceColors = generateSequenceColors(batchSize)
                 }
             }
 
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
-                    const bankIndex = by * banksX + bx;
-                    const x = mem.x + bx * bankSpacing + 2;
-                    const y = mem.y + by * bankSpacing + 2;
+                    const bankIndex = by * banksX + bx
+                    const x = mem.x + bx * bankSpacing + 2
+                    const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
                             // Model weights - always contiguous, purple color
-                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})`; // Purple for weights
-                            ctx.fillRect(x, y, bankSize, bankSize);
-                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)';
-                            ctx.lineWidth = 0.5;
-                            ctx.strokeRect(x, y, bankSize, bankSize);
+                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})` // Purple for weights
+                            ctx.fillRect(x, y, bankSize, bankSize)
+                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)'
+                            ctx.lineWidth = 0.5
+                            ctx.strokeRect(x, y, bankSize, bankSize)
                         } else {
                             // KV cache with paging - show smaller page blocks
                             // Industry standard: vLLM uses 16 tokens per page, we visualize this with smaller blocks
-                            const kvBankIndex = bankIndex - weightBanks;
-                            const kvTotalBanks = filledBanks - weightBanks;
+                            const kvBankIndex = bankIndex - weightBanks
+                            const kvTotalBanks = filledBanks - weightBanks
 
                             if (kvBankIndex < kvTotalBanks) {
                                 // Each visual "bank" can hold 4 pages (2x2 grid)
                                 // Calculate how many pages are actually used in this bank
-                                const PAGES_PER_BANK = 4;
-                                const totalPagesNeeded = Math.ceil((kvTotalBanks * PAGES_PER_BANK * usageRatioWithinAllocation));
-                                const currentBankStartPage = kvBankIndex * PAGES_PER_BANK;
-                                const pagesInThisBank = Math.min(PAGES_PER_BANK, Math.max(0, totalPagesNeeded - currentBankStartPage));
+                                const PAGES_PER_BANK = 4
+                                const totalPagesNeeded = Math.ceil(
+                                    kvTotalBanks * PAGES_PER_BANK * usageRatioWithinAllocation,
+                                )
+                                const currentBankStartPage = kvBankIndex * PAGES_PER_BANK
+                                const pagesInThisBank = Math.min(
+                                    PAGES_PER_BANK,
+                                    Math.max(0, totalPagesNeeded - currentBankStartPage),
+                                )
 
                                 // Distribute pages across sequences using a deterministic interleaved pattern
                                 // This simulates how pages from different sequences can be mixed in memory
-                                const pagePattern = [0, 2, 1, 3, 0, 4, 2, 5, 1, 6, 3, 7, 4, 5, 6, 7];
+                                const pagePattern = [0, 2, 1, 3, 0, 4, 2, 5, 1, 6, 3, 7, 4, 5, 6, 7]
 
                                 // Draw each page slot in the bank
-                                const subPageSize = bankSize / 2 - 1;
-                                let pageIndex = 0;
+                                const subPageSize = bankSize / 2 - 1
+                                let pageIndex = 0
 
                                 for (let py = 0; py < 2; py++) {
                                     for (let px = 0; px < 2; px++) {
-                                        const subX = x + px * (subPageSize + 1);
-                                        const subY = y + py * (subPageSize + 1);
+                                        const subX = x + px * (subPageSize + 1)
+                                        const subY = y + py * (subPageSize + 1)
 
                                         if (pageIndex < pagesInThisBank) {
                                             // This page is allocated - determine which sequence owns it
-                                            const globalPageIndex = currentBankStartPage + pageIndex;
-                                            const sequenceIndex = pagePattern[globalPageIndex % pagePattern.length] % batchSize;
+                                            const globalPageIndex = currentBankStartPage + pageIndex
+                                            const sequenceIndex =
+                                                pagePattern[globalPageIndex % pagePattern.length] % batchSize
 
-                                            const color = sequenceColors[sequenceIndex % sequenceColors.length] || '#5FA3E6';
-                                            const r = parseInt(color.substr(1,2), 16);
-                                            const g = parseInt(color.substr(3,2), 16);
-                                            const b = parseInt(color.substr(5,2), 16);
+                                            const color =
+                                                sequenceColors[sequenceIndex % sequenceColors.length] || '#5FA3E6'
+                                            const r = parseInt(color.substr(1, 2), 16)
+                                            const g = parseInt(color.substr(3, 2), 16)
+                                            const b = parseInt(color.substr(5, 2), 16)
 
                                             // Filled page with sequence color
-                                            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.8})`;
-                                            ctx.fillRect(subX, subY, subPageSize, subPageSize);
+                                            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.8})`
+                                            ctx.fillRect(subX, subY, subPageSize, subPageSize)
 
                                             // Flash Attention: Draw tile grid overlay
                                             if (flashAttention) {
-                                                const tileGridSize = subPageSize / 2;
-                                                ctx.strokeStyle = 'rgba(255, 220, 0, 0.4)';
-                                                ctx.lineWidth = 0.5;
+                                                const tileGridSize = subPageSize / 2
+                                                ctx.strokeStyle = 'rgba(255, 220, 0, 0.4)'
+                                                ctx.lineWidth = 0.5
 
                                                 // Draw tile grid
                                                 for (let tg = 1; tg < 2; tg++) {
                                                     // Vertical line
-                                                    ctx.beginPath();
-                                                    ctx.moveTo(subX + tg * tileGridSize, subY);
-                                                    ctx.lineTo(subX + tg * tileGridSize, subY + subPageSize);
-                                                    ctx.stroke();
+                                                    ctx.beginPath()
+                                                    ctx.moveTo(subX + tg * tileGridSize, subY)
+                                                    ctx.lineTo(subX + tg * tileGridSize, subY + subPageSize)
+                                                    ctx.stroke()
 
                                                     // Horizontal line
-                                                    ctx.beginPath();
-                                                    ctx.moveTo(subX, subY + tg * tileGridSize);
-                                                    ctx.lineTo(subX + subPageSize, subY + tg * tileGridSize);
-                                                    ctx.stroke();
+                                                    ctx.beginPath()
+                                                    ctx.moveTo(subX, subY + tg * tileGridSize)
+                                                    ctx.lineTo(subX + subPageSize, subY + tg * tileGridSize)
+                                                    ctx.stroke()
                                                 }
                                             }
 
                                             // Page border
-                                            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                                            ctx.lineWidth = 0.5;
-                                            ctx.strokeRect(subX, subY, subPageSize, subPageSize);
+                                            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
+                                            ctx.lineWidth = 0.5
+                                            ctx.strokeRect(subX, subY, subPageSize, subPageSize)
                                         } else {
                                             // This page slot is empty
-                                            ctx.strokeStyle = 'rgba(100, 150, 200, 0.15)';
-                                            ctx.lineWidth = 0.5;
-                                            ctx.strokeRect(subX, subY, subPageSize, subPageSize);
+                                            ctx.strokeStyle = 'rgba(100, 150, 200, 0.15)'
+                                            ctx.lineWidth = 0.5
+                                            ctx.strokeRect(subX, subY, subPageSize, subPageSize)
                                         }
 
-                                        pageIndex++;
+                                        pageIndex++
                                     }
                                 }
                             }
                         }
                     } else {
                         // Empty memory bank
-                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
-                        ctx.lineWidth = 0.5;
-                        ctx.strokeRect(x, y, bankSize, bankSize);
+                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)'
+                        ctx.lineWidth = 0.5
+                        ctx.strokeRect(x, y, bankSize, bankSize)
                     }
                 }
             }
@@ -1240,1185 +1283,1213 @@ function drawMemoryGrid() {
             if (batchSize > 1) {
                 // Generate sequence colors for traditional batching visualization
                 if (sequenceColors.length !== batchSize) {
-                    sequenceColors = generateSequenceColors(batchSize);
+                    sequenceColors = generateSequenceColors(batchSize)
                 }
             }
 
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
-                    const bankIndex = by * banksX + bx;
-                    const x = mem.x + bx * bankSpacing + 2;
-                    const y = mem.y + by * bankSpacing + 2;
+                    const bankIndex = by * banksX + bx
+                    const x = mem.x + bx * bankSpacing + 2
+                    const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
+                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
                             // Model weights - purple color
-                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})`; // Purple for weights
-                            ctx.fillRect(x, y, bankSize, bankSize);
-                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)';
-                            ctx.lineWidth = 0.5;
-                            ctx.strokeRect(x, y, bankSize, bankSize);
+                            ctx.fillStyle = `rgba(147, 51, 234, ${pulse})` // Purple for weights
+                            ctx.fillRect(x, y, bankSize, bankSize)
+                            ctx.strokeStyle = 'rgba(147, 51, 234, 0.5)'
+                            ctx.lineWidth = 0.5
+                            ctx.strokeRect(x, y, bankSize, bankSize)
                         } else {
                             // KV cache banks - show per-batch allocation
-                            const kvBankIndex = bankIndex - weightBanks;
-                            const kvTotalBanks = filledBanks - weightBanks;
+                            const kvBankIndex = bankIndex - weightBanks
+                            const kvTotalBanks = filledBanks - weightBanks
 
                             if (batchSize > 1 && kvTotalBanks > 0) {
                                 // Traditional batching: fixed pre-allocated chunks at specific memory addresses
                                 // Each batch gets maximum possible space allocated upfront (no moving/shifting)
-                                const maxBanksPerBatch = Math.ceil(kvTotalBanks / batchSize);
-                                const batchNum = Math.floor(kvBankIndex / maxBanksPerBatch);
-                                const bankInBatch = kvBankIndex % maxBanksPerBatch;
+                                const maxBanksPerBatch = Math.ceil(kvTotalBanks / batchSize)
+                                const batchNum = Math.floor(kvBankIndex / maxBanksPerBatch)
+                                const bankInBatch = kvBankIndex % maxBanksPerBatch
 
                                 // Each batch is fully pre-allocated but only partially used
                                 // Usage ratio is based on current tokens vs max tokens
-                                const usedBanksInBatch = Math.floor(maxBanksPerBatch * usageRatioWithinAllocation);
+                                const usedBanksInBatch = Math.floor(maxBanksPerBatch * usageRatioWithinAllocation)
 
                                 // Ensure batchNum doesn't exceed actual batch count
-                                const actualBatchNum = Math.min(batchNum, batchSize - 1);
+                                const actualBatchNum = Math.min(batchNum, batchSize - 1)
 
-                                const color = sequenceColors[actualBatchNum % sequenceColors.length] || '#5FA3E6';
-                                const r = parseInt(color.substr(1,2), 16);
-                                const g = parseInt(color.substr(3,2), 16);
-                                const b = parseInt(color.substr(5,2), 16);
+                                const color = sequenceColors[actualBatchNum % sequenceColors.length] || '#5FA3E6'
+                                const r = parseInt(color.substr(1, 2), 16)
+                                const g = parseInt(color.substr(3, 2), 16)
+                                const b = parseInt(color.substr(5, 2), 16)
 
                                 if (bankInBatch < usedBanksInBatch) {
                                     // Actually used memory - full bright color
-                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
+                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`
                                 } else {
                                     // Pre-allocated but unused - very dim to show it's reserved
-                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.15})`;
+                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.15})`
                                 }
-                                ctx.fillRect(x, y, bankSize, bankSize);
+                                ctx.fillRect(x, y, bankSize, bankSize)
 
                                 // Flash Attention: Draw tile grid overlay for traditional batching
                                 if (flashAttention && bankInBatch < usedBanksInBatch) {
-                                    const tileSize = bankSize / 3;
-                                    ctx.strokeStyle = 'rgba(255, 220, 0, 0.3)';
-                                    ctx.lineWidth = 0.5;
+                                    const tileSize = bankSize / 3
+                                    ctx.strokeStyle = 'rgba(255, 220, 0, 0.3)'
+                                    ctx.lineWidth = 0.5
 
                                     for (let ti = 1; ti < 3; ti++) {
                                         // Vertical lines
-                                        ctx.beginPath();
-                                        ctx.moveTo(x + ti * tileSize, y);
-                                        ctx.lineTo(x + ti * tileSize, y + bankSize);
-                                        ctx.stroke();
+                                        ctx.beginPath()
+                                        ctx.moveTo(x + ti * tileSize, y)
+                                        ctx.lineTo(x + ti * tileSize, y + bankSize)
+                                        ctx.stroke()
 
                                         // Horizontal lines
-                                        ctx.beginPath();
-                                        ctx.moveTo(x, y + ti * tileSize);
-                                        ctx.lineTo(x + bankSize, y + ti * tileSize);
-                                        ctx.stroke();
+                                        ctx.beginPath()
+                                        ctx.moveTo(x, y + ti * tileSize)
+                                        ctx.lineTo(x + bankSize, y + ti * tileSize)
+                                        ctx.stroke()
                                     }
                                 }
 
                                 // Show allocation boundaries more subtly
                                 if (bankInBatch === 0) {
-                                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
-                                    ctx.lineWidth = 1.5;
-                                    ctx.strokeRect(x-1, y, bankSize+2, bankSize);
+                                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`
+                                    ctx.lineWidth = 1.5
+                                    ctx.strokeRect(x - 1, y, bankSize + 2, bankSize)
                                 }
                             } else {
                                 // Single batch or fallback - use standard blue
-                                ctx.fillStyle = `rgba(100, 200, 255, ${pulse})`;
-                                ctx.fillRect(x, y, bankSize, bankSize);
+                                ctx.fillStyle = `rgba(100, 200, 255, ${pulse})`
+                                ctx.fillRect(x, y, bankSize, bankSize)
                             }
                         }
                     } else {
                         // Empty memory bank
-                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
-                        ctx.lineWidth = 0.5;
-                        ctx.strokeRect(x, y, bankSize, bankSize);
+                        ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)'
+                        ctx.lineWidth = 0.5
+                        ctx.strokeRect(x, y, bankSize, bankSize)
                     }
                 }
             }
         }
 
         // Memory type label (GPU-specific)
-        const currentGPUConfig = gpuConfigs[currentGPU];
-        const memoryType = currentGPUConfig ? currentGPUConfig.memType : 'HBM';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        ctx.font = '10px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(memoryType, mem.x + w/2, mem.y - 5);
+        const currentGPUConfig = gpuConfigs[currentGPU]
+        const memoryType = currentGPUConfig ? currentGPUConfig.memType : 'HBM'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.font = '10px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText(memoryType, mem.x + w / 2, mem.y - 5)
 
         // Draw data paths from HBM to GPU die
-        const moduleFillRatio = filledBanks / totalBanks;
+        const moduleFillRatio = filledBanks / totalBanks
         if (moduleFillRatio > 0) {
-            ctx.strokeStyle = model.color + '66';
-            ctx.lineWidth = 2 + moduleFillRatio * 3;
-            ctx.setLineDash([5, 5]);
-            ctx.globalAlpha = 0.3 + moduleFillRatio * 0.4;
-            ctx.beginPath();
+            ctx.strokeStyle = model.color + '66'
+            ctx.lineWidth = 2 + moduleFillRatio * 3
+            ctx.setLineDash([5, 5])
+            ctx.globalAlpha = 0.3 + moduleFillRatio * 0.4
+            ctx.beginPath()
 
-            let startX, startY, endX, endY;
+            let startX, startY, endX, endY
             if (mem.side === 'left') {
-                startX = mem.x + w;
-                startY = mem.y + h/2;
-                endX = dieX;
-                endY = centerY;
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
+                startX = mem.x + w
+                startY = mem.y + h / 2
+                endX = dieX
+                endY = centerY
+                ctx.moveTo(startX, startY)
+                ctx.lineTo(endX, endY)
             } else if (mem.side === 'right') {
-                startX = mem.x;
-                startY = mem.y + h/2;
-                endX = dieX + dieWidth;
-                endY = centerY;
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
+                startX = mem.x
+                startY = mem.y + h / 2
+                endX = dieX + dieWidth
+                endY = centerY
+                ctx.moveTo(startX, startY)
+                ctx.lineTo(endX, endY)
             } else if (mem.side === 'top') {
-                startX = mem.x + w/2;
-                startY = mem.y + h;
-                endX = centerX;
-                endY = dieY;
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
+                startX = mem.x + w / 2
+                startY = mem.y + h
+                endX = centerX
+                endY = dieY
+                ctx.moveTo(startX, startY)
+                ctx.lineTo(endX, endY)
             } else {
-                startX = mem.x + w/2;
-                startY = mem.y;
-                endX = centerX;
-                endY = dieY + dieHeight;
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
+                startX = mem.x + w / 2
+                startY = mem.y
+                endX = centerX
+                endY = dieY + dieHeight
+                ctx.moveTo(startX, startY)
+                ctx.lineTo(endX, endY)
             }
 
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.globalAlpha = 1;
+            ctx.stroke()
+            ctx.setLineDash([])
+            ctx.globalAlpha = 1
 
             // Generate data flow particles for active HBM modules
             // Flash Attention reduces bandwidth by 10-100x
-            const particleRate = flashAttention ? 0.01 : 0.1;
+            const particleRate = flashAttention ? 0.01 : 0.1
             if (Math.random() < particleRate * moduleFillRatio && isPlaying) {
-                dataFlowParticles.push(new DataFlowParticle(
-                    startX, startY, endX, endY,
-                    flashAttention ? '#FFD700' : model.color,  // Gold particles for Flash Attention
-                    flashAttention ? 0.01 : (0.02 + Math.random() * 0.02)  // Slower particles for Flash Attention
-                ));
+                dataFlowParticles.push(
+                    new DataFlowParticle(
+                        startX,
+                        startY,
+                        endX,
+                        endY,
+                        flashAttention ? '#FFD700' : model.color, // Gold particles for Flash Attention
+                        flashAttention ? 0.01 : 0.02 + Math.random() * 0.02, // Slower particles for Flash Attention
+                    ),
+                )
             }
         }
     }
 
     // Draw GPU Die
     // Die substrate
-    const gradient = ctx.createLinearGradient(dieX, dieY, dieX + dieWidth, dieY + dieHeight);
-    gradient.addColorStop(0, 'rgba(60, 70, 90, 0.95)');
-    gradient.addColorStop(0.5, 'rgba(80, 90, 110, 0.95)');
-    gradient.addColorStop(1, 'rgba(60, 70, 90, 0.95)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(dieX, dieY, dieWidth, dieHeight);
+    const gradient = ctx.createLinearGradient(dieX, dieY, dieX + dieWidth, dieY + dieHeight)
+    gradient.addColorStop(0, 'rgba(60, 70, 90, 0.95)')
+    gradient.addColorStop(0.5, 'rgba(80, 90, 110, 0.95)')
+    gradient.addColorStop(1, 'rgba(60, 70, 90, 0.95)')
+    ctx.fillStyle = gradient
+    ctx.fillRect(dieX, dieY, dieWidth, dieHeight)
 
     // Flash Attention: Draw SRAM/L2 Cache visualization inside GPU die
     if (flashAttention) {
         // Calculate and display attention matrix memory savings
-        const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize);
+        const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize)
 
         // Show tiled computation visualization in GPU die
-        ctx.save();
+        ctx.save()
 
         // Draw small tiles to represent Flash Attention's tiled computation
-        const flashTileSize = 8;
-        const tilesX = Math.floor((dieWidth - 40) / (flashTileSize + 2));
-        const tilesY = Math.floor((dieHeight - 80) / (flashTileSize + 2));
-        const startX = dieX + 20;
-        const startY = dieY + 60;
+        const flashTileSize = 8
+        const tilesX = Math.floor((dieWidth - 40) / (flashTileSize + 2))
+        const tilesY = Math.floor((dieHeight - 80) / (flashTileSize + 2))
+        const startX = dieX + 20
+        const startY = dieY + 60
 
         // Animate tiles to show computation flowing
-        const animPhase = (Date.now() / 100) % (tilesX + tilesY);
+        const animPhase = (Date.now() / 100) % (tilesX + tilesY)
 
         for (let ty = 0; ty < tilesY; ty++) {
             for (let tx = 0; tx < tilesX; tx++) {
-                const x = startX + tx * (flashTileSize + 2);
-                const y = startY + ty * (flashTileSize + 2);
+                const x = startX + tx * (flashTileSize + 2)
+                const y = startY + ty * (flashTileSize + 2)
 
                 // Create wave effect for tiles
-                const distance = tx + ty;
-                const isActive = Math.abs(distance - animPhase) < 3;
+                const distance = tx + ty
+                const isActive = Math.abs(distance - animPhase) < 3
 
                 if (isActive) {
                     // Active tile - bright green
-                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)';
-                    ctx.fillRect(x, y, flashTileSize, flashTileSize);
-                    ctx.strokeStyle = 'rgba(150, 255, 150, 1)';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(x, y, flashTileSize, flashTileSize);
+                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)'
+                    ctx.fillRect(x, y, flashTileSize, flashTileSize)
+                    ctx.strokeStyle = 'rgba(150, 255, 150, 1)'
+                    ctx.lineWidth = 1
+                    ctx.strokeRect(x, y, flashTileSize, flashTileSize)
                 } else {
                     // Inactive tile - dim
-                    ctx.strokeStyle = 'rgba(100, 150, 100, 0.3)';
-                    ctx.lineWidth = 0.5;
-                    ctx.strokeRect(x, y, flashTileSize, flashTileSize);
+                    ctx.strokeStyle = 'rgba(100, 150, 100, 0.3)'
+                    ctx.lineWidth = 0.5
+                    ctx.strokeRect(x, y, flashTileSize, flashTileSize)
                 }
             }
         }
 
         // Labels inside GPU die
-        ctx.fillStyle = 'rgba(100, 255, 100, 0.9)';
-        ctx.font = 'bold 14px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚡ TILED COMPUTATION ⚡', centerX, dieY + 30);
-        ctx.font = '11px monospace';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.fillText(`O(1) memory instead of O(n²)`, centerX, dieY + 48);
+        ctx.fillStyle = 'rgba(100, 255, 100, 0.9)'
+        ctx.font = 'bold 14px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('⚡ TILED COMPUTATION ⚡', centerX, dieY + 30)
+        ctx.font = '11px monospace'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+        ctx.fillText(`O(1) memory instead of O(n²)`, centerX, dieY + 48)
 
-        ctx.restore();
+        ctx.restore()
 
-        const cacheX = dieX + dieWidth/2 - 60;
-        const cacheY = dieY + dieHeight/2 - 40;
-        const cacheWidth = 120;
-        const cacheHeight = 80;
+        const cacheX = dieX + dieWidth / 2 - 60
+        const cacheY = dieY + dieHeight / 2 - 40
+        const cacheWidth = 120
+        const cacheHeight = 80
 
         // Cache background with gradient
-        const cacheGradient = ctx.createLinearGradient(cacheX, cacheY, cacheX + cacheWidth, cacheY + cacheHeight);
-        cacheGradient.addColorStop(0, 'rgba(255, 200, 0, 0.2)');
-        cacheGradient.addColorStop(0.5, 'rgba(255, 220, 0, 0.3)');
-        cacheGradient.addColorStop(1, 'rgba(255, 200, 0, 0.2)');
-        ctx.fillStyle = cacheGradient;
-        ctx.fillRect(cacheX, cacheY, cacheWidth, cacheHeight);
+        const cacheGradient = ctx.createLinearGradient(cacheX, cacheY, cacheX + cacheWidth, cacheY + cacheHeight)
+        cacheGradient.addColorStop(0, 'rgba(255, 200, 0, 0.2)')
+        cacheGradient.addColorStop(0.5, 'rgba(255, 220, 0, 0.3)')
+        cacheGradient.addColorStop(1, 'rgba(255, 200, 0, 0.2)')
+        ctx.fillStyle = cacheGradient
+        ctx.fillRect(cacheX, cacheY, cacheWidth, cacheHeight)
 
         // Draw cache tiles (representing tiled computation)
-        const cacheTileSize = 15;
-        const tilePadding = 3;
-        const cacheTilesX = Math.floor(cacheWidth / (cacheTileSize + tilePadding));
-        const cacheTilesY = Math.floor(cacheHeight / (cacheTileSize + tilePadding));
+        const cacheTileSize = 15
+        const tilePadding = 3
+        const cacheTilesX = Math.floor(cacheWidth / (cacheTileSize + tilePadding))
+        const cacheTilesY = Math.floor(cacheHeight / (cacheTileSize + tilePadding))
 
         // Animate tiles with wave pattern
-        const waveOffset = Date.now() * 0.002;
+        const waveOffset = Date.now() * 0.002
 
         for (let ty = 0; ty < cacheTilesY; ty++) {
             for (let tx = 0; tx < cacheTilesX; tx++) {
-                const x = cacheX + 10 + tx * (cacheTileSize + tilePadding);
-                const y = cacheY + 10 + ty * (cacheTileSize + tilePadding);
+                const x = cacheX + 10 + tx * (cacheTileSize + tilePadding)
+                const y = cacheY + 10 + ty * (cacheTileSize + tilePadding)
 
                 // Wave animation for tile access pattern
-                const wave = Math.sin(waveOffset + tx * 0.5 + ty * 0.3) * 0.5 + 0.5;
-                const alpha = 0.3 + wave * 0.5;
+                const wave = Math.sin(waveOffset + tx * 0.5 + ty * 0.3) * 0.5 + 0.5
+                const alpha = 0.3 + wave * 0.5
 
-                ctx.fillStyle = `rgba(255, 220, 0, ${alpha})`;
-                ctx.fillRect(x, y, cacheTileSize, cacheTileSize);
+                ctx.fillStyle = `rgba(255, 220, 0, ${alpha})`
+                ctx.fillRect(x, y, cacheTileSize, cacheTileSize)
 
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(x, y, cacheTileSize, cacheTileSize);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'
+                ctx.lineWidth = 0.5
+                ctx.strokeRect(x, y, cacheTileSize, cacheTileSize)
             }
         }
 
         // Cache label
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.font = 'bold 10px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('SRAM CACHE', cacheX + cacheWidth/2, cacheY - 5);
-        ctx.font = '9px monospace';
-        ctx.fillText('(Tiled Access)', cacheX + cacheWidth/2, cacheY + cacheHeight + 12);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+        ctx.font = 'bold 10px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('SRAM CACHE', cacheX + cacheWidth / 2, cacheY - 5)
+        ctx.font = '9px monospace'
+        ctx.fillText('(Tiled Access)', cacheX + cacheWidth / 2, cacheY + cacheHeight + 12)
     }
 
     // Die border
-    ctx.strokeStyle = 'rgba(150, 200, 255, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(dieX, dieY, dieWidth, dieHeight);
+    ctx.strokeStyle = 'rgba(150, 200, 255, 0.5)'
+    ctx.lineWidth = 2
+    ctx.strokeRect(dieX, dieY, dieWidth, dieHeight)
 
     // Draw compute units grid on the die
-    const cuSize = 12;
-    const cuSpacing = 16;
-    const cuStartX = dieX + 20;
-    const cuStartY = dieY + 20;
-    const cuCols = Math.floor((dieWidth - 40) / cuSpacing);
-    const cuRows = Math.floor((dieHeight - 40) / cuSpacing);
+    const cuSize = 12
+    const cuSpacing = 16
+    const cuStartX = dieX + 20
+    const cuStartY = dieY + 20
+    const cuCols = Math.floor((dieWidth - 40) / cuSpacing)
+    const cuRows = Math.floor((dieHeight - 40) / cuSpacing)
 
     // Calculate compute unit activity based on memory usage
-    const activity = fillRatio;
+    const activity = fillRatio
 
     for (let row = 0; row < cuRows; row++) {
         for (let col = 0; col < cuCols; col++) {
-            const x = cuStartX + col * cuSpacing;
-            const y = cuStartY + row * cuSpacing;
+            const x = cuStartX + col * cuSpacing
+            const y = cuStartY + row * cuSpacing
 
             // Compute unit activity visualization
-            const pulse = Math.sin(Date.now() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7;
-            const active = Math.random() < activity;
+            const pulse = Math.sin(Date.now() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7
+            const active = Math.random() < activity
 
             if (active) {
                 // Active compute unit
-                const heat = activity;
+                const heat = activity
                 if (heat > 0.8) {
-                    ctx.fillStyle = `rgba(255, ${Math.floor(100 - heat * 100)}, 0, ${pulse})`;
+                    ctx.fillStyle = `rgba(255, ${Math.floor(100 - heat * 100)}, 0, ${pulse})`
                 } else if (heat > 0.5) {
-                    ctx.fillStyle = `rgba(255, 255, ${Math.floor(100 - heat * 100)}, ${pulse})`;
+                    ctx.fillStyle = `rgba(255, 255, ${Math.floor(100 - heat * 100)}, ${pulse})`
                 } else {
-                    ctx.fillStyle = `rgba(0, ${Math.floor(150 + heat * 105)}, 255, ${pulse})`;
+                    ctx.fillStyle = `rgba(0, ${Math.floor(150 + heat * 105)}, 255, ${pulse})`
                 }
-                ctx.fillRect(x, y, cuSize, cuSize);
+                ctx.fillRect(x, y, cuSize, cuSize)
 
                 // Glow effect for active units
                 const glow = ctx.createRadialGradient(
-                    x + cuSize/2, y + cuSize/2, 0,
-                    x + cuSize/2, y + cuSize/2, cuSize
-                );
-                glow.addColorStop(0, ctx.fillStyle);
-                glow.addColorStop(1, 'transparent');
-                ctx.fillStyle = glow;
-                ctx.fillRect(x - 2, y - 2, cuSize + 4, cuSize + 4);
+                    x + cuSize / 2,
+                    y + cuSize / 2,
+                    0,
+                    x + cuSize / 2,
+                    y + cuSize / 2,
+                    cuSize,
+                )
+                glow.addColorStop(0, ctx.fillStyle)
+                glow.addColorStop(1, 'transparent')
+                ctx.fillStyle = glow
+                ctx.fillRect(x - 2, y - 2, cuSize + 4, cuSize + 4)
             } else {
                 // Idle compute unit
-                ctx.fillStyle = 'rgba(50, 80, 120, 0.3)';
-                ctx.fillRect(x, y, cuSize, cuSize);
-                ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)';
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(x, y, cuSize, cuSize);
+                ctx.fillStyle = 'rgba(50, 80, 120, 0.3)'
+                ctx.fillRect(x, y, cuSize, cuSize)
+                ctx.strokeStyle = 'rgba(100, 150, 200, 0.2)'
+                ctx.lineWidth = 0.5
+                ctx.strokeRect(x, y, cuSize, cuSize)
             }
         }
     }
 
     // GPU die label
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = 'bold 14px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('GPU DIE', centerX, dieY - 15);
-    ctx.font = '11px monospace';
-    ctx.fillText(`${Math.floor(activity * 100)}% Active`, centerX, dieY - 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+    ctx.font = 'bold 14px monospace'
+    ctx.textAlign = 'center'
+    ctx.fillText('GPU DIE', centerX, dieY - 15)
+    ctx.font = '11px monospace'
+    ctx.fillText(`${Math.floor(activity * 100)}% Active`, centerX, dieY - 2)
 
     // Draw heat sink representation (subtle)
-    ctx.strokeStyle = 'rgba(150, 150, 150, 0.2)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([2, 2]);
+    ctx.strokeStyle = 'rgba(150, 150, 150, 0.2)'
+    ctx.lineWidth = 1
+    ctx.setLineDash([2, 2])
     for (let i = 0; i < 5; i++) {
-        ctx.strokeRect(
-            dieX - 10 - i * 5,
-            dieY - 10 - i * 5,
-            dieWidth + 20 + i * 10,
-            dieHeight + 20 + i * 10
-        );
+        ctx.strokeRect(dieX - 10 - i * 5, dieY - 10 - i * 5, dieWidth + 20 + i * 10, dieHeight + 20 + i * 10)
     }
-    ctx.setLineDash([]);
+    ctx.setLineDash([])
 
     // Add utilization indicator (positioned below bottom HBM module)
-    const utilX = centerX;
+    const utilX = centerX
     // Position well below the bottom memory module (which is at dieY + dieHeight + memGap + memWidth)
-    const bottomMemBottom = dieY + dieHeight + memGap + memWidth;
-    const utilY = bottomMemBottom + 40; // Add spacing below memory
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = 'bold 12px monospace';
-    ctx.textAlign = 'center';
+    const bottomMemBottom = dieY + dieHeight + memGap + memWidth
+    const utilY = bottomMemBottom + 40 // Add spacing below memory
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+    ctx.font = 'bold 12px monospace'
+    ctx.textAlign = 'center'
 
     // Always show usage vs GPU capacity
-    const gpuCapacityGiB = getCurrentGPUMemGiB();
-    const usagePercent = (totalGiB / gpuCapacityGiB * 100).toFixed(1);
+    const gpuCapacityGiB = getCurrentGPUMemGiB()
+    const usagePercent = ((totalGiB / gpuCapacityGiB) * 100).toFixed(1)
 
     // First line: current usage vs GPU capacity
-    ctx.fillText(`Memory: ${formatMemory(totalGiB)} / ${formatMemory(gpuCapacityGiB)} (${usagePercent}% of ${currentGPU})`, utilX, utilY);
+    ctx.fillText(
+        `Memory: ${formatMemory(totalGiB)} / ${formatMemory(gpuCapacityGiB)} (${usagePercent}% of ${currentGPU})`,
+        utilX,
+        utilY,
+    )
 
     // Second line: breakdown details
     if (continuousBatching && batchSize > 1) {
-        ctx.font = '10px monospace';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        ctx.fillText(`KV: ${formatMemory(kvGiB)} (${batchSize} variable seq) + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15);
+        ctx.font = '10px monospace'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.fillText(
+            `KV: ${formatMemory(kvGiB)} (${batchSize} variable seq) + Weights: ${formatMemory(weightsGiB)}`,
+            utilX,
+            utilY + 15,
+        )
     } else if (batchSize > 1) {
-        ctx.font = '10px monospace';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        ctx.fillText(`KV: ${formatMemory(kvGiB)} (${batchSize}×${Math.floor(currentTokens)} tok) + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15);
+        ctx.font = '10px monospace'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.fillText(
+            `KV: ${formatMemory(kvGiB)} (${batchSize}×${Math.floor(currentTokens)} tok) + Weights: ${formatMemory(weightsGiB)}`,
+            utilX,
+            utilY + 15,
+        )
     } else {
-        ctx.font = '10px monospace';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        ctx.fillText(`KV: ${formatMemory(kvGiB)} + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15);
+        ctx.font = '10px monospace'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.fillText(`KV: ${formatMemory(kvGiB)} + Weights: ${formatMemory(weightsGiB)}`, utilX, utilY + 15)
     }
 
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 1
 }
 
 // Draw exponential curve
 function drawExponentialCurve() {
-    const model = models[currentModelIndex];
-    const points = [];
-    const steps = 100;
+    const model = models[currentModelIndex]
+    const points = []
+    const steps = 100
 
     // Calculate points
     for (let i = 0; i <= steps; i++) {
-        const tokens = (i / steps) * maxTokens;
+        const tokens = (i / steps) * maxTokens
         // For the curve, we'll show the average case for continuous batching
-        const kvGiB = continuousBatching ? calculateBatchKVCache(model, tokens) : calculateKVCacheSize(model, tokens) * batchSize;
-        const kvMaxGiB = continuousBatching ? calculateBatchKVCache(model, maxTokens) : calculateKVCacheSize(model, maxTokens) * batchSize;
-        const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-        const memory = kvGiB + weightsGiB;
-        const maxMemory = kvMaxGiB + weightsGiB;
+        const kvGiB = continuousBatching
+            ? calculateBatchKVCache(model, tokens)
+            : calculateKVCacheSize(model, tokens) * batchSize
+        const kvMaxGiB = continuousBatching
+            ? calculateBatchKVCache(model, maxTokens)
+            : calculateKVCacheSize(model, maxTokens) * batchSize
+        const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
+        const memory = kvGiB + weightsGiB
+        const maxMemory = kvMaxGiB + weightsGiB
 
-        const x = (i / steps) * (canvas.width - 200) + 100;
-        const y = canvas.height - 100 - (memory / maxMemory) * (canvas.height - 200);
+        const x = (i / steps) * (canvas.width - 200) + 100
+        const y = canvas.height - 100 - (memory / maxMemory) * (canvas.height - 200)
 
-        points.push({ x, y, tokens, memory });
+        points.push({ x, y, tokens, memory })
     }
 
     // Draw curve - green if Flash Attention is enabled to show efficiency
-    ctx.strokeStyle = flashAttention ? 'rgba(100, 255, 100, 0.8)' : model.color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
+    ctx.strokeStyle = flashAttention ? 'rgba(100, 255, 100, 0.8)' : model.color
+    ctx.lineWidth = 3
+    ctx.beginPath()
 
     points.forEach((point, i) => {
         if (i === 0) {
-            ctx.moveTo(point.x, point.y);
+            ctx.moveTo(point.x, point.y)
         } else {
-            ctx.lineTo(point.x, point.y);
+            ctx.lineTo(point.x, point.y)
         }
-    });
+    })
 
-    ctx.stroke();
+    ctx.stroke()
 
     // Calculate current position first for the arrow
-    const currentRatio = currentTokens / maxTokens;
-    const currentX = currentRatio * (canvas.width - 200) + 100;
-    const kvGiBNow = calculateBatchKVCache(model, currentTokens);
-    const kvGiBMax = calculateBatchKVCache(model, maxTokens);
-    const weightsGiBNow = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const currentMemory = kvGiBNow + weightsGiBNow;
-    const maxMemory = kvGiBMax + weightsGiBNow;
-    const currentY = canvas.height - 100 - (maxMemory > 0 ? (currentMemory / maxMemory) : 0) * (canvas.height - 200);
+    const currentRatio = currentTokens / maxTokens
+    const currentX = currentRatio * (canvas.width - 200) + 100
+    const kvGiBNow = calculateBatchKVCache(model, currentTokens)
+    const kvGiBMax = calculateBatchKVCache(model, maxTokens)
+    const weightsGiBNow = includeWeights ? calculateWeightMemoryGiB(model) : 0
+    const currentMemory = kvGiBNow + weightsGiBNow
+    const maxMemory = kvGiBMax + weightsGiBNow
+    const currentY = canvas.height - 100 - (maxMemory > 0 ? currentMemory / maxMemory : 0) * (canvas.height - 200)
 
     // Add label for attention flow right next to the diagonal line
-    ctx.save();
+    ctx.save()
 
     // Get GPU dimensions to position slightly to the left of GPU
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const dieWidth = 280;
-    const dieHeight = 280;
-    const dieX = centerX - dieWidth/2;
-    const memWidth2 = 100;
-    const memGap2 = 30;
-    const leftMemX = dieX - memGap2 - memWidth2;  // Left edge of leftmost memory
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
+    const dieWidth = 280
+    const dieHeight = 280
+    const dieX = centerX - dieWidth / 2
+    const memWidth2 = 100
+    const memGap2 = 30
+    const leftMemX = dieX - memGap2 - memWidth2 // Left edge of leftmost memory
 
     // Position more to the left of the left memory
-    const labelX = leftMemX - 150;  // 150px to the left of the GPU area
+    const labelX = leftMemX - 150 // 150px to the left of the GPU area
 
     // Find where the diagonal line is at this X position
-    const lineStartX = 100;
-    const lineStartY = canvas.height - 100;
-    const lineEndX = canvas.width - 100;
-    const lineEndY = 100;
+    const lineStartX = 100
+    const lineStartY = canvas.height - 100
+    const lineEndX = canvas.width - 100
+    const lineEndY = 100
 
     // Calculate Y position where diagonal crosses this X position
-    const lineSlope = (lineEndY - lineStartY) / (lineEndX - lineStartX);
-    const lineIntercept = lineStartY - (lineSlope * lineStartX);
-    const labelY = lineSlope * labelX + lineIntercept + 60;  // +60 to move it down more
+    const lineSlope = (lineEndY - lineStartY) / (lineEndX - lineStartX)
+    const lineIntercept = lineStartY - lineSlope * lineStartX
+    const labelY = lineSlope * labelX + lineIntercept + 60 // +60 to move it down more
 
     // Calculate the actual angle of the diagonal line
-    const deltaX = lineEndX - lineStartX;
-    const deltaY = lineEndY - lineStartY;
-    const lineAngle = Math.atan2(deltaY, deltaX);
+    const deltaX = lineEndX - lineStartX
+    const deltaY = lineEndY - lineStartY
+    const lineAngle = Math.atan2(deltaY, deltaX)
 
     // Rotate to match the actual diagonal line angle
-    ctx.translate(labelX, labelY);
-    ctx.rotate(lineAngle);
+    ctx.translate(labelX, labelY)
+    ctx.rotate(lineAngle)
 
     // Background box for label (slightly bigger)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-    ctx.roundRect(-65, -12, 130, 24, 4);
-    ctx.fill();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)'
+    ctx.roundRect(-65, -12, 130, 24, 4)
+    ctx.fill()
 
     // Border for clarity
-    ctx.strokeStyle = flashAttention ? 'rgba(100, 255, 100, 0.4)' : 'rgba(95, 163, 230, 0.4)';
-    ctx.lineWidth = 1;
-    ctx.roundRect(-65, -12, 130, 24, 4);
-    ctx.stroke();
+    ctx.strokeStyle = flashAttention ? 'rgba(100, 255, 100, 0.4)' : 'rgba(95, 163, 230, 0.4)'
+    ctx.lineWidth = 1
+    ctx.roundRect(-65, -12, 130, 24, 4)
+    ctx.stroke()
 
     // Label text (slightly bigger font)
-    ctx.fillStyle = flashAttention ? 'rgba(100, 255, 100, 1)' : 'rgba(95, 163, 230, 1)';
-    ctx.font = '12px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(flashAttention ? 'Attention: O(n·d)' : 'Attention: O(n²)', 0, 0);
+    ctx.fillStyle = flashAttention ? 'rgba(100, 255, 100, 1)' : 'rgba(95, 163, 230, 1)'
+    ctx.font = '12px monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(flashAttention ? 'Attention: O(n·d)' : 'Attention: O(n²)', 0, 0)
 
-    ctx.restore();
+    ctx.restore()
 
     // Pulsing circle at current position - smaller and different color with Flash Attention
-    const basePulse = flashAttention ? 3 : 5;  // Smaller base size with Flash Attention
-    const pulseRange = flashAttention ? 2 : 5;  // Less variation with Flash Attention
-    const pulse = Math.sin(Date.now() * 0.003) * pulseRange + basePulse + 5;
+    const basePulse = flashAttention ? 3 : 5 // Smaller base size with Flash Attention
+    const pulseRange = flashAttention ? 2 : 5 // Less variation with Flash Attention
+    const pulse = Math.sin(Date.now() * 0.003) * pulseRange + basePulse + 5
 
     // Striking yellow-green for Flash Attention, original color otherwise
-    const dotColor = flashAttention ? 'rgba(200, 255, 0, 1)' : model.color;
+    const dotColor = flashAttention ? 'rgba(200, 255, 0, 1)' : model.color
 
-    ctx.beginPath();
-    ctx.arc(currentX, currentY, pulse, 0, Math.PI * 2);
-    ctx.fillStyle = dotColor;
-    ctx.fill();
+    ctx.beginPath()
+    ctx.arc(currentX, currentY, pulse, 0, Math.PI * 2)
+    ctx.fillStyle = dotColor
+    ctx.fill()
 
     // More intense glow effect for Flash Attention
-    const glowRadius = flashAttention ? pulse * 3 : pulse * 2;
-    const glow = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, glowRadius);
+    const glowRadius = flashAttention ? pulse * 3 : pulse * 2
+    const glow = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, glowRadius)
 
     if (flashAttention) {
         // Bright yellow-green glow for Flash Attention
-        glow.addColorStop(0, 'rgba(200, 255, 0, 0.8)');
-        glow.addColorStop(0.5, 'rgba(150, 255, 0, 0.3)');
-        glow.addColorStop(1, 'transparent');
+        glow.addColorStop(0, 'rgba(200, 255, 0, 0.8)')
+        glow.addColorStop(0.5, 'rgba(150, 255, 0, 0.3)')
+        glow.addColorStop(1, 'transparent')
     } else {
-        glow.addColorStop(0, dotColor);
-        glow.addColorStop(1, 'transparent');
+        glow.addColorStop(0, dotColor)
+        glow.addColorStop(1, 'transparent')
     }
 
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(currentX, currentY, glowRadius, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = glow
+    ctx.beginPath()
+    ctx.arc(currentX, currentY, glowRadius, 0, Math.PI * 2)
+    ctx.fill()
 }
 
 // Generate dynamic factoids based on current state
 function generateFactoids() {
-    const model = models[currentModelIndex];
-    const kvGiB = calculateKVCacheSize(model, currentTokens);
-    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const memoryPerQuery = kvGiB + weightsGiB;
+    const model = models[currentModelIndex]
+    const kvGiB = calculateKVCacheSize(model, currentTokens)
+    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
+    const memoryPerQuery = kvGiB + weightsGiB
     // Total memory for all concurrent queries
-    const totalGiB = memoryPerQuery * batchSize;
-    const gpusNeeded = calculateGPUsNeeded(totalGiB);
-    const per = getCurrentGPUMemGiB();
-    const efficiency = Math.min(100, (totalGiB / (gpusNeeded * per)) * 100);
+    const totalGiB = memoryPerQuery * batchSize
+    const gpusNeeded = calculateGPUsNeeded(totalGiB)
+    const per = getCurrentGPUMemGiB()
+    const efficiency = Math.min(100, (totalGiB / (gpusNeeded * per)) * 100)
 
     // Only include factoids with hard references
     return [
         {
-            title: "📏 KV Cache Formula",
+            title: '📏 KV Cache Formula',
             main: `2×layers×tokens×KV heads×head_dim×bytes`,
-            detail: `Reference: LMCache KV Cache Calculator — https://lmcache.ai/kv_cache_calculator.html`
+            detail: `Reference: LMCache KV Cache Calculator — https://lmcache.ai/kv_cache_calculator.html`,
         },
         {
-            title: "🖥️ Device Memory Basis",
+            title: '🖥️ Device Memory Basis',
             main: `${currentGPU} → count: ${gpusNeeded}`,
-            detail: `Devices needed = ceil(total GiB / per-device GiB). Selected device memory: ${getCurrentGPUMemGiB()} GiB.`
+            detail: `Devices needed = ceil(total GiB / per-device GiB). Selected device memory: ${getCurrentGPUMemGiB()} GiB.`,
         },
         {
-            title: "⚖️ Weights Memory",
+            title: '⚖️ Weights Memory',
             main: `Weights ≈ params × bytes/param`,
-            detail: `FP16 is 2 bytes/param (IEEE 754 half). Example: 70B × 2 B ≈ 140 GiB. Ref: https://en.wikipedia.org/wiki/Half-precision_floating-point_format`
+            detail: `FP16 is 2 bytes/param (IEEE 754 half). Example: 70B × 2 B ≈ 140 GiB. Ref: https://en.wikipedia.org/wiki/Half-precision_floating-point_format`,
         },
         {
-            title: "📊 Efficiency (definition)",
+            title: '📊 Efficiency (definition)',
             main: `${efficiency.toFixed(1)}%`,
-            detail: `Efficiency = used / allocated GPU memory. Used = Weights + KV. (Definition)`
-        }
-    ];
+            detail: `Efficiency = used / allocated GPU memory. Used = Weights + KV. (Definition)`,
+        },
+    ]
 }
 
 // Update factoid display
 function updateFactoid() {
     // Skip factoid updates on mobile
-    if (isMobile) return;
+    if (isMobile) return
 
-    const factoids = generateFactoids();
-    const factoid = factoids[currentFactoidIndex % factoids.length];
+    const factoids = generateFactoids()
+    const factoid = factoids[currentFactoidIndex % factoids.length]
 
-    const panel = document.getElementById('factoidPanel');
-    const title = document.getElementById('factoidTitle');
-    const main = document.getElementById('factoidMain');
-    const detail = document.getElementById('factoidDetail');
+    const panel = document.getElementById('factoidPanel')
+    const title = document.getElementById('factoidTitle')
+    const main = document.getElementById('factoidMain')
+    const detail = document.getElementById('factoidDetail')
 
     // Fade out
-    panel.style.opacity = '0';
+    panel.style.opacity = '0'
 
     setTimeout(() => {
-        title.textContent = factoid.title;
-        main.textContent = factoid.main;
-        detail.textContent = factoid.detail;
+        title.textContent = factoid.title
+        main.textContent = factoid.main
+        detail.textContent = factoid.detail
 
         // Fade in
-        panel.style.opacity = '1';
+        panel.style.opacity = '1'
         // Don't reposition during fade - causes flicker
-    }, 400);
+    }, 400)
 
-    currentFactoidIndex++;
+    currentFactoidIndex++
 }
 
 // Update paper references in dedicated box
 function updatePaperReferences() {
-    const paperRefsBoxEl = document.getElementById('paperRefsBox');
-    const paperLinksEl = document.getElementById('paperRefsLinks');
+    const paperRefsBoxEl = document.getElementById('paperRefsBox')
+    const paperLinksEl = document.getElementById('paperRefsLinks')
 
     if (paperRefsBoxEl && paperLinksEl) {
-        const papers = [];
+        const papers = []
 
         if (continuousBatching) {
-            papers.push('<a href="https://www.usenix.org/system/files/osdi22-yu-gyeong.pdf" target="_blank">📄 Continuous Batching: Orca (OSDI\'22)</a>');
+            papers.push(
+                '<a href="https://www.usenix.org/system/files/osdi22-yu-gyeong.pdf" target="_blank">📄 Continuous Batching: Orca (OSDI\'22)</a>',
+            )
         }
 
         if (pagedAttention) {
-            papers.push('<a href="https://arxiv.org/abs/2309.06180" target="_blank">📄 Paged Attention: vLLM (arXiv:2309.06180)</a>');
+            papers.push(
+                '<a href="https://arxiv.org/abs/2309.06180" target="_blank">📄 Paged Attention: vLLM (arXiv:2309.06180)</a>',
+            )
         }
 
         if (flashAttention) {
-            papers.push('<a href="https://arxiv.org/abs/2205.14135" target="_blank">📄 FlashAttention: Dao et al. (arXiv:2205.14135)</a>');
-            papers.push('<a href="https://arxiv.org/abs/2307.08691" target="_blank">📄 FlashAttention-2 (arXiv:2307.08691)</a>');
+            papers.push(
+                '<a href="https://arxiv.org/abs/2205.14135" target="_blank">📄 FlashAttention: Dao et al. (arXiv:2205.14135)</a>',
+            )
+            papers.push(
+                '<a href="https://arxiv.org/abs/2307.08691" target="_blank">📄 FlashAttention-2 (arXiv:2307.08691)</a>',
+            )
         }
 
         if (papers.length > 0) {
-            paperLinksEl.innerHTML = papers.join('\n');
-            paperRefsBoxEl.style.display = 'block';
-            paperRefsBoxEl.classList.add('show');
+            paperLinksEl.innerHTML = papers.join('\n')
+            paperRefsBoxEl.style.display = 'block'
+            paperRefsBoxEl.classList.add('show')
 
             // Position it below the efficiency box
-            const efficiencyBoxEl = document.getElementById('efficiencyBox');
+            const efficiencyBoxEl = document.getElementById('efficiencyBox')
             if (efficiencyBoxEl) {
-                const efficiencyRect = efficiencyBoxEl.getBoundingClientRect();
-                paperRefsBoxEl.style.top = (efficiencyRect.bottom + 20) + 'px';
-                paperRefsBoxEl.style.left = efficiencyRect.left + 'px';
+                const efficiencyRect = efficiencyBoxEl.getBoundingClientRect()
+                paperRefsBoxEl.style.top = efficiencyRect.bottom + 20 + 'px'
+                paperRefsBoxEl.style.left = efficiencyRect.left + 'px'
             }
 
             // Hide factoid when papers are shown
-            if (window.positionFactoidPanel) window.positionFactoidPanel();
+            if (window.positionFactoidPanel) window.positionFactoidPanel()
         } else {
-            paperRefsBoxEl.classList.remove('show');
+            paperRefsBoxEl.classList.remove('show')
             setTimeout(() => {
-                paperRefsBoxEl.style.display = 'none';
+                paperRefsBoxEl.style.display = 'none'
                 // Show factoid again when papers are hidden
-                if (window.positionFactoidPanel) window.positionFactoidPanel();
-            }, 300); // Wait for fade animation
+                if (window.positionFactoidPanel) window.positionFactoidPanel()
+            }, 300) // Wait for fade animation
         }
     }
 }
 
 // Update info panel
 function updateInfoPanel() {
-    const model = models[currentModelIndex];
-    const kvGiB = calculateBatchKVCache(model, currentTokens);
-    const kvMaxGiB = calculateBatchKVCache(model, maxTokens);
-    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
+    const model = models[currentModelIndex]
+    const kvGiB = calculateBatchKVCache(model, currentTokens)
+    const kvMaxGiB = calculateBatchKVCache(model, maxTokens)
+    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
 
     // For traditional batching, show allocated vs used
-    let totalGiB, allocatedGiB;
+    let totalGiB, allocatedGiB
     if (!continuousBatching && !pagedAttention && batchSize > 1) {
-        allocatedGiB = kvMaxGiB + weightsGiB; // Pre-allocated for max context
-        totalGiB = kvGiB + weightsGiB; // Actually used
+        allocatedGiB = kvMaxGiB + weightsGiB // Pre-allocated for max context
+        totalGiB = kvGiB + weightsGiB // Actually used
     } else {
-        allocatedGiB = kvGiB + weightsGiB;
-        totalGiB = allocatedGiB;
+        allocatedGiB = kvGiB + weightsGiB
+        totalGiB = allocatedGiB
     }
 
-    const gpusNeeded = calculateGPUsNeeded(allocatedGiB);
+    const gpusNeeded = calculateGPUsNeeded(allocatedGiB)
 
-    document.getElementById('modelName').textContent = model.name;
-    document.getElementById('contextLength').textContent = `${formatNumber(Math.floor(currentTokens))} tokens`;
+    document.getElementById('modelName').textContent = model.name
+    document.getElementById('contextLength').textContent = `${formatNumber(Math.floor(currentTokens))} tokens`
 
     // Show allocation unit size
-    const allocationEl = document.getElementById('allocationUnit');
+    const allocationEl = document.getElementById('allocationUnit')
     if (allocationEl) {
-        const currentGPUConfig = gpuConfigs[currentGPU];
-        const gpuTileSize = currentGPUConfig ? currentGPUConfig.flashTileSize : 64;
+        const currentGPUConfig = gpuConfigs[currentGPU]
+        const gpuTileSize = currentGPUConfig ? currentGPUConfig.flashTileSize : 64
 
         if (flashAttention && pagedAttention) {
             // Flash Attention with paged: tiles within pages
-            allocationEl.textContent = `${Math.floor(gpuTileSize/4)}×${Math.floor(gpuTileSize/4)} tiles/page`;
+            allocationEl.textContent = `${Math.floor(gpuTileSize / 4)}×${Math.floor(gpuTileSize / 4)} tiles/page`
         } else if (flashAttention) {
             // Flash Attention: computation tiles (GPU-specific)
-            allocationEl.textContent = `${gpuTileSize}×${gpuTileSize} tiles`;
+            allocationEl.textContent = `${gpuTileSize}×${gpuTileSize} tiles`
         } else if (pagedAttention) {
             // Industry standard: vLLM uses 16 tokens per page
-            allocationEl.textContent = '16 tokens/page';
+            allocationEl.textContent = '16 tokens/page'
         } else {
             // Without paged attention: large contiguous blocks
-            allocationEl.textContent = '2MB blocks';
+            allocationEl.textContent = '2MB blocks'
         }
     }
 
-    const weightsEl = document.getElementById('weightsSize');
-    const totalEl = document.getElementById('totalSize');
-    if (weightsEl) weightsEl.textContent = includeWeights ? formatMemory(weightsGiB) : '—';
+    const weightsEl = document.getElementById('weightsSize')
+    const totalEl = document.getElementById('totalSize')
+    if (weightsEl) weightsEl.textContent = includeWeights ? formatMemory(weightsGiB) : '—'
     if (totalEl) {
         // Always use innerHTML to maintain consistent height with potential two-line layout
         if (flashAttention && currentTokens > 0) {
-            const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize);
-            const withoutFlashGiB = totalGiB + attentionMatrixGiB;
-            const savingsPercent = Math.round((attentionMatrixGiB / withoutFlashGiB) * 100);
-            totalEl.innerHTML = `<div style="min-height: 32px;"><span style="color: #4f4;">${formatMemory(totalGiB)}</span> <span style="color: #f88; text-decoration: line-through; font-size: 0.85em;">${formatMemory(withoutFlashGiB)}</span><br><small style="color: #4f4;">-${savingsPercent}% with Flash!</small></div>`;
+            const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize)
+            const withoutFlashGiB = totalGiB + attentionMatrixGiB
+            const savingsPercent = Math.round((attentionMatrixGiB / withoutFlashGiB) * 100)
+            totalEl.innerHTML = `<div style="min-height: 32px;"><span style="color: #4f4;">${formatMemory(totalGiB)}</span> <span style="color: #f88; text-decoration: line-through; font-size: 0.85em;">${formatMemory(withoutFlashGiB)}</span><br><small style="color: #4f4;">-${savingsPercent}% with Flash!</small></div>`
         } else if (!continuousBatching && !pagedAttention && batchSize > 1) {
             // Traditional batching: show allocated vs used
-            const usagePercent = Math.round((totalGiB / allocatedGiB) * 100);
-            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(allocatedGiB)} (${usagePercent}% used)</div>`;
+            const usagePercent = Math.round((totalGiB / allocatedGiB) * 100)
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(allocatedGiB)} (${usagePercent}% used)</div>`
         } else if (continuousBatching && batchSize > 1) {
             // Continuous batching - just show total
-            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)} (CB)</div>`;
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)} (CB)</div>`
         } else if (pagedAttention) {
             // Paged attention - just show total
-            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)} (paged)</div>`;
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)} (paged)</div>`
         } else {
-            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)}</div>`;
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)}</div>`
         }
     }
-    document.getElementById('cacheSize').textContent = formatMemory(kvGiB);
+    document.getElementById('cacheSize').textContent = formatMemory(kvGiB)
 
     // Dynamically position efficiency box below info panel
-    const infoPanelEl = document.querySelector('.info-panel');
-    const efficiencyBoxEl = document.getElementById('efficiencyBox');
+    const infoPanelEl = document.querySelector('.info-panel')
+    const efficiencyBoxEl = document.getElementById('efficiencyBox')
     if (infoPanelEl && efficiencyBoxEl) {
-        const infoPanelRect = infoPanelEl.getBoundingClientRect();
-        const infoPanelBottom = infoPanelRect.bottom;
+        const infoPanelRect = infoPanelEl.getBoundingClientRect()
+        const infoPanelBottom = infoPanelRect.bottom
 
         // Position efficiency box 20px below the info panel
-        efficiencyBoxEl.style.top = (infoPanelBottom + 20) + 'px';
+        efficiencyBoxEl.style.top = infoPanelBottom + 20 + 'px'
 
         // Also align it horizontally with the info panel
-        efficiencyBoxEl.style.left = infoPanelRect.left + 'px';
+        efficiencyBoxEl.style.left = infoPanelRect.left + 'px'
     }
 
     // Update paper references (positioned below efficiency box)
-    updatePaperReferences();
+    updatePaperReferences()
 
     // Update GPU display to show batch processing info
-    const gpuText = batchSize > 1
-        ? `${gpusNeeded} (${batchSize} queries/GPU)`
-        : gpusNeeded;
-    document.getElementById('gpusNeeded').textContent = gpuText;
-    document.getElementById('dataType').textContent = currentDtype;
+    const gpuText = batchSize > 1 ? `${gpusNeeded} (${batchSize} queries/GPU)` : gpusNeeded
+    document.getElementById('gpusNeeded').textContent = gpuText
+    document.getElementById('dataType').textContent = currentDtype
 
     // Calculate efficiency based on GPU utilization
     // Efficiency represents how much of the allocated GPU memory is actually used
     // Low efficiency = wasted money on unused GPU memory
-    const perGPU = getCurrentGPUMemGiB();
-    const efficiency = Math.min(100, (totalGiB / (gpusNeeded * perGPU)) * 100);
-    const efficiencyElement = document.getElementById('efficiency');
-    efficiencyElement.textContent = `${efficiency.toFixed(1)}%`;
+    const perGPU = getCurrentGPUMemGiB()
+    const efficiency = Math.min(100, (totalGiB / (gpusNeeded * perGPU)) * 100)
+    const efficiencyElement = document.getElementById('efficiency')
+    efficiencyElement.textContent = `${efficiency.toFixed(1)}%`
 
     // Color code efficiency: green (>80%), yellow (50-80%), red (<50%)
     if (efficiency > 80) {
-        efficiencyElement.style.color = '#00ff88';
+        efficiencyElement.style.color = '#00ff88'
     } else if (efficiency > 50) {
-        efficiencyElement.style.color = '#FFB800';
+        efficiencyElement.style.color = '#FFB800'
     } else {
-        efficiencyElement.style.color = '#FF6B00';
+        efficiencyElement.style.color = '#FF6B00'
     }
 
     // Show warning for multi-GPU requirement or extreme memory
-    const warning = document.getElementById('warning');
-    let criticalState = 'none';
+    const warning = document.getElementById('warning')
+    let criticalState = 'none'
     if (totalGiB > 1000) {
-        criticalState = 'datacenter';
-        warning.style.display = 'block';
-        warning.textContent = `⚠️ ${formatMemory(totalGiB)} - Exceeds datacenter capacity!`;
+        criticalState = 'datacenter'
+        warning.style.display = 'block'
+        warning.textContent = `⚠️ ${formatMemory(totalGiB)} - Exceeds datacenter capacity!`
         // Clarify below the memory emulation area
-        const dcWrap = document.getElementById('datacenterNote');
-        const dcBody = document.getElementById('datacenterNoteBody');
+        const dcWrap = document.getElementById('datacenterNote')
+        const dcBody = document.getElementById('datacenterNoteBody')
         if (dcWrap && dcBody) {
-            dcBody.textContent = `Total KV + weights ≈ ${formatMemory(totalGiB)}. We flag > 1 TiB as beyond practical single-cluster GPU memory for this demo; real limits depend on your cluster (GPU count, memory per GPU, and interconnect bandwidth). Consider heavier quantization, KV compression/paging, or model sharding across many nodes.`;
-            dcWrap.style.display = 'block';
-            if (window.positionDatacenterNote) window.positionDatacenterNote();
+            dcBody.textContent = `Total KV + weights ≈ ${formatMemory(totalGiB)}. We flag > 1 TiB as beyond practical single-cluster GPU memory for this demo; real limits depend on your cluster (GPU count, memory per GPU, and interconnect bandwidth). Consider heavier quantization, KV compression/paging, or model sharding across many nodes.`
+            dcWrap.style.display = 'block'
+            if (window.positionDatacenterNote) window.positionDatacenterNote()
         }
     } else if (gpusNeeded > 8) {
-        criticalState = 'multi-node';
-        warning.style.display = 'block';
-        warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}) - Multi-node required!`;
-        const dcWrap = document.getElementById('datacenterNote');
-        if (dcWrap) dcWrap.style.display = 'none';
+        criticalState = 'multi-node'
+        warning.style.display = 'block'
+        warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}) - Multi-node required!`
+        const dcWrap = document.getElementById('datacenterNote')
+        if (dcWrap) dcWrap.style.display = 'none'
     } else if (gpusNeeded > 1) {
-        criticalState = 'multi-gpu';
-        warning.style.display = 'block';
-        const perGPU = getCurrentGPUMemGiB();
-        warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}, ${formatMemory(gpusNeeded * perGPU)} total)`;
-        const dcWrap = document.getElementById('datacenterNote');
-        if (dcWrap) dcWrap.style.display = 'none';
+        criticalState = 'multi-gpu'
+        warning.style.display = 'block'
+        const perGPU = getCurrentGPUMemGiB()
+        warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}, ${formatMemory(gpusNeeded * perGPU)} total)`
+        const dcWrap = document.getElementById('datacenterNote')
+        if (dcWrap) dcWrap.style.display = 'none'
     } else {
-        warning.style.display = 'none';
-        const dcWrap = document.getElementById('datacenterNote');
-        if (dcWrap) dcWrap.style.display = 'none';
+        warning.style.display = 'none'
+        const dcWrap = document.getElementById('datacenterNote')
+        if (dcWrap) dcWrap.style.display = 'none'
     }
 
     // Trigger critical popup on state transition with cooldown
     if (criticalState !== 'none' && criticalState !== lastCriticalState) {
-        const now = Date.now();
+        const now = Date.now()
         if (now - lastPopupTime > POPUP_COOLDOWN_MS) {
-            showCriticalPopup(criticalState, { memoryGiB: totalGiB, gpusNeeded });
-            lastPopupTime = now;
+            showCriticalPopup(criticalState, { memoryGiB: totalGiB, gpusNeeded })
+            lastPopupTime = now
         }
     }
-    lastCriticalState = criticalState;
+    lastCriticalState = criticalState
 
     // Update progress bar
-    const progress = (currentTokens / maxTokens) * 100;
-    document.getElementById('progressFill').style.width = `${progress}%`;
+    const progress = (currentTokens / maxTokens) * 100
+    document.getElementById('progressFill').style.width = `${progress}%`
 }
 
 // Choose a relevant factoid for the critical event
 function pickRelevantFactoid(state) {
-    const factoids = generateFactoids();
+    const factoids = generateFactoids()
     // Map states to the most relevant hard-truth factoid
     if (state === 'multi-gpu' || state === 'multi-node' || state === 'datacenter') {
-        return factoids.find(f => f.title.includes('Device Memory Basis')) || factoids[0];
+        return factoids.find((f) => f.title.includes('Device Memory Basis')) || factoids[0]
     }
-    return factoids[0];
+    return factoids[0]
 }
 
 // Show critical popup
 function showCriticalPopup(state, metrics) {
     // Skip critical popups on mobile
-    if (isMobile) return;
+    if (isMobile) return
 
-    const overlay = document.getElementById('criticalOverlay');
-    if (!overlay) return;
-    const title = document.getElementById('criticalTitle');
-    const main = document.getElementById('criticalMain');
-    const detail = document.getElementById('criticalDetail');
+    const overlay = document.getElementById('criticalOverlay')
+    if (!overlay) return
+    const title = document.getElementById('criticalTitle')
+    const main = document.getElementById('criticalMain')
+    const detail = document.getElementById('criticalDetail')
 
     // Title and main message by state
     if (state === 'datacenter') {
-        title.textContent = 'Critical: Capacity Exceeded';
-        main.textContent = `${formatMemory(metrics.memoryGiB)} total KV memory`;
-        detail.textContent = 'This exceeds realistic datacenter capacity — consider aggressive compression or sharding strategies.';
+        title.textContent = 'Critical: Capacity Exceeded'
+        main.textContent = `${formatMemory(metrics.memoryGiB)} total KV memory`
+        detail.textContent =
+            'This exceeds realistic datacenter capacity — consider aggressive compression or sharding strategies.'
     } else if (state === 'multi-node') {
-        title.textContent = 'Critical: Multi-Node Required';
-        main.textContent = `${metrics.gpusNeeded}× devices required (${currentGPU})`;
-        detail.textContent = 'Cross-node communication will dominate latency — pipeline and bandwidth optimizations are essential.';
+        title.textContent = 'Critical: Multi-Node Required'
+        main.textContent = `${metrics.gpusNeeded}× devices required (${currentGPU})`
+        detail.textContent =
+            'Cross-node communication will dominate latency — pipeline and bandwidth optimizations are essential.'
     } else {
-        title.textContent = 'Critical: Multi-Accelerator Required';
-        main.textContent = `${metrics.gpusNeeded}× devices required (${currentGPU})`;
-        detail.textContent = `KV cache ≈ ${formatMemory(metrics.memoryGiB)} — exceeds single GPU capacity.`;
+        title.textContent = 'Critical: Multi-Accelerator Required'
+        main.textContent = `${metrics.gpusNeeded}× devices required (${currentGPU})`
+        detail.textContent = `KV cache ≈ ${formatMemory(metrics.memoryGiB)} — exceeds single GPU capacity.`
     }
 
     // Append a relevant factoid snippet
-    const factoid = pickRelevantFactoid(state);
+    const factoid = pickRelevantFactoid(state)
     if (factoid) {
-        detail.textContent += `\n\n${factoid.title} — ${factoid.main}. ${factoid.detail}`;
+        detail.textContent += `\n\n${factoid.title} — ${factoid.main}. ${factoid.detail}`
     }
 
-    overlay.style.display = 'flex';
+    overlay.style.display = 'flex'
 
     // Auto-close after a few seconds
-    clearTimeout(showCriticalPopup._timer);
+    clearTimeout(showCriticalPopup._timer)
     showCriticalPopup._timer = setTimeout(() => {
-        overlay.style.display = 'none';
-    }, 6000);
+        overlay.style.display = 'none'
+    }, 6000)
 }
 
 // Close control
 document.addEventListener('DOMContentLoaded', () => {
-    const overlay = document.getElementById('criticalOverlay');
-    const close = document.getElementById('criticalClose');
+    const overlay = document.getElementById('criticalOverlay')
+    const close = document.getElementById('criticalClose')
     if (close) {
-        close.addEventListener('click', () => overlay.style.display = 'none');
+        close.addEventListener('click', () => (overlay.style.display = 'none'))
     }
     if (overlay) {
         overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) overlay.style.display = 'none';
-        });
+            if (e.target === overlay) overlay.style.display = 'none'
+        })
     }
-});
+})
 
 // Generate particles based on memory growth
 function generateParticles() {
-    const model = models[currentModelIndex];
-    const memoryGiB = calculateKVCacheSize(model, currentTokens);
+    const model = models[currentModelIndex]
+    const memoryGiB = calculateKVCacheSize(model, currentTokens)
 
     // Generate more particles as memory grows
-    const particleRate = Math.min(10, memoryGiB / 10);
+    const particleRate = Math.min(10, memoryGiB / 10)
 
     if (Math.random() < particleRate / 60) {
-        const x = Math.random() * canvas.width;
-        const y = canvas.height - 50;
-        const size = 10 + Math.random() * 20;
+        const x = Math.random() * canvas.width
+        const y = canvas.height - 50
+        const size = 10 + Math.random() * 20
 
-        memoryBlocks.push(new MemoryBlock(x, y, size, model.color));
+        memoryBlocks.push(new MemoryBlock(x, y, size, model.color))
     }
 }
 
 // Animation loop
 function animate() {
     try {
-        if (!canvas || !ctx) return requestAnimationFrame(animate);
+        if (!canvas || !ctx) return requestAnimationFrame(animate)
 
-        ctx.fillStyle = 'rgba(15, 15, 30, 0.1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(15, 15, 30, 0.1)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
 
         // Update and draw waves
-        waves.forEach(wave => {
-            wave.update();
-            wave.draw();
-        });
+        waves.forEach((wave) => {
+            wave.update()
+            wave.draw()
+        })
 
         // Draw visualizations
-        drawMemoryGrid();
-        drawExponentialCurve();
+        drawMemoryGrid()
+        drawExponentialCurve()
 
         // Update and draw data flow particles
-        dataFlowParticles = dataFlowParticles.filter(particle => particle.life > 0);
-        dataFlowParticles.forEach(particle => {
-            particle.update();
-            particle.draw();
-        });
+        dataFlowParticles = dataFlowParticles.filter((particle) => particle.life > 0)
+        dataFlowParticles.forEach((particle) => {
+            particle.update()
+            particle.draw()
+        })
 
         // Update and draw particles
-        memoryBlocks = memoryBlocks.filter(block => block.life > 0);
-        memoryBlocks.forEach(block => {
-            block.update();
-            block.draw();
-        });
+        memoryBlocks = memoryBlocks.filter((block) => block.life > 0)
+        memoryBlocks.forEach((block) => {
+            block.update()
+            block.draw()
+        })
 
         // Generate new particles
-        generateParticles();
+        generateParticles()
 
         // Update token count with variable speed based on max context
         if (isPlaying) {
-            const baseIncrement = Math.max(100, maxTokens / 10000);
+            const baseIncrement = Math.max(100, maxTokens / 10000)
             // Slow down by 50% when Flash Attention is enabled to show efficiency
-            const flashAttentionModifier = flashAttention ? 0.5 : 1.0;
-            currentTokens += baseIncrement * animationSpeed * flashAttentionModifier;
+            const flashAttentionModifier = flashAttention ? 0.5 : 1.0
+            currentTokens += baseIncrement * animationSpeed * flashAttentionModifier
             if (currentTokens >= maxTokens) {
-                currentTokens = 0; // Loop
+                currentTokens = 0 // Loop
             }
 
             // Update sequence lengths when tokens change in continuous batching mode
             if (continuousBatching && batchSize > 1) {
-                batchSequenceLengths = [];
+                batchSequenceLengths = []
                 for (let i = 0; i < batchSize; i++) {
-                    const ratio = getSequenceLengthRatio(i, batchSize);
-                    batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+                    const ratio = getSequenceLengthRatio(i, batchSize)
+                    batchSequenceLengths.push(Math.floor(currentTokens * ratio))
                 }
             }
         }
 
         // Update info panel
-        updateInfoPanel();
+        updateInfoPanel()
 
         // Update factoids every 4 seconds
-        const now = Date.now();
+        const now = Date.now()
         if (now - lastFactoidUpdate > 4000) {
-            updateFactoid();
-            lastFactoidUpdate = now;
+            updateFactoid()
+            lastFactoidUpdate = now
         }
     } catch (e) {
         // Surface runtime errors in the warning box to aid debugging
-        const warning = document.getElementById('warning');
+        const warning = document.getElementById('warning')
         if (warning) {
-            warning.style.display = 'block';
-            warning.textContent = `⚠️ Visualization error: ${e && e.message ? e.message : e}`;
+            warning.style.display = 'block'
+            warning.textContent = `⚠️ Visualization error: ${e && e.message ? e.message : e}`
         }
     } finally {
-        requestAnimationFrame(animate);
+        requestAnimationFrame(animate)
     }
 }
 
 // Control handlers
-document.getElementById('playPause').addEventListener('click', function() {
-    isPlaying = !isPlaying;
-    this.textContent = isPlaying ? 'Pause' : 'Play';
-    this.classList.toggle('active', isPlaying);
-});
+document.getElementById('playPause').addEventListener('click', function () {
+    isPlaying = !isPlaying
+    this.textContent = isPlaying ? 'Pause' : 'Play'
+    this.classList.toggle('active', isPlaying)
+})
 
 // Batch size control
-document.getElementById('batchControl').addEventListener('click', function() {
-    const batchSizes = [1, 2, 4, 8, 16, 32, 64, 128];
-    const currentIndex = batchSizes.indexOf(batchSize);
-    const nextIndex = (currentIndex + 1) % batchSizes.length;
-    batchSize = batchSizes[nextIndex];
-    this.textContent = `Batch: ${batchSize}`;
+document.getElementById('batchControl').addEventListener('click', function () {
+    const batchSizes = [1, 2, 4, 8, 16, 32, 64, 128]
+    const currentIndex = batchSizes.indexOf(batchSize)
+    const nextIndex = (currentIndex + 1) % batchSizes.length
+    batchSize = batchSizes[nextIndex]
+    this.textContent = `Batch: ${batchSize}`
 
     // Regenerate sequence lengths and colors when batch size changes
     if (continuousBatching && batchSize > 1) {
-        batchSequenceLengths = [];
-        sequenceColors = generateSequenceColors(batchSize);
+        batchSequenceLengths = []
+        sequenceColors = generateSequenceColors(batchSize)
         for (let i = 0; i < batchSize; i++) {
-            const ratio = getSequenceLengthRatio(i, batchSize);
-            batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+            const ratio = getSequenceLengthRatio(i, batchSize)
+            batchSequenceLengths.push(Math.floor(currentTokens * ratio))
         }
     }
 
     // Force update display to show new calculations
-    updateInfoPanel();
-});
+    updateInfoPanel()
+})
 
 // Continuous batching toggle
-const cbBtn = document.getElementById('cbToggle');
+const cbBtn = document.getElementById('cbToggle')
 if (cbBtn) {
-    cbBtn.addEventListener('click', function() {
-        continuousBatching = !continuousBatching;
-        const spanEl = this.querySelector('span:first-child');
+    cbBtn.addEventListener('click', function () {
+        continuousBatching = !continuousBatching
+        const spanEl = this.querySelector('span:first-child')
         if (spanEl) {
-            spanEl.textContent = continuousBatching ? 'CB: ON' : 'CB: OFF';
+            spanEl.textContent = continuousBatching ? 'CB: ON' : 'CB: OFF'
         }
-        this.classList.toggle('active', continuousBatching);
+        this.classList.toggle('active', continuousBatching)
 
         // Regenerate sequence lengths when toggling
         if (continuousBatching && batchSize > 1) {
-            batchSequenceLengths = [];
-            sequenceColors = generateSequenceColors(batchSize);
+            batchSequenceLengths = []
+            sequenceColors = generateSequenceColors(batchSize)
             for (let i = 0; i < batchSize; i++) {
-                const ratio = getSequenceLengthRatio(i, batchSize);
-                batchSequenceLengths.push(Math.floor(currentTokens * ratio));
+                const ratio = getSequenceLengthRatio(i, batchSize)
+                batchSequenceLengths.push(Math.floor(currentTokens * ratio))
             }
         } else {
-            batchSequenceLengths = [];
-            sequenceColors = generateSequenceColors(1);
+            batchSequenceLengths = []
+            sequenceColors = generateSequenceColors(1)
         }
 
-        updateInfoPanel();
-    });
+        updateInfoPanel()
+    })
 }
 
 // Paged attention toggle
-const paBtn = document.getElementById('paToggle');
+const paBtn = document.getElementById('paToggle')
 if (paBtn) {
-    paBtn.addEventListener('click', function() {
-        pagedAttention = !pagedAttention;
-        const spanEl = this.querySelector('span:first-child');
+    paBtn.addEventListener('click', function () {
+        pagedAttention = !pagedAttention
+        const spanEl = this.querySelector('span:first-child')
         if (spanEl) {
-            spanEl.textContent = pagedAttention ? 'PA: ON' : 'PA: OFF';
+            spanEl.textContent = pagedAttention ? 'PA: ON' : 'PA: OFF'
         }
-        this.classList.toggle('active', pagedAttention);
+        this.classList.toggle('active', pagedAttention)
 
-        updateInfoPanel();
-    });
+        updateInfoPanel()
+    })
 }
 
 // Flash Attention toggle
-const faBtn = document.getElementById('faToggle');
+const faBtn = document.getElementById('faToggle')
 if (faBtn) {
-    faBtn.addEventListener('click', function() {
-        flashAttention = !flashAttention;
-        const spanEl = this.querySelector('span:first-child');
+    faBtn.addEventListener('click', function () {
+        flashAttention = !flashAttention
+        const spanEl = this.querySelector('span:first-child')
         if (spanEl) {
-            spanEl.textContent = flashAttention ? 'FA: ON' : 'FA: OFF';
+            spanEl.textContent = flashAttention ? 'FA: ON' : 'FA: OFF'
         }
-        this.classList.toggle('active', flashAttention);
-        updateInfoPanel();
-    });
+        this.classList.toggle('active', flashAttention)
+        updateInfoPanel()
+    })
 }
 
-document.getElementById('speedControl').addEventListener('click', function() {
-    const speeds = [0.5, 1, 2, 5, 10, 20, 50, 100];
-    const currentIndex = speeds.indexOf(animationSpeed);
-    animationSpeed = speeds[(currentIndex + 1) % speeds.length];
-    this.textContent = `Speed: ${animationSpeed}x`;
-});
+document.getElementById('speedControl').addEventListener('click', function () {
+    const speeds = [0.5, 1, 2, 5, 10, 20, 50, 100]
+    const currentIndex = speeds.indexOf(animationSpeed)
+    animationSpeed = speeds[(currentIndex + 1) % speeds.length]
+    this.textContent = `Speed: ${animationSpeed}x`
+})
 
-document.getElementById('modelSwitch').addEventListener('click', function() {
-    currentModelIndex = (currentModelIndex + 1) % models.length;
-    currentTokens = 0;
-    initWaves();
-    memoryBlocks = [];
-});
+document.getElementById('modelSwitch').addEventListener('click', function () {
+    currentModelIndex = (currentModelIndex + 1) % models.length
+    currentTokens = 0
+    initWaves()
+    memoryBlocks = []
+})
 
 // Context length control
-document.getElementById('contextControl').addEventListener('click', function() {
-    const contexts = Object.keys(contextPresets);
-    let currentContext = null;
+document.getElementById('contextControl').addEventListener('click', function () {
+    const contexts = Object.keys(contextPresets)
+    let currentContext = null
 
     // Find exact match or closest context
     for (let key of contexts) {
         if (contextPresets[key] === maxTokens) {
-            currentContext = key;
-            break;
+            currentContext = key
+            break
         }
     }
 
     // If no exact match, find the closest one
     if (!currentContext) {
-        let minDiff = Infinity;
+        let minDiff = Infinity
         for (let key of contexts) {
-            const diff = Math.abs(contextPresets[key] - maxTokens);
+            const diff = Math.abs(contextPresets[key] - maxTokens)
             if (diff < minDiff) {
-                minDiff = diff;
-                currentContext = key;
+                minDiff = diff
+                currentContext = key
             }
         }
     }
 
-    const currentIndex = contexts.indexOf(currentContext);
-    const nextContext = contexts[(currentIndex + 1) % contexts.length];
-    maxTokens = contextPresets[nextContext];
-    this.textContent = `Context: ${nextContext}`;
+    const currentIndex = contexts.indexOf(currentContext)
+    const nextContext = contexts[(currentIndex + 1) % contexts.length]
+    maxTokens = contextPresets[nextContext]
+    this.textContent = `Context: ${nextContext}`
 
     // Reset if current tokens exceed new max
     if (currentTokens > maxTokens) {
-        currentTokens = 0;
+        currentTokens = 0
     }
-});
+})
 
 // Data type control
-document.getElementById('dtypeControl').addEventListener('click', function() {
-    const dtypes = Object.keys(dtypeConfigs);
-    let currentIndex = 0;
+document.getElementById('dtypeControl').addEventListener('click', function () {
+    const dtypes = Object.keys(dtypeConfigs)
+    let currentIndex = 0
 
     // Find current dtype
     for (let i = 0; i < dtypes.length; i++) {
         if (dtypes[i] === currentDtype) {
-            currentIndex = i;
-            break;
+            currentIndex = i
+            break
         }
     }
 
-    currentDtype = dtypes[(currentIndex + 1) % dtypes.length];
-    this.textContent = `Type: ${currentDtype}`;
+    currentDtype = dtypes[(currentIndex + 1) % dtypes.length]
+    this.textContent = `Type: ${currentDtype}`
 
     // Update model colors based on dtype
-    const config = dtypeConfigs[currentDtype];
-    models.forEach(model => {
+    const config = dtypeConfigs[currentDtype]
+    models.forEach((model) => {
         if (!model.originalColor) {
-            model.originalColor = model.color;
+            model.originalColor = model.color
         }
         // Blend model color with dtype color for visual feedback
-        model.color = model.originalColor;
-    });
+        model.color = model.originalColor
+    })
 
-    initWaves();
-});
+    initWaves()
+})
 
 // Skip Model Weights (SMW) toggle
-const smwBtn = document.getElementById('smwToggle');
+const smwBtn = document.getElementById('smwToggle')
 if (smwBtn) {
-    smwBtn.addEventListener('click', function() {
-        includeWeights = !includeWeights;
-        this.classList.toggle('active', !includeWeights); // active means skipping weights
-        updateInfoPanel();
-    });
+    smwBtn.addEventListener('click', function () {
+        includeWeights = !includeWeights
+        this.classList.toggle('active', !includeWeights) // active means skipping weights
+        updateInfoPanel()
+    })
 }
 
 // GPU selection control
-const gpuBtn = document.getElementById('gpuControl');
+const gpuBtn = document.getElementById('gpuControl')
 if (gpuBtn) {
-    gpuBtn.addEventListener('click', function() {
-        const keys = Object.keys(gpuConfigs);
-        const idx = keys.indexOf(currentGPU);
-        currentGPU = keys[(idx + 1) % keys.length];
-        this.textContent = `Device: ${currentGPU}`;
+    gpuBtn.addEventListener('click', function () {
+        const keys = Object.keys(gpuConfigs)
+        const idx = keys.indexOf(currentGPU)
+        currentGPU = keys[(idx + 1) % keys.length]
+        this.textContent = `Device: ${currentGPU}`
 
         // Set appropriate defaults for the new GPU
-        setGPUDefaults(currentGPU);
+        setGPUDefaults(currentGPU)
 
         // Update UI to reflect new defaults
-        updateInfoPanel();
-        updateControlStates();
-    });
+        updateInfoPanel()
+        updateControlStates()
+    })
 }
 
 // Initialize
 window.addEventListener('resize', () => {
-    resizeCanvas();
-    updateInfoPanel(); // Reposition efficiency box on resize
-});
-resizeCanvas();
-initWaves();
+    resizeCanvas()
+    updateInfoPanel() // Reposition efficiency box on resize
+})
+resizeCanvas()
+initWaves()
 
 // Sync initial control states
 document.addEventListener('DOMContentLoaded', () => {
-    const playBtn = document.getElementById('playPause');
+    const playBtn = document.getElementById('playPause')
     if (playBtn) {
-        playBtn.textContent = isPlaying ? 'Pause' : 'Play';
-        playBtn.classList.toggle('active', isPlaying);
+        playBtn.textContent = isPlaying ? 'Pause' : 'Play'
+        playBtn.classList.toggle('active', isPlaying)
     }
-    const speedBtn = document.getElementById('speedControl');
-    if (speedBtn) speedBtn.textContent = `Speed: ${animationSpeed}x`;
-    const batchBtn = document.getElementById('batchControl');
-    if (batchBtn) batchBtn.textContent = `Batch: ${batchSize}`;
-    const dtypeBtn = document.getElementById('dtypeControl');
-    if (dtypeBtn) dtypeBtn.textContent = `Type: ${currentDtype}`;
-    const gpuBtn2 = document.getElementById('gpuControl');
-    if (gpuBtn2) gpuBtn2.textContent = `Device: ${currentGPU}`;
-});
+    const speedBtn = document.getElementById('speedControl')
+    if (speedBtn) speedBtn.textContent = `Speed: ${animationSpeed}x`
+    const batchBtn = document.getElementById('batchControl')
+    if (batchBtn) batchBtn.textContent = `Batch: ${batchSize}`
+    const dtypeBtn = document.getElementById('dtypeControl')
+    if (dtypeBtn) dtypeBtn.textContent = `Type: ${currentDtype}`
+    const gpuBtn2 = document.getElementById('gpuControl')
+    if (gpuBtn2) gpuBtn2.textContent = `Device: ${currentGPU}`
+})
 
 // Initialize first factoid
 setTimeout(() => {
-    updateFactoid();
-    lastFactoidUpdate = Date.now();
-}, 100);
+    updateFactoid()
+    lastFactoidUpdate = Date.now()
+}, 100)
 
 // Set initial defaults for the default GPU
-setGPUDefaults(currentGPU);
-updateControlStates();
+setGPUDefaults(currentGPU)
+updateControlStates()
 
-animate();
+animate()

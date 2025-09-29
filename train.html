@@ -1,396 +1,439 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Memory Visualization - The GPU Memory Challenge</title>
-    <style>
-        :root {
-            --primary-red: #FF4444;
-            --light-red: #FF8888;
-            --accent-orange: #FFA500;
-            --accent-yellow: #FFD700;
-            --dark-ink: #0B1026;
-            --surface: rgba(10, 16, 44, 0.92);
-            --surface-2: rgba(13, 22, 58, 0.85);
-            --border: rgba(255, 100, 100, 0.45);
-            --text-primary: #EAF2FF;
-            --text-secondary: #FFD4D4;
-            --text-muted: #E0A5A5;
-            --accent-warn: #FF6B00;
-            --success-green: #4CAF50;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
-            color: var(--text-primary);
-            overflow: hidden;
-            position: relative;
-        }
-
-        canvas {
-            display: block;
-        }
-
-        .header {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 10;
-        }
-
-        h1 {
-            font-size: 2.8em;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--primary-red) 0%, var(--accent-orange) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 20px rgba(255, 68, 68, 0.3);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .info-panel {
-            position: absolute;
-            top: 100px;
-            left: 30px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 15px 18px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 40px rgba(255, 68, 68, 0.2);
-            max-width: 260px;
-        }
-
-        .info-panel h3 {
-            color: var(--light-red);
-            margin-bottom: 12px;
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.8em;
-        }
-
-        .info-label {
-            color: var(--text-muted);
-        }
-
-        .info-value {
-            color: var(--text-primary);
-            font-weight: bold;
-        }
-
-        .controls {
-            position: fixed;  /* Fixed instead of absolute */
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 12px;
-            z-index: 20;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90%;
-            height: auto;  /* Explicit height */
-        }
-
-        button {
-            background: linear-gradient(180deg, rgba(255, 68, 68, 0.20), rgba(255, 68, 68, 0.10));
-            border: 2px solid var(--primary-red);
-            color: var(--text-primary);
-            padding: 10px 18px;
-            border-radius: 22px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(5px);
-            font-family: inherit;
-            min-width: 140px;  /* Prevent size changes */
-        }
-
-        #playPause {
-            min-width: 180px;  /* Larger for play/pause button */
-        }
-
-        button:hover {
-            background: linear-gradient(180deg, rgba(255, 68, 68, 0.35), rgba(255, 68, 68, 0.25));
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
-        }
-
-        .btn-two-line {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-            align-items: center;
-        }
-
-        .btn-two-line .caption {
-            font-size: 0.72em;
-            opacity: 0.9;
-            text-transform: none;
-            letter-spacing: 0;
-        }
-
-        .btn-two-line.enabled {
-            background: linear-gradient(135deg, var(--accent-orange), var(--primary-red)) !important;
-            border-color: var(--accent-orange) !important;
-            box-shadow: 0 0 15px rgba(255, 165, 0, 0.4) !important;
-        }
-
-        .memory-breakdown {
-            position: absolute;
-            top: 100px;
-            right: 30px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 15px 18px;
-            backdrop-filter: blur(10px);
-            max-width: 260px;
-        }
-
-        .memory-bar {
-            width: 100%;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 5px 0;
-            display: flex;
-        }
-
-        .memory-segment {
-            height: 100%;
-            transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .loss-curve {
-            position: absolute;
-            bottom: 120px;
-            right: 30px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 15px;
-            width: 280px;
-            height: 150px;
-        }
-
-        #warning {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 100, 0, 0.2);
-            border: 2px solid var(--accent-warn);
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            text-align: center;
-            max-width: 600px;
-        }
-
-        /* Navigation link */
-        .nav-link {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            font-size: 10px;
-            z-index: 5;
-        }
-
-        .nav-link a {
-            color: rgba(255, 136, 136, 0.6);
-            text-decoration: none;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-        }
-
-        .nav-link a:hover {
-            opacity: 1;
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            h1 { font-size: 1.8em; }
-            .subtitle { font-size: 0.9em; }
-            .controls { bottom: 10px; gap: 8px; }
-            button { padding: 8px 12px; font-size: 0.75em; }
-            .info-panel, .memory-breakdown {
-                position: static;
-                margin: 10px;
-                max-width: calc(100% - 20px);
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Training Memory Visualization - The GPU Memory Challenge</title>
+        <style>
+            :root {
+                --primary-red: #ff4444;
+                --light-red: #ff8888;
+                --accent-orange: #ffa500;
+                --accent-yellow: #ffd700;
+                --dark-ink: #0b1026;
+                --surface: rgba(10, 16, 44, 0.92);
+                --surface-2: rgba(13, 22, 58, 0.85);
+                --border: rgba(255, 100, 100, 0.45);
+                --text-primary: #eaf2ff;
+                --text-secondary: #ffd4d4;
+                --text-muted: #e0a5a5;
+                --accent-warn: #ff6b00;
+                --success-green: #4caf50;
             }
-            .loss-curve { display: none; }
-        }
-    </style>
-</head>
-<body>
-    <canvas id="canvas"></canvas>
 
-    <div class="header">
-        <h1>Training Memory Explosion</h1>
-        <div class="subtitle">Watch GPU memory consumed by weights, gradients, optimizer states & activations</div>
-    </div>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-    <div class="info-panel">
-        <h3>Training Configuration</h3>
-        <div class="info-item">
-            <span class="info-label">Model:</span>
-            <span class="info-value" id="modelName">Llama-3.1-8B</span>
+            body {
+                font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
+                color: var(--text-primary);
+                overflow: hidden;
+                position: relative;
+            }
+
+            canvas {
+                display: block;
+            }
+
+            .header {
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                text-align: center;
+                z-index: 10;
+            }
+
+            h1 {
+                font-size: 2.8em;
+                margin-bottom: 8px;
+                background: linear-gradient(135deg, var(--primary-red) 0%, var(--accent-orange) 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 2px 20px rgba(255, 68, 68, 0.3);
+                font-weight: 800;
+                letter-spacing: -0.02em;
+            }
+
+            .subtitle {
+                color: var(--text-secondary);
+                font-size: 1.1em;
+                opacity: 0.9;
+            }
+
+            .info-panel {
+                position: absolute;
+                top: 100px;
+                left: 30px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 15px 18px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 10px 40px rgba(255, 68, 68, 0.2);
+                max-width: 260px;
+            }
+
+            .info-panel h3 {
+                color: var(--light-red);
+                margin-bottom: 12px;
+                font-size: 0.85em;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                font-size: 0.8em;
+            }
+
+            .info-label {
+                color: var(--text-muted);
+            }
+
+            .info-value {
+                color: var(--text-primary);
+                font-weight: bold;
+            }
+
+            .controls {
+                position: fixed; /* Fixed instead of absolute */
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 12px;
+                z-index: 20;
+                flex-wrap: wrap;
+                justify-content: center;
+                max-width: 90%;
+                height: auto; /* Explicit height */
+            }
+
+            button {
+                background: linear-gradient(180deg, rgba(255, 68, 68, 0.2), rgba(255, 68, 68, 0.1));
+                border: 2px solid var(--primary-red);
+                color: var(--text-primary);
+                padding: 10px 18px;
+                border-radius: 22px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: 600;
+                font-size: 0.85em;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                backdrop-filter: blur(5px);
+                font-family: inherit;
+                min-width: 140px; /* Prevent size changes */
+            }
+
+            #playPause {
+                min-width: 180px; /* Larger for play/pause button */
+            }
+
+            button:hover {
+                background: linear-gradient(180deg, rgba(255, 68, 68, 0.35), rgba(255, 68, 68, 0.25));
+                transform: translateY(-2px);
+                box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+            }
+
+            .btn-two-line {
+                display: flex;
+                flex-direction: column;
+                line-height: 1.1;
+                align-items: center;
+            }
+
+            .btn-two-line .caption {
+                font-size: 0.72em;
+                opacity: 0.9;
+                text-transform: none;
+                letter-spacing: 0;
+            }
+
+            .btn-two-line.enabled {
+                background: linear-gradient(135deg, var(--accent-orange), var(--primary-red)) !important;
+                border-color: var(--accent-orange) !important;
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.4) !important;
+            }
+
+            .memory-breakdown {
+                position: absolute;
+                top: 100px;
+                right: 30px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 15px 18px;
+                backdrop-filter: blur(10px);
+                max-width: 260px;
+            }
+
+            .memory-bar {
+                width: 100%;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+                overflow: hidden;
+                margin: 5px 0;
+                display: flex;
+            }
+
+            .memory-segment {
+                height: 100%;
+                transition: width 0.3s ease;
+                position: relative;
+            }
+
+            .loss-curve {
+                position: absolute;
+                bottom: 120px;
+                right: 30px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 15px;
+                width: 280px;
+                height: 150px;
+            }
+
+            #warning {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(255, 100, 0, 0.2);
+                border: 2px solid var(--accent-warn);
+                padding: 20px 30px;
+                border-radius: 15px;
+                font-size: 1.2em;
+                font-weight: bold;
+                visibility: hidden;
+                opacity: 0;
+                transition:
+                    opacity 0.3s ease,
+                    visibility 0.3s ease;
+                backdrop-filter: blur(10px);
+                z-index: 100;
+                text-align: center;
+                max-width: 600px;
+            }
+
+            /* Navigation link */
+            .nav-link {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                font-size: 10px;
+                z-index: 5;
+            }
+
+            .nav-link a {
+                color: rgba(255, 136, 136, 0.6);
+                text-decoration: none;
+                opacity: 0.7;
+                transition: opacity 0.3s;
+            }
+
+            .nav-link a:hover {
+                opacity: 1;
+            }
+
+            /* Mobile responsiveness */
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 1.8em;
+                }
+                .subtitle {
+                    font-size: 0.9em;
+                }
+                .controls {
+                    bottom: 10px;
+                    gap: 8px;
+                }
+                button {
+                    padding: 8px 12px;
+                    font-size: 0.75em;
+                }
+                .info-panel,
+                .memory-breakdown {
+                    position: static;
+                    margin: 10px;
+                    max-width: calc(100% - 20px);
+                }
+                .loss-curve {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+
+        <div class="header">
+            <h1>Training Memory Explosion</h1>
+            <div class="subtitle">Watch GPU memory consumed by weights, gradients, optimizer states & activations</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Parameters:</span>
-            <span class="info-value" id="paramCount">8B</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Batch Size:</span>
-            <span class="info-value" id="batchInfo">4</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Sequence Length:</span>
-            <span class="info-value" id="seqLength">2048</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Learning Rate:</span>
-            <span class="info-value" id="learningRate">5e-5</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Step:</span>
-            <span class="info-value" id="stepCount">0 / 100K</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Total Memory:</span>
-            <span class="info-value" id="totalMem">0 GiB</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">GPU Required:</span>
-            <span class="info-value" id="gpuCount">1× H100</span>
-        </div>
-    </div>
 
-    <div class="memory-breakdown">
-        <h3 style="color: var(--light-red); margin-bottom: 12px; font-size: 0.85em;">Memory Breakdown</h3>
-
-        <div class="info-item">
-            <span class="info-label">Model Weights:</span>
-            <span class="info-value" id="weightsSize">16 GiB</span>
-        </div>
-        <div class="memory-bar">
-            <div class="memory-segment" id="weightsBar" style="background: #9C27B0; width: 25%;"></div>
+        <div class="info-panel">
+            <h3>Training Configuration</h3>
+            <div class="info-item">
+                <span class="info-label">Model:</span>
+                <span class="info-value" id="modelName">Llama-3.1-8B</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Parameters:</span>
+                <span class="info-value" id="paramCount">8B</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Batch Size:</span>
+                <span class="info-value" id="batchInfo">4</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Sequence Length:</span>
+                <span class="info-value" id="seqLength">2048</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Learning Rate:</span>
+                <span class="info-value" id="learningRate">5e-5</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Step:</span>
+                <span class="info-value" id="stepCount">0 / 100K</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Total Memory:</span>
+                <span class="info-value" id="totalMem">0 GiB</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">GPU Required:</span>
+                <span class="info-value" id="gpuCount">1× H100</span>
+            </div>
         </div>
 
-        <div class="info-item">
-            <span class="info-label">Gradients:</span>
-            <span class="info-value" id="gradientsSize">16 GiB</span>
+        <div class="memory-breakdown">
+            <h3 style="color: var(--light-red); margin-bottom: 12px; font-size: 0.85em">Memory Breakdown</h3>
+
+            <div class="info-item">
+                <span class="info-label">Model Weights:</span>
+                <span class="info-value" id="weightsSize">16 GiB</span>
+            </div>
+            <div class="memory-bar">
+                <div class="memory-segment" id="weightsBar" style="background: #9c27b0; width: 25%"></div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Gradients:</span>
+                <span class="info-value" id="gradientsSize">16 GiB</span>
+            </div>
+            <div class="memory-bar">
+                <div class="memory-segment" id="gradientsBar" style="background: #ff9800; width: 25%"></div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Optimizer (Adam):</span>
+                <span class="info-value" id="optimizerSize">32 GiB</span>
+            </div>
+            <div class="memory-bar">
+                <div class="memory-segment" id="optimizerBar" style="background: #f44336; width: 50%"></div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Activations:</span>
+                <span class="info-value" id="activationsSize">8 GiB</span>
+            </div>
+            <div class="memory-bar">
+                <div class="memory-segment" id="activationsBar" style="background: #4caf50; width: 12.5%"></div>
+            </div>
         </div>
-        <div class="memory-bar">
-            <div class="memory-segment" id="gradientsBar" style="background: #FF9800; width: 25%;"></div>
+
+        <div class="loss-curve">
+            <h3 style="color: var(--light-red); margin-bottom: 10px; font-size: 0.85em">Training Loss</h3>
+            <canvas id="lossCanvas" width="250" height="100"></canvas>
         </div>
 
-        <div class="info-item">
-            <span class="info-label">Optimizer (Adam):</span>
-            <span class="info-value" id="optimizerSize">32 GiB</span>
+        <div id="warning"></div>
+
+        <div class="controls">
+            <button id="playPause">▶️ Start Training</button>
+            <button id="speedControl">Speed: 50x</button>
+            <button id="modelControl">Model: Llama-1B</button>
+            <button id="batchControl">Batch: 2</button>
+            <button id="seqControl">Seq: 1024</button>
+            <button id="optimizerControl">Optimizer: Adam</button>
+
+            <button
+                id="gcToggle"
+                class="btn-two-line enabled"
+                title="Gradient Checkpointing - trade compute for memory"
+            >
+                <span>GC: ON</span>
+                <span class="caption">grad checkpoint</span>
+            </button>
+
+            <button
+                id="mpToggle"
+                class="btn-two-line enabled"
+                title="Mixed Precision - FP16 compute with FP32 master weights"
+            >
+                <span>MP: ON</span>
+                <span class="caption">mixed precision</span>
+            </button>
+
+            <button id="zeroToggle" class="btn-two-line" title="ZeRO Optimization - shard optimizer states">
+                <span>ZeRO: OFF</span>
+                <span class="caption">DeepSpeed ZeRO</span>
+            </button>
+
+            <button id="fsdpToggle" class="btn-two-line" title="Fully Sharded Data Parallel">
+                <span>FSDP: OFF</span>
+                <span class="caption">fully sharded</span>
+            </button>
+
+            <button id="gaToggle" class="btn-two-line" title="Gradient Accumulation - simulate larger batches">
+                <span>GA: OFF</span>
+                <span class="caption">grad accumulation</span>
+            </button>
+
+            <button id="gpuControl">GPU: H100 80G</button>
         </div>
-        <div class="memory-bar">
-            <div class="memory-segment" id="optimizerBar" style="background: #F44336; width: 50%;"></div>
+
+        <!-- Navigation back to inference -->
+        <div class="nav-link">
+            <a href="index.html">← Inference (KV Cache) Simulation</a>
         </div>
 
-        <div class="info-item">
-            <span class="info-label">Activations:</span>
-            <span class="info-value" id="activationsSize">8 GiB</span>
+        <div
+            style="
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                text-align: center;
+                color: #999;
+                font-size: 11px;
+                z-index: 5;
+            "
+        >
+            <div>
+                Training Memory Visualization |
+                <a
+                    href="https://github.com/mcgrof/kvcache-view"
+                    target="_blank"
+                    style="color: var(--light-red); text-decoration: none"
+                >
+                    kvcache-view
+                </a>
+            </div>
         </div>
-        <div class="memory-bar">
-            <div class="memory-segment" id="activationsBar" style="background: #4CAF50; width: 12.5%;"></div>
-        </div>
-    </div>
 
-    <div class="loss-curve">
-        <h3 style="color: var(--light-red); margin-bottom: 10px; font-size: 0.85em;">Training Loss</h3>
-        <canvas id="lossCanvas" width="250" height="100"></canvas>
-    </div>
-
-    <div id="warning"></div>
-
-    <div class="controls">
-        <button id="playPause">▶️ Start Training</button>
-        <button id="speedControl">Speed: 50x</button>
-        <button id="modelControl">Model: Llama-1B</button>
-        <button id="batchControl">Batch: 2</button>
-        <button id="seqControl">Seq: 1024</button>
-        <button id="optimizerControl">Optimizer: Adam</button>
-
-        <button id="gcToggle" class="btn-two-line enabled" title="Gradient Checkpointing - trade compute for memory">
-            <span>GC: ON</span>
-            <span class="caption">grad checkpoint</span>
-        </button>
-
-        <button id="mpToggle" class="btn-two-line enabled" title="Mixed Precision - FP16 compute with FP32 master weights">
-            <span>MP: ON</span>
-            <span class="caption">mixed precision</span>
-        </button>
-
-        <button id="zeroToggle" class="btn-two-line" title="ZeRO Optimization - shard optimizer states">
-            <span>ZeRO: OFF</span>
-            <span class="caption">DeepSpeed ZeRO</span>
-        </button>
-
-        <button id="fsdpToggle" class="btn-two-line" title="Fully Sharded Data Parallel">
-            <span>FSDP: OFF</span>
-            <span class="caption">fully sharded</span>
-        </button>
-
-        <button id="gaToggle" class="btn-two-line" title="Gradient Accumulation - simulate larger batches">
-            <span>GA: OFF</span>
-            <span class="caption">grad accumulation</span>
-        </button>
-
-        <button id="gpuControl">GPU: H100 80G</button>
-    </div>
-
-    <!-- Navigation back to inference -->
-    <div class="nav-link">
-        <a href="index.html">← Inference (KV Cache) Simulation</a>
-    </div>
-
-    <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center; color: #999; font-size: 11px; z-index: 5;">
-        <div>Training Memory Visualization | <a href="https://github.com/mcgrof/kvcache-view" target="_blank" style="color: var(--light-red); text-decoration: none;">kvcache-view</a></div>
-    </div>
-
-    <script src="train-visualization.js"></script>
-</body>
+        <script src="train-visualization.js"></script>
+    </body>
 </html>
