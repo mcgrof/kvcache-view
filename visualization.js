@@ -204,6 +204,7 @@ let sequenceColors = []; // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
+    'Tesla T4 16G':   { memGiB: 16,  label: 'Tesla T4 16G', memType: 'GDDR6', l2Cache: 6, flashTileSize: 32 },
     'RTX 4090 24G':   { memGiB: 24,  label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64 },
     'L40S 48G':       { memGiB: 48,  label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
     'A100 40G':       { memGiB: 40,  label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
