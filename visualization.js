@@ -261,6 +261,7 @@ const gpuConfigs = {
 let gpuCount = 1  // Number of GPUs (powers of 2: 1, 2, 4, 8, 16, 32, 64, 128)
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
 const pcieBandwidth = 32  // PCIe 4.0 x16 bandwidth in GB/s
+let useHighSpeedInterconnect = true  // Use NVLink/IFL when available vs PCIe
 
 let currentGPU = 'H100 80G'
 
@@ -796,7 +797,10 @@ function initWaves() {
 }
 
 // Draw GPU architecture visualization
-// Multi-GPU cluster visualization
+// Store interconnect particles for animation
+let interconnectParticles = []
+
+// Multi-GPU cluster visualization with enhanced interconnect visualization
 function drawMultiGPUCluster() {
     const model = models[currentModelIndex]
     const gpuConfig = gpuConfigs[currentGPU]
@@ -838,7 +842,7 @@ function drawMultiGPUCluster() {
     let interconnectBW = pcieBandwidth
     let interconnectColor = '#606060'  // Gray for PCIe
 
-    if (gpuConfig.nvlink) {
+    if (gpuConfig.nvlink && useHighSpeedInterconnect) {
         if (gpuConfig.ifl) {
             interconnectType = 'Infinity Fabric'
             interconnectBW = gpuConfig.nvlinkBW || 400
@@ -862,16 +866,27 @@ function drawMultiGPUCluster() {
         }
     }
 
-    // Calculate bandwidth utilization
-    const kvCacheSyncTraffic = (kvGiB * 1024) / gpuCount  // MB per GPU for all-reduce
+    // Calculate bandwidth utilization - more realistic model
+    // During training/inference, KV cache needs to be synchronized for attention
+    // This creates all-to-all traffic patterns
+    const kvCacheSyncTraffic = (kvGiB * 1024) * Math.log2(gpuCount)  // All-reduce traffic scales with log(n)
     const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
 
     // Draw interconnects first (behind GPUs)
     ctx.save()
 
+    // Create visual metaphor for bandwidth saturation
+    if (bandwidthUtilization > 0.7) {
+        // Draw pulsing red glow when approaching saturation
+        const pulseIntensity = 0.3 + Math.sin(Date.now() / 200) * 0.2
+        ctx.fillStyle = `rgba(255, 68, 68, ${pulseIntensity * bandwidthUtilization})`
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+
     // Draw mesh interconnects for high-speed links
-    if (gpuConfig.nvlink && gpuCount <= 8) {
+    if (gpuConfig.nvlink && useHighSpeedInterconnect && gpuCount <= 8) {
         // Full mesh topology for NVLink/IFL
+        const connections = []
         for (let i = 0; i < gpuCount; i++) {
             const row1 = Math.floor(i / cols)
             const col1 = i % cols
@@ -883,55 +898,187 @@ function drawMultiGPUCluster() {
                 const col2 = j % cols
                 const x2 = offsetX + col2 * gpuSpacing
                 const y2 = offsetY + row2 * gpuSpacing
+                connections.push({x1, y1, x2, y2})
+            }
+        }
 
-                // Draw interconnect line
-                ctx.strokeStyle = interconnectColor
-                ctx.globalAlpha = 0.3 + bandwidthUtilization * 0.7
-                ctx.lineWidth = 2 + bandwidthUtilization * 4
+        // Draw all connections with visual bandwidth representation
+        connections.forEach(conn => {
+            const {x1, y1, x2, y2} = conn
+
+            // Base interconnect line - thicker when saturated
+            const baseWidth = 2 + bandwidthUtilization * 8
+            ctx.strokeStyle = interconnectColor
+            ctx.globalAlpha = 0.2
+            ctx.lineWidth = baseWidth
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+
+            // Draw "data pipes" that visually fill up with traffic
+            if (bandwidthUtilization > 0) {
+                // Inner flow showing actual data movement
+                const flowWidth = baseWidth * bandwidthUtilization
+
+                // Color changes from green to yellow to red as saturation increases
+                let flowColor
+                if (bandwidthUtilization < 0.5) {
+                    flowColor = `rgba(76, 175, 80, ${0.6 + bandwidthUtilization})`
+                } else if (bandwidthUtilization < 0.8) {
+                    flowColor = `rgba(255, 193, 7, ${0.6 + bandwidthUtilization})`
+                } else {
+                    flowColor = `rgba(255, 68, 68, ${0.6 + bandwidthUtilization})`
+                }
+
+                ctx.strokeStyle = flowColor
+                ctx.globalAlpha = 0.7
+                ctx.lineWidth = flowWidth
                 ctx.beginPath()
                 ctx.moveTo(x1, y1)
                 ctx.lineTo(x2, y2)
                 ctx.stroke()
 
-                // Animate data flow on interconnects
-                if (isPlaying && bandwidthUtilization > 0.1) {
-                    const particleX = x1 + (x2 - x1) * ((Date.now() / 1000) % 1)
-                    const particleY = y1 + (y2 - y1) * ((Date.now() / 1000) % 1)
-                    ctx.fillStyle = interconnectColor
-                    ctx.globalAlpha = 0.8
-                    ctx.beginPath()
-                    ctx.arc(particleX, particleY, 3, 0, Math.PI * 2)
-                    ctx.fill()
+                // Add glowing effect for high utilization
+                if (bandwidthUtilization > 0.5) {
+                    ctx.shadowBlur = 10 * bandwidthUtilization
+                    ctx.shadowColor = flowColor
+                    ctx.stroke()
+                    ctx.shadowBlur = 0
                 }
             }
-        }
+
+            // Animate data packets flowing through the pipes
+            if (isPlaying && bandwidthUtilization > 0) {
+                // More particles when bandwidth is higher
+                const particleCount = Math.ceil(bandwidthUtilization * 5)
+                for (let p = 0; p < particleCount; p++) {
+                    const offset = (Date.now() / (1000 - bandwidthUtilization * 800) + p / particleCount) % 1
+                    const particleX = x1 + (x2 - x1) * offset
+                    const particleY = y1 + (y2 - y1) * offset
+
+                    // Particle size and brightness based on traffic
+                    const particleSize = 2 + bandwidthUtilization * 4
+                    ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
+                                   bandwidthUtilization > 0.5 ? '#FFC107' : '#4CAF50'
+                    ctx.globalAlpha = 0.8 + Math.sin(offset * Math.PI) * 0.2
+                    ctx.beginPath()
+                    ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2)
+                    ctx.fill()
+
+                    // Add trailing effect for fast movement
+                    if (bandwidthUtilization > 0.7) {
+                        ctx.globalAlpha = 0.3
+                        for (let t = 1; t <= 3; t++) {
+                            const trailOffset = offset - t * 0.02
+                            if (trailOffset > 0) {
+                                const trailX = x1 + (x2 - x1) * trailOffset
+                                const trailY = y1 + (y2 - y1) * trailOffset
+                                ctx.beginPath()
+                                ctx.arc(trailX, trailY, particleSize * (1 - t * 0.2), 0, Math.PI * 2)
+                                ctx.fill()
+                            }
+                        }
+                    }
+                }
+            }
+        })
     } else {
         // Tree topology through PCIe switch for non-NVLink or large clusters
         const switchX = canvas.width / 2
         const switchY = canvas.height - 80
 
-        // Draw PCIe switch
-        ctx.fillStyle = '#404040'
-        ctx.fillRect(switchX - 40, switchY - 15, 80, 30)
-        ctx.fillStyle = '#606060'
-        ctx.font = '10px monospace'
-        ctx.textAlign = 'center'
-        ctx.fillText('PCIe Switch', switchX, switchY + 3)
+        // Draw PCIe switch as a bottleneck point
+        const switchWidth = 120
+        const switchHeight = 40
 
-        // Connect each GPU to switch
+        // Switch glows red when saturated
+        if (bandwidthUtilization > 0.7) {
+            ctx.shadowBlur = 20
+            ctx.shadowColor = 'rgba(255, 68, 68, ' + bandwidthUtilization + ')'
+        }
+
+        const switchGradient = ctx.createLinearGradient(switchX - switchWidth/2, switchY - switchHeight/2,
+                                                       switchX + switchWidth/2, switchY + switchHeight/2)
+        switchGradient.addColorStop(0, bandwidthUtilization > 0.8 ? '#8B0000' : '#404040')
+        switchGradient.addColorStop(1, bandwidthUtilization > 0.8 ? '#FF4444' : '#606060')
+
+        ctx.fillStyle = switchGradient
+        ctx.fillRect(switchX - switchWidth/2, switchY - switchHeight/2, switchWidth, switchHeight)
+        ctx.shadowBlur = 0
+
+        // Switch label changes color based on load
+        ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
+                       bandwidthUtilization > 0.5 ? '#FFA500' : '#808080'
+        ctx.font = 'bold 12px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('PCIe Switch', switchX, switchY)
+
+        // Show bottleneck indicator
+        if (bandwidthUtilization > 0.7) {
+            ctx.fillStyle = '#FF4444'
+            ctx.font = 'bold 10px monospace'
+            ctx.fillText(`${(bandwidthUtilization * 100).toFixed(0)}% SATURATED`, switchX, switchY + 15)
+        }
+
+        // Connect each GPU to switch with traffic visualization
         for (let i = 0; i < gpuCount; i++) {
             const row = Math.floor(i / cols)
             const col = i % cols
             const x = offsetX + col * gpuSpacing
             const y = offsetY + row * gpuSpacing
 
-            ctx.strokeStyle = interconnectColor
-            ctx.globalAlpha = 0.3 + bandwidthUtilization * 0.5
-            ctx.lineWidth = 1 + bandwidthUtilization * 2
+            // Calculate path to switch
+            const startX = x
+            const startY = y + gpuSize / 2
+            const endX = switchX
+            const endY = switchY - switchHeight/2
+
+            // Base connection
+            ctx.strokeStyle = '#404040'
+            ctx.globalAlpha = 0.3
+            ctx.lineWidth = 2
             ctx.beginPath()
-            ctx.moveTo(x, y + gpuSize / 2)
-            ctx.lineTo(switchX, switchY - 15)
+            ctx.moveTo(startX, startY)
+            ctx.lineTo(endX, endY)
             ctx.stroke()
+
+            // Traffic flow visualization
+            if (bandwidthUtilization > 0) {
+                const flowWidth = 2 + bandwidthUtilization * 6
+                ctx.strokeStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
+                                 bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+                ctx.globalAlpha = 0.5 + bandwidthUtilization * 0.3
+                ctx.lineWidth = flowWidth * bandwidthUtilization
+                ctx.beginPath()
+                ctx.moveTo(startX, startY)
+                ctx.lineTo(endX, endY)
+                ctx.stroke()
+            }
+
+            // Animate packets converging at the switch (showing congestion)
+            if (isPlaying && bandwidthUtilization > 0) {
+                const particleCount = Math.ceil(bandwidthUtilization * 3)
+                for (let p = 0; p < particleCount; p++) {
+                    const offset = (Date.now() / (2000 - bandwidthUtilization * 1500) + i * 0.1 + p / particleCount) % 1
+
+                    // Particles slow down as they approach saturated switch
+                    const slowdownFactor = bandwidthUtilization > 0.7 ?
+                        1 - (bandwidthUtilization - 0.7) * Math.pow(offset, 2) : 1
+                    const adjustedOffset = offset * slowdownFactor
+
+                    const particleX = startX + (endX - startX) * adjustedOffset
+                    const particleY = startY + (endY - startY) * adjustedOffset
+
+                    // Particles bunch up near switch when congested
+                    const particleSize = 2 + bandwidthUtilization * 3
+                    ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' : '#FFA500'
+                    ctx.globalAlpha = 0.7
+                    ctx.beginPath()
+                    ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2)
+                    ctx.fill()
+                }
+            }
         }
     }
 
@@ -987,24 +1134,76 @@ function drawMultiGPUCluster() {
         ctx.fillText(`${memPerGPU.toFixed(1)}/${gpuConfig.memGiB}G`, x, y + gpuSize/2 + 12)
     }
 
-    // Draw interconnect info
+    // Draw interconnect info and bandwidth meter
     ctx.save()
-    ctx.fillStyle = '#C0C0C0'
-    ctx.font = '12px monospace'
-    ctx.textAlign = 'left'
 
-    const infoY = canvas.height - 40
-    ctx.fillText(`Interconnect: ${interconnectType} (${interconnectBW} GB/s)`, 20, infoY)
-    ctx.fillText(`Bandwidth Usage: ${(bandwidthUtilization * 100).toFixed(1)}%`, 20, infoY + 15)
+    // Draw bandwidth meter (visual thermometer)
+    const meterX = 20
+    const meterY = canvas.height - 100
+    const meterWidth = 200
+    const meterHeight = 20
+
+    // Meter background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillRect(meterX, meterY, meterWidth, meterHeight)
+
+    // Meter fill - gradient from green to red
+    const meterGradient = ctx.createLinearGradient(meterX, meterY, meterX + meterWidth, meterY)
+    meterGradient.addColorStop(0, '#4CAF50')
+    meterGradient.addColorStop(0.5, '#FFC107')
+    meterGradient.addColorStop(0.8, '#FF5722')
+    meterGradient.addColorStop(1, '#FF0000')
+
+    ctx.fillStyle = meterGradient
+    ctx.fillRect(meterX, meterY, meterWidth * bandwidthUtilization, meterHeight)
+
+    // Meter border - glows when high
+    ctx.strokeStyle = bandwidthUtilization > 0.8 ? '#FF4444' : '#606060'
+    ctx.lineWidth = bandwidthUtilization > 0.8 ? 2 : 1
+    ctx.strokeRect(meterX, meterY, meterWidth, meterHeight)
+
+    // Labels
+    ctx.fillStyle = '#C0C0C0'
+    ctx.font = '11px monospace'
+    ctx.textAlign = 'left'
+    ctx.fillText(`${interconnectType} Bandwidth: ${interconnectBW} GB/s`, meterX, meterY - 5)
+
+    ctx.textAlign = 'center'
+    ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
+                   bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+    ctx.font = 'bold 12px monospace'
+    ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}%`, meterX + meterWidth/2, meterY + meterHeight/2 + 4)
+
+    // Detailed bandwidth info
+    ctx.textAlign = 'left'
+    ctx.font = '10px monospace'
+    ctx.fillStyle = '#999'
+    const actualBW = interconnectBW * bandwidthUtilization
+    ctx.fillText(`Active: ${actualBW.toFixed(1)} GB/s | KV Sync: ${(kvCacheSyncTraffic / 1024).toFixed(1)} GB`, meterX, meterY + meterHeight + 15)
 
     // Show bottleneck warning if bandwidth is saturated
     if (bandwidthUtilization > 0.8) {
-        ctx.fillStyle = '#FF4444'
-        ctx.font = 'bold 14px monospace'
+        // Pulsing warning message
+        const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7
+        ctx.fillStyle = `rgba(255, 68, 68, ${pulse})`
+        ctx.font = 'bold 16px monospace'
         ctx.textAlign = 'center'
-        ctx.fillText('⚠️ INTERCONNECT BOTTLENECK DETECTED', canvas.width / 2, 30)
+        ctx.fillText('⚠️ INTERCONNECT BOTTLENECK ⚠️', canvas.width / 2, 30)
+
+        ctx.fillStyle = '#FF8888'
+        ctx.font = '12px monospace'
+        ctx.fillText(`${interconnectType} bandwidth saturated - inference will stall!`, canvas.width / 2, 48)
+
+        // Show impact
+        const latencyIncrease = Math.pow(bandwidthUtilization, 3) * 500  // Exponential latency increase
         ctx.font = '11px monospace'
-        ctx.fillText(`KV cache synchronization saturating ${interconnectType} bandwidth`, canvas.width / 2, 45)
+        ctx.fillStyle = '#FFA500'
+        ctx.fillText(`Latency impact: +${latencyIncrease.toFixed(0)}ms per token`, canvas.width / 2, 65)
+    } else if (bandwidthUtilization > 0.5) {
+        ctx.fillStyle = '#FFA500'
+        ctx.font = '13px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('⚡ High interconnect traffic', canvas.width / 2, 30)
     }
 
     ctx.restore()
@@ -2194,23 +2393,49 @@ function updateInfoPanel() {
     if (gpuCount > 1) {
         const gpuConfig = gpuConfigs[currentGPU]
         const memPerGPU = allocatedGiB / gpuCount
-        const interconnectType = gpuConfig.nvlink ?
-            (gpuConfig.ifl ? 'Infinity Fabric' :
-             gpuConfig.tpuInterconnect ? 'TPU Link' :
-             gpuConfig.ipuLink ? 'IPU-Link' :
-             currentGPU.includes('Intel') ? 'Xe Link' :
-             'NVLink') : 'PCIe 4.0'
+
+        // Determine actual interconnect being used
+        let interconnectType, interconnectBW
+        if (gpuConfig.nvlink && useHighSpeedInterconnect) {
+            if (gpuConfig.ifl) {
+                interconnectType = 'Infinity Fabric'
+                interconnectBW = gpuConfig.nvlinkBW || 400
+            } else if (gpuConfig.tpuInterconnect) {
+                interconnectType = 'TPU Link'
+                interconnectBW = gpuConfig.nvlinkBW || 700
+            } else if (gpuConfig.ipuLink) {
+                interconnectType = 'IPU-Link'
+                interconnectBW = gpuConfig.nvlinkBW || 320
+            } else if (currentGPU.includes('Intel')) {
+                interconnectType = 'Xe Link'
+                interconnectBW = 400
+            } else {
+                interconnectType = `NVLink ${gpuConfig.nvlinkBW >= 900 ? '4.0' : '3.0'}`
+                interconnectBW = gpuConfig.nvlinkBW || 600
+            }
+        } else {
+            interconnectType = 'PCIe 4.0'
+            interconnectBW = pcieBandwidth
+        }
 
         const clusterMemory = gpuConfig.memGiB * gpuCount
         const utilization = (allocatedGiB / clusterMemory) * 100
 
+        // Calculate bandwidth utilization
+        const kvCacheSyncTraffic = (kvGiB * 1024) / gpuCount  // MB per GPU for all-reduce
+        const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
+
         // Update total memory to show cluster total
         const totalMemEl = document.getElementById('totalMemory')
         if (totalMemEl) {
+            const bwColor = bandwidthUtilization > 0.8 ? '#FF4444' :
+                           bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+
             totalMemEl.innerHTML = `<strong style="color: #FFD700">${gpuCount}×</strong> ${currentGPU}<br>` +
                                   `Cluster: ${clusterMemory.toFixed(0)} GiB total<br>` +
                                   `Using: ${allocatedGiB.toFixed(1)} GiB (${utilization.toFixed(1)}%)<br>` +
-                                  `Interconnect: ${interconnectType}`
+                                  `Link: ${interconnectType} (${interconnectBW} GB/s)<br>` +
+                                  `<span style="color: ${bwColor}">Bandwidth: ${(bandwidthUtilization * 100).toFixed(1)}% used</span>`
         }
     }
 
@@ -2710,6 +2935,9 @@ if (gpuBtn) {
         // Set appropriate defaults for the new GPU
         setGPUDefaults(currentGPU)
 
+        // Update interconnect button visibility
+        updateInterconnectButton()
+
         // Update UI to reflect new defaults
         updateInfoPanel()
         updateControlStates()
@@ -2730,9 +2958,71 @@ if (gpuCountBtn) {
             currentTokens = 10000
         }
 
+        // Show/hide interconnect button based on GPU count and availability
+        updateInterconnectButton()
+
         // Update info panel to show multi-GPU info
         updateInfoPanel()
     })
+}
+
+// Interconnect control (NVLink vs PCIe)
+const interconnectBtn = document.getElementById('interconnectControl')
+if (interconnectBtn) {
+    interconnectBtn.addEventListener('click', function () {
+        const gpuConfig = gpuConfigs[currentGPU]
+        if (!gpuConfig.nvlink || gpuCount === 1) return
+
+        useHighSpeedInterconnect = !useHighSpeedInterconnect
+
+        // Update button text
+        if (useHighSpeedInterconnect) {
+            let linkName = 'NVLink'
+            if (gpuConfig.ifl) linkName = 'IFL'
+            else if (gpuConfig.tpuInterconnect) linkName = 'TPU Link'
+            else if (gpuConfig.ipuLink) linkName = 'IPU-Link'
+            else if (currentGPU.includes('Intel')) linkName = 'Xe Link'
+
+            this.textContent = `Link: ${linkName}`
+            this.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
+        } else {
+            this.textContent = 'Link: PCIe'
+            this.style.background = ''
+        }
+
+        // Update info panel to reflect bandwidth change
+        updateInfoPanel()
+    })
+}
+
+// Helper function to update interconnect button visibility
+function updateInterconnectButton() {
+    const btn = document.getElementById('interconnectControl')
+    if (!btn) return
+
+    const gpuConfig = gpuConfigs[currentGPU]
+
+    // Show button only if GPU has high-speed interconnect and multiple GPUs selected
+    if (gpuConfig.nvlink && gpuCount > 1) {
+        btn.style.display = ''
+
+        // Set initial text based on current state
+        if (useHighSpeedInterconnect) {
+            let linkName = 'NVLink'
+            if (gpuConfig.ifl) linkName = 'IFL'
+            else if (gpuConfig.tpuInterconnect) linkName = 'TPU Link'
+            else if (gpuConfig.ipuLink) linkName = 'IPU-Link'
+            else if (currentGPU.includes('Intel')) linkName = 'Xe Link'
+
+            btn.textContent = `Link: ${linkName}`
+            btn.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
+        } else {
+            btn.textContent = 'Link: PCIe'
+            btn.style.background = ''
+        }
+    } else {
+        btn.style.display = 'none'
+    }
 }
 
 // Initialize
