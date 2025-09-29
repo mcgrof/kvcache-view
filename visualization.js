@@ -181,7 +181,7 @@ const models = [
 
 let currentModelIndex = 0;
 let currentTokens = 0;
-let maxTokens = 1000000; // 1M context default
+let maxTokens = 128000; // 128K context default (industry standard)
 let animationSpeed = 50;
 let isPlaying = false; // start paused so first click plays
 let particles = [];
@@ -194,11 +194,12 @@ let lastCriticalState = 'none';
 let lastPopupTime = 0;
 const POPUP_COOLDOWN_MS = 10000;
 let includeWeights = true; // Include model weights memory by default
-let batchSize = 1; // Number of concurrent queries per GPU
+let batchSize = 8; // Number of concurrent queries per GPU (modern production default)
 let dataFlowParticles = []; // Particles flowing between HBM and GPU
 let continuousBatching = false; // Enable continuous batching with variable sequence lengths
 let batchSequenceLengths = []; // Array of sequence lengths for each request in batch
 let pagedAttention = false; // Enable paged attention for memory fragmentation visualization
+let flashAttention = false; // Enable Flash Attention for tiled computation and reduced bandwidth
 let sequenceColors = []; // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
@@ -238,12 +239,16 @@ function getCurrentGPUMemGiB() {
 
 // SOTA context length presets
 const contextPresets = {
-    '128K': 128000,     // Standard
-    '200K': 200000,     // Claude 3.5
-    '1M': 1000000,      // Llama 3.1
-    '2M': 2000000,      // Gemini 1.5 Pro
-    '10M': 10000000,    // Research/Magic
-    '100M': 100000000   // Theoretical future
+    '4K': 4096,         // Original GPT-3.5, older models
+    '8K': 8192,         // GPT-4 base
+    '16K': 16384,       // GPT-3.5 Turbo 16K
+    '32K': 32768,       // GPT-4 32K, Claude Instant
+    '100K': 100000,     // Claude 2.1
+    '128K': 128000,     // GPT-4 Turbo, GPT-4o, Llama 3
+    '200K': 200000,     // Claude 3 Opus/Sonnet/Haiku
+    '1M': 1000000,      // Gemini 1.5 Pro (public), Claude 3.5 Sonnet
+    '2M': 2000000,      // Gemini 1.5 Pro (developer preview)
+    '10M': 10000000     // Research frontier (Magic, experimental)
 };
 
 // Data type configurations
@@ -341,6 +346,18 @@ function getSequenceLengthRatio(index, batchSize) {
         0.35, 0.65, 0.05, 0.5, 0.18, 0.7, 0.12, 0.85
     ];
     return pattern[index % pattern.length];
+}
+
+// Calculate attention matrix memory that would be needed without Flash Attention
+function calculateAttentionMatrixSize(sequenceLength, batchSize = 1, dtype = null) {
+    const config = dtypeConfigs[dtype || currentDtype];
+    const bytesPerElement = config.bytes;
+
+    // Attention matrix is seq_len x seq_len for each batch
+    // Without Flash Attention, this needs to be materialized in memory
+    const matrixBytes = sequenceLength * sequenceLength * bytesPerElement * batchSize;
+
+    return matrixBytes / (1024 ** 3); // Convert to GiB
 }
 
 // Calculate total KV cache for batch with continuous batching support
@@ -589,7 +606,7 @@ function drawMemoryGrid() {
     // For continuous batching: show USED memory (current tokens)
     let kvGiB, kvMaxGiB, allocatedGiB;
 
-    if (!continuousBatching && !pagedAttention && batchSize > 0) {
+    if (!continuousBatching && !pagedAttention && batchSize > 1) {
         // Traditional batching: memory is pre-allocated for max context
         kvGiB = calculateBatchKVCache(model, currentTokens); // Actually used
         kvMaxGiB = calculateBatchKVCache(model, maxTokens);  // Max possible
@@ -679,6 +696,135 @@ function drawMemoryGrid() {
 
     // Calculate total memory distribution across ALL HBM modules
     const gpuMemGiB = getCurrentGPUMemGiB();
+
+    // Flash Attention: Show dramatic visualization of attention matrix memory NOT being used
+    if (flashAttention && currentTokens > 0) {
+        const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize);
+        const attentionRatio = Math.min(1.0, attentionMatrixGiB / gpuMemGiB);
+
+        // Draw a large dramatic warning-style indicator showing memory savings
+        ctx.save();
+        const savingsBoxWidth = 350;
+        const savingsBoxHeight = 100;
+        const savingsX = centerX - savingsBoxWidth/2;
+        const savingsY = centerY - 450;
+
+        // Pulsing glow effect around the savings indicator
+        const glowPulse = Math.sin(Date.now() * 0.003) * 20 + 30;
+        ctx.shadowColor = 'rgba(255, 50, 50, 0.8)';
+        ctx.shadowBlur = glowPulse;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Main savings box with gradient
+        const gradient = ctx.createLinearGradient(savingsX, savingsY, savingsX, savingsY + savingsBoxHeight);
+        gradient.addColorStop(0, 'rgba(255, 50, 50, 0.9)');
+        gradient.addColorStop(0.5, 'rgba(255, 80, 80, 0.85)');
+        gradient.addColorStop(1, 'rgba(255, 50, 50, 0.9)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(savingsX, savingsY, savingsBoxWidth, savingsBoxHeight);
+
+        // Border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(savingsX, savingsY, savingsBoxWidth, savingsBoxHeight);
+
+        // Text content
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+        ctx.font = 'bold 24px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⚡ FLASH ATTENTION ACTIVE ⚡', centerX, savingsY + 25);
+
+        ctx.font = 'bold 32px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 100, 1)';
+        ctx.fillText(`${attentionMatrixGiB.toFixed(1)} GiB`, centerX, savingsY + 55);
+
+        ctx.font = 'bold 16px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillText('MEMORY SAVED', centerX, savingsY + 80);
+
+        ctx.restore();
+
+        // Draw prominent ghost memory blocks showing what WOULD be used without Flash Attention
+        for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
+            const hbm = hbmModules[i];
+            const w = hbm.width || hbmWidth;
+            const h = hbm.height || hbmHeight;
+
+            // Calculate how much of this HBM would be consumed by attention matrix
+            const ghostHeight = Math.min(h, h * attentionRatio * activeHBMs);
+
+            // Draw thick red border around what would be used
+            const borderPulse = Math.sin(Date.now() * 0.002) * 0.2 + 0.5;
+            ctx.strokeStyle = `rgba(255, 50, 50, ${borderPulse})`;
+            ctx.lineWidth = 4;
+            ctx.setLineDash([15, 10]);
+            ctx.strokeRect(hbm.x - 2, hbm.y - 2, w + 4, ghostHeight + 4);
+            ctx.setLineDash([]);
+
+            // Semi-transparent red overlay
+            const pulse = Math.sin(Date.now() * 0.002) * 0.1 + 0.25;
+            ctx.fillStyle = `rgba(255, 50, 50, ${pulse})`;
+            ctx.fillRect(hbm.x, hbm.y, w, ghostHeight);
+
+            // Draw diagonal stripes to show it's saved/eliminated
+            ctx.save();
+            const region = new Path2D();
+            region.rect(hbm.x, hbm.y, w, ghostHeight);
+            ctx.clip(region);
+
+            ctx.strokeStyle = `rgba(255, 100, 100, 0.4)`;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 8]);
+
+            // Diagonal stripes
+            for (let stripe = -h; stripe < w + h; stripe += 20) {
+                ctx.beginPath();
+                ctx.moveTo(hbm.x + stripe, hbm.y);
+                ctx.lineTo(hbm.x + stripe + ghostHeight, hbm.y + ghostHeight);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+            ctx.setLineDash([]);
+
+            // Draw "WOULD BE USED" text on each HBM module
+            if (ghostHeight > 30) {
+                ctx.save();
+                ctx.font = 'bold 10px monospace';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('SAVED', hbm.x + w/2, hbm.y + ghostHeight/2);
+                ctx.restore();
+            }
+        }
+
+        // Draw arrows pointing from the savings box to the HBM modules
+        if (activeHBMs >= 2) {
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+
+            // Left arrow
+            ctx.beginPath();
+            ctx.moveTo(savingsX, savingsY + savingsBoxHeight);
+            ctx.lineTo(hbmModules[0].x + (hbmModules[0].width || hbmWidth)/2, hbmModules[0].y - 10);
+            ctx.stroke();
+
+            // Right arrow if we have enough HBM modules
+            if (activeHBMs > 2) {
+                ctx.beginPath();
+                ctx.moveTo(savingsX + savingsBoxWidth, savingsY + savingsBoxHeight);
+                ctx.lineTo(hbmModules[2].x + (hbmModules[2].width || hbmWidth)/2, hbmModules[2].y - 10);
+                ctx.stroke();
+            }
+
+            ctx.setLineDash([]);
+        }
+    }
 
     // Draw HBM modules
     for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
@@ -823,39 +969,82 @@ function drawMemoryGrid() {
                             ctx.lineWidth = 0.5;
                             ctx.strokeRect(x, y, bankSize, bankSize);
                         } else {
-                            // KV cache with paging
-                            // Simulate fragmentation - some blocks are non-contiguous
+                            // KV cache with paging - show smaller page blocks
+                            // Industry standard: vLLM uses 16 tokens per page, we visualize this with smaller blocks
                             const kvBankIndex = bankIndex - weightBanks;
                             const kvTotalBanks = filledBanks - weightBanks;
-                            const isFragmented = Math.random() < 0.15 && kvBankIndex > kvTotalBanks * 0.3;
 
-                            if (isFragmented) {
-                                // Show as empty (fragmented)
-                                ctx.strokeStyle = 'rgba(255, 100, 100, 0.3)';
-                                ctx.lineWidth = 0.5;
-                                ctx.strokeRect(x, y, bankSize, bankSize);
-                            } else {
-                                // Filled with paged blocks
-                                if (batchSize > 1 && kvTotalBanks > 0) {
-                                    // Use sequence colors with paging for multiple batches
-                                    const banksPerBatch = Math.ceil(kvTotalBanks / batchSize);
-                                    const batchNum = Math.floor(kvBankIndex / banksPerBatch);
+                            if (kvBankIndex < kvTotalBanks) {
+                                // Each visual "bank" can hold 4 pages (2x2 grid)
+                                // Calculate how many pages are actually used in this bank
+                                const PAGES_PER_BANK = 4;
+                                const totalPagesNeeded = Math.ceil((kvTotalBanks * PAGES_PER_BANK * usageRatioWithinAllocation));
+                                const currentBankStartPage = kvBankIndex * PAGES_PER_BANK;
+                                const pagesInThisBank = Math.min(PAGES_PER_BANK, Math.max(0, totalPagesNeeded - currentBankStartPage));
 
-                                    const color = sequenceColors[batchNum % sequenceColors.length];
-                                    const r = parseInt(color.substr(1,2), 16);
-                                    const g = parseInt(color.substr(3,2), 16);
-                                    const b = parseInt(color.substr(5,2), 16);
-                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.8})`;
-                                } else {
-                                    // Standard paged color for KV cache (single batch)
-                                    ctx.fillStyle = `rgba(100, 200, 255, ${pulse})`;
+                                // Distribute pages across sequences using a deterministic interleaved pattern
+                                // This simulates how pages from different sequences can be mixed in memory
+                                const pagePattern = [0, 2, 1, 3, 0, 4, 2, 5, 1, 6, 3, 7, 4, 5, 6, 7];
+
+                                // Draw each page slot in the bank
+                                const subPageSize = bankSize / 2 - 1;
+                                let pageIndex = 0;
+
+                                for (let py = 0; py < 2; py++) {
+                                    for (let px = 0; px < 2; px++) {
+                                        const subX = x + px * (subPageSize + 1);
+                                        const subY = y + py * (subPageSize + 1);
+
+                                        if (pageIndex < pagesInThisBank) {
+                                            // This page is allocated - determine which sequence owns it
+                                            const globalPageIndex = currentBankStartPage + pageIndex;
+                                            const sequenceIndex = pagePattern[globalPageIndex % pagePattern.length] % batchSize;
+
+                                            const color = sequenceColors[sequenceIndex % sequenceColors.length];
+                                            const r = parseInt(color.substr(1,2), 16);
+                                            const g = parseInt(color.substr(3,2), 16);
+                                            const b = parseInt(color.substr(5,2), 16);
+
+                                            // Filled page with sequence color
+                                            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.8})`;
+                                            ctx.fillRect(subX, subY, subPageSize, subPageSize);
+
+                                            // Flash Attention: Draw tile grid overlay
+                                            if (flashAttention) {
+                                                const tileGridSize = subPageSize / 2;
+                                                ctx.strokeStyle = 'rgba(255, 220, 0, 0.4)';
+                                                ctx.lineWidth = 0.5;
+
+                                                // Draw tile grid
+                                                for (let tg = 1; tg < 2; tg++) {
+                                                    // Vertical line
+                                                    ctx.beginPath();
+                                                    ctx.moveTo(subX + tg * tileGridSize, subY);
+                                                    ctx.lineTo(subX + tg * tileGridSize, subY + subPageSize);
+                                                    ctx.stroke();
+
+                                                    // Horizontal line
+                                                    ctx.beginPath();
+                                                    ctx.moveTo(subX, subY + tg * tileGridSize);
+                                                    ctx.lineTo(subX + subPageSize, subY + tg * tileGridSize);
+                                                    ctx.stroke();
+                                                }
+                                            }
+
+                                            // Page border
+                                            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                                            ctx.lineWidth = 0.5;
+                                            ctx.strokeRect(subX, subY, subPageSize, subPageSize);
+                                        } else {
+                                            // This page slot is empty
+                                            ctx.strokeStyle = 'rgba(100, 150, 200, 0.15)';
+                                            ctx.lineWidth = 0.5;
+                                            ctx.strokeRect(subX, subY, subPageSize, subPageSize);
+                                        }
+
+                                        pageIndex++;
+                                    }
                                 }
-                                ctx.fillRect(x, y, bankSize, bankSize);
-
-                                // Draw page border
-                                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                                ctx.lineWidth = 0.5;
-                                ctx.strokeRect(x, y, bankSize, bankSize);
                             }
                         }
                     } else {
@@ -908,32 +1097,49 @@ function drawMemoryGrid() {
                                 // Usage ratio is based on current tokens vs max tokens
                                 const usedBanksInBatch = Math.floor(maxBanksPerBatch * usageRatioWithinAllocation);
 
-                                const color = sequenceColors[batchNum % sequenceColors.length];
+                                // Ensure batchNum doesn't exceed actual batch count
+                                const actualBatchNum = Math.min(batchNum, batchSize - 1);
+
+                                const color = sequenceColors[actualBatchNum % sequenceColors.length];
                                 const r = parseInt(color.substr(1,2), 16);
                                 const g = parseInt(color.substr(3,2), 16);
                                 const b = parseInt(color.substr(5,2), 16);
 
-                                if (batchNum < batchSize) {
-                                    if (bankInBatch < usedBanksInBatch) {
-                                        // Actually used memory - full bright color
-                                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
-                                    } else {
-                                        // Pre-allocated but unused - very dim to show it's reserved
-                                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.15})`;
-                                    }
-                                    ctx.fillRect(x, y, bankSize, bankSize);
-
-                                    // Show allocation boundaries more subtly
-                                    if (bankInBatch === 0) {
-                                        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
-                                        ctx.lineWidth = 1.5;
-                                        ctx.strokeRect(x-1, y, bankSize+2, bankSize);
-                                    }
+                                if (bankInBatch < usedBanksInBatch) {
+                                    // Actually used memory - full bright color
+                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
                                 } else {
-                                    // Banks beyond current batch count - completely unused
-                                    ctx.strokeStyle = 'rgba(100, 150, 200, 0.1)';
+                                    // Pre-allocated but unused - very dim to show it's reserved
+                                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.15})`;
+                                }
+                                ctx.fillRect(x, y, bankSize, bankSize);
+
+                                // Flash Attention: Draw tile grid overlay for traditional batching
+                                if (flashAttention && bankInBatch < usedBanksInBatch) {
+                                    const tileSize = bankSize / 3;
+                                    ctx.strokeStyle = 'rgba(255, 220, 0, 0.3)';
                                     ctx.lineWidth = 0.5;
-                                    ctx.strokeRect(x, y, bankSize, bankSize);
+
+                                    for (let ti = 1; ti < 3; ti++) {
+                                        // Vertical lines
+                                        ctx.beginPath();
+                                        ctx.moveTo(x + ti * tileSize, y);
+                                        ctx.lineTo(x + ti * tileSize, y + bankSize);
+                                        ctx.stroke();
+
+                                        // Horizontal lines
+                                        ctx.beginPath();
+                                        ctx.moveTo(x, y + ti * tileSize);
+                                        ctx.lineTo(x + bankSize, y + ti * tileSize);
+                                        ctx.stroke();
+                                    }
+                                }
+
+                                // Show allocation boundaries more subtly
+                                if (bankInBatch === 0) {
+                                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
+                                    ctx.lineWidth = 1.5;
+                                    ctx.strokeRect(x-1, y, bankSize+2, bankSize);
                                 }
                             } else {
                                 // Single batch or fallback - use standard blue
@@ -1002,11 +1208,13 @@ function drawMemoryGrid() {
             ctx.globalAlpha = 1;
 
             // Generate data flow particles for active HBM modules
-            if (Math.random() < 0.1 * moduleFillRatio && isPlaying) {
+            // Flash Attention reduces bandwidth by 10-100x
+            const particleRate = flashAttention ? 0.01 : 0.1;
+            if (Math.random() < particleRate * moduleFillRatio && isPlaying) {
                 dataFlowParticles.push(new DataFlowParticle(
                     startX, startY, endX, endY,
-                    model.color,
-                    0.02 + Math.random() * 0.02
+                    flashAttention ? '#FFD700' : model.color,  // Gold particles for Flash Attention
+                    flashAttention ? 0.01 : (0.02 + Math.random() * 0.02)  // Slower particles for Flash Attention
                 ));
             }
         }
@@ -1020,6 +1228,109 @@ function drawMemoryGrid() {
     gradient.addColorStop(1, 'rgba(60, 70, 90, 0.95)');
     ctx.fillStyle = gradient;
     ctx.fillRect(dieX, dieY, dieWidth, dieHeight);
+
+    // Flash Attention: Draw SRAM/L2 Cache visualization inside GPU die
+    if (flashAttention) {
+        // Calculate and display attention matrix memory savings
+        const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize);
+
+        // Show tiled computation visualization in GPU die
+        ctx.save();
+
+        // Draw small tiles to represent Flash Attention's tiled computation
+        const flashTileSize = 8;
+        const tilesX = Math.floor((dieWidth - 40) / (flashTileSize + 2));
+        const tilesY = Math.floor((dieHeight - 80) / (flashTileSize + 2));
+        const startX = dieX + 20;
+        const startY = dieY + 60;
+
+        // Animate tiles to show computation flowing
+        const animPhase = (Date.now() / 100) % (tilesX + tilesY);
+
+        for (let ty = 0; ty < tilesY; ty++) {
+            for (let tx = 0; tx < tilesX; tx++) {
+                const x = startX + tx * (flashTileSize + 2);
+                const y = startY + ty * (flashTileSize + 2);
+
+                // Create wave effect for tiles
+                const distance = tx + ty;
+                const isActive = Math.abs(distance - animPhase) < 3;
+
+                if (isActive) {
+                    // Active tile - bright green
+                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)';
+                    ctx.fillRect(x, y, flashTileSize, flashTileSize);
+                    ctx.strokeStyle = 'rgba(150, 255, 150, 1)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x, y, flashTileSize, flashTileSize);
+                } else {
+                    // Inactive tile - dim
+                    ctx.strokeStyle = 'rgba(100, 150, 100, 0.3)';
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(x, y, flashTileSize, flashTileSize);
+                }
+            }
+        }
+
+        // Labels inside GPU die
+        ctx.fillStyle = 'rgba(100, 255, 100, 0.9)';
+        ctx.font = 'bold 14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡ TILED COMPUTATION ⚡', centerX, dieY + 30);
+        ctx.font = '11px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.fillText(`O(1) memory instead of O(n²)`, centerX, dieY + 48);
+
+        ctx.restore();
+
+        const cacheX = dieX + dieWidth/2 - 60;
+        const cacheY = dieY + dieHeight/2 - 40;
+        const cacheWidth = 120;
+        const cacheHeight = 80;
+
+        // Cache background with gradient
+        const cacheGradient = ctx.createLinearGradient(cacheX, cacheY, cacheX + cacheWidth, cacheY + cacheHeight);
+        cacheGradient.addColorStop(0, 'rgba(255, 200, 0, 0.2)');
+        cacheGradient.addColorStop(0.5, 'rgba(255, 220, 0, 0.3)');
+        cacheGradient.addColorStop(1, 'rgba(255, 200, 0, 0.2)');
+        ctx.fillStyle = cacheGradient;
+        ctx.fillRect(cacheX, cacheY, cacheWidth, cacheHeight);
+
+        // Draw cache tiles (representing tiled computation)
+        const cacheTileSize = 15;
+        const tilePadding = 3;
+        const cacheTilesX = Math.floor(cacheWidth / (cacheTileSize + tilePadding));
+        const cacheTilesY = Math.floor(cacheHeight / (cacheTileSize + tilePadding));
+
+        // Animate tiles with wave pattern
+        const waveOffset = Date.now() * 0.002;
+
+        for (let ty = 0; ty < cacheTilesY; ty++) {
+            for (let tx = 0; tx < cacheTilesX; tx++) {
+                const x = cacheX + 10 + tx * (cacheTileSize + tilePadding);
+                const y = cacheY + 10 + ty * (cacheTileSize + tilePadding);
+
+                // Wave animation for tile access pattern
+                const wave = Math.sin(waveOffset + tx * 0.5 + ty * 0.3) * 0.5 + 0.5;
+                const alpha = 0.3 + wave * 0.5;
+
+                ctx.fillStyle = `rgba(255, 220, 0, ${alpha})`;
+                ctx.fillRect(x, y, cacheTileSize, cacheTileSize);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cacheTileSize, cacheTileSize);
+            }
+        }
+
+        // Cache label
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('SRAM CACHE', cacheX + cacheWidth/2, cacheY - 5);
+        ctx.font = '9px monospace';
+        ctx.fillText('(Tiled Access)', cacheX + cacheWidth/2, cacheY + cacheHeight + 12);
+    }
 
     // Die border
     ctx.strokeStyle = 'rgba(150, 200, 255, 0.5)';
@@ -1264,6 +1575,48 @@ function updateFactoid() {
     currentFactoidIndex++;
 }
 
+// Update paper references in dedicated box
+function updatePaperReferences() {
+    const paperRefsBoxEl = document.getElementById('paperRefsBox');
+    const paperLinksEl = document.getElementById('paperRefsLinks');
+
+    if (paperRefsBoxEl && paperLinksEl) {
+        const papers = [];
+
+        if (continuousBatching) {
+            papers.push('<a href="https://www.usenix.org/system/files/osdi22-yu-gyeong.pdf" target="_blank">📄 Continuous Batching: Orca (OSDI\'22)</a>');
+        }
+
+        if (pagedAttention) {
+            papers.push('<a href="https://arxiv.org/abs/2309.06180" target="_blank">📄 Paged Attention: vLLM (arXiv:2309.06180)</a>');
+        }
+
+        if (flashAttention) {
+            papers.push('<a href="https://arxiv.org/abs/2205.14135" target="_blank">📄 FlashAttention: Dao et al. (arXiv:2205.14135)</a>');
+            papers.push('<a href="https://arxiv.org/abs/2307.08691" target="_blank">📄 FlashAttention-2 (arXiv:2307.08691)</a>');
+        }
+
+        if (papers.length > 0) {
+            paperLinksEl.innerHTML = papers.join('\n');
+            paperRefsBoxEl.style.display = 'block';
+            paperRefsBoxEl.classList.add('show');
+
+            // Position it below the efficiency box
+            const efficiencyBoxEl = document.getElementById('efficiencyBox');
+            if (efficiencyBoxEl) {
+                const efficiencyRect = efficiencyBoxEl.getBoundingClientRect();
+                paperRefsBoxEl.style.top = (efficiencyRect.bottom + 20) + 'px';
+                paperRefsBoxEl.style.left = efficiencyRect.left + 'px';
+            }
+        } else {
+            paperRefsBoxEl.classList.remove('show');
+            setTimeout(() => {
+                paperRefsBoxEl.style.display = 'none';
+            }, 300); // Wait for fade animation
+        }
+    }
+}
+
 // Update info panel
 function updateInfoPanel() {
     const model = models[currentModelIndex];
@@ -1273,7 +1626,7 @@ function updateInfoPanel() {
 
     // For traditional batching, show allocated vs used
     let totalGiB, allocatedGiB;
-    if (!continuousBatching && !pagedAttention && batchSize > 0) {
+    if (!continuousBatching && !pagedAttention && batchSize > 1) {
         allocatedGiB = kvMaxGiB + weightsGiB; // Pre-allocated for max context
         totalGiB = kvGiB + weightsGiB; // Actually used
     } else {
@@ -1285,36 +1638,67 @@ function updateInfoPanel() {
 
     document.getElementById('modelName').textContent = model.name;
     document.getElementById('contextLength').textContent = `${formatNumber(Math.floor(currentTokens))} tokens`;
+
+    // Show allocation unit size
+    const allocationEl = document.getElementById('allocationUnit');
+    if (allocationEl) {
+        if (flashAttention && pagedAttention) {
+            // Flash Attention with paged: tiles within pages
+            allocationEl.textContent = '4×4 tiles/page';
+        } else if (flashAttention) {
+            // Flash Attention: computation tiles
+            allocationEl.textContent = '64×64 tiles';
+        } else if (pagedAttention) {
+            // Industry standard: vLLM uses 16 tokens per page
+            allocationEl.textContent = '16 tokens/page';
+        } else {
+            // Without paged attention: large contiguous blocks
+            allocationEl.textContent = '2MB blocks';
+        }
+    }
+
     const weightsEl = document.getElementById('weightsSize');
     const totalEl = document.getElementById('totalSize');
     if (weightsEl) weightsEl.textContent = includeWeights ? formatMemory(weightsGiB) : '—';
     if (totalEl) {
-        if (!continuousBatching && !pagedAttention && batchSize > 0) {
+        // Always use innerHTML to maintain consistent height with potential two-line layout
+        if (flashAttention && currentTokens > 0) {
+            const attentionMatrixGiB = calculateAttentionMatrixSize(currentTokens, batchSize);
+            const withoutFlashGiB = totalGiB + attentionMatrixGiB;
+            const savingsPercent = Math.round((attentionMatrixGiB / withoutFlashGiB) * 100);
+            totalEl.innerHTML = `<div style="min-height: 32px;"><span style="color: #4f4;">${formatMemory(totalGiB)}</span> <span style="color: #f88; text-decoration: line-through; font-size: 0.85em;">${formatMemory(withoutFlashGiB)}</span><br><small style="color: #4f4;">-${savingsPercent}% with Flash!</small></div>`;
+        } else if (!continuousBatching && !pagedAttention && batchSize > 1) {
             // Traditional batching: show allocated vs used
             const usagePercent = Math.round((totalGiB / allocatedGiB) * 100);
-            const kvPerQueryAlloc = kvMaxGiB / batchSize;
-            const kvPerQueryUsed = kvGiB / batchSize;
-            if (batchSize > 1) {
-                totalEl.textContent = `${formatMemory(allocatedGiB)} allocated (${usagePercent}% used: ${formatMemory(totalGiB)})`;
-            } else {
-                totalEl.textContent = `${formatMemory(allocatedGiB)} allocated (${usagePercent}% used)`;
-            }
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(allocatedGiB)} (${usagePercent}% used)</div>`;
         } else if (continuousBatching && batchSize > 1) {
-            // Show average sequence length for continuous batching
-            const avgSeqLen = batchSequenceLengths.reduce((a, b) => a + b, 0) / batchSequenceLengths.length;
-            if (includeWeights) {
-                totalEl.textContent = `${formatMemory(totalGiB)} (${formatMemory(weightsGiB)} weights + ${formatMemory(kvGiB)} CB-KV)`;
-            } else {
-                totalEl.textContent = `${formatMemory(totalGiB)} (CB: ${batchSize} reqs, avg ${Math.floor(avgSeqLen)} tok)`;
-            }
-        } else if (batchSize > 1) {
-            const kvPerQuery = kvGiB / batchSize;
-            totalEl.textContent = `${formatMemory(totalGiB)} (${formatMemory(weightsGiB)} weights + ${batchSize}×${formatMemory(kvPerQuery)} KV)`;
+            // Continuous batching - just show total
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)} (CB)</div>`;
+        } else if (pagedAttention) {
+            // Paged attention - just show total
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)} (paged)</div>`;
         } else {
-            totalEl.textContent = formatMemory(totalGiB);
+            totalEl.innerHTML = `<div style="min-height: 32px;">${formatMemory(totalGiB)}</div>`;
         }
     }
     document.getElementById('cacheSize').textContent = formatMemory(kvGiB);
+
+    // Dynamically position efficiency box below info panel
+    const infoPanelEl = document.querySelector('.info-panel');
+    const efficiencyBoxEl = document.getElementById('efficiencyBox');
+    if (infoPanelEl && efficiencyBoxEl) {
+        const infoPanelRect = infoPanelEl.getBoundingClientRect();
+        const infoPanelBottom = infoPanelRect.bottom;
+
+        // Position efficiency box 20px below the info panel
+        efficiencyBoxEl.style.top = (infoPanelBottom + 20) + 'px';
+
+        // Also align it horizontally with the info panel
+        efficiencyBoxEl.style.left = infoPanelRect.left + 'px';
+    }
+
+    // Update paper references (positioned below efficiency box)
+    updatePaperReferences();
 
     // Update GPU display to show batch processing info
     const gpuText = batchSize > 1
@@ -1617,6 +2001,20 @@ if (paBtn) {
     });
 }
 
+// Flash Attention toggle
+const faBtn = document.getElementById('faToggle');
+if (faBtn) {
+    faBtn.addEventListener('click', function() {
+        flashAttention = !flashAttention;
+        const spanEl = this.querySelector('span:first-child');
+        if (spanEl) {
+            spanEl.textContent = flashAttention ? 'FA: ON' : 'FA: OFF';
+        }
+        this.classList.toggle('active', flashAttention);
+        updateInfoPanel();
+    });
+}
+
 document.getElementById('speedControl').addEventListener('click', function() {
     const speeds = [0.5, 1, 2, 5, 10, 20, 50, 100];
     const currentIndex = speeds.indexOf(animationSpeed);
@@ -1707,7 +2105,10 @@ if (gpuBtn) {
 }
 
 // Initialize
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    updateInfoPanel(); // Reposition efficiency box on resize
+});
 resizeCanvas();
 initWaves();
 
