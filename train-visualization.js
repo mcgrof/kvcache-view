@@ -32,9 +32,9 @@ const models = [
     { name: 'Llama-3.1-405B', params: 405, layers: 126, hidden: 16384, heads: 128 }
 ];
 
-let currentModelIndex = 2; // Start with Llama-8B
-let batchSize = 4;
-let sequenceLength = 2048;
+let currentModelIndex = 0; // Start with Llama-1B - fits in memory
+let batchSize = 2;  // Smaller batch to start
+let sequenceLength = 1024;  // Shorter sequence to start
 let accumulationSteps = 1;
 
 // Optimizer configurations
@@ -47,9 +47,9 @@ const optimizers = {
 };
 let currentOptimizer = 'Adam';
 
-// Training optimizations
-let gradientCheckpointing = false;
-let mixedPrecision = false;
+// Training optimizations - start with some enabled to show their benefit
+let gradientCheckpointing = true;  // Enabled by default to reduce memory
+let mixedPrecision = true;  // Enabled by default - standard practice
 let zeroOptimization = 0; // 0=off, 1=ZeRO-1, 2=ZeRO-2, 3=ZeRO-3
 let fullyShardedDataParallel = false;
 let gradientAccumulation = false;

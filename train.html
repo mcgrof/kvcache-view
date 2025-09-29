@@ -341,18 +341,18 @@
     <div class="controls">
         <button id="playPause">▶️ Start Training</button>
         <button id="speedControl">Speed: 1x</button>
-        <button id="modelControl">Model: Llama-8B</button>
-        <button id="batchControl">Batch: 4</button>
-        <button id="seqControl">Seq: 2048</button>
+        <button id="modelControl">Model: Llama-1B</button>
+        <button id="batchControl">Batch: 2</button>
+        <button id="seqControl">Seq: 1024</button>
         <button id="optimizerControl">Optimizer: Adam</button>
 
-        <button id="gcToggle" class="btn-two-line" title="Gradient Checkpointing - trade compute for memory">
-            <span>GC: OFF</span>
+        <button id="gcToggle" class="btn-two-line enabled" title="Gradient Checkpointing - trade compute for memory">
+            <span>GC: ON</span>
             <span class="caption">grad checkpoint</span>
         </button>
 
-        <button id="mpToggle" class="btn-two-line" title="Mixed Precision - FP16 compute with FP32 master weights">
-            <span>MP: OFF</span>
+        <button id="mpToggle" class="btn-two-line enabled" title="Mixed Precision - FP16 compute with FP32 master weights">
+            <span>MP: ON</span>
             <span class="caption">mixed precision</span>
         </button>
 
