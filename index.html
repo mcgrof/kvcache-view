@@ -775,6 +775,9 @@
 
         
         // Position factoid panel centered above the GPU architecture visualization
+        // Cache the last visibility state to prevent flicker
+        let lastFactoidVisibility = null;
+
         function positionFactoidPanel() {
             const panel = document.getElementById('factoidPanel');
             const infoPanel = document.querySelector('.info-panel');
@@ -782,6 +785,13 @@
             const efficiencyBox = document.getElementById('efficiencyBox');
             const canvasEl = document.getElementById('canvas');
             if (!panel || !infoPanel || !canvasEl) return;
+
+            // Always hide factoid when paper refs box is visible
+            if (paperRefsBox && paperRefsBox.style.display !== 'none' && paperRefsBox.classList.contains('show')) {
+                panel.style.display = 'none';
+                lastFactoidVisibility = false;
+                return;
+            }
 
             // Check what's the lowest element we need to avoid
             let lowestElementBottom = infoPanel.getBoundingClientRect().bottom;
@@ -792,29 +802,28 @@
                 lowestElementBottom = Math.max(lowestElementBottom, effBottom);
             }
 
-            // Check if paper refs box is visible and lower
-            if (paperRefsBox && paperRefsBox.style.display !== 'none') {
-                const paperBottom = paperRefsBox.getBoundingClientRect().bottom;
-                lowestElementBottom = Math.max(lowestElementBottom, paperBottom);
-            }
-
             // Check if there's enough vertical space between lowest element and URLs
             const urlsTop = window.innerHeight - 80; // URLs are at bottom + their height
             const availableSpace = urlsTop - lowestElementBottom;
             const panelHeight = panel.offsetHeight || 80; // Smaller expected height
 
-            // Hide factoid if not enough space (need at least panel height + 20px padding)
-            if (availableSpace < panelHeight + 20) {
-                panel.style.display = 'none';
-                return;
-            }
+            // Add hysteresis: only change visibility if there's a significant difference (40px buffer)
+            const shouldShow = availableSpace >= panelHeight + 40;
+            const shouldHide = availableSpace < panelHeight + 20;
 
-            // Show and position factoid panel
-            panel.style.display = 'block';
-            panel.style.left = '40px';
-            panel.style.bottom = '80px'; // Just above URLs
-            panel.style.right = 'auto';
-            panel.style.top = 'auto';
+            // Only change visibility if crossing the threshold significantly
+            if (shouldHide && lastFactoidVisibility !== false) {
+                panel.style.display = 'none';
+                lastFactoidVisibility = false;
+            } else if (shouldShow && lastFactoidVisibility !== true) {
+                panel.style.display = 'block';
+                panel.style.left = '40px';
+                panel.style.bottom = '80px'; // Just above URLs
+                panel.style.right = 'auto';
+                panel.style.top = 'auto';
+                lastFactoidVisibility = true;
+            }
+            // If in the buffer zone (20-40px), keep the current state
         }
 
         // Position datacenter note centered below the GPU architecture
@@ -852,8 +861,7 @@
         setTimeout(positionFactoidPanel, 240);
         setTimeout(positionDatacenterNote, 260);
 
-        // Also reposition on info panel updates
-        setInterval(positionFactoidPanel, 500);
+        // Don't use interval - let visualization.js call when needed
     </script>
 </body>
 </html>

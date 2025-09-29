@@ -204,31 +204,31 @@ let sequenceColors = []; // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA
-    'RTX 4090 24G':   { memGiB: 24,  label: 'RTX 4090 24G' },
-    'L40S 48G':       { memGiB: 48,  label: 'L40S 48G' },
-    'A100 40G':       { memGiB: 40,  label: 'A100 40G' },
-    'A100 80G':       { memGiB: 80,  label: 'A100 80G' },
-    'H100 80G':       { memGiB: 80,  label: 'H100 80G' },
-    'H200 141G':      { memGiB: 141, label: 'H200 141G' },
+    'RTX 4090 24G':   { memGiB: 24,  label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64 },
+    'L40S 48G':       { memGiB: 48,  label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
+    'A100 40G':       { memGiB: 40,  label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
+    'A100 80G':       { memGiB: 80,  label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
+    'H100 80G':       { memGiB: 80,  label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128 },
+    'H200 141G':      { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128 },
     // AMD Radeon Pro (workstation)
-    'AMD W7800 32G':  { memGiB: 32,  label: 'AMD W7800 32G' },
-    'AMD W7900 48G':  { memGiB: 48,  label: 'AMD W7900 48G' },
+    'AMD W7800 32G':  { memGiB: 32,  label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64 },
+    'AMD W7900 48G':  { memGiB: 48,  label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
     // AMD Instinct (data center)
-    'AMD MI210 64G':  { memGiB: 64,  label: 'AMD MI210 64G' },
-    'AMD MI250X 128G':{ memGiB: 128, label: 'AMD MI250X 128G' },
-    'AMD MI300X 192G':{ memGiB: 192, label: 'AMD MI300X 192G' },
+    'AMD MI210 64G':  { memGiB: 64,  label: 'AMD MI210 64G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
+    'AMD MI250X 128G':{ memGiB: 128, label: 'AMD MI250X 128G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
+    'AMD MI300X 192G':{ memGiB: 192, label: 'AMD MI300X 192G', memType: 'HBM3', l2Cache: 256, flashTileSize: 128 },
     // Intel (GPU + AI accelerators)
-    'Intel Arc A770 16G':   { memGiB: 16,  label: 'Intel Arc A770 16G' },
-    'Intel Max 1550 128G':  { memGiB: 128, label: 'Intel Max 1550 128G' },
-    'Intel Gaudi2 96G':     { memGiB: 96,  label: 'Intel Gaudi2 96G' },
+    'Intel Arc A770 16G':   { memGiB: 16,  label: 'Intel Arc A770 16G', memType: 'GDDR6', l2Cache: 16, flashTileSize: 32 },
+    'Intel Max 1550 128G':  { memGiB: 128, label: 'Intel Max 1550 128G', memType: 'HBM2e', l2Cache: 408, flashTileSize: 128 },
+    'Intel Gaudi2 96G':     { memGiB: 96,  label: 'Intel Gaudi2 96G', memType: 'HBM2e', l2Cache: 48, flashTileSize: 64 },
     // Google TPU (approx per-chip HBM)
-    'Google TPU v3 16G':    { memGiB: 16,  label: 'Google TPU v3 16G' },
-    'Google TPU v4 32G':    { memGiB: 32,  label: 'Google TPU v4 32G' },
+    'Google TPU v3 16G':    { memGiB: 16,  label: 'Google TPU v3 16G', memType: 'HBM2', l2Cache: 16, flashTileSize: 64 },
+    'Google TPU v4 32G':    { memGiB: 32,  label: 'Google TPU v4 32G', memType: 'HBM2', l2Cache: 32, flashTileSize: 128 },
     // Graphcore and Cerebras
-    'Graphcore IPU Mk2 0.9G': { memGiB: 0.9, label: 'Graphcore IPU Mk2 0.9G' },
-    'Cerebras WSE-2 40G':   { memGiB: 40,  label: 'Cerebras WSE-2 40G' },
+    'Graphcore IPU Mk2 0.9G': { memGiB: 0.9, label: 'Graphcore IPU Mk2 0.9G', memType: 'SRAM', l2Cache: 900, flashTileSize: 256 },
+    'Cerebras WSE-2 40G':   { memGiB: 40,  label: 'Cerebras WSE-2 40G', memType: 'SRAM', l2Cache: 40960, flashTileSize: 512 },
     // Qualcomm Cloud AI
-    'Qualcomm Cloud AI 100 32G': { memGiB: 32, label: 'Qualcomm Cloud AI 100 32G' }
+    'Qualcomm Cloud AI 100 32G': { memGiB: 32, label: 'Qualcomm Cloud AI 100 32G', memType: 'LPDDR5', l2Cache: 32, flashTileSize: 64 }
 };
 let currentGPU = 'H100 80G';
 
@@ -352,10 +352,25 @@ function getSequenceLengthRatio(index, batchSize) {
 function calculateAttentionMatrixSize(sequenceLength, batchSize = 1, dtype = null) {
     const config = dtypeConfigs[dtype || currentDtype];
     const bytesPerElement = config.bytes;
+    const model = models[currentModelIndex];
 
-    // Attention matrix is seq_len x seq_len for each batch
-    // Without Flash Attention, this needs to be materialized in memory
-    const matrixBytes = sequenceLength * sequenceLength * bytesPerElement * batchSize;
+    // Attention matrix: [batch_size, num_heads, seq_len, seq_len]
+    // Flash Attention saves the memory of materializing intermediate attention scores
+    const numHeads = model.heads || 32; // Default for most models
+
+    // More realistic calculation: attention scores held during computation
+    // We don't materialize the full attention matrix for all heads simultaneously
+    // Scale by GPU cache efficiency and model architecture
+    const currentGPUConfig = gpuConfigs[currentGPU];
+    const cacheEfficiency = currentGPUConfig ? Math.min(2, currentGPUConfig.l2Cache / 40) : 1;
+
+    // Base attention memory per head (what needs to be stored temporarily)
+    const baseAttentionBytes = sequenceLength * sequenceLength * bytesPerElement * batchSize;
+
+    // Scale by effective heads that would be computed simultaneously
+    const effectiveHeads = Math.min(numHeads, Math.max(1, cacheEfficiency));
+
+    const matrixBytes = baseAttentionBytes * effectiveHeads * 0.25; // 25% efficiency factor
 
     return matrixBytes / (1024 ** 3); // Convert to GiB
 }
@@ -639,34 +654,47 @@ function drawMemoryGrid() {
     const dieX = centerX - dieWidth / 2;
     const dieY = centerY - dieHeight / 2;
 
-    // HBM Module dimensions
-    const hbmWidth = 60;
-    const hbmHeight = 240;
-    const hbmGap = 30; // Gap between HBM and die
+    // Memory Module dimensions (HBM, GDDR, etc.)
+    const memWidth = 60;
+    const memHeight = 240;
+    const memGap = 30; // Gap between memory and die
 
-    // Calculate HBM positions (4 modules on each side for high-end GPUs)
-    const hbmModules = [
-        // Left side HBM stacks
-        { x: dieX - hbmGap - hbmWidth, y: centerY - hbmHeight/2, side: 'left', index: 0 },
-        { x: dieX - hbmGap - hbmWidth*2 - 10, y: centerY - hbmHeight/2, side: 'left', index: 1 },
+    // Calculate memory module positions (4 modules on each side for high-end GPUs)
+    const memoryModules = [
+        // Left side memory stacks
+        { x: dieX - memGap - memWidth, y: centerY - memHeight/2, side: 'left', index: 0 },
+        { x: dieX - memGap - memWidth*2 - 10, y: centerY - memHeight/2, side: 'left', index: 1 },
 
-        // Right side HBM stacks
-        { x: dieX + dieWidth + hbmGap, y: centerY - hbmHeight/2, side: 'right', index: 2 },
-        { x: dieX + dieWidth + hbmGap + hbmWidth + 10, y: centerY - hbmHeight/2, side: 'right', index: 3 },
+        // Right side memory stacks
+        { x: dieX + dieWidth + memGap, y: centerY - memHeight/2, side: 'right', index: 2 },
+        { x: dieX + dieWidth + memGap + memWidth + 10, y: centerY - memHeight/2, side: 'right', index: 3 },
 
-        // Top HBM stacks (for very high memory configs)
-        { x: centerX - hbmHeight/2, y: dieY - hbmGap - hbmWidth, side: 'top', index: 4, width: hbmHeight, height: hbmWidth },
+        // Top memory stacks (for very high memory configs)
+        { x: centerX - memHeight/2, y: dieY - memGap - memWidth, side: 'top', index: 4, width: memHeight, height: memWidth },
 
-        // Bottom HBM stacks
-        { x: centerX - hbmHeight/2, y: dieY + dieHeight + hbmGap, side: 'bottom', index: 5, width: hbmHeight, height: hbmWidth }
+        // Bottom memory stacks
+        { x: centerX - memHeight/2, y: dieY + dieHeight + memGap, side: 'bottom', index: 5, width: memHeight, height: memWidth }
     ];
 
-    // Determine how many HBM modules to show based on GPU memory
+    // Determine how many memory modules to show based on GPU memory and type
     const memGiB = getCurrentGPUMemGiB();
-    let activeHBMs = 4; // Default to 4 HBM stacks
-    if (memGiB >= 80) activeHBMs = 6; // H100/A100 80GB have 5-6 HBM stacks
-    else if (memGiB >= 40) activeHBMs = 4; // A100 40GB has 4-5 HBM stacks
-    else if (memGiB >= 24) activeHBMs = 2; // Consumer GPUs have 2 memory modules
+    const currentGPUConfig = gpuConfigs[currentGPU];
+    const memType = currentGPUConfig ? currentGPUConfig.memType : 'HBM';
+    let activeMemModules = 4; // Default to 4 memory stacks
+
+    if (memType.includes('HBM')) {
+        // HBM configurations
+        if (memGiB >= 80) activeMemModules = 6; // H100/A100 80GB have 5-6 HBM stacks
+        else if (memGiB >= 40) activeMemModules = 4; // A100 40GB has 4-5 HBM stacks
+        else activeMemModules = 2; // Lower memory HBM configs
+    } else if (memType.includes('GDDR')) {
+        // GDDR configurations (typically 2-4 modules for consumer GPUs)
+        if (memGiB >= 24) activeMemModules = 2; // Consumer GPUs have 2 memory modules
+        else activeMemModules = 2;
+    } else {
+        // Other memory types (SRAM, LPDDR5, etc.)
+        activeMemModules = Math.min(4, Math.max(1, Math.floor(memGiB / 16)));
+    }
 
     // Draw PCB substrate
     ctx.fillStyle = 'rgba(20, 30, 45, 0.8)';
@@ -748,31 +776,31 @@ function drawMemoryGrid() {
         ctx.restore();
 
         // Draw prominent ghost memory blocks showing what WOULD be used without Flash Attention
-        for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
-            const hbm = hbmModules[i];
-            const w = hbm.width || hbmWidth;
-            const h = hbm.height || hbmHeight;
+        for (let i = 0; i < activeMemModules && i < memoryModules.length; i++) {
+            const mem = memoryModules[i];
+            const w = mem.width || memWidth;
+            const h = mem.height || memHeight;
 
-            // Calculate how much of this HBM would be consumed by attention matrix
-            const ghostHeight = Math.min(h, h * attentionRatio * activeHBMs);
+            // Calculate how much of this memory would be consumed by attention matrix
+            const ghostHeight = Math.min(h, h * attentionRatio * activeMemModules);
 
             // Draw thick red border around what would be used
             const borderPulse = Math.sin(Date.now() * 0.002) * 0.2 + 0.5;
             ctx.strokeStyle = `rgba(255, 50, 50, ${borderPulse})`;
             ctx.lineWidth = 4;
             ctx.setLineDash([15, 10]);
-            ctx.strokeRect(hbm.x - 2, hbm.y - 2, w + 4, ghostHeight + 4);
+            ctx.strokeRect(mem.x - 2, mem.y - 2, w + 4, ghostHeight + 4);
             ctx.setLineDash([]);
 
             // Semi-transparent red overlay
             const pulse = Math.sin(Date.now() * 0.002) * 0.1 + 0.25;
             ctx.fillStyle = `rgba(255, 50, 50, ${pulse})`;
-            ctx.fillRect(hbm.x, hbm.y, w, ghostHeight);
+            ctx.fillRect(mem.x, mem.y, w, ghostHeight);
 
             // Draw diagonal stripes to show it's saved/eliminated
             ctx.save();
             const region = new Path2D();
-            region.rect(hbm.x, hbm.y, w, ghostHeight);
+            region.rect(mem.x, mem.y, w, ghostHeight);
             ctx.clip(region);
 
             ctx.strokeStyle = `rgba(255, 100, 100, 0.4)`;
@@ -782,8 +810,8 @@ function drawMemoryGrid() {
             // Diagonal stripes
             for (let stripe = -h; stripe < w + h; stripe += 20) {
                 ctx.beginPath();
-                ctx.moveTo(hbm.x + stripe, hbm.y);
-                ctx.lineTo(hbm.x + stripe + ghostHeight, hbm.y + ghostHeight);
+                ctx.moveTo(mem.x + stripe, mem.y);
+                ctx.lineTo(mem.x + stripe + ghostHeight, mem.y + ghostHeight);
                 ctx.stroke();
             }
 
@@ -797,13 +825,13 @@ function drawMemoryGrid() {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('SAVED', hbm.x + w/2, hbm.y + ghostHeight/2);
+                ctx.fillText('SAVED', mem.x + w/2, mem.y + ghostHeight/2);
                 ctx.restore();
             }
         }
 
         // Draw arrows pointing from the savings box to the HBM modules
-        if (activeHBMs >= 2) {
+        if (activeMemModules >= 2) {
             ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
@@ -811,14 +839,14 @@ function drawMemoryGrid() {
             // Left arrow
             ctx.beginPath();
             ctx.moveTo(savingsX, savingsY + savingsBoxHeight);
-            ctx.lineTo(hbmModules[0].x + (hbmModules[0].width || hbmWidth)/2, hbmModules[0].y - 10);
+            ctx.lineTo(memoryModules[0].x + (memoryModules[0].width || memWidth)/2, memoryModules[0].y - 10);
             ctx.stroke();
 
             // Right arrow if we have enough HBM modules
-            if (activeHBMs > 2) {
+            if (activeMemModules > 2) {
                 ctx.beginPath();
                 ctx.moveTo(savingsX + savingsBoxWidth, savingsY + savingsBoxHeight);
-                ctx.lineTo(hbmModules[2].x + (hbmModules[2].width || hbmWidth)/2, hbmModules[2].y - 10);
+                ctx.lineTo(memoryModules[2].x + (memoryModules[2].width || memWidth)/2, memoryModules[2].y - 10);
                 ctx.stroke();
             }
 
@@ -827,14 +855,14 @@ function drawMemoryGrid() {
     }
 
     // Draw HBM modules
-    for (let i = 0; i < activeHBMs && i < hbmModules.length; i++) {
-        const hbm = hbmModules[i];
-        const w = hbm.width || hbmWidth;
-        const h = hbm.height || hbmHeight;
+    for (let i = 0; i < activeMemModules && i < memoryModules.length; i++) {
+        const mem = memoryModules[i];
+        const w = mem.width || memWidth;
+        const h = mem.height || memHeight;
 
         // HBM base (dark silicon)
         ctx.fillStyle = 'rgba(30, 35, 50, 0.9)';
-        ctx.fillRect(hbm.x, hbm.y, w, h);
+        ctx.fillRect(mem.x, mem.y, w, h);
 
         // HBM memory banks (grid pattern)
         const bankSize = 8;
@@ -869,8 +897,8 @@ function drawMemoryGrid() {
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
                     const bankIndex = by * banksX + bx;
-                    const x = hbm.x + bx * bankSpacing + 2;
-                    const y = hbm.y + by * bankSpacing + 2;
+                    const x = mem.x + bx * bankSpacing + 2;
+                    const y = mem.y + by * bankSpacing + 2;
 
                     if (bankIndex < filledBanks) {
                         const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
@@ -954,8 +982,8 @@ function drawMemoryGrid() {
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
                     const bankIndex = by * banksX + bx;
-                    const x = hbm.x + bx * bankSpacing + 2;
-                    const y = hbm.y + by * bankSpacing + 2;
+                    const x = mem.x + bx * bankSpacing + 2;
+                    const y = mem.y + by * bankSpacing + 2;
 
                     if (bankIndex < filledBanks) {
                         const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
@@ -1067,8 +1095,8 @@ function drawMemoryGrid() {
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
                     const bankIndex = by * banksX + bx;
-                    const x = hbm.x + bx * bankSpacing + 2;
-                    const y = hbm.y + by * bankSpacing + 2;
+                    const x = mem.x + bx * bankSpacing + 2;
+                    const y = mem.y + by * bankSpacing + 2;
 
                     if (bankIndex < filledBanks) {
                         const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8;
@@ -1157,11 +1185,13 @@ function drawMemoryGrid() {
             }
         }
 
-        // HBM label
+        // Memory type label (GPU-specific)
+        const currentGPUConfig = gpuConfigs[currentGPU];
+        const memoryType = currentGPUConfig ? currentGPUConfig.memType : 'HBM';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.font = '10px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('HBM', hbm.x + w/2, hbm.y - 5);
+        ctx.fillText(memoryType, mem.x + w/2, mem.y - 5);
 
         // Draw data paths from HBM to GPU die
         const moduleFillRatio = filledBanks / totalBanks;
@@ -1173,30 +1203,30 @@ function drawMemoryGrid() {
             ctx.beginPath();
 
             let startX, startY, endX, endY;
-            if (hbm.side === 'left') {
-                startX = hbm.x + w;
-                startY = hbm.y + h/2;
+            if (mem.side === 'left') {
+                startX = mem.x + w;
+                startY = mem.y + h/2;
                 endX = dieX;
                 endY = centerY;
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
-            } else if (hbm.side === 'right') {
-                startX = hbm.x;
-                startY = hbm.y + h/2;
+            } else if (mem.side === 'right') {
+                startX = mem.x;
+                startY = mem.y + h/2;
                 endX = dieX + dieWidth;
                 endY = centerY;
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
-            } else if (hbm.side === 'top') {
-                startX = hbm.x + w/2;
-                startY = hbm.y + h;
+            } else if (mem.side === 'top') {
+                startX = mem.x + w/2;
+                startY = mem.y + h;
                 endX = centerX;
                 endY = dieY;
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
             } else {
-                startX = hbm.x + w/2;
-                startY = hbm.y;
+                startX = mem.x + w/2;
+                startY = mem.y;
                 endX = centerX;
                 endY = dieY + dieHeight;
                 ctx.moveTo(startX, startY);
@@ -1413,9 +1443,9 @@ function drawMemoryGrid() {
 
     // Add utilization indicator (positioned below bottom HBM module)
     const utilX = centerX;
-    // Position well below the bottom HBM module (which is at dieY + dieHeight + hbmGap + hbmWidth)
-    const bottomHBMBottom = dieY + dieHeight + hbmGap + hbmWidth;
-    const utilY = bottomHBMBottom + 40; // Add spacing below HBM
+    // Position well below the bottom memory module (which is at dieY + dieHeight + memGap + memWidth)
+    const bottomMemBottom = dieY + dieHeight + memGap + memWidth;
+    const utilY = bottomMemBottom + 40; // Add spacing below memory
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.font = 'bold 12px monospace';
     ctx.textAlign = 'center';
@@ -1467,8 +1497,8 @@ function drawExponentialCurve() {
         points.push({ x, y, tokens, memory });
     }
 
-    // Draw curve
-    ctx.strokeStyle = model.color;
+    // Draw curve - green if Flash Attention is enabled to show efficiency
+    ctx.strokeStyle = flashAttention ? 'rgba(100, 255, 100, 0.8)' : model.color;
     ctx.lineWidth = 3;
     ctx.beginPath();
 
@@ -1482,7 +1512,7 @@ function drawExponentialCurve() {
 
     ctx.stroke();
 
-    // Draw current position
+    // Calculate current position first for the arrow
     const currentRatio = currentTokens / maxTokens;
     const currentX = currentRatio * (canvas.width - 200) + 100;
     const kvGiBNow = calculateBatchKVCache(model, currentTokens);
@@ -1492,20 +1522,92 @@ function drawExponentialCurve() {
     const maxMemory = kvGiBMax + weightsGiBNow;
     const currentY = canvas.height - 100 - (maxMemory > 0 ? (currentMemory / maxMemory) : 0) * (canvas.height - 200);
 
-    // Pulsing circle at current position
-    const pulse = Math.sin(Date.now() * 0.003) * 5 + 10;
-    ctx.beginPath();
-    ctx.arc(currentX, currentY, pulse, 0, Math.PI * 2);
-    ctx.fillStyle = model.color;
+    // Add label for attention flow right next to the diagonal line
+    ctx.save();
+
+    // Get GPU dimensions to position slightly to the left of GPU
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const dieWidth = 280;
+    const dieHeight = 280;
+    const dieX = centerX - dieWidth/2;
+    const memWidth2 = 100;
+    const memGap2 = 30;
+    const leftMemX = dieX - memGap2 - memWidth2;  // Left edge of leftmost memory
+
+    // Position more to the left of the left memory
+    const labelX = leftMemX - 150;  // 150px to the left of the GPU area
+
+    // Find where the diagonal line is at this X position
+    const lineStartX = 100;
+    const lineStartY = canvas.height - 100;
+    const lineEndX = canvas.width - 100;
+    const lineEndY = 100;
+
+    // Calculate Y position where diagonal crosses this X position
+    const lineSlope = (lineEndY - lineStartY) / (lineEndX - lineStartX);
+    const lineIntercept = lineStartY - (lineSlope * lineStartX);
+    const labelY = lineSlope * labelX + lineIntercept + 60;  // +60 to move it down more
+
+    // Calculate the actual angle of the diagonal line
+    const deltaX = lineEndX - lineStartX;
+    const deltaY = lineEndY - lineStartY;
+    const lineAngle = Math.atan2(deltaY, deltaX);
+
+    // Rotate to match the actual diagonal line angle
+    ctx.translate(labelX, labelY);
+    ctx.rotate(lineAngle);
+
+    // Background box for label (slightly bigger)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.roundRect(-65, -12, 130, 24, 4);
     ctx.fill();
 
-    // Glow effect
-    const glow = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, pulse * 2);
-    glow.addColorStop(0, model.color);
-    glow.addColorStop(1, 'transparent');
+    // Border for clarity
+    ctx.strokeStyle = flashAttention ? 'rgba(100, 255, 100, 0.4)' : 'rgba(95, 163, 230, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.roundRect(-65, -12, 130, 24, 4);
+    ctx.stroke();
+
+    // Label text (slightly bigger font)
+    ctx.fillStyle = flashAttention ? 'rgba(100, 255, 100, 1)' : 'rgba(95, 163, 230, 1)';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(flashAttention ? 'Attention: O(n·d)' : 'Attention: O(n²)', 0, 0);
+
+    ctx.restore();
+
+    // Pulsing circle at current position - smaller and different color with Flash Attention
+    const basePulse = flashAttention ? 3 : 5;  // Smaller base size with Flash Attention
+    const pulseRange = flashAttention ? 2 : 5;  // Less variation with Flash Attention
+    const pulse = Math.sin(Date.now() * 0.003) * pulseRange + basePulse + 5;
+
+    // Striking yellow-green for Flash Attention, original color otherwise
+    const dotColor = flashAttention ? 'rgba(200, 255, 0, 1)' : model.color;
+
+    ctx.beginPath();
+    ctx.arc(currentX, currentY, pulse, 0, Math.PI * 2);
+    ctx.fillStyle = dotColor;
+    ctx.fill();
+
+    // More intense glow effect for Flash Attention
+    const glowRadius = flashAttention ? pulse * 3 : pulse * 2;
+    const glow = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, glowRadius);
+
+    if (flashAttention) {
+        // Bright yellow-green glow for Flash Attention
+        glow.addColorStop(0, 'rgba(200, 255, 0, 0.8)');
+        glow.addColorStop(0.5, 'rgba(150, 255, 0, 0.3)');
+        glow.addColorStop(1, 'transparent');
+    } else {
+        glow.addColorStop(0, dotColor);
+        glow.addColorStop(1, 'transparent');
+    }
+
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(currentX, currentY, pulse * 2, 0, Math.PI * 2);
+    ctx.arc(currentX, currentY, glowRadius, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -1569,7 +1671,7 @@ function updateFactoid() {
 
         // Fade in
         panel.style.opacity = '1';
-        if (window.positionFactoidPanel) window.positionFactoidPanel();
+        // Don't reposition during fade - causes flicker
     }, 400);
 
     currentFactoidIndex++;
@@ -1608,10 +1710,15 @@ function updatePaperReferences() {
                 paperRefsBoxEl.style.top = (efficiencyRect.bottom + 20) + 'px';
                 paperRefsBoxEl.style.left = efficiencyRect.left + 'px';
             }
+
+            // Hide factoid when papers are shown
+            if (window.positionFactoidPanel) window.positionFactoidPanel();
         } else {
             paperRefsBoxEl.classList.remove('show');
             setTimeout(() => {
                 paperRefsBoxEl.style.display = 'none';
+                // Show factoid again when papers are hidden
+                if (window.positionFactoidPanel) window.positionFactoidPanel();
             }, 300); // Wait for fade animation
         }
     }
@@ -1642,12 +1749,15 @@ function updateInfoPanel() {
     // Show allocation unit size
     const allocationEl = document.getElementById('allocationUnit');
     if (allocationEl) {
+        const currentGPUConfig = gpuConfigs[currentGPU];
+        const gpuTileSize = currentGPUConfig ? currentGPUConfig.flashTileSize : 64;
+
         if (flashAttention && pagedAttention) {
             // Flash Attention with paged: tiles within pages
-            allocationEl.textContent = '4×4 tiles/page';
+            allocationEl.textContent = `${Math.floor(gpuTileSize/4)}×${Math.floor(gpuTileSize/4)} tiles/page`;
         } else if (flashAttention) {
-            // Flash Attention: computation tiles
-            allocationEl.textContent = '64×64 tiles';
+            // Flash Attention: computation tiles (GPU-specific)
+            allocationEl.textContent = `${gpuTileSize}×${gpuTileSize} tiles`;
         } else if (pagedAttention) {
             // Industry standard: vLLM uses 16 tokens per page
             allocationEl.textContent = '16 tokens/page';
@@ -1893,7 +2003,9 @@ function animate() {
         // Update token count with variable speed based on max context
         if (isPlaying) {
             const baseIncrement = Math.max(100, maxTokens / 10000);
-            currentTokens += baseIncrement * animationSpeed;
+            // Slow down by 50% when Flash Attention is enabled to show efficiency
+            const flashAttentionModifier = flashAttention ? 0.5 : 1.0;
+            currentTokens += baseIncrement * animationSpeed * flashAttentionModifier;
             if (currentTokens >= maxTokens) {
                 currentTokens = 0; // Loop
             }
