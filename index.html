@@ -708,7 +708,7 @@
     </div>
 
     <!-- Factoid Panel positioned between URLs and Info panel -->
-    <div id="factoidPanel" style="position: absolute; bottom: 80px; left: 40px; background: rgba(0, 0, 0, 0.85); padding: 10px 12px; border-radius: 10px; border: 1px solid #1428A0; backdrop-filter: blur(10px); width: 240px; max-width: 240px; z-index: 10; box-shadow: 0 10px 40px rgba(20, 40, 160, 0.3); transition: opacity 0.8s ease;">
+    <div id="factoidPanel" style="position: absolute; bottom: 80px; left: 40px; background: rgba(0, 0, 0, 0.85); padding: 10px 12px; border-radius: 10px; border: 1px solid #1428A0; backdrop-filter: blur(10px); width: 240px; max-width: 240px; z-index: 10; box-shadow: 0 10px 40px rgba(20, 40, 160, 0.3); transition: opacity 0.8s ease; display: none;">
         <div style="color: #5FA3E6; font-weight: 600; margin-bottom: 6px; font-size: 0.75em;" id="factoidTitle">💡 Did You Know?</div>
         <div style="color: #fff; font-weight: bold; margin-bottom: 6px; font-size: 0.7em; line-height: 1.2;" id="factoidMain">
             Loading...
@@ -776,9 +776,15 @@
         
         // Position factoid panel centered above the GPU architecture visualization
         // Cache the last visibility state to prevent flicker
-        let lastFactoidVisibility = null;
+        let lastFactoidVisibility = false; // Start with false to match initial hidden state
+        let positioningInProgress = false; // Prevent rapid successive calls
 
         function positionFactoidPanel() {
+            if (positioningInProgress) return; // Debounce rapid calls
+            positioningInProgress = true;
+
+            setTimeout(() => { positioningInProgress = false; }, 100); // Reset after 100ms
+
             const panel = document.getElementById('factoidPanel');
             const infoPanel = document.querySelector('.info-panel');
             const paperRefsBox = document.getElementById('paperRefsBox');
@@ -788,8 +794,10 @@
 
             // Always hide factoid when paper refs box is visible
             if (paperRefsBox && paperRefsBox.style.display !== 'none' && paperRefsBox.classList.contains('show')) {
-                panel.style.display = 'none';
-                lastFactoidVisibility = false;
+                if (lastFactoidVisibility !== false) {
+                    panel.style.display = 'none';
+                    lastFactoidVisibility = false;
+                }
                 return;
             }
 

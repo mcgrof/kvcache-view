@@ -354,26 +354,45 @@ function calculateAttentionMatrixSize(sequenceLength, batchSize = 1, dtype = nul
     const config = dtypeConfigs[dtype || currentDtype];
     const bytesPerElement = config.bytes;
     const model = models[currentModelIndex];
-
-    // Attention matrix: [batch_size, num_heads, seq_len, seq_len]
-    // Flash Attention saves the memory of materializing intermediate attention scores
-    const numHeads = model.heads || 32; // Default for most models
-
-    // More realistic calculation: attention scores held during computation
-    // We don't materialize the full attention matrix for all heads simultaneously
-    // Scale by GPU cache efficiency and model architecture
     const currentGPUConfig = gpuConfigs[currentGPU];
-    const cacheEfficiency = currentGPUConfig ? Math.min(2, currentGPUConfig.l2Cache / 40) : 1;
+    const totalGPUMemoryGiB = getCurrentGPUMemGiB();
 
-    // Base attention memory per head (what needs to be stored temporarily)
-    const baseAttentionBytes = sequenceLength * sequenceLength * bytesPerElement * batchSize;
+    // Flash Attention saves intermediate attention computation memory, not the full O(n²) matrix
+    // Traditional attention still uses chunking for very long sequences, so baseline isn't full matrix
 
-    // Scale by effective heads that would be computed simultaneously
-    const effectiveHeads = Math.min(numHeads, Math.max(1, cacheEfficiency));
+    // Calculate realistic working memory for attention computation
+    // This represents intermediate attention scores that would be held during computation
+    const numHeads = model.heads || 32;
 
-    const matrixBytes = baseAttentionBytes * effectiveHeads * 0.25; // 25% efficiency factor
+    // For shorter sequences (<32k), traditional attention might materialize more of the matrix
+    // For longer sequences, even traditional implementations use chunking
+    const effectiveSequenceLength = Math.min(sequenceLength, 65536); // Cap at 64k for realistic baseline
 
-    return matrixBytes / (1024 ** 3); // Convert to GiB
+    // Chunk size that traditional attention would process at once (realistic: 1k-4k tokens)
+    const chunkSize = Math.min(4096, effectiveSequenceLength);
+
+    // Memory for attention scores during computation: chunk_size × seq_len × heads × batches
+    const workingMemoryBytes = chunkSize * effectiveSequenceLength * numHeads * batchSize * bytesPerElement;
+
+    // Flash Attention reduces this by computing in smaller tiles (typically 64×64 or 128×128)
+    const flashTileSize = currentGPUConfig ? currentGPUConfig.flashTileSize : 64;
+    const traditionalChunkBytes = workingMemoryBytes;
+    const flashTileBytes = flashTileSize * flashTileSize * numHeads * batchSize * bytesPerElement;
+
+    // Savings = traditional working memory - flash tile memory
+    const savingsBytes = Math.max(0, traditionalChunkBytes - flashTileBytes);
+    const savingsGiB = savingsBytes / (1024 ** 3);
+
+    // Cap savings at 50% of total GPU memory (can't save more than what's physically possible)
+    const maxSavingsGiB = totalGPUMemoryGiB * 0.5;
+    const cappedSavingsGiB = Math.min(savingsGiB, maxSavingsGiB);
+
+    // For very short sequences, savings are minimal
+    if (sequenceLength < 2048) {
+        return cappedSavingsGiB * 0.1; // Minimal savings for short sequences
+    }
+
+    return cappedSavingsGiB;
 }
 
 // Calculate total KV cache for batch with continuous batching support
