@@ -18,7 +18,7 @@ window.addEventListener('resize', resizeCanvas);
 let isTraining = false;
 let currentStep = 0;
 let maxSteps = 100000;
-let trainingSpeed = 1;
+let trainingSpeed = 50;
 let currentLoss = 4.5; // Starting loss
 let lossHistory = [];
 
@@ -242,6 +242,11 @@ function drawLossCurve() {
 
     if (lossHistory.length < 2) return;
 
+    // Find min and max loss for auto-scaling
+    const minLoss = Math.min(...lossHistory);
+    const maxLoss = Math.max(...lossHistory);
+    const lossRange = maxLoss - minLoss || 1;
+
     // Draw axes
     lossCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
     lossCtx.lineWidth = 1;
@@ -251,17 +256,27 @@ function drawLossCurve() {
     lossCtx.lineTo(240, 90);
     lossCtx.stroke();
 
+    // Draw Y-axis labels
+    lossCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    lossCtx.font = '9px monospace';
+    lossCtx.textAlign = 'right';
+    lossCtx.fillText(maxLoss.toFixed(2), 18, 15);
+    lossCtx.fillText(minLoss.toFixed(2), 18, 88);
+
     // Draw loss curve
     lossCtx.strokeStyle = '#4CAF50';
     lossCtx.lineWidth = 2;
     lossCtx.beginPath();
 
-    const xScale = 220 / Math.max(100, lossHistory.length);
-    const yScale = 70 / 5; // Assuming max loss of 5
+    // Scale X to show all data points
+    const xScale = 210 / Math.max(1, lossHistory.length - 1);
+    // Scale Y to fit the actual loss range with padding
+    const yPadding = 5;
+    const yScale = (70 - yPadding * 2) / lossRange;
 
     lossHistory.forEach((loss, i) => {
-        const x = 20 + i * xScale;
-        const y = 90 - loss * yScale;
+        const x = 25 + i * xScale;
+        const y = 85 - yPadding - (loss - minLoss) * yScale;
 
         if (i === 0) {
             lossCtx.moveTo(x, y);
@@ -272,10 +287,35 @@ function drawLossCurve() {
 
     lossCtx.stroke();
 
+    // Draw current loss point with glow
+    if (lossHistory.length > 0) {
+        const lastLoss = lossHistory[lossHistory.length - 1];
+        const lastX = 25 + (lossHistory.length - 1) * xScale;
+        const lastY = 85 - yPadding - (lastLoss - minLoss) * yScale;
+
+        // Glow effect
+        lossCtx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+        lossCtx.beginPath();
+        lossCtx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+        lossCtx.fill();
+
+        // Solid point
+        lossCtx.fillStyle = '#4CAF50';
+        lossCtx.beginPath();
+        lossCtx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        lossCtx.fill();
+    }
+
     // Current loss value
     lossCtx.fillStyle = '#EAF2FF';
     lossCtx.font = '12px monospace';
+    lossCtx.textAlign = 'left';
     lossCtx.fillText(`Loss: ${currentLoss.toFixed(3)}`, 160, 20);
+
+    // Step indicator
+    lossCtx.font = '10px monospace';
+    lossCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    lossCtx.fillText(`${lossHistory.length} samples`, 160, 35);
 }
 
 // Update UI elements
@@ -340,11 +380,17 @@ function animate() {
         const targetLoss = 0.1;
         currentLoss = currentLoss * 0.999 + targetLoss * 0.001;
 
-        // Record loss history
+        // Record loss history - keep all points but downsample for performance
         if (currentStep % 100 === 0) {
             lossHistory.push(currentLoss);
-            if (lossHistory.length > 100) {
-                lossHistory.shift();
+            // Optional: downsample if too many points for performance
+            if (lossHistory.length > 500) {
+                // Keep every other point to maintain shape
+                const downsampled = [];
+                for (let i = 0; i < lossHistory.length; i += 2) {
+                    downsampled.push(lossHistory[i]);
+                }
+                lossHistory = downsampled;
             }
         }
     }
