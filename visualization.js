@@ -2336,6 +2336,117 @@ function updateFactoid() {
     currentFactoidIndex++
 }
 
+// Update performance metrics for multi-GPU deployments
+function updatePerformanceMetrics() {
+    const metricsEl = document.getElementById('metricsContent')
+    if (!metricsEl || gpuCount === 1) return
+
+    const model = models[currentModelIndex]
+    const gpuConfig = gpuConfigs[currentGPU]
+    const kvGiB = calculateBatchKVCache(model, currentTokens)
+
+    // Determine actual interconnect bandwidth
+    let interconnectBW = pcie4Bandwidth
+    if (gpuConfig.nvlink && useHighSpeedInterconnect) {
+        interconnectBW = gpuConfig.nvlinkBW || 600
+    } else if (gpuConfig.pcieGen === 5) {
+        interconnectBW = pcie5Bandwidth
+    } else if (gpuConfig.pcieGen === 3) {
+        interconnectBW = 16
+    }
+
+    // Calculate bandwidth utilization (more realistic with all-reduce pattern)
+    const kvCacheSyncTraffic = (kvGiB * 1024) * Math.log2(gpuCount)  // GB for all-reduce
+    const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
+
+    // Base performance assumptions (single GPU baseline)
+    const baseTokensPerSec = 100  // Baseline tokens/sec on single GPU
+    const baseLatencyMs = 10      // Baseline latency in ms
+
+    // Calculate actual performance with interconnect impact
+    // Performance degrades non-linearly as bandwidth saturates
+    const performanceDegradation = 1 - Math.pow(bandwidthUtilization, 2)
+    const actualTokensPerSec = baseTokensPerSec * performanceDegradation * Math.sqrt(gpuCount)  // Sub-linear scaling
+
+    // Latency increases exponentially with saturation
+    const latencyIncrease = baseLatencyMs * (1 + Math.pow(bandwidthUtilization, 2) * 10)
+    const p50Latency = latencyIncrease
+    const p99Latency = latencyIncrease * (1 + bandwidthUtilization * 3)  // P99 spikes much worse
+
+    // Calculate cost efficiency
+    const gpuCostPerHour = 2.49  // H100 approximate $/hour
+    const totalCostPerHour = gpuCostPerHour * gpuCount
+    const tokensPerDollar = (actualTokensPerSec * 3600) / totalCostPerHour
+
+    // GPU utilization (decreases with interconnect bottleneck)
+    const gpuUtilization = Math.max(20, 100 * performanceDegradation)
+
+    // Build metrics HTML with color coding
+    let html = ''
+
+    // Tokens per second with trend
+    const tokenColor = actualTokensPerSec > 50 ? '#4CAF50' :
+                      actualTokensPerSec > 20 ? '#FFA500' : '#FF4444'
+    html += `<div style="margin-bottom: 12px;">
+        <strong style="color: ${tokenColor}">Throughput: ${actualTokensPerSec.toFixed(1)} tokens/sec</strong><br>
+        <span style="color: #888; font-size: 0.9em">
+            ${bandwidthUtilization > 0.5 ? '⬇' : '⬆'} ${(performanceDegradation * 100).toFixed(0)}% of ideal scaling
+        </span>
+    </div>`
+
+    // Latency metrics
+    const latencyColor = p50Latency < 50 ? '#4CAF50' :
+                        p50Latency < 100 ? '#FFA500' : '#FF4444'
+    html += `<div style="margin-bottom: 12px;">
+        <strong>Latency Impact:</strong><br>
+        <span style="color: ${latencyColor}">P50: ${p50Latency.toFixed(0)}ms | P99: ${p99Latency.toFixed(0)}ms</span><br>
+        <span style="color: #888; font-size: 0.9em">
+            ${bandwidthUtilization > 0.7 ? '⚠️ Causes stuttering output' : '✓ Smooth streaming'}
+        </span>
+    </div>`
+
+    // GPU utilization
+    const utilColor = gpuUtilization > 80 ? '#4CAF50' :
+                      gpuUtilization > 50 ? '#FFA500' : '#FF4444'
+    html += `<div style="margin-bottom: 12px;">
+        <strong>GPU Utilization: <span style="color: ${utilColor}">${gpuUtilization.toFixed(0)}%</span></strong><br>
+        <span style="color: #888; font-size: 0.9em">
+            ${gpuUtilization < 70 ? '💸 GPUs idle waiting for data' : '✓ Good compute usage'}
+        </span>
+    </div>`
+
+    // Cost efficiency
+    html += `<div style="margin-bottom: 12px;">
+        <strong>Cost Analysis:</strong><br>
+        $${totalCostPerHour.toFixed(2)}/hour for ${gpuCount}× ${currentGPU}<br>
+        <span style="color: #888; font-size: 0.9em">
+            ${tokensPerDollar.toFixed(0)} tokens/$
+            ${bandwidthUtilization > 0.5 ? '(poor ROI due to bottleneck)' : '(reasonable efficiency)'}
+        </span>
+    </div>`
+
+    // Recommendation based on bottleneck
+    if (bandwidthUtilization > 0.8) {
+        html += `<div style="padding: 8px; background: rgba(255, 68, 68, 0.2); border-radius: 4px; margin-top: 10px;">
+            <strong style="color: #FF4444">🚨 Critical Bottleneck</strong><br>
+            <span style="font-size: 0.9em">
+                ${useHighSpeedInterconnect ?
+                    'Even with high-speed interconnect saturated!' :
+                    'Enable NVLink or reduce GPU count'}
+            </span>
+        </div>`
+    } else if (bandwidthUtilization > 0.5) {
+        html += `<div style="padding: 8px; background: rgba(255, 165, 0, 0.2); border-radius: 4px; margin-top: 10px;">
+            <strong style="color: #FFA500">⚡ Performance Limited</strong><br>
+            <span style="font-size: 0.9em">
+                Interconnect becoming bottleneck
+            </span>
+        </div>`
+    }
+
+    metricsEl.innerHTML = html
+}
+
 // Update paper references in dedicated box
 function updatePaperReferences() {
     const paperRefsBoxEl = document.getElementById('paperRefsBox')
@@ -2519,18 +2630,37 @@ function updateInfoPanel() {
     }
     document.getElementById('cacheSize').textContent = formatMemory(kvGiB)
 
-    // Dynamically position efficiency box below info panel
+    // Show appropriate box based on GPU count
     const infoPanelEl = document.querySelector('.info-panel')
     const efficiencyBoxEl = document.getElementById('efficiencyBox')
-    if (infoPanelEl && efficiencyBoxEl) {
+    const performanceMetricsBoxEl = document.getElementById('performanceMetricsBox')
+
+    if (infoPanelEl) {
         const infoPanelRect = infoPanelEl.getBoundingClientRect()
         const infoPanelBottom = infoPanelRect.bottom
 
-        // Position efficiency box 20px below the info panel
-        efficiencyBoxEl.style.top = infoPanelBottom + 20 + 'px'
+        if (gpuCount > 1) {
+            // Hide efficiency box, show performance metrics for multi-GPU
+            if (efficiencyBoxEl) efficiencyBoxEl.style.display = 'none'
 
-        // Also align it horizontally with the info panel
-        efficiencyBoxEl.style.left = infoPanelRect.left + 'px'
+            if (performanceMetricsBoxEl) {
+                performanceMetricsBoxEl.style.display = 'block'
+                performanceMetricsBoxEl.style.top = infoPanelBottom + 20 + 'px'
+                performanceMetricsBoxEl.style.left = infoPanelRect.left + 'px'
+
+                // Calculate and display performance metrics
+                updatePerformanceMetrics()
+            }
+        } else {
+            // Show efficiency box for single GPU
+            if (performanceMetricsBoxEl) performanceMetricsBoxEl.style.display = 'none'
+
+            if (efficiencyBoxEl) {
+                efficiencyBoxEl.style.display = 'block'
+                efficiencyBoxEl.style.top = infoPanelBottom + 20 + 'px'
+                efficiencyBoxEl.style.left = infoPanelRect.left + 'px'
+            }
+        }
     }
 
     // Update paper references (positioned below efficiency box)
