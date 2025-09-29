@@ -158,11 +158,21 @@ This visualization demonstrates why such optimizations are critical for the futu
 
 ```
 kvcache-view/
-├── index.html           # Main HTML file with UI
-├── visualization.js     # Core visualization logic
-├── README.md           # This file
-└── Makefile            # Simple server commands
+├── index.html                    # Main HTML file with UI
+├── visualization.js              # Core visualization logic
+├── README.md                     # This file
+├── Makefile                      # Simple server commands
+├── CLAUDE.md                     # Development guidelines
+├── GPU_OPTIMIZATION_DEFAULTS.md # GPU optimization rationale
+└── VISUALIZATION_GUIDE.md       # Visual components guide
 ```
+
+## 📚 Documentation
+
+- **[Complete Feature Documentation](SIMULATION_FEATURES.md)** - Comprehensive guide to all simulation features, controls, and calculations
+- **[GPU Optimization Defaults](GPU_OPTIMIZATION_DEFAULTS.md)** - Why certain optimizations (CB, PA, FA) are enabled/disabled by default for different GPUs
+- **[Visualization Guide](VISUALIZATION_GUIDE.md)** - Detailed explanation of all visual components and their meanings
+- **[Development Guidelines](CLAUDE.md)** - Contributing guidelines and common pitfalls
 
 ## 🔗 Related Projects
 
