@@ -1,0 +1,24 @@
+{
+    "name": "kvcache-view",
+    "version": "1.0.0",
+    "description": "KV Cache Growth Visualization - Watch memory explode as LLMs scale to millions of tokens",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mcgrof/kvcache-view"
+    },
+    "scripts": {
+        "format": "prettier --write '*.html' '*.js'",
+        "check-format": "prettier --check '*.html' '*.js'"
+    },
+    "devDependencies": {
+        "prettier": "^3.1.0"
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "singleQuote": true,
+        "semi": false,
+        "printWidth": 120,
+        "bracketSpacing": true,
+        "htmlWhitespaceSensitivity": "ignore"
+    }
+}

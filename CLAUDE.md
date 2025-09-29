@@ -3,6 +3,15 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with
 code in this repository.
 
+## IMPORTANT: Before Committing
+
+1. **ALWAYS run `make check-commits`** to ensure commit messages follow these guidelines.
+   - If check fails, run `make fix-commits` to automatically correct the format.
+
+2. **ALWAYS run `make check-format`** to ensure HTML/JS code is properly formatted.
+   - If check fails, run `make format` to automatically format the code.
+   - Uses Prettier with project-specific settings (4-space tabs, single quotes, no semicolons).
+
 ## One commit per change
 
 As with the Linux kernel, this project prefers commits to be atomic and to
