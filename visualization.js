@@ -374,9 +374,12 @@ const contextPresets = {
     '8K': 8192,         // GPT-4 base
     '16K': 16384,       // GPT-3.5 Turbo 16K
     '32K': 32768,       // GPT-4 32K, Claude Instant
+    '64K': 64000,       // Current standard context
     '100K': 100000,     // Claude 2.1
     '128K': 128000,     // GPT-4 Turbo, GPT-4o, Llama 3
     '200K': 200000,     // Claude 3 Opus/Sonnet/Haiku
+    '256K': 256000,     // High-end production context
+    '512K': 512000,     // H100/A100 80GB default
     '1M': 1000000,      // Gemini 1.5 Pro (public), Claude 3.5 Sonnet
     '2M': 2000000,      // Gemini 1.5 Pro (developer preview)
     '10M': 10000000     // Research frontier (Magic, experimental)
@@ -2293,13 +2296,25 @@ document.getElementById('modelSwitch').addEventListener('click', function() {
 // Context length control
 document.getElementById('contextControl').addEventListener('click', function() {
     const contexts = Object.keys(contextPresets);
-    let currentContext = '1M';
+    let currentContext = null;
 
-    // Find current context
+    // Find exact match or closest context
     for (let key of contexts) {
         if (contextPresets[key] === maxTokens) {
             currentContext = key;
             break;
+        }
+    }
+
+    // If no exact match, find the closest one
+    if (!currentContext) {
+        let minDiff = Infinity;
+        for (let key of contexts) {
+            const diff = Math.abs(contextPresets[key] - maxTokens);
+            if (diff < minDiff) {
+                minDiff = diff;
+                currentContext = key;
+            }
         }
     }
 
