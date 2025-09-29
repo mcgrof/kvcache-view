@@ -323,29 +323,23 @@ function generateSequenceColors(batchSize) {
 
 // Generate deterministic sequence length ratios for continuous batching
 function getSequenceLengthRatio(index, batchSize) {
-    // Realistic production workload distribution
-    // Most requests are short-to-medium (prompts and moderate completions)
-    // Few requests use full context
-    // This pattern ensures continuous batching shows memory savings
+    // For visual clarity, use more balanced ratios that ensure each sequence is visible
+    if (batchSize <= 4) {
+        // Small batch sizes: use well-distributed ratios for clear visualization
+        const smallBatchPatterns = {
+            2: [0.3, 0.7],           // 30% vs 70%
+            3: [0.2, 0.4, 0.6],      // 20%, 40%, 60%
+            4: [0.15, 0.25, 0.35, 0.5] // 15%, 25%, 35%, 50%
+        };
+        const pattern = smallBatchPatterns[batchSize];
+        return pattern[index % pattern.length];
+    }
+
+    // For larger batch sizes, use a more varied but still visible pattern
     const pattern = [
-        0.05,  // Very short prompt (5%)
-        0.15,  // Short prompt
-        0.25,  // Short-medium query
-        0.35,  // Medium query
-        0.10,  // Short prompt
-        0.45,  // Medium generation
-        0.20,  // Short query
-        0.55,  // Medium-long generation
-        0.30,  // Medium query
-        0.65,  // Long generation
-        0.40,  // Medium
-        0.50,  // Average
-        0.08,  // Very short
-        0.70,  // Long conversation
-        0.12,  // Short prompt
-        0.85   // Near-max (rare)
+        0.1, 0.2, 0.3, 0.4, 0.15, 0.45, 0.25, 0.55,
+        0.35, 0.65, 0.05, 0.5, 0.18, 0.7, 0.12, 0.85
     ];
-    // Average is ~0.35, showing realistic memory savings with continuous batching
     return pattern[index % pattern.length];
 }
 
@@ -590,10 +584,26 @@ function initWaves() {
 // Draw GPU architecture visualization
 function drawMemoryGrid() {
     const model = models[currentModelIndex];
-    const kvGiB = calculateBatchKVCache(model, currentTokens);
-    const kvMaxGiB = calculateBatchKVCache(model, maxTokens);
+
+    // For traditional batching: show ALLOCATED memory (max context)
+    // For continuous batching: show USED memory (current tokens)
+    let kvGiB, kvMaxGiB, allocatedGiB;
+
+    if (!continuousBatching && !pagedAttention && batchSize > 0) {
+        // Traditional batching: memory is pre-allocated for max context
+        kvGiB = calculateBatchKVCache(model, currentTokens); // Actually used
+        kvMaxGiB = calculateBatchKVCache(model, maxTokens);  // Max possible
+        allocatedGiB = kvMaxGiB; // In traditional batching, we allocate for max
+    } else {
+        // Continuous batching or paged attention: allocate as needed
+        kvGiB = calculateBatchKVCache(model, currentTokens);
+        kvMaxGiB = calculateBatchKVCache(model, maxTokens);
+        allocatedGiB = kvGiB; // Only allocate what's needed
+    }
+
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const totalGiB = kvGiB + weightsGiB;
+    const totalGiB = allocatedGiB + weightsGiB; // Total allocated memory
+    const usedGiB = kvGiB + weightsGiB; // Actually used memory
 
     // Skip complex rendering on mobile if performance is poor
     if (isMobile && currentTokens > 1000000) {
@@ -663,6 +673,8 @@ function drawMemoryGrid() {
         if (sequenceColors.length !== batchSize) {
             sequenceColors = generateSequenceColors(batchSize);
         }
+    } else {
+        sequenceColors = [];
     }
 
     // Calculate total memory distribution across ALL HBM modules
@@ -685,7 +697,7 @@ function drawMemoryGrid() {
         const banksY = Math.floor(h / bankSpacing);
         const totalBanks = banksX * banksY;
 
-        // Calculate what percentage of total GPU memory is used
+        // Calculate what percentage of total GPU memory is allocated
         const memoryUsageRatio = totalGiB / gpuMemGiB;
 
         // Each HBM module should show the same fill percentage
@@ -696,10 +708,17 @@ function drawMemoryGrid() {
         const weightRatio = includeWeights ? (weightsGiB / totalGiB) : 0;
         const weightBanks = Math.floor(filledBanks * weightRatio);
 
+        // For traditional batching, calculate how much of allocated memory is actually used
+        const usageRatioWithinAllocation = (!continuousBatching && !pagedAttention && allocatedGiB > 0)
+            ? (usedGiB / allocatedGiB)
+            : 1.0; // For CB/paged, allocated = used
+
         if (continuousBatching && batchSize > 1 && !pagedAttention) {
             // Continuous batching: show different colors for each sequence
             let banksFilled = 0;
             let currentSeq = 0;
+
+
 
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
@@ -724,22 +743,42 @@ function drawMemoryGrid() {
                             // KV cache - determine which sequence this bank belongs to
                             const kvBankIndex = bankIndex - weightBanks;
                             const kvTotalBanks = filledBanks - weightBanks;
-                            const seqProgress = kvBankIndex / kvTotalBanks;
-                            let cumulative = 0;
-                            currentSeq = 0;
 
+                            if (kvTotalBanks <= 0) {
+                                continue; // Skip if no KV banks
+                            }
+
+                            // Distribute banks among sequences based on their ratios
+                            // Calculate total of all sequence ratios
+                            let totalRatios = 0;
+                            for (let s = 0; s < batchSize; s++) {
+                                totalRatios += getSequenceLengthRatio(s, batchSize);
+                            }
+
+                            // Calculate which sequence this bank belongs to
+                            let bankStart = 0;
+                            currentSeq = 0;
                             for (let s = 0; s < batchSize; s++) {
                                 const seqRatio = getSequenceLengthRatio(s, batchSize);
-                                const normalizedRatio = seqRatio / batchSequenceLengths.reduce((sum, len, idx) =>
-                                    sum + getSequenceLengthRatio(idx, batchSize), 0);
-                                cumulative += normalizedRatio;
-                                if (seqProgress <= cumulative) {
+                                const seqBanks = Math.floor((seqRatio / totalRatios) * kvTotalBanks);
+                                const bankEnd = bankStart + seqBanks;
+
+                                if (kvBankIndex >= bankStart && kvBankIndex < bankEnd) {
                                     currentSeq = s;
                                     break;
+                                }
+
+                                bankStart = bankEnd;
+
+                                // Handle remaining banks for the last sequence
+                                if (s === batchSize - 1) {
+                                    currentSeq = s;
                                 }
                             }
 
                             const color = sequenceColors[currentSeq % sequenceColors.length];
+
+
 
                             // Convert hex to RGB for manipulation
                             const r = parseInt(color.substr(1,2), 16);
@@ -759,6 +798,13 @@ function drawMemoryGrid() {
             }
         } else if (pagedAttention) {
             // Paged attention: show fragmented memory with gaps
+            // Generate sequence colors if we have multiple batches
+            if (batchSize > 1) {
+                if (sequenceColors.length !== batchSize) {
+                    sequenceColors = generateSequenceColors(batchSize);
+                }
+            }
+
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
                     const bankIndex = by * banksX + bx;
@@ -780,7 +826,8 @@ function drawMemoryGrid() {
                             // KV cache with paging
                             // Simulate fragmentation - some blocks are non-contiguous
                             const kvBankIndex = bankIndex - weightBanks;
-                            const isFragmented = Math.random() < 0.15 && kvBankIndex > (filledBanks - weightBanks) * 0.3;
+                            const kvTotalBanks = filledBanks - weightBanks;
+                            const isFragmented = Math.random() < 0.15 && kvBankIndex > kvTotalBanks * 0.3;
 
                             if (isFragmented) {
                                 // Show as empty (fragmented)
@@ -789,17 +836,18 @@ function drawMemoryGrid() {
                                 ctx.strokeRect(x, y, bankSize, bankSize);
                             } else {
                                 // Filled with paged blocks
-                                if (continuousBatching && batchSize > 1) {
-                                    // Use sequence colors with paging
-                                    const kvTotalBanks = filledBanks - weightBanks;
-                                    const seqIndex = Math.floor((kvBankIndex / kvTotalBanks) * batchSize);
-                                    const color = sequenceColors[seqIndex % sequenceColors.length];
+                                if (batchSize > 1 && kvTotalBanks > 0) {
+                                    // Use sequence colors with paging for multiple batches
+                                    const banksPerBatch = Math.ceil(kvTotalBanks / batchSize);
+                                    const batchNum = Math.floor(kvBankIndex / banksPerBatch);
+
+                                    const color = sequenceColors[batchNum % sequenceColors.length];
                                     const r = parseInt(color.substr(1,2), 16);
                                     const g = parseInt(color.substr(3,2), 16);
                                     const b = parseInt(color.substr(5,2), 16);
                                     ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.8})`;
                                 } else {
-                                    // Standard paged color for KV cache
+                                    // Standard paged color for KV cache (single batch)
                                     ctx.fillStyle = `rgba(100, 200, 255, ${pulse})`;
                                 }
                                 ctx.fillRect(x, y, bankSize, bankSize);
@@ -819,7 +867,14 @@ function drawMemoryGrid() {
                 }
             }
         } else {
-            // Traditional batching: uniform color for KV cache, but separate color for weights
+            // Traditional batching: show per-batch reserved chunks with used/unused portions
+            if (batchSize > 1) {
+                // Generate sequence colors for traditional batching visualization
+                if (sequenceColors.length !== batchSize) {
+                    sequenceColors = generateSequenceColors(batchSize);
+                }
+            }
+
             for (let by = 0; by < banksY; by++) {
                 for (let bx = 0; bx < banksX; bx++) {
                     const bankIndex = by * banksX + bx;
@@ -838,19 +893,53 @@ function drawMemoryGrid() {
                             ctx.lineWidth = 0.5;
                             ctx.strokeRect(x, y, bankSize, bankSize);
                         } else {
-                            // KV cache - heat gradient based on overall fill ratio
-                            const overallFillRatio = filledBanks / totalBanks;
-                            const heat = 0.5 + overallFillRatio * 0.5;
+                            // KV cache banks - show per-batch allocation
+                            const kvBankIndex = bankIndex - weightBanks;
+                            const kvTotalBanks = filledBanks - weightBanks;
 
-                            // Heat gradient based on fill
-                            if (overallFillRatio > 0.8) {
-                                ctx.fillStyle = `rgba(255, ${Math.floor(100 - overallFillRatio * 50)}, 0, ${pulse})`;
-                            } else if (overallFillRatio > 0.5) {
-                                ctx.fillStyle = `rgba(255, ${Math.floor(200 - overallFillRatio * 100)}, 0, ${pulse})`;
+                            if (batchSize > 1 && kvTotalBanks > 0) {
+                                // Traditional batching: fixed pre-allocated chunks at specific memory addresses
+                                // Each batch gets maximum possible space allocated upfront (no moving/shifting)
+                                const maxBanksPerBatch = Math.ceil(kvTotalBanks / batchSize);
+                                const batchNum = Math.floor(kvBankIndex / maxBanksPerBatch);
+                                const bankInBatch = kvBankIndex % maxBanksPerBatch;
+
+                                // Each batch is fully pre-allocated but only partially used
+                                // Usage ratio is based on current tokens vs max tokens
+                                const usedBanksInBatch = Math.floor(maxBanksPerBatch * usageRatioWithinAllocation);
+
+                                const color = sequenceColors[batchNum % sequenceColors.length];
+                                const r = parseInt(color.substr(1,2), 16);
+                                const g = parseInt(color.substr(3,2), 16);
+                                const b = parseInt(color.substr(5,2), 16);
+
+                                if (batchNum < batchSize) {
+                                    if (bankInBatch < usedBanksInBatch) {
+                                        // Actually used memory - full bright color
+                                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse})`;
+                                    } else {
+                                        // Pre-allocated but unused - very dim to show it's reserved
+                                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${pulse * 0.15})`;
+                                    }
+                                    ctx.fillRect(x, y, bankSize, bankSize);
+
+                                    // Show allocation boundaries more subtly
+                                    if (bankInBatch === 0) {
+                                        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
+                                        ctx.lineWidth = 1.5;
+                                        ctx.strokeRect(x-1, y, bankSize+2, bankSize);
+                                    }
+                                } else {
+                                    // Banks beyond current batch count - completely unused
+                                    ctx.strokeStyle = 'rgba(100, 150, 200, 0.1)';
+                                    ctx.lineWidth = 0.5;
+                                    ctx.strokeRect(x, y, bankSize, bankSize);
+                                }
                             } else {
-                                ctx.fillStyle = `rgba(0, ${Math.floor(200 + overallFillRatio * 55)}, 255, ${pulse})`;
+                                // Single batch or fallback - use standard blue
+                                ctx.fillStyle = `rgba(100, 200, 255, ${pulse})`;
+                                ctx.fillRect(x, y, bankSize, bankSize);
                             }
-                            ctx.fillRect(x, y, bankSize, bankSize);
                         }
                     } else {
                         // Empty memory bank
@@ -1179,9 +1268,20 @@ function updateFactoid() {
 function updateInfoPanel() {
     const model = models[currentModelIndex];
     const kvGiB = calculateBatchKVCache(model, currentTokens);
+    const kvMaxGiB = calculateBatchKVCache(model, maxTokens);
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0;
-    const totalGiB = kvGiB + weightsGiB;
-    const gpusNeeded = calculateGPUsNeeded(totalGiB);
+
+    // For traditional batching, show allocated vs used
+    let totalGiB, allocatedGiB;
+    if (!continuousBatching && !pagedAttention && batchSize > 0) {
+        allocatedGiB = kvMaxGiB + weightsGiB; // Pre-allocated for max context
+        totalGiB = kvGiB + weightsGiB; // Actually used
+    } else {
+        allocatedGiB = kvGiB + weightsGiB;
+        totalGiB = allocatedGiB;
+    }
+
+    const gpusNeeded = calculateGPUsNeeded(allocatedGiB);
 
     document.getElementById('modelName').textContent = model.name;
     document.getElementById('contextLength').textContent = `${formatNumber(Math.floor(currentTokens))} tokens`;
@@ -1189,7 +1289,17 @@ function updateInfoPanel() {
     const totalEl = document.getElementById('totalSize');
     if (weightsEl) weightsEl.textContent = includeWeights ? formatMemory(weightsGiB) : '—';
     if (totalEl) {
-        if (continuousBatching && batchSize > 1) {
+        if (!continuousBatching && !pagedAttention && batchSize > 0) {
+            // Traditional batching: show allocated vs used
+            const usagePercent = Math.round((totalGiB / allocatedGiB) * 100);
+            const kvPerQueryAlloc = kvMaxGiB / batchSize;
+            const kvPerQueryUsed = kvGiB / batchSize;
+            if (batchSize > 1) {
+                totalEl.textContent = `${formatMemory(allocatedGiB)} allocated (${usagePercent}% used: ${formatMemory(totalGiB)})`;
+            } else {
+                totalEl.textContent = `${formatMemory(allocatedGiB)} allocated (${usagePercent}% used)`;
+            }
+        } else if (continuousBatching && batchSize > 1) {
             // Show average sequence length for continuous batching
             const avgSeqLen = batchSequenceLengths.reduce((a, b) => a + b, 0) / batchSequenceLengths.length;
             if (includeWeights) {
