@@ -2501,7 +2501,16 @@ function updateInfoPanel() {
     }
 
     // Update paper references (positioned below efficiency box)
-    updatePaperReferences()
+    // Hide paper references when using multiple GPUs to save screen space
+    if (gpuCount === 1) {
+        updatePaperReferences()
+    } else {
+        // Hide paper references box for multi-GPU view
+        const paperRefsBoxEl = document.getElementById('paperRefsBox')
+        if (paperRefsBoxEl) {
+            paperRefsBoxEl.style.display = 'none'
+        }
+    }
 
     // Update GPU display to show batch processing info
     const gpuText = batchSize > 1 ? `${gpusNeeded} (${batchSize} queries/GPU)` : gpusNeeded
