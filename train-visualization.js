@@ -352,13 +352,16 @@ function updateUI() {
     // Show warning if memory exceeds GPU
     const warning = document.getElementById('warning');
     if (memory.total > gpuConfigs[currentGPU].memory) {
-        warning.style.display = 'block';
+        warning.style.visibility = 'visible';
+        warning.style.opacity = '1';
         warning.textContent = `⚠️ Out of Memory! Requires ${gpusNeeded} GPUs or enable optimizations`;
     } else if (memory.total > gpuConfigs[currentGPU].memory * 0.9) {
-        warning.style.display = 'block';
+        warning.style.visibility = 'visible';
+        warning.style.opacity = '1';
         warning.textContent = `⚠️ Warning: Near memory limit (${(memory.total / gpuConfigs[currentGPU].memory * 100).toFixed(0)}% used)`;
     } else {
-        warning.style.display = 'none';
+        warning.style.visibility = 'hidden';
+        warning.style.opacity = '0';
     }
 }
 
@@ -376,9 +379,25 @@ function animate() {
             document.getElementById('playPause').textContent = '✓ Training Complete';
         }
 
-        // Simulate loss decay
+        // Simulate realistic loss decay with noise
+        const progress = currentStep / maxSteps;
+        const warmupProgress = Math.min(1, currentStep / 1000);
+
+        // Exponential decay with warm-up
         const targetLoss = 0.1;
-        currentLoss = currentLoss * 0.999 + targetLoss * 0.001;
+        const baseLoss = 4.5;
+
+        // Loss follows exponential decay with some noise
+        const idealLoss = targetLoss + (baseLoss - targetLoss) * Math.exp(-5 * progress);
+
+        // Add realistic training noise
+        const noise = (Math.random() - 0.5) * 0.1 * (1 - progress * 0.8); // Noise decreases over time
+
+        // Occasional spikes (gradient instability)
+        const spike = Math.random() < 0.02 ? Math.random() * 0.5 : 0;
+
+        // Smooth the transition
+        currentLoss = currentLoss * 0.95 + (idealLoss + noise + spike) * 0.05;
 
         // Record loss history - keep all points but downsample for performance
         if (currentStep % 100 === 0) {
