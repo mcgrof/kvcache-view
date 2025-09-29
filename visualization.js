@@ -2315,17 +2315,27 @@ function updateInfoPanel() {
             dcWrap.style.display = 'block'
             if (window.positionDatacenterNote) window.positionDatacenterNote()
         }
-    } else if (gpusNeeded > 8) {
+    } else if (gpusNeeded > 8 && gpuCount === 1) {
+        // Only show multi-node warning if user hasn't already selected multiple GPUs
         criticalState = 'multi-node'
         warning.style.display = 'block'
         warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}) - Multi-node required!`
         const dcWrap = document.getElementById('datacenterNote')
         if (dcWrap) dcWrap.style.display = 'none'
-    } else if (gpusNeeded > 1) {
+    } else if (gpusNeeded > 1 && gpuCount === 1) {
+        // Only show multi-GPU warning if user is still on single GPU
         criticalState = 'multi-gpu'
         warning.style.display = 'block'
         const perGPU = getCurrentGPUMemGiB()
         warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}, ${formatMemory(gpusNeeded * perGPU)} total)`
+        const dcWrap = document.getElementById('datacenterNote')
+        if (dcWrap) dcWrap.style.display = 'none'
+    } else if (gpuCount > 1 && allocatedGiB > (getCurrentGPUMemGiB() * gpuCount)) {
+        // User selected multiple GPUs but still needs more
+        const actualNeeded = Math.ceil(allocatedGiB / getCurrentGPUMemGiB())
+        criticalState = 'none'  // Don't show popup, just warning
+        warning.style.display = 'block'
+        warning.textContent = `⚠️ Current ${gpuCount} GPUs insufficient - need ${actualNeeded} for this workload`
         const dcWrap = document.getElementById('datacenterNote')
         if (dcWrap) dcWrap.style.display = 'none'
     } else {
@@ -2713,6 +2723,12 @@ if (gpuCountBtn) {
         const idx = validGPUCounts.indexOf(gpuCount)
         gpuCount = validGPUCounts[(idx + 1) % validGPUCounts.length]
         this.textContent = `GPUs: ${gpuCount}`
+
+        // When switching to multi-GPU for the first time, adjust context if needed
+        if (gpuCount > 1 && currentTokens === 0) {
+            // Start with some tokens to show the interconnect in action
+            currentTokens = 10000
+        }
 
         // Update info panel to show multi-GPU info
         updateInfoPanel()
