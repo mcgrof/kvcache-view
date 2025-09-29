@@ -233,9 +233,130 @@ const gpuConfigs = {
 };
 let currentGPU = 'H100 80G';
 
+// Set sane defaults based on GPU capabilities
+function setGPUDefaults(gpuKey) {
+    const config = gpuConfigs[gpuKey];
+    if (!config) return;
+
+    const memGiB = config.memGiB;
+    const memType = config.memType;
+
+    // Set appropriate context length based on GPU memory
+    if (memGiB >= 128) {
+        // High-end GPUs (MI300X, Max 1550): 1M context
+        maxTokens = 1000000;
+        currentTokens = Math.min(currentTokens, maxTokens * 0.5); // Start at 50%
+    } else if (memGiB >= 80) {
+        // Premium GPUs (H100, A100 80G): 512K context
+        maxTokens = 512000;
+        currentTokens = Math.min(currentTokens, maxTokens * 0.3); // Start at 30%
+    } else if (memGiB >= 40) {
+        // High-end GPUs (A100 40G, L40S): 256K context
+        maxTokens = 256000;
+        currentTokens = Math.min(currentTokens, maxTokens * 0.25); // Start at 25%
+    } else if (memGiB >= 24) {
+        // Enthusiast GPUs (RTX 4090): 128K context
+        maxTokens = 128000;
+        currentTokens = Math.min(currentTokens, maxTokens * 0.2); // Start at 20%
+    } else if (memGiB >= 16) {
+        // Mid-range GPUs (Tesla T4, Arc A770): 64K context
+        maxTokens = 64000;
+        currentTokens = Math.min(currentTokens, maxTokens * 0.15); // Start at 15%
+    } else {
+        // Lower-end or specialized (Graphcore): 32K context
+        maxTokens = 32000;
+        currentTokens = Math.min(currentTokens, maxTokens * 0.1); // Start at 10%
+    }
+
+    // Set appropriate batch size based on memory and type
+    if (memType.includes('SRAM')) {
+        // Specialized accelerators: smaller batches, optimized for throughput
+        batchSize = memGiB > 10 ? 2 : 1;
+    } else if (memGiB >= 80) {
+        // High-memory GPUs: larger batches
+        batchSize = 8;
+    } else if (memGiB >= 40) {
+        // Mid-high memory: moderate batches
+        batchSize = 4;
+    } else if (memGiB >= 16) {
+        // Mid-range: conservative batches
+        batchSize = 2;
+    } else {
+        // Low memory: single batch
+        batchSize = 1;
+    }
+
+    // Enable appropriate optimizations based on GPU capabilities
+    if (memType.includes('SRAM')) {
+        // SRAM-based accelerators: all optimizations enabled by default
+        continuousBatching = true;
+        pagedAttention = true;
+        flashAttention = true;
+    } else if (memType.includes('HBM')) {
+        // HBM-based GPUs: enable CB and Flash by default
+        continuousBatching = true;
+        pagedAttention = false; // Start with just CB + Flash
+        flashAttention = true;
+    } else {
+        // GDDR-based GPUs: more conservative defaults
+        continuousBatching = memGiB >= 24; // Only for high-memory GDDR
+        pagedAttention = false;
+        flashAttention = memGiB >= 16; // Flash for mid-range and up
+    }
+
+    // Reset animation to start position
+    if (currentTokens === 0) {
+        currentTokens = maxTokens * 0.01; // Start at 1% to show some progress
+    }
+}
+
 function getCurrentGPUMemGiB() {
     const cfg = gpuConfigs[currentGPU];
     return cfg ? cfg.memGiB : 80;
+}
+
+// Update UI controls to reflect current state
+function updateControlStates() {
+    // Update batch size control
+    const batchBtn = document.getElementById('batchControl');
+    if (batchBtn) {
+        batchBtn.textContent = `Batch: ${batchSize}`;
+    }
+
+    // Update context length control
+    const contextBtn = document.getElementById('contextControl');
+    if (contextBtn) {
+        contextBtn.textContent = `Context: ${formatMemoryValue(maxTokens)} tokens`;
+    }
+
+    // Update optimization toggle states
+    const cbBtn = document.getElementById('continuousBatchingToggle');
+    if (cbBtn) {
+        cbBtn.textContent = `CB: ${continuousBatching ? 'ON' : 'OFF'}`;
+        cbBtn.classList.toggle('enabled', continuousBatching);
+    }
+
+    const paBtn = document.getElementById('pagedAttentionToggle');
+    if (paBtn) {
+        paBtn.textContent = `PA: ${pagedAttention ? 'ON' : 'OFF'}`;
+        paBtn.classList.toggle('enabled', pagedAttention);
+    }
+
+    const faBtn = document.getElementById('flashAttentionToggle');
+    if (faBtn) {
+        faBtn.textContent = `Flash: ${flashAttention ? 'ON' : 'OFF'}`;
+        faBtn.classList.toggle('enabled', flashAttention);
+    }
+}
+
+// Format large numbers for display
+function formatMemoryValue(value) {
+    if (value >= 1000000) {
+        return (value / 1000000).toFixed(value % 1000000 === 0 ? 0 : 1) + 'M';
+    } else if (value >= 1000) {
+        return (value / 1000).toFixed(value % 1000 === 0 ? 0 : 1) + 'K';
+    }
+    return value.toString();
 }
 
 // SOTA context length presets
@@ -2232,7 +2353,13 @@ if (gpuBtn) {
         const idx = keys.indexOf(currentGPU);
         currentGPU = keys[(idx + 1) % keys.length];
         this.textContent = `Device: ${currentGPU}`;
+
+        // Set appropriate defaults for the new GPU
+        setGPUDefaults(currentGPU);
+
+        // Update UI to reflect new defaults
         updateInfoPanel();
+        updateControlStates();
     });
 }
 
@@ -2266,5 +2393,9 @@ setTimeout(() => {
     updateFactoid();
     lastFactoidUpdate = Date.now();
 }, 100);
+
+// Set initial defaults for the default GPU
+setGPUDefaults(currentGPU);
+updateControlStates();
 
 animate();
