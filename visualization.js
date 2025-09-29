@@ -330,21 +330,30 @@ function updateControlStates() {
     }
 
     // Update optimization toggle states
-    const cbBtn = document.getElementById('continuousBatchingToggle');
+    const cbBtn = document.getElementById('cbToggle');
     if (cbBtn) {
-        cbBtn.textContent = `CB: ${continuousBatching ? 'ON' : 'OFF'}`;
+        const span = cbBtn.querySelector('span');
+        if (span) {
+            span.textContent = `CB: ${continuousBatching ? 'ON' : 'OFF'}`;
+        }
         cbBtn.classList.toggle('enabled', continuousBatching);
     }
 
-    const paBtn = document.getElementById('pagedAttentionToggle');
+    const paBtn = document.getElementById('paToggle');
     if (paBtn) {
-        paBtn.textContent = `PA: ${pagedAttention ? 'ON' : 'OFF'}`;
+        const span = paBtn.querySelector('span');
+        if (span) {
+            span.textContent = `PA: ${pagedAttention ? 'ON' : 'OFF'}`;
+        }
         paBtn.classList.toggle('enabled', pagedAttention);
     }
 
-    const faBtn = document.getElementById('flashAttentionToggle');
+    const faBtn = document.getElementById('faToggle');
     if (faBtn) {
-        faBtn.textContent = `Flash: ${flashAttention ? 'ON' : 'OFF'}`;
+        const span = faBtn.querySelector('span');
+        if (span) {
+            span.textContent = `FA: ${flashAttention ? 'ON' : 'OFF'}`;
+        }
         faBtn.classList.toggle('enabled', flashAttention);
     }
 }
@@ -860,7 +869,8 @@ function drawMemoryGrid() {
             sequenceColors = generateSequenceColors(batchSize);
         }
     } else {
-        sequenceColors = [];
+        // Even for single batch, we need at least one color
+        sequenceColors = generateSequenceColors(1);
     }
 
     // Calculate total memory distribution across ALL HBM modules
@@ -1091,9 +1101,7 @@ function drawMemoryGrid() {
                                 }
                             }
 
-                            const color = sequenceColors[currentSeq % sequenceColors.length];
-
-
+                            const color = sequenceColors[currentSeq % sequenceColors.length] || '#5FA3E6';
 
                             // Convert hex to RGB for manipulation
                             const r = parseInt(color.substr(1,2), 16);
@@ -1169,7 +1177,7 @@ function drawMemoryGrid() {
                                             const globalPageIndex = currentBankStartPage + pageIndex;
                                             const sequenceIndex = pagePattern[globalPageIndex % pagePattern.length] % batchSize;
 
-                                            const color = sequenceColors[sequenceIndex % sequenceColors.length];
+                                            const color = sequenceColors[sequenceIndex % sequenceColors.length] || '#5FA3E6';
                                             const r = parseInt(color.substr(1,2), 16);
                                             const g = parseInt(color.substr(3,2), 16);
                                             const b = parseInt(color.substr(5,2), 16);
@@ -1269,7 +1277,7 @@ function drawMemoryGrid() {
                                 // Ensure batchNum doesn't exceed actual batch count
                                 const actualBatchNum = Math.min(batchNum, batchSize - 1);
 
-                                const color = sequenceColors[actualBatchNum % sequenceColors.length];
+                                const color = sequenceColors[actualBatchNum % sequenceColors.length] || '#5FA3E6';
                                 const r = parseInt(color.substr(1,2), 16);
                                 const g = parseInt(color.substr(3,2), 16);
                                 const b = parseInt(color.substr(5,2), 16);
@@ -2232,7 +2240,7 @@ if (cbBtn) {
             }
         } else {
             batchSequenceLengths = [];
-            sequenceColors = [];
+            sequenceColors = generateSequenceColors(1);
         }
 
         updateInfoPanel();

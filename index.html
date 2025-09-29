@@ -212,6 +212,17 @@
         }
         .btn-two-line { display: flex; flex-direction: column; line-height: 1.1; align-items: center; }
         .btn-two-line .caption { font-size: 0.72em; opacity: 0.9; text-transform: none; letter-spacing: 0; }
+
+        /* Enabled state for toggle buttons */
+        .btn-two-line.enabled {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--light-blue)) !important;
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4) !important;
+        }
+
+        .btn-two-line.enabled .caption {
+            opacity: 1 !important;
+        }
         .header-toggle { position: absolute; top: 36px; right: 40px; padding: 8px 14px; border-radius: 18px; font-size: 0.85em; }
 
         button {
