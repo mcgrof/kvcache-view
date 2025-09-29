@@ -203,41 +203,47 @@ let flashAttention = false // Enable Flash Attention for tiled computation and r
 let sequenceColors = [] // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
-    // NVIDIA
-    'Tesla T4 16G': { memGiB: 16, label: 'Tesla T4 16G', memType: 'GDDR6', l2Cache: 6, flashTileSize: 32 },
-    'RTX 4090 24G': { memGiB: 24, label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64 },
-    'L40S 48G': { memGiB: 48, label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
-    'A100 40G': { memGiB: 40, label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
-    'A100 80G': { memGiB: 80, label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128 },
-    'H100 80G': { memGiB: 80, label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128 },
-    'H200 141G': { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128 },
-    // AMD Radeon Pro (workstation)
-    'AMD W7800 32G': { memGiB: 32, label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64 },
-    'AMD W7900 48G': { memGiB: 48, label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64 },
-    // AMD Instinct (data center)
-    'AMD MI210 64G': { memGiB: 64, label: 'AMD MI210 64G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
-    'AMD MI250X 128G': { memGiB: 128, label: 'AMD MI250X 128G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64 },
-    'AMD MI300X 192G': { memGiB: 192, label: 'AMD MI300X 192G', memType: 'HBM3', l2Cache: 256, flashTileSize: 128 },
+    // NVIDIA - NVLink support and PCIe generations
+    'Tesla T4 16G': { memGiB: 16, label: 'Tesla T4 16G', memType: 'GDDR6', l2Cache: 6, flashTileSize: 32, nvlink: false, pcieGen: 3 },
+    'RTX 4090 24G': { memGiB: 24, label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    'L40S 48G': { memGiB: 48, label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    'A100 40G': { memGiB: 40, label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128, nvlink: true, nvlinkBW: 600, pcieGen: 4 },
+    'A100 80G': { memGiB: 80, label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128, nvlink: true, nvlinkBW: 600, pcieGen: 4 },
+    'H100 80G': { memGiB: 80, label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128, nvlink: true, nvlinkBW: 900, pcieGen: 5 },
+    'H200 141G': { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128, nvlink: true, nvlinkBW: 900, pcieGen: 5 },
+    // AMD Radeon Pro (workstation) - No Infinity Fabric Link on workstation cards
+    'AMD W7800 32G': { memGiB: 32, label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    'AMD W7900 48G': { memGiB: 48, label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    // AMD Instinct (data center) - Infinity Fabric Link support
+    'AMD MI210 64G': { memGiB: 64, label: 'AMD MI210 64G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64, nvlink: true, nvlinkBW: 300, ifl: true, pcieGen: 4 },
+    'AMD MI250X 128G': { memGiB: 128, label: 'AMD MI250X 128G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64, nvlink: true, nvlinkBW: 400, ifl: true, pcieGen: 4 },
+    'AMD MI300X 192G': { memGiB: 192, label: 'AMD MI300X 192G', memType: 'HBM3', l2Cache: 256, flashTileSize: 128, nvlink: true, nvlinkBW: 896, ifl: true, pcieGen: 5 },
     // Intel (GPU + AI accelerators)
-    'Intel Arc A770 16G': { memGiB: 16, label: 'Intel Arc A770 16G', memType: 'GDDR6', l2Cache: 16, flashTileSize: 32 },
+    'Intel Arc A770 16G': { memGiB: 16, label: 'Intel Arc A770 16G', memType: 'GDDR6', l2Cache: 16, flashTileSize: 32, nvlink: false, pcieGen: 4 },
     'Intel Max 1550 128G': {
         memGiB: 128,
         label: 'Intel Max 1550 128G',
         memType: 'HBM2e',
         l2Cache: 408,
         flashTileSize: 128,
+        nvlink: false,
+        pcieGen: 4
     },
-    'Intel Gaudi2 96G': { memGiB: 96, label: 'Intel Gaudi2 96G', memType: 'HBM2e', l2Cache: 48, flashTileSize: 64 },
-    // Google TPU (approx per-chip HBM)
-    'Google TPU v3 16G': { memGiB: 16, label: 'Google TPU v3 16G', memType: 'HBM2', l2Cache: 16, flashTileSize: 64 },
-    'Google TPU v4 32G': { memGiB: 32, label: 'Google TPU v4 32G', memType: 'HBM2', l2Cache: 32, flashTileSize: 128 },
-    // Graphcore and Cerebras
+    'Intel Gaudi2 96G': { memGiB: 96, label: 'Intel Gaudi2 96G', memType: 'HBM2e', l2Cache: 48, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    // Google TPU (approx per-chip HBM) - Has proprietary interconnect, PCIe for host connection
+    'Google TPU v3 16G': { memGiB: 16, label: 'Google TPU v3 16G', memType: 'HBM2', l2Cache: 16, flashTileSize: 64, nvlink: true, nvlinkBW: 700, tpuInterconnect: true, pcieGen: 3 },
+    'Google TPU v4 32G': { memGiB: 32, label: 'Google TPU v4 32G', memType: 'HBM2', l2Cache: 32, flashTileSize: 128, nvlink: true, nvlinkBW: 1200, tpuInterconnect: true, pcieGen: 4 },
+    // Graphcore and Cerebras - Proprietary fabrics
     'Graphcore IPU Mk2 0.9G': {
         memGiB: 0.9,
         label: 'Graphcore IPU Mk2 0.9G',
         memType: 'SRAM',
         l2Cache: 900,
         flashTileSize: 256,
+        nvlink: true,
+        nvlinkBW: 320,
+        ipuLink: true,
+        pcieGen: 4
     },
     'Cerebras WSE-2 40G': {
         memGiB: 40,
@@ -245,6 +251,8 @@ const gpuConfigs = {
         memType: 'SRAM',
         l2Cache: 40960,
         flashTileSize: 512,
+        nvlink: false,  // Single wafer, no multi-chip needed
+        pcieGen: 4
     },
     // Qualcomm Cloud AI
     'Qualcomm Cloud AI 100 32G': {
@@ -253,14 +261,16 @@ const gpuConfigs = {
         memType: 'LPDDR5',
         l2Cache: 32,
         flashTileSize: 64,
-        nvlink: false
+        nvlink: false,
+        pcieGen: 4
     },
 }
 
 // Multi-GPU configuration
 let gpuCount = 1  // Number of GPUs (powers of 2: 1, 2, 4, 8, 16, 32, 64, 128)
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
-const pcieBandwidth = 32  // PCIe 4.0 x16 bandwidth in GB/s
+const pcie4Bandwidth = 32  // PCIe 4.0 x16 bandwidth in GB/s (most GPUs)
+const pcie5Bandwidth = 64  // PCIe 5.0 x16 bandwidth in GB/s (H100, H200, MI300X)
 let useHighSpeedInterconnect = true  // Use NVLink/IFL when available vs PCIe
 
 let currentGPU = 'H100 80G'
@@ -838,9 +848,23 @@ function drawMultiGPUCluster() {
     const gpuPositions = []
 
     // Determine interconnect type and bandwidth
-    let interconnectType = 'PCIe 4.0'
-    let interconnectBW = pcieBandwidth
+    let interconnectType = 'PCIe'
+    let interconnectBW = pcie4Bandwidth  // Default to PCIe 4.0
     let interconnectColor = '#606060'  // Gray for PCIe
+
+    // Check PCIe generation for this GPU
+    if (!useHighSpeedInterconnect || !gpuConfig.nvlink) {
+        if (gpuConfig.pcieGen === 5) {
+            interconnectType = 'PCIe 5.0'
+            interconnectBW = pcie5Bandwidth
+        } else if (gpuConfig.pcieGen === 3) {
+            interconnectType = 'PCIe 3.0'
+            interconnectBW = 16  // PCIe 3.0 x16 = 16 GB/s
+        } else {
+            interconnectType = 'PCIe 4.0'
+            interconnectBW = pcie4Bandwidth
+        }
+    }
 
     if (gpuConfig.nvlink && useHighSpeedInterconnect) {
         if (gpuConfig.ifl) {
@@ -2414,8 +2438,17 @@ function updateInfoPanel() {
                 interconnectBW = gpuConfig.nvlinkBW || 600
             }
         } else {
-            interconnectType = 'PCIe 4.0'
-            interconnectBW = pcieBandwidth
+            // Determine PCIe generation and bandwidth
+            if (gpuConfig.pcieGen === 5) {
+                interconnectType = 'PCIe 5.0'
+                interconnectBW = pcie5Bandwidth
+            } else if (gpuConfig.pcieGen === 3) {
+                interconnectType = 'PCIe 3.0'
+                interconnectBW = 16
+            } else {
+                interconnectType = 'PCIe 4.0'
+                interconnectBW = pcie4Bandwidth
+            }
         }
 
         const clusterMemory = gpuConfig.memGiB * gpuCount
