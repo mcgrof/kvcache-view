@@ -74,7 +74,9 @@ function calculateModelWeightsMemory(model, dtype = 'fp32') {
 function calculateGradientsMemory(model, dtype = 'fp32') {
     // Gradients are same size as weights
     const bytesPerParam = dtype === 'fp16' || dtype === 'bf16' ? 2 : 4;
-    return (model.params * 1e9 * bytesPerParam) / (1024 ** 3); // GiB
+    // Gradients accumulate during forward pass, clear after backward
+    const accumulation = isTraining ? (0.8 + Math.sin(Date.now() * 0.002) * 0.2) : 1;
+    return (model.params * 1e9 * bytesPerParam * accumulation) / (1024 ** 3); // GiB
 }
 
 function calculateOptimizerMemory(model, optimizer, dtype = 'fp32') {
@@ -99,7 +101,10 @@ function calculateActivationsMemory(model, batchSize, sequenceLength, dtype = 'f
         factor = 2; // Only store checkpoint activations
     }
 
-    const activationBytes = batchSize * sequenceLength * model.layers * model.hidden * factor * bytesPerValue;
+    // Add dynamic variation during training (activations vary based on batch)
+    const variation = isTraining ? (1 + Math.sin(Date.now() * 0.001) * 0.2) : 1;
+
+    const activationBytes = batchSize * sequenceLength * model.layers * model.hidden * factor * bytesPerValue * variation;
     return activationBytes / (1024 ** 3); // GiB
 }
 
@@ -376,7 +381,7 @@ function animate() {
         if (currentStep >= maxSteps) {
             currentStep = maxSteps;
             isTraining = false;
-            document.getElementById('playPause').textContent = '✓ Complete';
+            document.getElementById('playPause').innerHTML = '<span>✓ Complete</span><br><span style="font-size: 0.7em; opacity: 0.8">Restart Training</span>';
         }
 
         // Simulate realistic loss decay with noise
@@ -423,8 +428,21 @@ function animate() {
 
 // Event listeners
 document.getElementById('playPause').addEventListener('click', function() {
-    isTraining = !isTraining;
-    this.textContent = isTraining ? '⏸️ Pause Training' : '▶️ Resume Training';
+    // If training is complete, restart
+    if (currentStep >= maxSteps) {
+        currentStep = 0;
+        lossHistory = [];
+        currentLoss = 4.5;
+        isTraining = true;
+        this.innerHTML = '<span>⏸️ Pause Training</span>';
+    } else {
+        isTraining = !isTraining;
+        if (currentStep === 0) {
+            this.innerHTML = '<span>▶️ Start Training</span>';
+        } else {
+            this.innerHTML = isTraining ? '<span>⏸️ Pause Training</span>' : '<span>▶️ Resume Training</span>';
+        }
+    }
 });
 
 document.getElementById('speedControl').addEventListener('click', function() {
