@@ -326,7 +326,7 @@ function updateControlStates() {
     // Update context length control
     const contextBtn = document.getElementById('contextControl');
     if (contextBtn) {
-        contextBtn.textContent = `Context: ${formatMemoryValue(maxTokens)} tokens`;
+        contextBtn.textContent = `Context: ${formatMemoryValue(maxTokens)}`;
     }
 
     // Update optimization toggle states
