@@ -253,8 +253,15 @@ const gpuConfigs = {
         memType: 'LPDDR5',
         l2Cache: 32,
         flashTileSize: 64,
+        nvlink: false
     },
 }
+
+// Multi-GPU configuration
+let gpuCount = 1  // Number of GPUs (powers of 2: 1, 2, 4, 8, 16, 32, 64, 128)
+const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
+const pcieBandwidth = 32  // PCIe 4.0 x16 bandwidth in GB/s
+
 let currentGPU = 'H100 80G'
 
 // Set sane defaults based on GPU capabilities
@@ -789,6 +796,220 @@ function initWaves() {
 }
 
 // Draw GPU architecture visualization
+// Multi-GPU cluster visualization
+function drawMultiGPUCluster() {
+    const model = models[currentModelIndex]
+    const gpuConfig = gpuConfigs[currentGPU]
+
+    // Calculate memory per GPU
+    const kvGiB = calculateBatchKVCache(model, currentTokens)
+    const kvMaxGiB = calculateBatchKVCache(model, maxTokens)
+    const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
+    const memPerGPU = (kvGiB + weightsGiB) / gpuCount  // KV cache is sharded across GPUs
+    const memMaxPerGPU = (kvMaxGiB + weightsGiB) / gpuCount
+
+    // Determine grid layout based on GPU count
+    let cols, rows
+    if (gpuCount === 2) { cols = 2; rows = 1; }
+    else if (gpuCount === 4) { cols = 2; rows = 2; }
+    else if (gpuCount === 8) { cols = 4; rows = 2; }
+    else if (gpuCount === 16) { cols = 4; rows = 4; }
+    else if (gpuCount === 32) { cols = 8; rows = 4; }
+    else if (gpuCount === 64) { cols = 8; rows = 8; }
+    else if (gpuCount === 128) { cols = 16; rows = 8; }
+    else { cols = Math.ceil(Math.sqrt(gpuCount)); rows = Math.ceil(gpuCount / cols); }
+
+    // Scale GPU size based on count
+    const maxGPUSize = Math.min(150, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
+    const gpuSize = maxGPUSize * 0.7
+    const gpuSpacing = maxGPUSize * 1.2
+
+    // Center the grid
+    const gridWidth = cols * gpuSpacing
+    const gridHeight = rows * gpuSpacing
+    const offsetX = (canvas.width - gridWidth) / 2 + gpuSpacing / 2
+    const offsetY = (canvas.height - gridHeight) / 2 + gpuSpacing / 2
+
+    // Store GPU positions for interconnect drawing
+    const gpuPositions = []
+
+    // Determine interconnect type and bandwidth
+    let interconnectType = 'PCIe 4.0'
+    let interconnectBW = pcieBandwidth
+    let interconnectColor = '#606060'  // Gray for PCIe
+
+    if (gpuConfig.nvlink) {
+        if (gpuConfig.ifl) {
+            interconnectType = 'Infinity Fabric'
+            interconnectBW = gpuConfig.nvlinkBW || 400
+            interconnectColor = '#FF4444'  // Red for AMD
+        } else if (gpuConfig.tpuInterconnect) {
+            interconnectType = 'TPU Interconnect'
+            interconnectBW = gpuConfig.nvlinkBW || 700
+            interconnectColor = '#4285F4'  // Google Blue
+        } else if (gpuConfig.ipuLink) {
+            interconnectType = 'IPU-Link'
+            interconnectBW = gpuConfig.nvlinkBW || 320
+            interconnectColor = '#00A0FF'  // Light blue for Graphcore
+        } else if (currentGPU.includes('Intel')) {
+            interconnectType = 'Xe Link'
+            interconnectBW = 400  // Intel Xe Link bandwidth
+            interconnectColor = '#0071C5'  // Intel Blue
+        } else {
+            interconnectType = `NVLink ${gpuConfig.nvlinkBW >= 900 ? '4.0' : '3.0'}`
+            interconnectBW = gpuConfig.nvlinkBW || 600
+            interconnectColor = '#76B900'  // NVIDIA Green
+        }
+    }
+
+    // Calculate bandwidth utilization
+    const kvCacheSyncTraffic = (kvGiB * 1024) / gpuCount  // MB per GPU for all-reduce
+    const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
+
+    // Draw interconnects first (behind GPUs)
+    ctx.save()
+
+    // Draw mesh interconnects for high-speed links
+    if (gpuConfig.nvlink && gpuCount <= 8) {
+        // Full mesh topology for NVLink/IFL
+        for (let i = 0; i < gpuCount; i++) {
+            const row1 = Math.floor(i / cols)
+            const col1 = i % cols
+            const x1 = offsetX + col1 * gpuSpacing
+            const y1 = offsetY + row1 * gpuSpacing
+
+            for (let j = i + 1; j < gpuCount; j++) {
+                const row2 = Math.floor(j / cols)
+                const col2 = j % cols
+                const x2 = offsetX + col2 * gpuSpacing
+                const y2 = offsetY + row2 * gpuSpacing
+
+                // Draw interconnect line
+                ctx.strokeStyle = interconnectColor
+                ctx.globalAlpha = 0.3 + bandwidthUtilization * 0.7
+                ctx.lineWidth = 2 + bandwidthUtilization * 4
+                ctx.beginPath()
+                ctx.moveTo(x1, y1)
+                ctx.lineTo(x2, y2)
+                ctx.stroke()
+
+                // Animate data flow on interconnects
+                if (isPlaying && bandwidthUtilization > 0.1) {
+                    const particleX = x1 + (x2 - x1) * ((Date.now() / 1000) % 1)
+                    const particleY = y1 + (y2 - y1) * ((Date.now() / 1000) % 1)
+                    ctx.fillStyle = interconnectColor
+                    ctx.globalAlpha = 0.8
+                    ctx.beginPath()
+                    ctx.arc(particleX, particleY, 3, 0, Math.PI * 2)
+                    ctx.fill()
+                }
+            }
+        }
+    } else {
+        // Tree topology through PCIe switch for non-NVLink or large clusters
+        const switchX = canvas.width / 2
+        const switchY = canvas.height - 80
+
+        // Draw PCIe switch
+        ctx.fillStyle = '#404040'
+        ctx.fillRect(switchX - 40, switchY - 15, 80, 30)
+        ctx.fillStyle = '#606060'
+        ctx.font = '10px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('PCIe Switch', switchX, switchY + 3)
+
+        // Connect each GPU to switch
+        for (let i = 0; i < gpuCount; i++) {
+            const row = Math.floor(i / cols)
+            const col = i % cols
+            const x = offsetX + col * gpuSpacing
+            const y = offsetY + row * gpuSpacing
+
+            ctx.strokeStyle = interconnectColor
+            ctx.globalAlpha = 0.3 + bandwidthUtilization * 0.5
+            ctx.lineWidth = 1 + bandwidthUtilization * 2
+            ctx.beginPath()
+            ctx.moveTo(x, y + gpuSize / 2)
+            ctx.lineTo(switchX, switchY - 15)
+            ctx.stroke()
+        }
+    }
+
+    ctx.restore()
+
+    // Draw GPUs
+    for (let i = 0; i < gpuCount; i++) {
+        const row = Math.floor(i / cols)
+        const col = i % cols
+        const x = offsetX + col * gpuSpacing
+        const y = offsetY + row * gpuSpacing
+
+        gpuPositions.push({ x, y })
+
+        // Draw GPU die
+        const gradient = ctx.createLinearGradient(x - gpuSize/2, y - gpuSize/2, x + gpuSize/2, y + gpuSize/2)
+        gradient.addColorStop(0, '#1a1a2e')
+        gradient.addColorStop(1, '#0a0a1a')
+
+        ctx.fillStyle = gradient
+        ctx.fillRect(x - gpuSize/2, y - gpuSize/2, gpuSize, gpuSize)
+
+        // Draw GPU border
+        ctx.strokeStyle = '#404060'
+        ctx.lineWidth = 1
+        ctx.strokeRect(x - gpuSize/2, y - gpuSize/2, gpuSize, gpuSize)
+
+        // Draw memory usage bar
+        const barHeight = 8
+        const barWidth = gpuSize - 10
+        const barX = x - barWidth/2
+        const barY = y + gpuSize/2 - 20
+
+        // Background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctx.fillRect(barX, barY, barWidth, barHeight)
+
+        // Memory usage
+        const memUsageRatio = Math.min(1, memPerGPU / gpuConfig.memGiB)
+        const usageColor = memUsageRatio > 0.9 ? '#FF4444' :
+                          memUsageRatio > 0.7 ? '#FFA500' : '#4CAF50'
+
+        ctx.fillStyle = usageColor
+        ctx.fillRect(barX, barY, barWidth * memUsageRatio, barHeight)
+
+        // GPU label
+        ctx.fillStyle = '#808080'
+        ctx.font = '9px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText(`GPU ${i}`, x, y - gpuSize/2 - 5)
+
+        // Memory text
+        ctx.fillText(`${memPerGPU.toFixed(1)}/${gpuConfig.memGiB}G`, x, y + gpuSize/2 + 12)
+    }
+
+    // Draw interconnect info
+    ctx.save()
+    ctx.fillStyle = '#C0C0C0'
+    ctx.font = '12px monospace'
+    ctx.textAlign = 'left'
+
+    const infoY = canvas.height - 40
+    ctx.fillText(`Interconnect: ${interconnectType} (${interconnectBW} GB/s)`, 20, infoY)
+    ctx.fillText(`Bandwidth Usage: ${(bandwidthUtilization * 100).toFixed(1)}%`, 20, infoY + 15)
+
+    // Show bottleneck warning if bandwidth is saturated
+    if (bandwidthUtilization > 0.8) {
+        ctx.fillStyle = '#FF4444'
+        ctx.font = 'bold 14px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('⚠️ INTERCONNECT BOTTLENECK DETECTED', canvas.width / 2, 30)
+        ctx.font = '11px monospace'
+        ctx.fillText(`KV cache synchronization saturating ${interconnectType} bandwidth`, canvas.width / 2, 45)
+    }
+
+    ctx.restore()
+}
+
 function drawMemoryGrid() {
     const model = models[currentModelIndex]
 
@@ -1964,10 +2185,34 @@ function updateInfoPanel() {
         totalGiB = allocatedGiB
     }
 
-    const gpusNeeded = calculateGPUsNeeded(allocatedGiB)
+    const gpusNeeded = gpuCount > 1 ? gpuCount : calculateGPUsNeeded(allocatedGiB)
 
     document.getElementById('modelName').textContent = model.name
     document.getElementById('contextLength').textContent = `${formatNumber(Math.floor(currentTokens))} tokens`
+
+    // Show multi-GPU cluster info
+    if (gpuCount > 1) {
+        const gpuConfig = gpuConfigs[currentGPU]
+        const memPerGPU = allocatedGiB / gpuCount
+        const interconnectType = gpuConfig.nvlink ?
+            (gpuConfig.ifl ? 'Infinity Fabric' :
+             gpuConfig.tpuInterconnect ? 'TPU Link' :
+             gpuConfig.ipuLink ? 'IPU-Link' :
+             currentGPU.includes('Intel') ? 'Xe Link' :
+             'NVLink') : 'PCIe 4.0'
+
+        const clusterMemory = gpuConfig.memGiB * gpuCount
+        const utilization = (allocatedGiB / clusterMemory) * 100
+
+        // Update total memory to show cluster total
+        const totalMemEl = document.getElementById('totalMemory')
+        if (totalMemEl) {
+            totalMemEl.innerHTML = `<strong style="color: #FFD700">${gpuCount}×</strong> ${currentGPU}<br>` +
+                                  `Cluster: ${clusterMemory.toFixed(0)} GiB total<br>` +
+                                  `Using: ${allocatedGiB.toFixed(1)} GiB (${utilization.toFixed(1)}%)<br>` +
+                                  `Interconnect: ${interconnectType}`
+        }
+    }
 
     // Show allocation unit size
     const allocationEl = document.getElementById('allocationUnit')
@@ -2203,7 +2448,11 @@ function animate() {
         })
 
         // Draw visualizations
-        drawMemoryGrid()
+        if (gpuCount > 1) {
+            drawMultiGPUCluster()
+        } else {
+            drawMemoryGrid()
+        }
         drawExponentialCurve()
 
         // Update and draw data flow particles
@@ -2454,6 +2703,19 @@ if (gpuBtn) {
         // Update UI to reflect new defaults
         updateInfoPanel()
         updateControlStates()
+    })
+}
+
+// GPU count control (powers of 2)
+const gpuCountBtn = document.getElementById('gpuCountControl')
+if (gpuCountBtn) {
+    gpuCountBtn.addEventListener('click', function () {
+        const idx = validGPUCounts.indexOf(gpuCount)
+        gpuCount = validGPUCounts[(idx + 1) % validGPUCounts.length]
+        this.textContent = `GPUs: ${gpuCount}`
+
+        // Update info panel to show multi-GPU info
+        updateInfoPanel()
     })
 }
 
