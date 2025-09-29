@@ -104,7 +104,7 @@
         }
 
         .controls {
-            position: absolute;
+            position: fixed;  /* Fixed instead of absolute */
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
@@ -114,6 +114,7 @@
             flex-wrap: wrap;
             justify-content: center;
             max-width: 90%;
+            height: auto;  /* Explicit height */
         }
 
         button {
@@ -130,6 +131,11 @@
             letter-spacing: 0.5px;
             backdrop-filter: blur(5px);
             font-family: inherit;
+            min-width: 140px;  /* Prevent size changes */
+        }
+
+        #playPause {
+            min-width: 180px;  /* Larger for play/pause button */
         }
 
         button:hover {

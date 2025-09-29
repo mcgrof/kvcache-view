@@ -376,7 +376,7 @@ function animate() {
         if (currentStep >= maxSteps) {
             currentStep = maxSteps;
             isTraining = false;
-            document.getElementById('playPause').textContent = '✓ Training Complete';
+            document.getElementById('playPause').textContent = '✓ Complete';
         }
 
         // Simulate realistic loss decay with noise
