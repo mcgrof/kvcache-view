@@ -89,6 +89,7 @@ let currentGPU = 'H100 80G'
 let gpuCount = 1  // Number of GPUs for distributed training
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
 let useHighSpeedInterconnect = true  // Use NVLink/InfinityFabric when available
+let currentInterconnect = 'pcie5'  // Default to PCIe 5.0
 
 // Famous training datacenter configurations
 const worldDatacenters = {
@@ -257,12 +258,24 @@ function drawMultiGPUCluster() {
     const activationSyncTraffic = (memory.activations * 1024) * (gpuCount / 4)  // Activation sharding
     const totalSyncTraffic = gradientSyncTraffic + activationSyncTraffic
 
-    // Determine interconnect type from current datacenter or default
+    // Use the selected interconnect type (works for both single and multi-GPU)
     const currentDC = worldDatacenters[currentDatacenter]
-    let interconnectSpec = currentDC?.interconnect || (useHighSpeedInterconnect ? 'nvlink' : 'pcie')
+    let interconnectSpec = currentDC?.interconnect || currentInterconnect
 
     // Set interconnect bandwidth and type based on spec
     switch (interconnectSpec) {
+        case 'pcie3':
+            interconnectType = 'PCIe 3.0'
+            interconnectBW = 16  // GB/s for PCIe 3.0 x16
+            break
+        case 'pcie4':
+            interconnectType = 'PCIe 4.0'
+            interconnectBW = 32  // GB/s for PCIe 4.0 x16
+            break
+        case 'pcie5':
+            interconnectType = 'PCIe 5.0'
+            interconnectBW = 64  // GB/s for PCIe 5.0 x16
+            break
         case 'nvlink':
             interconnectType = 'NVLink 4.0'
             interconnectBW = 900  // GB/s for NVLink
@@ -275,7 +288,6 @@ function drawMultiGPUCluster() {
             interconnectType = 'TPU Interconnect'
             interconnectBW = 600  // GB/s for TPU interconnect
             break
-        case 'pcie':
         default:
             interconnectType = 'PCIe 5.0'
             interconnectBW = 64  // GB/s for PCIe 5.0
@@ -593,6 +605,75 @@ function drawGPUMemory() {
     ctx.fillStyle = '#EAF2FF'
     ctx.font = '12px monospace'
     ctx.fillText(`Step ${currentStep.toLocaleString()} / ${maxSteps.toLocaleString()}`, centerX, progressY + 25)
+
+    // Add interconnect bandwidth meter for single GPU (for PCIe generation comparison)
+    const memory = getTotalTrainingMemory()
+
+    // Calculate single GPU data transfer (model loading, gradient sync, etc.)
+    const modelLoadTraffic = memory.weights * 0.1  // Model loading overhead
+    const gradientSaveTraffic = memory.gradients * 0.05  // Gradient checkpointing
+    const totalSingleGPUTraffic = modelLoadTraffic + gradientSaveTraffic
+
+    // Get current interconnect specs
+    const currentDC = worldDatacenters[currentDatacenter]
+    let interconnectSpec = currentDC?.interconnect || currentInterconnect
+
+    let interconnectBW = 64  // Default PCIe 5.0
+    let interconnectType = 'PCIe 5.0'
+
+    switch (interconnectSpec) {
+        case 'pcie3':
+            interconnectType = 'PCIe 3.0'
+            interconnectBW = 16
+            break
+        case 'pcie4':
+            interconnectType = 'PCIe 4.0'
+            interconnectBW = 32
+            break
+        case 'pcie5':
+            interconnectType = 'PCIe 5.0'
+            interconnectBW = 64
+            break
+        default:
+            interconnectType = 'PCIe 5.0'
+            interconnectBW = 64
+            break
+    }
+
+    const bandwidthUtilization = Math.min(1.0, totalSingleGPUTraffic / (interconnectBW * 1000))
+
+    // Draw interconnect bandwidth meter
+    const meterX = centerX - 100
+    const meterY = progressY + 50
+    const meterWidth = 200
+    const meterHeight = 15
+
+    // Meter background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillRect(meterX, meterY, meterWidth, meterHeight)
+
+    // Meter fill based on utilization
+    const fillWidth = meterWidth * bandwidthUtilization
+    const meterColor = bandwidthUtilization > 0.8 ? '#FF4444' :
+                      bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+    ctx.fillStyle = meterColor
+    ctx.fillRect(meterX, meterY, fillWidth, meterHeight)
+
+    // Meter border
+    ctx.strokeStyle = '#666'
+    ctx.lineWidth = 1
+    ctx.strokeRect(meterX, meterY, meterWidth, meterHeight)
+
+    // Meter label
+    ctx.fillStyle = '#FFF'
+    ctx.font = '11px monospace'
+    ctx.textAlign = 'center'
+    ctx.fillText(`${interconnectType} Bandwidth`, centerX, meterY - 8)
+
+    // Utilization percentage
+    ctx.font = '9px monospace'
+    ctx.fillStyle = '#CCC'
+    ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}% (${(totalSingleGPUTraffic / 1024).toFixed(2)} GB/s)`, centerX, meterY + meterHeight + 12)
 }
 
 // Draw training loss curve
@@ -975,12 +1056,41 @@ if (gpuCountBtn) {
 // Interconnect control
 const interconnectBtn = document.getElementById('interconnectControl')
 if (interconnectBtn) {
+    // Add interconnect cycling for both single and multi-GPU
+    let interconnectOptions = ['pcie5', 'pcie4', 'pcie3', 'nvlink', 'wl900']
+    let currentInterconnectIndex = 0 // Start with PCIe 5.0
+
     interconnectBtn.addEventListener('click', function () {
-        if (gpuCount === 1) return
-        useHighSpeedInterconnect = !useHighSpeedInterconnect
-        this.textContent = useHighSpeedInterconnect ? 'Link: NVLink' : 'Link: PCIe'
-        this.style.background = useHighSpeedInterconnect ?
-            'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))' : ''
+        // Cycle through interconnect options
+        currentInterconnectIndex = (currentInterconnectIndex + 1) % interconnectOptions.length
+        const selectedInterconnect = interconnectOptions[currentInterconnectIndex]
+
+        // Update button display and styling
+        switch (selectedInterconnect) {
+            case 'pcie3':
+                this.textContent = 'Link: PCIe 3.0'
+                this.style.background = ''
+                break
+            case 'pcie4':
+                this.textContent = 'Link: PCIe 4.0'
+                this.style.background = ''
+                break
+            case 'pcie5':
+                this.textContent = 'Link: PCIe 5.0'
+                this.style.background = 'linear-gradient(180deg, rgba(0, 123, 255, 0.2), rgba(0, 123, 255, 0.1))'
+                break
+            case 'nvlink':
+                this.textContent = 'Link: NVLink'
+                this.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
+                break
+            case 'wl900':
+                this.textContent = 'Link: WL900'
+                this.style.background = 'linear-gradient(180deg, rgba(255, 165, 0, 0.2), rgba(255, 165, 0, 0.1))'
+                break
+        }
+
+        // Store current selection for bandwidth calculations
+        currentInterconnect = selectedInterconnect
     })
 }
 
@@ -989,35 +1099,14 @@ function updateInterconnectButton() {
     const btn = document.getElementById('interconnectControl')
     if (!btn) return
 
-    if (gpuCount > 1) {
-        btn.style.display = ''
+    // Always show interconnect button (useful for single GPU PCIe generation modeling)
+    btn.style.display = ''
 
-        // Get current interconnect type from datacenter or default
-        const currentDC = worldDatacenters[currentDatacenter]
-        const interconnectSpec = currentDC?.interconnect || (useHighSpeedInterconnect ? 'nvlink' : 'pcie')
-
-        // Display appropriate text and styling
-        switch (interconnectSpec) {
-            case 'nvlink':
-                btn.textContent = 'Link: NVLink'
-                btn.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
-                break
-            case 'wl900':
-                btn.textContent = 'Link: WL900'
-                btn.style.background = 'linear-gradient(180deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1))'
-                break
-            case 'tpu':
-                btn.textContent = 'Link: TPU'
-                btn.style.background = 'linear-gradient(180deg, rgba(0, 150, 255, 0.2), rgba(0, 150, 255, 0.1))'
-                break
-            case 'pcie':
-            default:
-                btn.textContent = 'Link: PCIe 5.0'
-                btn.style.background = ''
-                break
-        }
-    } else {
-        btn.style.display = 'none'
+    // Initialize button with default PCIe 5.0 if not set
+    if (!btn.textContent || btn.textContent === 'Link: NVLink') {
+        btn.textContent = 'Link: PCIe 5.0'
+        btn.style.background = 'linear-gradient(180deg, rgba(0, 123, 255, 0.2), rgba(0, 123, 255, 0.1))'
+        currentInterconnect = 'pcie5'
     }
 }
 
