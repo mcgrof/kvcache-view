@@ -58,6 +58,7 @@ let gradientAccumulation = false
 const gpuConfigs = {
     'Tesla T4 16G': { memory: 16, bandwidth: 300, compute: 8.1 },
     'RTX 4090 24G': { memory: 24, bandwidth: 1008, compute: 82.6 },
+    'AMD W7900 48G': { memory: 48, bandwidth: 864, compute: 61.3 },
     'A100 40G': { memory: 40, bandwidth: 1555, compute: 19.5 },
     'A100 80G': { memory: 80, bandwidth: 2039, compute: 19.5 },
     'H100 80G': { memory: 80, bandwidth: 3350, compute: 67 },
@@ -261,25 +262,56 @@ function drawMultiGPUCluster() {
     if (gpuCount > 1) {
         const connections = []
 
-        // Create connection list
-        for (let i = 0; i < Math.min(gpuCount, 64); i++) {  // Increased limit for better large cluster visualization
-            const row1 = Math.floor(i / cols)
-            const col1 = i % cols
-            const x1 = offsetX + col1 * gpuSpacing
-            const y1 = offsetY + row1 * gpuSpacing
+        // Create connection list - sample evenly across all rows for large clusters
+        const maxConnections = gpuCount >= 128 ? 96 : Math.min(gpuCount, 64)
 
-            // Connect to neighbors
-            if (col1 < cols - 1) { // Right neighbor
-                connections.push({
-                    x1: x1 + gpuSize, y1: y1 + gpuSize/2,
-                    x2: x1 + gpuSpacing, y2: y1 + gpuSize/2
-                })
+        if (gpuCount >= 128) {
+            // For massive clusters, sample 2 GPUs per row to show interconnects across all rows
+            const gpusPerRow = Math.min(2, cols)
+            for (let row = 0; row < rows; row++) {
+                for (let colOffset = 0; colOffset < gpusPerRow && colOffset < cols; colOffset++) {
+                    const i = row * cols + colOffset * Math.floor(cols / gpusPerRow)
+                    const row1 = Math.floor(i / cols)
+                    const col1 = i % cols
+                    const x1 = offsetX + col1 * gpuSpacing
+                    const y1 = offsetY + row1 * gpuSpacing
+
+                    // Connect to neighbors
+                    if (col1 < cols - 1) { // Right neighbor
+                        connections.push({
+                            x1: x1 + gpuSize, y1: y1 + gpuSize/2,
+                            x2: x1 + gpuSpacing, y2: y1 + gpuSize/2
+                        })
+                    }
+                    if (row1 < rows - 1) { // Bottom neighbor
+                        connections.push({
+                            x1: x1 + gpuSize/2, y1: y1 + gpuSize,
+                            x2: x1 + gpuSize/2, y2: y1 + gpuSpacing
+                        })
+                    }
+                }
             }
-            if (row1 < rows - 1) { // Bottom neighbor
-                connections.push({
-                    x1: x1 + gpuSize/2, y1: y1 + gpuSize,
-                    x2: x1 + gpuSize/2, y2: y1 + gpuSpacing
-                })
+        } else {
+            // Standard approach for smaller clusters
+            for (let i = 0; i < maxConnections; i++) {
+                const row1 = Math.floor(i / cols)
+                const col1 = i % cols
+                const x1 = offsetX + col1 * gpuSpacing
+                const y1 = offsetY + row1 * gpuSpacing
+
+                // Connect to neighbors
+                if (col1 < cols - 1) { // Right neighbor
+                    connections.push({
+                        x1: x1 + gpuSize, y1: y1 + gpuSize/2,
+                        x2: x1 + gpuSpacing, y2: y1 + gpuSize/2
+                    })
+                }
+                if (row1 < rows - 1) { // Bottom neighbor
+                    connections.push({
+                        x1: x1 + gpuSize/2, y1: y1 + gpuSize,
+                        x2: x1 + gpuSize/2, y2: y1 + gpuSpacing
+                    })
+                }
             }
         }
 
