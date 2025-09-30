@@ -206,22 +206,23 @@
 
             #warning {
                 position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
+                top: 20px;
+                right: 20px;
+                transform: none;
                 background: rgba(255, 100, 0, 0.2);
                 border: 2px solid var(--accent-warn);
                 padding: 20px 30px;
                 border-radius: 15px;
-                font-size: 1.2em;
-                font-weight: bold;
+                font-size: 0.9em;
+                font-weight: 600;
                 visibility: hidden;
                 opacity: 0;
                 transition:
                     opacity 0.3s ease,
                     visibility 0.3s ease;
                 backdrop-filter: blur(10px);
-                z-index: 100;
+                z-index: 5;
+                pointer-events: none;
                 text-align: center;
                 max-width: 600px;
             }
@@ -372,10 +373,10 @@
         <div class="controls">
             <button id="playPause">▶️ Start Training</button>
             <button id="speedControl">Speed: 50x</button>
-            <button id="modelControl">Model: Llama-1B</button>
-            <button id="batchControl">Batch: 2</button>
-            <button id="seqControl">Seq: 1024</button>
-            <button id="optimizerControl">Optimizer: Adam</button>
+            <button id="modelControl">Model: Llama-8B</button>
+            <button id="batchControl">Batch: 4</button>
+            <button id="seqControl">Seq: 2048</button>
+            <button id="optimizerControl">Optimizer: AdamW</button>
 
             <button
                 id="gcToggle"

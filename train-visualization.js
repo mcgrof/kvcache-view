@@ -45,7 +45,7 @@ const optimizers = {
     Lion: { memoryFactor: 1 }, // 1x model size for momentum only
     AdaFactor: { memoryFactor: 0.5 }, // Factorized second moments
 }
-let currentOptimizer = 'Adam'
+let currentOptimizer = 'AdamW'
 
 // Training optimizations - start with some enabled to show their benefit
 let gradientCheckpointing = true // Enabled by default to reduce memory
@@ -724,6 +724,7 @@ function animate() {
     gradient.addColorStop(1, 'rgba(10, 10, 10, 0.1)')
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+
 
     // Training step progress
     if (isTraining) {
