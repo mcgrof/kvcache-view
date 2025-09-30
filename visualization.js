@@ -936,7 +936,7 @@ function drawMultiGPUCluster() {
     // Create visual metaphor for bandwidth saturation
     if (bandwidthUtilization > 0.7) {
         // Draw pulsing red glow when approaching saturation
-        const pulseIntensity = 0.3 + Math.sin(getAnimationTime() / 200) * 0.2
+        const pulseIntensity = isPlaying ? 0.3 + Math.sin(getAnimationTime() / 200) * 0.2 : 0.3
         ctx.fillStyle = `rgba(255, 68, 68, ${pulseIntensity * bandwidthUtilization})`
         ctx.fillRect(0, 0, canvas.width, canvas.height)
     }
@@ -1286,7 +1286,7 @@ function drawMultiGPUCluster() {
     // Show bottleneck warning if bandwidth is saturated
     if (bandwidthUtilization > 0.8) {
         // Pulsing warning message
-        const pulse = Math.sin(getAnimationTime() / 200) * 0.3 + 0.7
+        const pulse = isPlaying ? Math.sin(getAnimationTime() / 200) * 0.3 + 0.7 : 0.7
         ctx.fillStyle = `rgba(255, 68, 68, ${pulse})`
         ctx.font = 'bold 16px monospace'
         ctx.textAlign = 'center'
@@ -1453,7 +1453,7 @@ function drawMemoryGrid() {
         const savingsY = centerY - 450
 
         // Pulsing glow effect around the savings indicator
-        const glowPulse = Math.sin(getAnimationTime() * 0.003) * 20 + 30
+        const glowPulse = isPlaying ? Math.sin(getAnimationTime() * 0.003) * 20 + 30 : 30
         ctx.shadowColor = 'rgba(255, 50, 50, 0.8)'
         ctx.shadowBlur = glowPulse
         ctx.shadowOffsetX = 0
@@ -1500,7 +1500,7 @@ function drawMemoryGrid() {
             const ghostHeight = Math.min(h, h * attentionRatio * activeMemModules)
 
             // Draw thick red border around what would be used
-            const borderPulse = Math.sin(getAnimationTime() * 0.002) * 0.2 + 0.5
+            const borderPulse = isPlaying ? Math.sin(getAnimationTime() * 0.002) * 0.2 + 0.5 : 0.5
             ctx.strokeStyle = `rgba(255, 50, 50, ${borderPulse})`
             ctx.lineWidth = 4
             ctx.setLineDash([15, 10])
@@ -1508,7 +1508,7 @@ function drawMemoryGrid() {
             ctx.setLineDash([])
 
             // Semi-transparent red overlay
-            const pulse = Math.sin(getAnimationTime() * 0.002) * 0.1 + 0.25
+            const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002) * 0.1 + 0.25 : 0.25
             ctx.fillStyle = `rgba(255, 50, 50, ${pulse})`
             ctx.fillRect(mem.x, mem.y, w, ghostHeight)
 
@@ -1613,7 +1613,7 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                        const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8 : 0.6
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1696,7 +1696,7 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                        const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8 : 0.6
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1816,7 +1816,7 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                        const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8 : 0.6
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -2106,7 +2106,7 @@ function drawMemoryGrid() {
             const y = cuStartY + row * cuSpacing
 
             // Compute unit activity visualization
-            const pulse = Math.sin(getAnimationTime() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7
+            const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7 : 0.5
             const active = Math.random() < activity
 
             if (active) {
@@ -2318,7 +2318,7 @@ function drawExponentialCurve() {
     // Pulsing circle at current position - smaller and different color with Flash Attention
     const basePulse = flashAttention ? 3 : 5 // Smaller base size with Flash Attention
     const pulseRange = flashAttention ? 2 : 5 // Less variation with Flash Attention
-    const pulse = Math.sin(getAnimationTime() * 0.003) * pulseRange + basePulse + 5
+    const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.003) * pulseRange + basePulse + 5 : basePulse + 5
 
     // Striking yellow-green for Flash Attention, original color otherwise
     const dotColor = flashAttention ? 'rgba(200, 255, 0, 1)' : model.color
