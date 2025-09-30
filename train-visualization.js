@@ -614,30 +614,35 @@ function drawGPUMemory() {
     const gradientSaveTraffic = memory.gradients * 0.05  // Gradient checkpointing
     const totalSingleGPUTraffic = modelLoadTraffic + gradientSaveTraffic
 
-    // Get current interconnect specs
-    const currentDC = worldDatacenters[currentDatacenter]
-    let interconnectSpec = currentDC?.interconnect || currentInterconnect
-
+    // Get current interconnect specs - use safe default
     let interconnectBW = 64  // Default PCIe 5.0
     let interconnectType = 'PCIe 5.0'
 
-    switch (interconnectSpec) {
-        case 'pcie3':
-            interconnectType = 'PCIe 3.0'
-            interconnectBW = 16
-            break
-        case 'pcie4':
-            interconnectType = 'PCIe 4.0'
-            interconnectBW = 32
-            break
-        case 'pcie5':
-            interconnectType = 'PCIe 5.0'
-            interconnectBW = 64
-            break
-        default:
-            interconnectType = 'PCIe 5.0'
-            interconnectBW = 64
-            break
+    try {
+        const currentDC = worldDatacenters[currentDatacenter]
+        let interconnectSpec = currentDC?.interconnect || currentInterconnect || 'pcie5'
+
+        switch (interconnectSpec) {
+            case 'pcie3':
+                interconnectType = 'PCIe 3.0'
+                interconnectBW = 16
+                break
+            case 'pcie4':
+                interconnectType = 'PCIe 4.0'
+                interconnectBW = 32
+                break
+            case 'pcie5':
+                interconnectType = 'PCIe 5.0'
+                interconnectBW = 64
+                break
+            default:
+                interconnectType = 'PCIe 5.0'
+                interconnectBW = 64
+                break
+        }
+    } catch (error) {
+        console.error('Interconnect error:', error)
+        // Use defaults
     }
 
     const bandwidthUtilization = Math.min(1.0, totalSingleGPUTraffic / (interconnectBW * 1000))
