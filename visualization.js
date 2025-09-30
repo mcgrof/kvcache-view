@@ -275,6 +275,27 @@ let useHighSpeedInterconnect = true  // Use NVLink/IFL when available vs PCIe
 
 let currentGPU = 'H100 80G'
 
+// Famous GPU datacenter configurations
+const worldDatacenters = {
+    none: { name: 'None', gpus: null, gpu: null, model: null },
+    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
+    meta_rsc: { name: 'Meta RSC', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
+    openai_cluster: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
+    aws_p4: { name: 'AWS P4d.24xl', gpus: 8, gpu: 'A100 40G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    aws_p5: { name: 'AWS P5.48xl', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    gcp_a2: { name: 'GCP A2 Ultra', gpus: 16, gpu: 'A100 40G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
+    gcp_a3: { name: 'GCP A3 Mega', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    azure_nd96: { name: 'Azure NDv4', gpus: 8, gpu: 'A100 40G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    azure_ndh100: { name: 'Azure NDm H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    lambda_1x: { name: 'Lambda 1-Click', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.1-8B', interconnect: 'none' },
+    lambda_8x: { name: 'Lambda Cloud 8x', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    amd_mi300: { name: 'AMD MI300X', gpus: 8, gpu: 'MI300X', model: 'Llama-3.1-70B', interconnect: 'ifl' },
+    intel_gaudi: { name: 'Intel Gaudi 2', gpus: 8, gpu: 'Gaudi 2', model: 'Llama-3.1-8B', interconnect: 'pcie' },
+    tesla_dojo: { name: 'Tesla Dojo', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-405B', interconnect: 'custom' },
+}
+let currentDatacenter = 'none'
+
 // Set sane defaults based on GPU capabilities
 function setGPUDefaults(gpuKey) {
     const config = gpuConfigs[gpuKey]
@@ -833,10 +854,16 @@ function drawMultiGPUCluster() {
     else if (gpuCount === 128) { cols = 16; rows = 8; }
     else { cols = Math.ceil(Math.sqrt(gpuCount)); rows = Math.ceil(gpuCount / cols); }
 
-    // Scale GPU size based on count
+    // Scale GPU size based on count - much smaller for larger clusters
+    let scaleFactor = 0.7
+    if (gpuCount > 16) scaleFactor = 0.35  // Much smaller for 32 GPUs
+    if (gpuCount > 32) scaleFactor = 0.25  // Even smaller for 64 GPUs
+    if (gpuCount > 64) scaleFactor = 0.15  // Very tiny for >64 GPUs
+    if (gpuCount >= 128) scaleFactor = 0.03  // Microscopic for 128 GPUs
+
     const maxGPUSize = Math.min(150, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
-    const gpuSize = maxGPUSize * 0.7
-    const gpuSpacing = maxGPUSize * 1.2
+    const gpuSize = maxGPUSize * scaleFactor
+    const gpuSpacing = maxGPUSize * (gpuCount >= 128 ? 0.7 : (gpuCount > 16 ? 0.95 : 1.2))  // Very tight for 128
 
     // Center the grid
     const gridWidth = cols * gpuSpacing
@@ -908,21 +935,62 @@ function drawMultiGPUCluster() {
     }
 
     // Draw mesh interconnects for high-speed links
-    if (gpuConfig.nvlink && useHighSpeedInterconnect && gpuCount <= 8) {
-        // Full mesh topology for NVLink/IFL
+    if (gpuConfig.nvlink && useHighSpeedInterconnect) {
+        // Limit interconnect visualization for performance
         const connections = []
-        for (let i = 0; i < gpuCount; i++) {
-            const row1 = Math.floor(i / cols)
-            const col1 = i % cols
-            const x1 = offsetX + col1 * gpuSpacing
-            const y1 = offsetY + row1 * gpuSpacing
 
-            for (let j = i + 1; j < gpuCount; j++) {
-                const row2 = Math.floor(j / cols)
-                const col2 = j % cols
-                const x2 = offsetX + col2 * gpuSpacing
-                const y2 = offsetY + row2 * gpuSpacing
-                connections.push({x1, y1, x2, y2})
+        if (gpuCount <= 8) {
+            // Full mesh for small clusters
+            for (let i = 0; i < gpuCount; i++) {
+                const row1 = Math.floor(i / cols)
+                const col1 = i % cols
+                const x1 = offsetX + col1 * gpuSpacing
+                const y1 = offsetY + row1 * gpuSpacing
+
+                for (let j = i + 1; j < gpuCount; j++) {
+                    const row2 = Math.floor(j / cols)
+                    const col2 = j % cols
+                    const x2 = offsetX + col2 * gpuSpacing
+                    const y2 = offsetY + row2 * gpuSpacing
+                    connections.push({x1, y1, x2, y2})
+                }
+            }
+        } else if (gpuCount <= 32) {
+            // Sparse connections for medium clusters
+            for (let i = 0; i < gpuCount; i += 2) {  // Skip every other GPU
+                const row1 = Math.floor(i / cols)
+                const col1 = i % cols
+                const x1 = offsetX + col1 * gpuSpacing
+                const y1 = offsetY + row1 * gpuSpacing
+
+                // Only connect to nearest neighbors
+                for (let j = i + 1; j < Math.min(i + 4, gpuCount); j++) {
+                    const row2 = Math.floor(j / cols)
+                    const col2 = j % cols
+                    const x2 = offsetX + col2 * gpuSpacing
+                    const y2 = offsetY + row2 * gpuSpacing
+                    connections.push({x1, y1, x2, y2})
+                }
+            }
+        } else {
+            // Minimal connections for huge clusters (>32 GPUs)
+            // Just show a few representative connections to indicate fabric
+            const step = Math.max(4, Math.floor(gpuCount / 16))
+            for (let i = 0; i < gpuCount; i += step) {
+                const row1 = Math.floor(i / cols)
+                const col1 = i % cols
+                const x1 = offsetX + col1 * gpuSpacing
+                const y1 = offsetY + row1 * gpuSpacing
+
+                // Connect to one neighbor only
+                const j = Math.min(i + step, gpuCount - 1)
+                if (j > i) {
+                    const row2 = Math.floor(j / cols)
+                    const col2 = j % cols
+                    const x2 = offsetX + col2 * gpuSpacing
+                    const y2 = offsetY + row2 * gpuSpacing
+                    connections.push({x1, y1, x2, y2})
+                }
             }
         }
 
@@ -973,9 +1041,12 @@ function drawMultiGPUCluster() {
             }
 
             // Animate data packets flowing through the pipes
-            if (isPlaying && bandwidthUtilization > 0) {
-                // More particles when bandwidth is higher
-                const particleCount = Math.ceil(bandwidthUtilization * 5)
+            // Reduce particles for large clusters to save memory
+            if (isPlaying && bandwidthUtilization > 0 && gpuCount <= 64) {
+                // Limit particles based on GPU count
+                const maxParticles = gpuCount > 32 ? 2 : (gpuCount > 16 ? 3 : 5)
+                const particleCount = Math.min(maxParticles, Math.ceil(bandwidthUtilization * 5))
+
                 for (let p = 0; p < particleCount; p++) {
                     const offset = (Date.now() / (1000 - bandwidthUtilization * 800) + p / particleCount) % 1
                     const particleX = x1 + (x2 - x1) * offset
@@ -990,8 +1061,8 @@ function drawMultiGPUCluster() {
                     ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2)
                     ctx.fill()
 
-                    // Add trailing effect for fast movement
-                    if (bandwidthUtilization > 0.7) {
+                    // Skip trailing effect for large clusters to save performance
+                    if (bandwidthUtilization > 0.7 && gpuCount <= 16) {
                         ctx.globalAlpha = 0.3
                         for (let t = 1; t <= 3; t++) {
                             const trailOffset = offset - t * 0.02
@@ -3164,6 +3235,87 @@ if (interconnectBtn) {
 
         // Update info panel to reflect bandwidth change
         updateInfoPanel()
+    })
+}
+
+// World DC control (Famous GPU clusters)
+// Store original settings before DC selection
+let originalSettings = {
+    gpuCount: 1,
+    currentGPU: 'H100 80G',
+    currentModelIndex: 2,  // Llama-3.1-8B by default
+    useHighSpeedInterconnect: true
+}
+
+const worldDCBtn = document.getElementById('worldDCControl')
+if (worldDCBtn) {
+    // Capture initial settings
+    originalSettings.gpuCount = gpuCount
+    originalSettings.currentGPU = currentGPU
+    originalSettings.currentModelIndex = currentModelIndex
+    originalSettings.useHighSpeedInterconnect = useHighSpeedInterconnect
+
+    worldDCBtn.addEventListener('click', function () {
+        // Cycle through datacenters
+        const dcKeys = Object.keys(worldDatacenters)
+        const currentIdx = dcKeys.indexOf(currentDatacenter)
+        currentDatacenter = dcKeys[(currentIdx + 1) % dcKeys.length]
+
+        const dc = worldDatacenters[currentDatacenter]
+        this.textContent = `DC: ${dc.name}`
+
+        if (currentDatacenter === 'none') {
+            // Restore original settings
+            gpuCount = originalSettings.gpuCount
+            currentGPU = originalSettings.currentGPU
+            currentModelIndex = originalSettings.currentModelIndex
+            useHighSpeedInterconnect = originalSettings.useHighSpeedInterconnect
+
+            // Update UI
+            const gpuCountBtn = document.getElementById('gpuCountControl')
+            if (gpuCountBtn) gpuCountBtn.textContent = `GPUs: ${gpuCount}`
+
+            const gpuBtn = document.getElementById('gpuControl')
+            if (gpuBtn) gpuBtn.textContent = `Device: ${currentGPU}`
+
+            setGPUDefaults(currentGPU)
+            updateModelUI()
+            updateInterconnectButton()
+            updateInfoPanel()
+        } else if (dc.gpus !== null) {
+            // Apply datacenter configuration
+            // Set GPU count
+            gpuCount = dc.gpus
+            const gpuCountBtn = document.getElementById('gpuCountControl')
+            if (gpuCountBtn) gpuCountBtn.textContent = `GPUs: ${gpuCount}`
+
+            // Set GPU type
+            if (dc.gpu && gpuConfigs[dc.gpu]) {
+                currentGPU = dc.gpu
+                const gpuBtn = document.getElementById('gpuControl')
+                if (gpuBtn) gpuBtn.textContent = `Device: ${dc.gpu}`
+                setGPUDefaults(dc.gpu)
+            }
+
+            // Set model
+            if (dc.model) {
+                const modelIdx = models.findIndex(m => m.name === dc.model)
+                if (modelIdx !== -1) {
+                    currentModelIndex = modelIdx
+                    updateModelUI()
+                }
+            }
+
+            // Set interconnect
+            if (dc.interconnect === 'nvlink') {
+                useHighSpeedInterconnect = true
+            } else if (dc.interconnect === 'pcie') {
+                useHighSpeedInterconnect = false
+            }
+
+            updateInterconnectButton()
+            updateInfoPanel()
+        }
     })
 }
 
