@@ -15,7 +15,7 @@ An impactful, animated visualization demonstrating the exponential memory growth
 - 🏋️ **Training Visualization**: Interactive training memory visualization with weights, gradients, optimizer states
 - 🖥️ **Multi-GPU Support**: Distributed inference simulation with interconnect bandwidth modeling
 - 🎮 **Latest GPUs**: Support for NVIDIA Blackwell (B100, B200, GB200) and AMD MI300X
-- 🌊 **Beautiful Visuals**: Peaceful wave effects with particle animations
+- 🌊 **Beautiful Visuals**: Dynamic particle animations and visual effects
 
 ## 🚀 Live Demo
 
@@ -50,7 +50,7 @@ As context lengths grow from thousands to millions of tokens, KV cache memory be
   - Memory grid fills up showing utilization
   - Exponential curve traces the non-linear growth
   - Particle effects intensify with memory pressure
-  - Wave patterns inspired by the peaceful aesthetic
+  - Dynamic visual patterns representing memory growth
 
 ## Key Insights Visualized
 
@@ -149,9 +149,8 @@ This visualization demonstrates why such optimizations are critical for the futu
 
 ## Inspiration
 
-- **Visual Style**: Inspired by the meditative waves from the "peace" OpenGL project
 - **Technical Foundation**: Based on LMCache's KV cache calculator and memory projections
-- **Purpose**: Make the abstract concept of memory scaling tangible and impactful
+- **Purpose**: Make the abstract concept of memory scaling tangible and impactful through interactive visualization
 
 ## Technical Stack
 
@@ -208,8 +207,7 @@ kvcache-view/
 
 - [LMCache](https://github.com/LMCache/LMCache) - The KV cache optimization framework that inspired this visualization
 - [LMCache Calculator](https://lmcache.ai/kv_cache_calculator.html) - Interactive KV cache size calculator
-- [Peace](https://github.com/mcgrof/peace) - The meditative wave visualization that inspired the aesthetics
 
 ## 📝 License
 
-Created as a demonstration of the memory challenges that LMCache solves. Do whatever brings you peace.
+Created as a demonstration of the memory challenges that LMCache solves. Open source under permissive licensing.
