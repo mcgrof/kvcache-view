@@ -145,6 +145,20 @@ const models = [
         efficiency: 'optimized',
     },
     {
+        name: 'Qwen3-Omni-30B',
+        params: 30,
+        active_params: 3,
+        layers: 36,
+        hidden_size: 4096,
+        num_heads: 32,
+        num_kv_heads: 8,
+        num_local_experts: 128,
+        num_experts_per_tok: 8,
+        architecture: 'moe',
+        color: '#8E24AA', // Purple
+        efficiency: 'optimized',
+    },
+    {
         name: 'Mixtral-8x22B',
         params: 141, // 8 experts, 2 active = 39.1B active
         layers: 56,
@@ -211,25 +225,166 @@ let sequenceColors = [] // Colors for each sequence in continuous batching
 // GPU configurations (per-GPU memory in GiB)
 const gpuConfigs = {
     // NVIDIA - NVLink support and PCIe generations
-    'Tesla T4 16G': { memGiB: 16, label: 'Tesla T4 16G', memType: 'GDDR6', l2Cache: 6, flashTileSize: 32, nvlink: false, pcieGen: 3 },
-    'RTX 4090 24G': { memGiB: 24, label: 'RTX 4090 24G', memType: 'GDDR6X', l2Cache: 72, flashTileSize: 64, nvlink: false, pcieGen: 4 },
-    'L40S 48G': { memGiB: 48, label: 'L40S 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64, nvlink: false, pcieGen: 4 },
-    'A100 40G': { memGiB: 40, label: 'A100 40G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128, nvlink: true, nvlinkBW: 600, pcieGen: 4 },
-    'A100 80G': { memGiB: 80, label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128, nvlink: true, nvlinkBW: 600, pcieGen: 4 },
-    'H100 80G': { memGiB: 80, label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128, nvlink: true, nvlinkBW: 900, pcieGen: 5 },
-    'H200 141G': { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128, nvlink: true, nvlinkBW: 900, pcieGen: 5 },
-    'B100 80G': { memGiB: 80, label: 'B100 80G', memType: 'HBM3e', l2Cache: 60, flashTileSize: 128, nvlink: true, nvlinkBW: 1800, pcieGen: 6 },
-    'B200 192G': { memGiB: 192, label: 'B200 192G', memType: 'HBM3e', l2Cache: 60, flashTileSize: 128, nvlink: true, nvlinkBW: 1800, pcieGen: 6 },
-    'GB200 384G': { memGiB: 384, label: 'GB200 NVL2 384G', memType: 'HBM3e', l2Cache: 120, flashTileSize: 256, nvlink: true, nvlinkBW: 1800, pcieGen: 6 },
+    'Tesla T4 16G': {
+        memGiB: 16,
+        label: 'Tesla T4 16G',
+        memType: 'GDDR6',
+        l2Cache: 6,
+        flashTileSize: 32,
+        nvlink: false,
+        pcieGen: 3,
+    },
+    'RTX 4090 24G': {
+        memGiB: 24,
+        label: 'RTX 4090 24G',
+        memType: 'GDDR6X',
+        l2Cache: 72,
+        flashTileSize: 64,
+        nvlink: false,
+        pcieGen: 4,
+    },
+    'L40S 48G': {
+        memGiB: 48,
+        label: 'L40S 48G',
+        memType: 'GDDR6',
+        l2Cache: 96,
+        flashTileSize: 64,
+        nvlink: false,
+        pcieGen: 4,
+    },
+    'A100 40G': {
+        memGiB: 40,
+        label: 'A100 40G',
+        memType: 'HBM2e',
+        l2Cache: 40,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 600,
+        pcieGen: 4,
+    },
+    'A100 80G': {
+        memGiB: 80,
+        label: 'A100 80G',
+        memType: 'HBM2e',
+        l2Cache: 40,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 600,
+        pcieGen: 4,
+    },
+    'H100 80G': {
+        memGiB: 80,
+        label: 'H100 80G',
+        memType: 'HBM3',
+        l2Cache: 50,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 900,
+        pcieGen: 5,
+    },
+    'H200 141G': {
+        memGiB: 141,
+        label: 'H200 141G',
+        memType: 'HBM3e',
+        l2Cache: 50,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 900,
+        pcieGen: 5,
+    },
+    'B100 80G': {
+        memGiB: 80,
+        label: 'B100 80G',
+        memType: 'HBM3e',
+        l2Cache: 60,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 1800,
+        pcieGen: 6,
+    },
+    'B200 192G': {
+        memGiB: 192,
+        label: 'B200 192G',
+        memType: 'HBM3e',
+        l2Cache: 60,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 1800,
+        pcieGen: 6,
+    },
+    'GB200 384G': {
+        memGiB: 384,
+        label: 'GB200 NVL2 384G',
+        memType: 'HBM3e',
+        l2Cache: 120,
+        flashTileSize: 256,
+        nvlink: true,
+        nvlinkBW: 1800,
+        pcieGen: 6,
+    },
     // AMD Radeon Pro (workstation) - No Infinity Fabric Link on workstation cards
-    'AMD W7800 32G': { memGiB: 32, label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64, nvlink: false, pcieGen: 4 },
-    'AMD W7900 48G': { memGiB: 48, label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    'AMD W7800 32G': {
+        memGiB: 32,
+        label: 'AMD W7800 32G',
+        memType: 'GDDR6',
+        l2Cache: 64,
+        flashTileSize: 64,
+        nvlink: false,
+        pcieGen: 4,
+    },
+    'AMD W7900 48G': {
+        memGiB: 48,
+        label: 'AMD W7900 48G',
+        memType: 'GDDR6',
+        l2Cache: 96,
+        flashTileSize: 64,
+        nvlink: false,
+        pcieGen: 4,
+    },
     // AMD Instinct (data center) - Infinity Fabric Link support
-    'AMD MI210 64G': { memGiB: 64, label: 'AMD MI210 64G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64, nvlink: true, nvlinkBW: 300, ifl: true, pcieGen: 4 },
-    'AMD MI250X 128G': { memGiB: 128, label: 'AMD MI250X 128G', memType: 'HBM2e', l2Cache: 32, flashTileSize: 64, nvlink: true, nvlinkBW: 400, ifl: true, pcieGen: 4 },
-    'AMD MI300X 192G': { memGiB: 192, label: 'AMD MI300X 192G', memType: 'HBM3', l2Cache: 256, flashTileSize: 128, nvlink: true, nvlinkBW: 896, ifl: true, pcieGen: 5 },
+    'AMD MI210 64G': {
+        memGiB: 64,
+        label: 'AMD MI210 64G',
+        memType: 'HBM2e',
+        l2Cache: 32,
+        flashTileSize: 64,
+        nvlink: true,
+        nvlinkBW: 300,
+        ifl: true,
+        pcieGen: 4,
+    },
+    'AMD MI250X 128G': {
+        memGiB: 128,
+        label: 'AMD MI250X 128G',
+        memType: 'HBM2e',
+        l2Cache: 32,
+        flashTileSize: 64,
+        nvlink: true,
+        nvlinkBW: 400,
+        ifl: true,
+        pcieGen: 4,
+    },
+    'AMD MI300X 192G': {
+        memGiB: 192,
+        label: 'AMD MI300X 192G',
+        memType: 'HBM3',
+        l2Cache: 256,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 896,
+        ifl: true,
+        pcieGen: 5,
+    },
     // Intel (GPU + AI accelerators)
-    'Intel Arc A770 16G': { memGiB: 16, label: 'Intel Arc A770 16G', memType: 'GDDR6', l2Cache: 16, flashTileSize: 32, nvlink: false, pcieGen: 4 },
+    'Intel Arc A770 16G': {
+        memGiB: 16,
+        label: 'Intel Arc A770 16G',
+        memType: 'GDDR6',
+        l2Cache: 16,
+        flashTileSize: 32,
+        nvlink: false,
+        pcieGen: 4,
+    },
     'Intel Max 1550 128G': {
         memGiB: 128,
         label: 'Intel Max 1550 128G',
@@ -237,12 +392,40 @@ const gpuConfigs = {
         l2Cache: 408,
         flashTileSize: 128,
         nvlink: false,
-        pcieGen: 4
+        pcieGen: 4,
     },
-    'Intel Gaudi2 96G': { memGiB: 96, label: 'Intel Gaudi2 96G', memType: 'HBM2e', l2Cache: 48, flashTileSize: 64, nvlink: false, pcieGen: 4 },
+    'Intel Gaudi2 96G': {
+        memGiB: 96,
+        label: 'Intel Gaudi2 96G',
+        memType: 'HBM2e',
+        l2Cache: 48,
+        flashTileSize: 64,
+        nvlink: false,
+        pcieGen: 4,
+    },
     // Google TPU (approx per-chip HBM) - Has proprietary interconnect, PCIe for host connection
-    'Google TPU v3 16G': { memGiB: 16, label: 'Google TPU v3 16G', memType: 'HBM2', l2Cache: 16, flashTileSize: 64, nvlink: true, nvlinkBW: 700, tpuInterconnect: true, pcieGen: 3 },
-    'Google TPU v4 32G': { memGiB: 32, label: 'Google TPU v4 32G', memType: 'HBM2', l2Cache: 32, flashTileSize: 128, nvlink: true, nvlinkBW: 1200, tpuInterconnect: true, pcieGen: 4 },
+    'Google TPU v3 16G': {
+        memGiB: 16,
+        label: 'Google TPU v3 16G',
+        memType: 'HBM2',
+        l2Cache: 16,
+        flashTileSize: 64,
+        nvlink: true,
+        nvlinkBW: 700,
+        tpuInterconnect: true,
+        pcieGen: 3,
+    },
+    'Google TPU v4 32G': {
+        memGiB: 32,
+        label: 'Google TPU v4 32G',
+        memType: 'HBM2',
+        l2Cache: 32,
+        flashTileSize: 128,
+        nvlink: true,
+        nvlinkBW: 1200,
+        tpuInterconnect: true,
+        pcieGen: 4,
+    },
     // Graphcore and Cerebras - Proprietary fabrics
     'Graphcore IPU Mk2 0.9G': {
         memGiB: 0.9,
@@ -253,7 +436,7 @@ const gpuConfigs = {
         nvlink: true,
         nvlinkBW: 320,
         ipuLink: true,
-        pcieGen: 4
+        pcieGen: 4,
     },
     'Cerebras WSE-2 40G': {
         memGiB: 40,
@@ -261,8 +444,8 @@ const gpuConfigs = {
         memType: 'SRAM',
         l2Cache: 40960,
         flashTileSize: 512,
-        nvlink: false,  // Single wafer, no multi-chip needed
-        pcieGen: 4
+        nvlink: false, // Single wafer, no multi-chip needed
+        pcieGen: 4,
     },
     // Qualcomm Cloud AI
     'Qualcomm Cloud AI 100 32G': {
@@ -272,17 +455,17 @@ const gpuConfigs = {
         l2Cache: 32,
         flashTileSize: 64,
         nvlink: false,
-        pcieGen: 4
+        pcieGen: 4,
     },
 }
 
 // Multi-GPU configuration
-let gpuCount = 1  // Number of GPUs (powers of 2: 1, 2, 4, 8, 16, 32, 64, 128)
+let gpuCount = 1 // Number of GPUs (powers of 2: 1, 2, 4, 8, 16, 32, 64, 128)
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
-const pcie4Bandwidth = 32  // PCIe 4.0 x16 bandwidth in GB/s (most GPUs)
-const pcie5Bandwidth = 64  // PCIe 5.0 x16 bandwidth in GB/s (H100, H200, MI300X)
+const pcie4Bandwidth = 32 // PCIe 4.0 x16 bandwidth in GB/s (most GPUs)
+const pcie5Bandwidth = 64 // PCIe 5.0 x16 bandwidth in GB/s (H100, H200, MI300X)
 const pcie6Bandwidth = 128 // PCIe 6.0 x16 bandwidth in GB/s (B100, B200, GB200)
-let useHighSpeedInterconnect = true  // Use NVLink/IFL when available vs PCIe
+let useHighSpeedInterconnect = true // Use NVLink/IFL when available vs PCIe
 
 let currentGPU = 'H100 80G'
 
@@ -292,7 +475,13 @@ const worldDatacenters = {
     dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
     dgx_h200: { name: 'DGX H200', gpus: 8, gpu: 'H200 141G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
     dgx_b200: { name: 'DGX B200', gpus: 8, gpu: 'B200 192G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
-    dgx_gb200: { name: 'DGX GB200 NVL72', gpus: 72, gpu: 'GB200 384G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
+    dgx_gb200: {
+        name: 'DGX GB200 NVL72',
+        gpus: 72,
+        gpu: 'GB200 384G',
+        model: 'Llama-3.1-405B',
+        interconnect: 'nvlink',
+    },
     dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
     meta_rsc: { name: 'Meta RSC', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
     openai_cluster: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
@@ -305,7 +494,13 @@ const worldDatacenters = {
     lambda_1x: { name: 'Lambda 1-Click', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.1-8B', interconnect: 'none' },
     lambda_8x: { name: 'Lambda Cloud 8x', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
     amd_mi300: { name: 'AMD MI300X', gpus: 8, gpu: 'AMD MI300X 192G', model: 'Llama-3.1-70B', interconnect: 'ifl' },
-    intel_gaudi: { name: 'Intel Gaudi 2', gpus: 8, gpu: 'Intel Gaudi2 96G', model: 'Phi-3.5-mini', interconnect: 'pcie' },
+    intel_gaudi: {
+        name: 'Intel Gaudi 2',
+        gpus: 8,
+        gpu: 'Intel Gaudi2 96G',
+        model: 'Phi-3.5-mini',
+        interconnect: 'pcie',
+    },
     tesla_dojo: { name: 'Tesla Dojo', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-70B', interconnect: 'custom' },
 }
 let currentDatacenter = 'none'
@@ -862,30 +1057,47 @@ function drawMultiGPUCluster() {
     const kvGiB = calculateBatchKVCache(model, currentTokens)
     const kvMaxGiB = calculateBatchKVCache(model, maxTokens)
     const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
-    const memPerGPU = (kvGiB + weightsGiB) / gpuCount  // KV cache is sharded across GPUs
+    const memPerGPU = (kvGiB + weightsGiB) / gpuCount // KV cache is sharded across GPUs
     const memMaxPerGPU = (kvMaxGiB + weightsGiB) / gpuCount
 
     // Determine grid layout based on GPU count
     let cols, rows
-    if (gpuCount === 2) { cols = 2; rows = 1; }
-    else if (gpuCount === 4) { cols = 2; rows = 2; }
-    else if (gpuCount === 8) { cols = 4; rows = 2; }
-    else if (gpuCount === 16) { cols = 4; rows = 4; }
-    else if (gpuCount === 32) { cols = 8; rows = 4; }
-    else if (gpuCount === 64) { cols = 8; rows = 8; }
-    else if (gpuCount === 128) { cols = 16; rows = 8; }
-    else { cols = Math.ceil(Math.sqrt(gpuCount)); rows = Math.ceil(gpuCount / cols); }
+    if (gpuCount === 2) {
+        cols = 2
+        rows = 1
+    } else if (gpuCount === 4) {
+        cols = 2
+        rows = 2
+    } else if (gpuCount === 8) {
+        cols = 4
+        rows = 2
+    } else if (gpuCount === 16) {
+        cols = 4
+        rows = 4
+    } else if (gpuCount === 32) {
+        cols = 8
+        rows = 4
+    } else if (gpuCount === 64) {
+        cols = 8
+        rows = 8
+    } else if (gpuCount === 128) {
+        cols = 16
+        rows = 8
+    } else {
+        cols = Math.ceil(Math.sqrt(gpuCount))
+        rows = Math.ceil(gpuCount / cols)
+    }
 
     // Scale GPU size based on count - much smaller for larger clusters
     let scaleFactor = 0.7
-    if (gpuCount > 16) scaleFactor = 0.35  // Much smaller for 32 GPUs
-    if (gpuCount > 32) scaleFactor = 0.25  // Even smaller for 64 GPUs
-    if (gpuCount > 64) scaleFactor = 0.15  // Very tiny for >64 GPUs
-    if (gpuCount >= 128) scaleFactor = 0.03  // Microscopic for 128 GPUs
+    if (gpuCount > 16) scaleFactor = 0.35 // Much smaller for 32 GPUs
+    if (gpuCount > 32) scaleFactor = 0.25 // Even smaller for 64 GPUs
+    if (gpuCount > 64) scaleFactor = 0.15 // Very tiny for >64 GPUs
+    if (gpuCount >= 128) scaleFactor = 0.03 // Microscopic for 128 GPUs
 
     const maxGPUSize = Math.min(150, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
     const gpuSize = maxGPUSize * scaleFactor
-    const gpuSpacing = maxGPUSize * (gpuCount >= 128 ? 0.7 : (gpuCount > 16 ? 0.95 : 1.2))  // Very tight for 128
+    const gpuSpacing = maxGPUSize * (gpuCount >= 128 ? 0.7 : gpuCount > 16 ? 0.95 : 1.2) // Very tight for 128
 
     // Center the grid
     const gridWidth = cols * gpuSpacing
@@ -898,8 +1110,8 @@ function drawMultiGPUCluster() {
 
     // Determine interconnect type and bandwidth
     let interconnectType = 'PCIe'
-    let interconnectBW = pcie4Bandwidth  // Default to PCIe 4.0
-    let interconnectColor = '#606060'  // Gray for PCIe
+    let interconnectBW = pcie4Bandwidth // Default to PCIe 4.0
+    let interconnectColor = '#606060' // Gray for PCIe
 
     // Check PCIe generation for this GPU
     if (!useHighSpeedInterconnect || !gpuConfig.nvlink) {
@@ -911,7 +1123,7 @@ function drawMultiGPUCluster() {
             interconnectBW = pcie5Bandwidth
         } else if (gpuConfig.pcieGen === 3) {
             interconnectType = 'PCIe 3.0'
-            interconnectBW = 16  // PCIe 3.0 x16 = 16 GB/s
+            interconnectBW = 16 // PCIe 3.0 x16 = 16 GB/s
         } else {
             interconnectType = 'PCIe 4.0'
             interconnectBW = pcie4Bandwidth
@@ -922,30 +1134,30 @@ function drawMultiGPUCluster() {
         if (gpuConfig.ifl) {
             interconnectType = 'Infinity Fabric'
             interconnectBW = gpuConfig.nvlinkBW || 400
-            interconnectColor = '#FF4444'  // Red for AMD
+            interconnectColor = '#FF4444' // Red for AMD
         } else if (gpuConfig.tpuInterconnect) {
             interconnectType = 'TPU Interconnect'
             interconnectBW = gpuConfig.nvlinkBW || 700
-            interconnectColor = '#4285F4'  // Google Blue
+            interconnectColor = '#4285F4' // Google Blue
         } else if (gpuConfig.ipuLink) {
             interconnectType = 'IPU-Link'
             interconnectBW = gpuConfig.nvlinkBW || 320
-            interconnectColor = '#00A0FF'  // Light blue for Graphcore
+            interconnectColor = '#00A0FF' // Light blue for Graphcore
         } else if (currentGPU.includes('Intel')) {
             interconnectType = 'Xe Link'
-            interconnectBW = 400  // Intel Xe Link bandwidth
-            interconnectColor = '#0071C5'  // Intel Blue
+            interconnectBW = 400 // Intel Xe Link bandwidth
+            interconnectColor = '#0071C5' // Intel Blue
         } else {
             interconnectType = `NVLink ${gpuConfig.nvlinkBW >= 900 ? '4.0' : '3.0'}`
             interconnectBW = gpuConfig.nvlinkBW || 600
-            interconnectColor = '#76B900'  // NVIDIA Green
+            interconnectColor = '#76B900' // NVIDIA Green
         }
     }
 
     // Calculate bandwidth utilization - more realistic model
     // During training/inference, KV cache needs to be synchronized for attention
     // This creates all-to-all traffic patterns
-    const kvCacheSyncTraffic = (kvGiB * 1024) * Math.log2(gpuCount)  // All-reduce traffic scales with log(n)
+    const kvCacheSyncTraffic = kvGiB * 1024 * Math.log2(gpuCount) // All-reduce traffic scales with log(n)
     const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
 
     // Draw interconnects first (behind GPUs)
@@ -977,12 +1189,13 @@ function drawMultiGPUCluster() {
                     const col2 = j % cols
                     const x2 = offsetX + col2 * gpuSpacing
                     const y2 = offsetY + row2 * gpuSpacing
-                    connections.push({x1, y1, x2, y2})
+                    connections.push({ x1, y1, x2, y2 })
                 }
             }
         } else if (gpuCount <= 32) {
             // Sparse connections for medium clusters
-            for (let i = 0; i < gpuCount; i += 2) {  // Skip every other GPU
+            for (let i = 0; i < gpuCount; i += 2) {
+                // Skip every other GPU
                 const row1 = Math.floor(i / cols)
                 const col1 = i % cols
                 const x1 = offsetX + col1 * gpuSpacing
@@ -994,7 +1207,7 @@ function drawMultiGPUCluster() {
                     const col2 = j % cols
                     const x2 = offsetX + col2 * gpuSpacing
                     const y2 = offsetY + row2 * gpuSpacing
-                    connections.push({x1, y1, x2, y2})
+                    connections.push({ x1, y1, x2, y2 })
                 }
             }
         } else {
@@ -1014,14 +1227,14 @@ function drawMultiGPUCluster() {
                     const col2 = j % cols
                     const x2 = offsetX + col2 * gpuSpacing
                     const y2 = offsetY + row2 * gpuSpacing
-                    connections.push({x1, y1, x2, y2})
+                    connections.push({ x1, y1, x2, y2 })
                 }
             }
         }
 
         // Draw all connections with visual bandwidth representation
-        connections.forEach(conn => {
-            const {x1, y1, x2, y2} = conn
+        connections.forEach((conn) => {
+            const { x1, y1, x2, y2 } = conn
 
             // Base interconnect line - thicker when saturated
             const baseWidth = 2 + bandwidthUtilization * 8
@@ -1069,7 +1282,7 @@ function drawMultiGPUCluster() {
             // Reduce particles for large clusters to save memory
             if (isPlaying && bandwidthUtilization > 0 && gpuCount <= 64) {
                 // Limit particles based on GPU count
-                const maxParticles = gpuCount > 32 ? 2 : (gpuCount > 16 ? 3 : 5)
+                const maxParticles = gpuCount > 32 ? 2 : gpuCount > 16 ? 3 : 5
                 const particleCount = Math.min(maxParticles, Math.ceil(bandwidthUtilization * 5))
 
                 for (let p = 0; p < particleCount; p++) {
@@ -1079,8 +1292,8 @@ function drawMultiGPUCluster() {
 
                     // Particle size and brightness based on traffic
                     const particleSize = 2 + bandwidthUtilization * 4
-                    ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
-                                   bandwidthUtilization > 0.5 ? '#FFC107' : '#4CAF50'
+                    ctx.fillStyle =
+                        bandwidthUtilization > 0.8 ? '#FF4444' : bandwidthUtilization > 0.5 ? '#FFC107' : '#4CAF50'
                     ctx.globalAlpha = 0.8 + Math.sin(offset * Math.PI) * 0.2
                     ctx.beginPath()
                     ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2)
@@ -1118,18 +1331,21 @@ function drawMultiGPUCluster() {
             ctx.shadowColor = 'rgba(255, 68, 68, ' + bandwidthUtilization + ')'
         }
 
-        const switchGradient = ctx.createLinearGradient(switchX - switchWidth/2, switchY - switchHeight/2,
-                                                       switchX + switchWidth/2, switchY + switchHeight/2)
+        const switchGradient = ctx.createLinearGradient(
+            switchX - switchWidth / 2,
+            switchY - switchHeight / 2,
+            switchX + switchWidth / 2,
+            switchY + switchHeight / 2,
+        )
         switchGradient.addColorStop(0, bandwidthUtilization > 0.8 ? '#8B0000' : '#404040')
         switchGradient.addColorStop(1, bandwidthUtilization > 0.8 ? '#FF4444' : '#606060')
 
         ctx.fillStyle = switchGradient
-        ctx.fillRect(switchX - switchWidth/2, switchY - switchHeight/2, switchWidth, switchHeight)
+        ctx.fillRect(switchX - switchWidth / 2, switchY - switchHeight / 2, switchWidth, switchHeight)
         ctx.shadowBlur = 0
 
         // Switch label changes color based on load
-        ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
-                       bandwidthUtilization > 0.5 ? '#FFA500' : '#808080'
+        ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' : bandwidthUtilization > 0.5 ? '#FFA500' : '#808080'
         ctx.font = 'bold 12px monospace'
         ctx.textAlign = 'center'
         ctx.fillText('PCIe Switch', switchX, switchY)
@@ -1152,7 +1368,7 @@ function drawMultiGPUCluster() {
             const startX = x
             const startY = y + gpuSize / 2
             const endX = switchX
-            const endY = switchY - switchHeight/2
+            const endY = switchY - switchHeight / 2
 
             // Base connection
             ctx.strokeStyle = '#404040'
@@ -1166,8 +1382,8 @@ function drawMultiGPUCluster() {
             // Traffic flow visualization
             if (bandwidthUtilization > 0) {
                 const flowWidth = 2 + bandwidthUtilization * 6
-                ctx.strokeStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
-                                 bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+                ctx.strokeStyle =
+                    bandwidthUtilization > 0.8 ? '#FF4444' : bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
                 ctx.globalAlpha = 0.5 + bandwidthUtilization * 0.3
                 ctx.lineWidth = flowWidth * bandwidthUtilization
                 ctx.beginPath()
@@ -1180,11 +1396,12 @@ function drawMultiGPUCluster() {
             if (isPlaying && bandwidthUtilization > 0) {
                 const particleCount = Math.ceil(bandwidthUtilization * 3)
                 for (let p = 0; p < particleCount; p++) {
-                    const offset = (getAnimationTime() / (2000 - bandwidthUtilization * 1500) + i * 0.1 + p / particleCount) % 1
+                    const offset =
+                        (getAnimationTime() / (2000 - bandwidthUtilization * 1500) + i * 0.1 + p / particleCount) % 1
 
                     // Particles slow down as they approach saturated switch
-                    const slowdownFactor = bandwidthUtilization > 0.7 ?
-                        1 - (bandwidthUtilization - 0.7) * Math.pow(offset, 2) : 1
+                    const slowdownFactor =
+                        bandwidthUtilization > 0.7 ? 1 - (bandwidthUtilization - 0.7) * Math.pow(offset, 2) : 1
                     const adjustedOffset = offset * slowdownFactor
 
                     const particleX = startX + (endX - startX) * adjustedOffset
@@ -1214,23 +1431,23 @@ function drawMultiGPUCluster() {
         gpuPositions.push({ x, y })
 
         // Draw GPU die
-        const gradient = ctx.createLinearGradient(x - gpuSize/2, y - gpuSize/2, x + gpuSize/2, y + gpuSize/2)
+        const gradient = ctx.createLinearGradient(x - gpuSize / 2, y - gpuSize / 2, x + gpuSize / 2, y + gpuSize / 2)
         gradient.addColorStop(0, '#1a1a2e')
         gradient.addColorStop(1, '#0a0a1a')
 
         ctx.fillStyle = gradient
-        ctx.fillRect(x - gpuSize/2, y - gpuSize/2, gpuSize, gpuSize)
+        ctx.fillRect(x - gpuSize / 2, y - gpuSize / 2, gpuSize, gpuSize)
 
         // Draw GPU border
         ctx.strokeStyle = '#404060'
         ctx.lineWidth = 1
-        ctx.strokeRect(x - gpuSize/2, y - gpuSize/2, gpuSize, gpuSize)
+        ctx.strokeRect(x - gpuSize / 2, y - gpuSize / 2, gpuSize, gpuSize)
 
         // Draw memory usage bar
         const barHeight = 8
         const barWidth = gpuSize - 10
-        const barX = x - barWidth/2
-        const barY = y + gpuSize/2 - 20
+        const barX = x - barWidth / 2
+        const barY = y + gpuSize / 2 - 20
 
         // Background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1238,8 +1455,7 @@ function drawMultiGPUCluster() {
 
         // Memory usage
         const memUsageRatio = Math.min(1, memPerGPU / gpuConfig.memGiB)
-        const usageColor = memUsageRatio > 0.9 ? '#FF4444' :
-                          memUsageRatio > 0.7 ? '#FFA500' : '#4CAF50'
+        const usageColor = memUsageRatio > 0.9 ? '#FF4444' : memUsageRatio > 0.7 ? '#FFA500' : '#4CAF50'
 
         ctx.fillStyle = usageColor
         ctx.fillRect(barX, barY, barWidth * memUsageRatio, barHeight)
@@ -1248,10 +1464,10 @@ function drawMultiGPUCluster() {
         ctx.fillStyle = '#808080'
         ctx.font = '9px monospace'
         ctx.textAlign = 'center'
-        ctx.fillText(`GPU ${i}`, x, y - gpuSize/2 - 5)
+        ctx.fillText(`GPU ${i}`, x, y - gpuSize / 2 - 5)
 
         // Memory text
-        ctx.fillText(`${memPerGPU.toFixed(1)}/${gpuConfig.memGiB}G`, x, y + gpuSize/2 + 12)
+        ctx.fillText(`${memPerGPU.toFixed(1)}/${gpuConfig.memGiB}G`, x, y + gpuSize / 2 + 12)
     }
 
     // Draw interconnect info and bandwidth meter
@@ -1289,17 +1505,20 @@ function drawMultiGPUCluster() {
     ctx.fillText(`${interconnectType} Bandwidth: ${interconnectBW} GB/s`, meterX, meterY - 5)
 
     ctx.textAlign = 'center'
-    ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
-                   bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+    ctx.fillStyle = bandwidthUtilization > 0.8 ? '#FF4444' : bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
     ctx.font = 'bold 12px monospace'
-    ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}%`, meterX + meterWidth/2, meterY + meterHeight/2 + 4)
+    ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}%`, meterX + meterWidth / 2, meterY + meterHeight / 2 + 4)
 
     // Detailed bandwidth info
     ctx.textAlign = 'left'
     ctx.font = '10px monospace'
     ctx.fillStyle = '#999'
     const actualBW = interconnectBW * bandwidthUtilization
-    ctx.fillText(`Active: ${actualBW.toFixed(1)} GB/s | KV Sync: ${(kvCacheSyncTraffic / 1024).toFixed(1)} GB`, meterX, meterY + meterHeight + 15)
+    ctx.fillText(
+        `Active: ${actualBW.toFixed(1)} GB/s | KV Sync: ${(kvCacheSyncTraffic / 1024).toFixed(1)} GB`,
+        meterX,
+        meterY + meterHeight + 15,
+    )
 
     // Show bottleneck warning if bandwidth is saturated
     if (bandwidthUtilization > 0.8) {
@@ -1315,7 +1534,7 @@ function drawMultiGPUCluster() {
         ctx.fillText(`${interconnectType} bandwidth saturated - inference will stall!`, canvas.width / 2, 48)
 
         // Show impact
-        const latencyIncrease = Math.pow(bandwidthUtilization, 3) * 500  // Exponential latency increase
+        const latencyIncrease = Math.pow(bandwidthUtilization, 3) * 500 // Exponential latency increase
         ctx.font = '11px monospace'
         ctx.fillStyle = '#FFA500'
         ctx.fillText(`Latency impact: +${latencyIncrease.toFixed(0)}ms per token`, canvas.width / 2, 65)
@@ -1631,7 +1850,9 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8 : 0.6
+                        const pulse = isPlaying
+                            ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                            : 0.6
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1714,7 +1935,9 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8 : 0.6
+                        const pulse = isPlaying
+                            ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                            : 0.6
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1834,7 +2057,9 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8 : 0.6
+                        const pulse = isPlaying
+                            ? Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                            : 0.6
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -2124,9 +2349,11 @@ function drawMemoryGrid() {
             const y = cuStartY + row * cuSpacing
 
             // Compute unit activity visualization
-            const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7 : 0.5
+            const pulse = isPlaying
+                ? Math.sin(getAnimationTime() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7
+                : 0.5
             // Use deterministic pattern when paused, random when playing
-            const active = isPlaying ? Math.random() < activity : ((row + col) % 3) < (activity * 3)
+            const active = isPlaying ? Math.random() < activity : (row + col) % 3 < activity * 3
 
             if (active) {
                 // Active compute unit
@@ -2461,7 +2688,7 @@ function calculateCBPerformance() {
         // Base improvement: 8x minimum from CB
         // Scale up based on memory utilization and batch size
         // Higher memory util = better CB gains (can pack more requests)
-        improvement = 8 + (memoryUtilization * 10) + Math.min(5, batchSize * 0.4)
+        improvement = 8 + memoryUtilization * 10 + Math.min(5, batchSize * 0.4)
         // Cap at realistic 23x maximum
         improvement = Math.min(23, improvement)
     } else if (continuousBatching) {
@@ -2490,7 +2717,7 @@ function calculateCBPerformance() {
     return {
         throughput: baselineTokensPerSec * improvement,
         improvement: improvement,
-        memoryEfficiency: pagedAttention ? 0.96 : (continuousBatching ? 0.7 : 0.4) // Memory utilization
+        memoryEfficiency: pagedAttention ? 0.96 : continuousBatching ? 0.7 : 0.4, // Memory utilization
     }
 }
 
@@ -2516,25 +2743,25 @@ function updatePerformanceMetrics() {
     }
 
     // Calculate bandwidth utilization (more realistic with all-reduce pattern)
-    const kvCacheSyncTraffic = (kvGiB * 1024) * Math.log2(gpuCount)  // GB for all-reduce
+    const kvCacheSyncTraffic = kvGiB * 1024 * Math.log2(gpuCount) // GB for all-reduce
     const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
 
     // Base performance assumptions (single GPU baseline)
-    const baseTokensPerSec = 100  // Baseline tokens/sec on single GPU
-    const baseLatencyMs = 10      // Baseline latency in ms
+    const baseTokensPerSec = 100 // Baseline tokens/sec on single GPU
+    const baseLatencyMs = 10 // Baseline latency in ms
 
     // Calculate actual performance with interconnect impact
     // Performance degrades non-linearly as bandwidth saturates
     const performanceDegradation = 1 - Math.pow(bandwidthUtilization, 2)
-    const actualTokensPerSec = baseTokensPerSec * performanceDegradation * Math.sqrt(gpuCount)  // Sub-linear scaling
+    const actualTokensPerSec = baseTokensPerSec * performanceDegradation * Math.sqrt(gpuCount) // Sub-linear scaling
 
     // Latency increases exponentially with saturation
     const latencyIncrease = baseLatencyMs * (1 + Math.pow(bandwidthUtilization, 2) * 10)
     const p50Latency = latencyIncrease
-    const p99Latency = latencyIncrease * (1 + bandwidthUtilization * 3)  // P99 spikes much worse
+    const p99Latency = latencyIncrease * (1 + bandwidthUtilization * 3) // P99 spikes much worse
 
     // Calculate cost efficiency
-    const gpuCostPerHour = 2.49  // H100 approximate $/hour
+    const gpuCostPerHour = 2.49 // H100 approximate $/hour
     const totalCostPerHour = gpuCostPerHour * gpuCount
     const tokensPerDollar = (actualTokensPerSec * 3600) / totalCostPerHour
 
@@ -2545,8 +2772,7 @@ function updatePerformanceMetrics() {
     let html = ''
 
     // Tokens per second with trend
-    const tokenColor = actualTokensPerSec > 50 ? '#4CAF50' :
-                      actualTokensPerSec > 20 ? '#FFA500' : '#FF4444'
+    const tokenColor = actualTokensPerSec > 50 ? '#4CAF50' : actualTokensPerSec > 20 ? '#FFA500' : '#FF4444'
     html += `<div style="margin-bottom: 12px;">
         <strong style="color: ${tokenColor}">Throughput: ${actualTokensPerSec.toFixed(1)} tokens/sec</strong><br>
         <span style="color: #888; font-size: 0.9em">
@@ -2555,8 +2781,7 @@ function updatePerformanceMetrics() {
     </div>`
 
     // Latency metrics
-    const latencyColor = p50Latency < 50 ? '#4CAF50' :
-                        p50Latency < 100 ? '#FFA500' : '#FF4444'
+    const latencyColor = p50Latency < 50 ? '#4CAF50' : p50Latency < 100 ? '#FFA500' : '#FF4444'
     html += `<div style="margin-bottom: 12px;">
         <strong>Latency Impact:</strong><br>
         <span style="color: ${latencyColor}">P50: ${p50Latency.toFixed(0)}ms | P99: ${p99Latency.toFixed(0)}ms</span><br>
@@ -2566,8 +2791,7 @@ function updatePerformanceMetrics() {
     </div>`
 
     // GPU utilization
-    const utilColor = gpuUtilization > 80 ? '#4CAF50' :
-                      gpuUtilization > 50 ? '#FFA500' : '#FF4444'
+    const utilColor = gpuUtilization > 80 ? '#4CAF50' : gpuUtilization > 50 ? '#FFA500' : '#FF4444'
     html += `<div style="margin-bottom: 12px;">
         <strong>GPU Utilization: <span style="color: ${utilColor}">${gpuUtilization.toFixed(0)}%</span></strong><br>
         <span style="color: #888; font-size: 0.9em">
@@ -2590,9 +2814,11 @@ function updatePerformanceMetrics() {
         html += `<div style="padding: 8px; background: rgba(255, 68, 68, 0.2); border-radius: 4px; margin-top: 10px;">
             <strong style="color: #FF4444">🚨 Critical Bottleneck</strong><br>
             <span style="font-size: 0.9em">
-                ${useHighSpeedInterconnect ?
-                    'Even with high-speed interconnect saturated!' :
-                    'Enable NVLink or reduce GPU count'}
+                ${
+                    useHighSpeedInterconnect
+                        ? 'Even with high-speed interconnect saturated!'
+                        : 'Enable NVLink or reduce GPU count'
+                }
             </span>
         </div>`
     } else if (bandwidthUtilization > 0.5) {
@@ -2729,20 +2955,20 @@ function updateInfoPanel() {
         const utilization = (allocatedGiB / clusterMemory) * 100
 
         // Calculate bandwidth utilization
-        const kvCacheSyncTraffic = (kvGiB * 1024) / gpuCount  // MB per GPU for all-reduce
+        const kvCacheSyncTraffic = (kvGiB * 1024) / gpuCount // MB per GPU for all-reduce
         const bandwidthUtilization = Math.min(1.0, kvCacheSyncTraffic / (interconnectBW * 1000))
 
         // Update total memory to show cluster total
         const totalMemEl = document.getElementById('totalMemory')
         if (totalMemEl) {
-            const bwColor = bandwidthUtilization > 0.8 ? '#FF4444' :
-                           bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+            const bwColor = bandwidthUtilization > 0.8 ? '#FF4444' : bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
 
-            totalMemEl.innerHTML = `<strong style="color: #FFD700">${gpuCount}×</strong> ${currentGPU}<br>` +
-                                  `Cluster: ${clusterMemory.toFixed(0)} GiB total<br>` +
-                                  `Using: ${allocatedGiB.toFixed(1)} GiB (${utilization.toFixed(1)}%)<br>` +
-                                  `Link: ${interconnectType} (${interconnectBW} GB/s)<br>` +
-                                  `<span style="color: ${bwColor}">Bandwidth: ${(bandwidthUtilization * 100).toFixed(1)}% used</span>`
+            totalMemEl.innerHTML =
+                `<strong style="color: #FFD700">${gpuCount}×</strong> ${currentGPU}<br>` +
+                `Cluster: ${clusterMemory.toFixed(0)} GiB total<br>` +
+                `Using: ${allocatedGiB.toFixed(1)} GiB (${utilization.toFixed(1)}%)<br>` +
+                `Link: ${interconnectType} (${interconnectBW} GB/s)<br>` +
+                `<span style="color: ${bwColor}">Bandwidth: ${(bandwidthUtilization * 100).toFixed(1)}% used</span>`
         }
     }
 
@@ -2832,7 +3058,7 @@ function updateInfoPanel() {
         }
 
         const notes = document.querySelectorAll('.cb-perf-note')
-        notes.forEach(n => n.remove())
+        notes.forEach((n) => n.remove())
     }
 
     // Show appropriate box based on GPU count
@@ -2932,10 +3158,10 @@ function updateInfoPanel() {
         warning.textContent = `⚠️ Requires ${gpusNeeded} devices (${currentGPU}, ${formatMemory(gpusNeeded * perGPU)} total)`
         const dcWrap = document.getElementById('datacenterNote')
         if (dcWrap) dcWrap.style.display = 'none'
-    } else if (gpuCount > 1 && allocatedGiB > (getCurrentGPUMemGiB() * gpuCount)) {
+    } else if (gpuCount > 1 && allocatedGiB > getCurrentGPUMemGiB() * gpuCount) {
         // User selected multiple GPUs but still needs more
         const actualNeeded = Math.ceil(allocatedGiB / getCurrentGPUMemGiB())
-        criticalState = 'none'  // Don't show popup, just warning
+        criticalState = 'none' // Don't show popup, just warning
         warning.style.display = 'block'
         warning.textContent = `⚠️ Current ${gpuCount} GPUs insufficient - need ${actualNeeded} for this workload`
         const dcWrap = document.getElementById('datacenterNote')
@@ -3400,8 +3626,8 @@ if (interconnectBtn) {
 let originalSettings = {
     gpuCount: 1,
     currentGPU: 'H100 80G',
-    currentModelIndex: 2,  // Llama-3.1-8B by default
-    useHighSpeedInterconnect: true
+    currentModelIndex: 2, // Llama-3.1-8B by default
+    useHighSpeedInterconnect: true,
 }
 
 const worldDCBtn = document.getElementById('worldDCControl')
@@ -3456,7 +3682,7 @@ if (worldDCBtn) {
 
             // Set model
             if (dc.model) {
-                const modelIdx = models.findIndex(m => m.name === dc.model)
+                const modelIdx = models.findIndex((m) => m.name === dc.model)
                 if (modelIdx !== -1) {
                     currentModelIndex = modelIdx
                     updateModelUI()
