@@ -1997,7 +1997,7 @@ function drawMemoryGrid() {
         const startY = dieY + 60
 
         // Animate tiles to show computation flowing
-        const animPhase = (getAnimationTime() / 100) % (tilesX + tilesY)
+        const animPhase = isPlaying ? (getAnimationTime() / 100) % (tilesX + tilesY) : 0
 
         for (let ty = 0; ty < tilesY; ty++) {
             for (let tx = 0; tx < tilesX; tx++) {
@@ -2006,7 +2006,7 @@ function drawMemoryGrid() {
 
                 // Create wave effect for tiles
                 const distance = tx + ty
-                const isActive = Math.abs(distance - animPhase) < 3
+                const isActive = isPlaying ? Math.abs(distance - animPhase) < 3 : false
 
                 if (isActive) {
                     // Active tile - bright green
@@ -2055,7 +2055,7 @@ function drawMemoryGrid() {
         const cacheTilesY = Math.floor(cacheHeight / (cacheTileSize + tilePadding))
 
         // Animate tiles with wave pattern
-        const waveOffset = getAnimationTime() * 0.002
+        const waveOffset = isPlaying ? getAnimationTime() * 0.002 : 0
 
         for (let ty = 0; ty < cacheTilesY; ty++) {
             for (let tx = 0; tx < cacheTilesX; tx++) {
@@ -2063,7 +2063,7 @@ function drawMemoryGrid() {
                 const y = cacheY + 10 + ty * (cacheTileSize + tilePadding)
 
                 // Wave animation for tile access pattern
-                const wave = Math.sin(waveOffset + tx * 0.5 + ty * 0.3) * 0.5 + 0.5
+                const wave = isPlaying ? Math.sin(waveOffset + tx * 0.5 + ty * 0.3) * 0.5 + 0.5 : 0.5
                 const alpha = 0.3 + wave * 0.5
 
                 ctx.fillStyle = `rgba(255, 220, 0, ${alpha})`
