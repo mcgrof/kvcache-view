@@ -209,10 +209,10 @@ function drawMultiGPUCluster() {
     if (gpuCount > 16) scaleFactor = 0.4
     if (gpuCount > 32) scaleFactor = 0.25
     if (gpuCount > 64) scaleFactor = 0.15
-    if (gpuCount >= 128) scaleFactor = 0.08  // Much smaller for massive clusters
+    if (gpuCount >= 128) scaleFactor = 0.08  // Ultra compact for massive clusters
 
     const maxGPUSize = Math.min(120, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
-    const gpuSize = Math.max(6, maxGPUSize * scaleFactor)  // Minimum 6px for 128+ GPUs
+    const gpuSize = Math.max(gpuCount >= 128 ? 6 : 8, maxGPUSize * scaleFactor)  // Even smaller for 128+ GPUs
     const gpuSpacing = Math.max(gpuSize + 2, maxGPUSize * (gpuCount >= 128 ? 0.6 : (gpuCount > 16 ? 0.9 : 1.1)))
 
     // Center the grid with better positioning
@@ -222,8 +222,8 @@ function drawMultiGPUCluster() {
     const offsetY = (canvas.height - gridHeight) / 2 + 20  // Small offset from top
 
     // Calculate training-specific interconnect bandwidth utilization
-    let interconnectBW = 32  // PCIe 4.0 default
-    let interconnectType = 'PCIe 4.0'
+    let interconnectBW = 64  // PCIe 5.0 default
+    let interconnectType = 'PCIe 5.0'
 
     // Training synchronization traffic (gradient sync + all-reduce patterns)
     const gradientSyncTraffic = (memory.gradients * 1024) * Math.log2(gpuCount)  // All-reduce for gradients
@@ -250,8 +250,8 @@ function drawMultiGPUCluster() {
             break
         case 'pcie':
         default:
-            interconnectType = 'PCIe 4.0'
-            interconnectBW = 32  // GB/s for PCIe
+            interconnectType = 'PCIe 5.0'
+            interconnectBW = 64  // GB/s for PCIe 5.0
             break
     }
 
@@ -262,7 +262,7 @@ function drawMultiGPUCluster() {
         const connections = []
 
         // Create connection list
-        for (let i = 0; i < Math.min(gpuCount, 32); i++) {  // Limit for performance
+        for (let i = 0; i < Math.min(gpuCount, 64); i++) {  // Increased limit for better large cluster visualization
             const row1 = Math.floor(i / cols)
             const col1 = i % cols
             const x1 = offsetX + col1 * gpuSpacing
@@ -317,6 +317,11 @@ function drawMultiGPUCluster() {
         })
 
         ctx.globalAlpha = 1.0
+    }
+
+    // Debug for large GPU counts
+    if (gpuCount >= 128) {
+        console.log(`Drawing ${gpuCount} GPUs: gpuSize=${gpuSize}px, spacing=${gpuSpacing}px, grid=${cols}×${rows}`)
     }
 
     // Draw GPUs
@@ -948,7 +953,7 @@ function updateInterconnectButton() {
                 break
             case 'pcie':
             default:
-                btn.textContent = 'Link: PCIe'
+                btn.textContent = 'Link: PCIe 5.0'
                 btn.style.background = ''
                 break
         }
