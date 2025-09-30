@@ -266,11 +266,11 @@ function drawMultiGPUCluster() {
         const maxConnections = gpuCount >= 128 ? 96 : Math.min(gpuCount, 64)
 
         if (gpuCount >= 128) {
-            // For massive clusters, sample 2 GPUs per row to show interconnects across all rows
-            const gpusPerRow = Math.min(2, cols)
+            // For massive clusters, sample more evenly across columns and rows
+            const samplingInterval = Math.max(2, Math.floor(cols / 6)) // Sample every ~6 columns
             for (let row = 0; row < rows; row++) {
-                for (let colOffset = 0; colOffset < gpusPerRow && colOffset < cols; colOffset++) {
-                    const i = row * cols + colOffset * Math.floor(cols / gpusPerRow)
+                for (let col = 0; col < cols; col += samplingInterval) {
+                    const i = row * cols + col
                     const row1 = Math.floor(i / cols)
                     const col1 = i % cols
                     const x1 = offsetX + col1 * gpuSpacing
