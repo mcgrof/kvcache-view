@@ -2410,17 +2410,38 @@ function updateFactoid() {
 // Calculate continuous batching performance improvements
 function calculateCBPerformance() {
     // Based on Anyscale blog: up to 23x throughput with vLLM
-    // 8x with Ray Serve, 4x with FasterTransformer
+    // Real-world improvements depend on request patterns and GPU utilization
 
     const baselineTokensPerSec = 10 // Traditional batching baseline
     let improvement = 1.0
 
     if (continuousBatching && pagedAttention) {
-        // vLLM-like: CB + PagedAttention = up to 23x
-        improvement = 8 + Math.min(15, batchSize * 1.5) // Scale with batch size
+        // vLLM-like: CB + PagedAttention
+        // Anyscale blog shows 8-23x, depends on:
+        // - GPU memory utilization (higher util = more gain)
+        // - Request arrival patterns (more concurrent = more gain)
+        // - Sequence length variation (more variation = more gain from CB)
+
+        // Calculate based on memory utilization and batch efficiency
+        const model = models[currentModelIndex]
+        const gpuConfig = gpuConfigs[currentGPU]
+        const kvGiB = calculateBatchKVCache(model, currentTokens)
+        const memoryUtilization = Math.min(1.0, kvGiB / (gpuConfig.memory * 0.9))
+
+        // Base improvement: 8x minimum from CB
+        // Scale up based on memory utilization and batch size
+        // Higher memory util = better CB gains (can pack more requests)
+        improvement = 8 + (memoryUtilization * 10) + Math.min(5, batchSize * 0.4)
+        // Cap at realistic 23x maximum
+        improvement = Math.min(23, improvement)
     } else if (continuousBatching) {
-        // CB only: 4-8x improvement
-        improvement = 4 + Math.min(4, batchSize * 0.5)
+        // CB only: 4-8x improvement (Anyscale blog)
+        // Scales with batch size but less dramatically
+        const model = models[currentModelIndex]
+        const gpuConfig = gpuConfigs[currentGPU]
+        const kvGiB = calculateBatchKVCache(model, currentTokens)
+        const memoryUtilization = Math.min(1.0, kvGiB / (gpuConfig.memory * 0.9))
+        improvement = 4 + Math.min(4, batchSize * 0.3 + memoryUtilization * 2)
     } else if (pagedAttention) {
         // PA only: ~2x from memory efficiency
         improvement = 2.0
