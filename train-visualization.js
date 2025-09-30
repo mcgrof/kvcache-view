@@ -66,22 +66,23 @@ const gpuConfigs = {
 let currentGPU = 'H100 80G'
 let gpuCount = 1  // Number of GPUs for distributed training
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
+let useHighSpeedInterconnect = true  // Use NVLink/InfinityFabric when available
 
 // Famous training datacenter configurations
 const worldDatacenters = {
-    none: { name: 'None', gpus: null, gpu: null, model: null, batch: null, seq: null, optimizer: null },
-    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'Adam' },
-    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW' },
-    meta_rsc: { name: 'Meta Training', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW' },
-    openai_gpt: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-8B', batch: 1, seq: 1024, optimizer: 'Adam' },
-    aws_p5: { name: 'AWS P5 Train', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Adam' },
-    gcp_tpu: { name: 'GCP TPU v5e', gpus: 8, gpu: 'TPU v5e 16G', model: 'Llama-3.2-1B', batch: 8, seq: 512, optimizer: 'AdaFactor' },
-    azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 2, seq: 1024, optimizer: 'Adam' },
-    lambda_train: { name: 'Lambda Train', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Lion' },
-    single_gpu: { name: 'Single GPU', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.2-1B', batch: 8, seq: 2048, optimizer: 'AdamW' },
-    anthropic_claude: { name: 'Anthropic', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 4096, optimizer: 'AdamW' },
-    stability_sd: { name: 'Stability AI', gpus: 8, gpu: 'A100 80G', model: 'Mistral-7B', batch: 4, seq: 1024, optimizer: 'Adam' },
-    cohere_train: { name: 'Cohere Train', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'AdamW' },
+    none: { name: 'None', gpus: null, gpu: null, model: null, batch: null, seq: null, optimizer: null, interconnect: null },
+    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'Adam', interconnect: 'nvlink' },
+    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    meta_rsc: { name: 'Meta Training', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    openai_gpt: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-8B', batch: 1, seq: 1024, optimizer: 'Adam', interconnect: 'nvlink' },
+    aws_p5: { name: 'AWS P5 Train', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Adam', interconnect: 'nvlink' },
+    gcp_tpu: { name: 'GCP TPU v5e', gpus: 8, gpu: 'TPU v5e 16G', model: 'Llama-3.2-1B', batch: 8, seq: 512, optimizer: 'AdaFactor', interconnect: 'tpu' },
+    azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 2, seq: 1024, optimizer: 'Adam', interconnect: 'nvlink' },
+    lambda_train: { name: 'Lambda Train', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Lion', interconnect: 'nvlink' },
+    single_gpu: { name: 'Single GPU', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.2-1B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'none' },
+    anthropic_claude: { name: 'Anthropic', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 4096, optimizer: 'AdamW', interconnect: 'nvlink' },
+    stability_sd: { name: 'Stability AI', gpus: 8, gpu: 'A100 80G', model: 'Mistral-7B', batch: 4, seq: 1024, optimizer: 'Adam', interconnect: 'nvlink' },
+    cohere_train: { name: 'Cohere Train', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
 }
 let currentDatacenter = 'none'
 
@@ -199,28 +200,46 @@ function drawMultiGPUCluster() {
     else if (gpuCount === 128) { cols = 16; rows = 8; }
     else { cols = Math.ceil(Math.sqrt(gpuCount)); rows = Math.ceil(gpuCount / cols); }
 
-    // Scale GPU size based on count
-    let scaleFactor = 0.7
-    if (gpuCount > 16) scaleFactor = 0.35
-    if (gpuCount > 32) scaleFactor = 0.25
-    if (gpuCount > 64) scaleFactor = 0.15
-    if (gpuCount >= 128) scaleFactor = 0.03
+    // Scale GPU size based on count - improved scaling to keep GPUs visible
+    let scaleFactor = 0.8
+    if (gpuCount > 8) scaleFactor = 0.6
+    if (gpuCount > 16) scaleFactor = 0.4
+    if (gpuCount > 32) scaleFactor = 0.3
+    if (gpuCount > 64) scaleFactor = 0.2
+    if (gpuCount >= 128) scaleFactor = 0.15  // Increased from 0.03 to remain visible
 
-    const maxGPUSize = Math.min(150, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
-    const gpuSize = maxGPUSize * scaleFactor
-    const gpuSpacing = maxGPUSize * (gpuCount >= 128 ? 0.7 : (gpuCount > 16 ? 0.95 : 1.2))
+    const maxGPUSize = Math.min(120, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
+    const gpuSize = Math.max(8, maxGPUSize * scaleFactor)  // Minimum 8px to stay visible
+    const gpuSpacing = Math.max(gpuSize + 4, maxGPUSize * (gpuCount >= 128 ? 0.8 : (gpuCount > 16 ? 0.9 : 1.1)))
 
-    // Center the grid
-    const gridWidth = cols * gpuSpacing
-    const gridHeight = rows * gpuSpacing
-    const offsetX = (canvas.width - gridWidth) / 2 + gpuSpacing / 2
-    const offsetY = (canvas.height - gridHeight) / 2 + gpuSpacing / 2
+    // Center the grid with better positioning
+    const gridWidth = (cols - 1) * gpuSpacing
+    const gridHeight = (rows - 1) * gpuSpacing
+    const offsetX = (canvas.width - gridWidth) / 2
+    const offsetY = (canvas.height - gridHeight) / 2 + 20  // Small offset from top
 
-    // Draw interconnect lines (simplified for training)
+    // Calculate training-specific interconnect bandwidth utilization
+    let interconnectBW = 32  // PCIe 4.0 default
+    let interconnectType = 'PCIe 4.0'
+
+    // Training synchronization traffic (gradient sync + all-reduce patterns)
+    const gradientSyncTraffic = (memory.gradients * 1024) * Math.log2(gpuCount)  // All-reduce for gradients
+    const activationSyncTraffic = (memory.activations * 1024) * (gpuCount / 4)  // Activation sharding
+    const totalSyncTraffic = gradientSyncTraffic + activationSyncTraffic
+
+    if (useHighSpeedInterconnect) {
+        interconnectType = 'NVLink 4.0'
+        interconnectBW = 900  // GB/s for NVLink
+    }
+
+    const bandwidthUtilization = Math.min(1.0, totalSyncTraffic / (interconnectBW * 1000))
+
+    // Draw enhanced interconnect lines with data flow
     if (gpuCount > 1) {
-        ctx.strokeStyle = 'rgba(255, 100, 100, 0.2)'
-        ctx.lineWidth = 1
-        for (let i = 0; i < gpuCount; i++) {
+        const connections = []
+
+        // Create connection list
+        for (let i = 0; i < Math.min(gpuCount, 32); i++) {  // Limit for performance
             const row1 = Math.floor(i / cols)
             const col1 = i % cols
             const x1 = offsetX + col1 * gpuSpacing
@@ -228,26 +247,61 @@ function drawMultiGPUCluster() {
 
             // Connect to neighbors
             if (col1 < cols - 1) { // Right neighbor
-                ctx.beginPath()
-                ctx.moveTo(x1 + gpuSize/2, y1)
-                ctx.lineTo(x1 + gpuSpacing - gpuSize/2, y1)
-                ctx.stroke()
+                connections.push({
+                    x1: x1 + gpuSize, y1: y1 + gpuSize/2,
+                    x2: x1 + gpuSpacing, y2: y1 + gpuSize/2
+                })
             }
             if (row1 < rows - 1) { // Bottom neighbor
-                ctx.beginPath()
-                ctx.moveTo(x1, y1 + gpuSize/2)
-                ctx.lineTo(x1, y1 + gpuSpacing - gpuSize/2)
-                ctx.stroke()
+                connections.push({
+                    x1: x1 + gpuSize/2, y1: y1 + gpuSize,
+                    x2: x1 + gpuSize/2, y2: y1 + gpuSpacing
+                })
             }
         }
+
+        // Draw connections with bandwidth visualization
+        connections.forEach(conn => {
+            const {x1, y1, x2, y2} = conn
+
+            // Base line with thickness based on utilization
+            const lineWidth = 1 + bandwidthUtilization * 3
+            ctx.strokeStyle = bandwidthUtilization > 0.8 ? '#FF4444' :
+                             bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+            ctx.lineWidth = lineWidth
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+
+            // Animate gradient sync particles (show even when not training for demo)
+            if (bandwidthUtilization > 0.05 || gpuCount > 1) {
+                const particleCount = Math.min(3, Math.max(1, Math.ceil(bandwidthUtilization * 5)))
+                for (let p = 0; p < particleCount; p++) {
+                    const time = Date.now() / (500 - Math.min(bandwidthUtilization * 300, 400))
+                    const offset = (time + p / particleCount) % 1
+                    const particleX = x1 + (x2 - x1) * offset
+                    const particleY = y1 + (y2 - y1) * offset
+
+                    // Gradient particle (orange for gradients)
+                    ctx.fillStyle = isTraining ? '#FF8C00' : '#4CAF50'
+                    ctx.globalAlpha = 0.6 + Math.sin(offset * Math.PI * 2) * 0.2
+                    ctx.beginPath()
+                    ctx.arc(particleX, particleY, 2 + Math.max(bandwidthUtilization * 2, 1), 0, Math.PI * 2)
+                    ctx.fill()
+                }
+            }
+        })
+
+        ctx.globalAlpha = 1.0
     }
 
     // Draw GPUs
     for (let i = 0; i < gpuCount; i++) {
         const row = Math.floor(i / cols)
         const col = i % cols
-        const x = offsetX + col * gpuSpacing - gpuSize / 2
-        const y = offsetY + row * gpuSpacing - gpuSize / 2
+        const x = offsetX + col * gpuSpacing
+        const y = offsetY + row * gpuSpacing
 
         // GPU background gradient
         const gradient = ctx.createLinearGradient(x, y, x, y + gpuSize)
@@ -306,16 +360,65 @@ function drawMultiGPUCluster() {
         }
     }
 
-    // Show total cluster info
+    // Show total cluster info at bottom-left (to avoid controls at bottom)
     ctx.fillStyle = '#FFF'
-    ctx.font = 'bold 16px monospace'
-    ctx.textAlign = 'center'
+    ctx.font = 'bold 14px monospace'
+    ctx.textAlign = 'left'
+    const interconnectText = useHighSpeedInterconnect ? 'NVLink' : 'PCIe'
     const clusterText = fullyShardedDataParallel ? `${gpuCount}× ${currentGPU} (FSDP)` : `${gpuCount}× ${currentGPU} (Data Parallel)`
-    ctx.fillText(clusterText, canvas.width / 2, canvas.height - 50)
+    ctx.fillText(clusterText, 20, canvas.height - 50)
 
-    const memText = `Memory: ${memPerGPU.toFixed(1)} GiB/GPU (Total: ${memory.total.toFixed(1)} GiB)`
-    ctx.font = '14px monospace'
-    ctx.fillText(memText, canvas.width / 2, canvas.height - 30)
+    const memText = `Memory: ${memPerGPU.toFixed(1)} GiB/GPU | Interconnect: ${interconnectText}`
+    ctx.font = '12px monospace'
+    ctx.fillText(memText, 20, canvas.height - 30)
+
+    // Draw interconnect bandwidth meter at bottom
+    const meterX = 20
+    const meterY = canvas.height - 100
+    const meterWidth = 200
+    const meterHeight = 20
+
+    // Meter background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillRect(meterX, meterY, meterWidth, meterHeight)
+
+    // Meter fill based on utilization
+    const fillWidth = meterWidth * bandwidthUtilization
+    const meterColor = bandwidthUtilization > 0.8 ? '#FF4444' :
+                      bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+    ctx.fillStyle = meterColor
+    ctx.fillRect(meterX, meterY, fillWidth, meterHeight)
+
+    // Meter border
+    ctx.strokeStyle = '#666'
+    ctx.lineWidth = 1
+    ctx.strokeRect(meterX, meterY, meterWidth, meterHeight)
+
+    // Meter label
+    ctx.fillStyle = '#FFF'
+    ctx.font = '12px monospace'
+    ctx.textAlign = 'left'
+    ctx.fillText(`${interconnectType} Bandwidth`, meterX, meterY - 5)
+
+    // Utilization percentage
+    ctx.font = '10px monospace'
+    ctx.fillStyle = '#CCC'
+    ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}% (${(totalSyncTraffic / 1024).toFixed(1)} GB sync)`, meterX, meterY + meterHeight + 15)
+
+    // Show bottleneck warning
+    if (bandwidthUtilization > 0.8) {
+        const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7
+        ctx.fillStyle = `rgba(255, 68, 68, ${pulse})`
+        ctx.font = 'bold 14px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText('⚠️ TRAINING BOTTLENECK ⚠️', canvas.width / 2, 30)
+        ctx.fillStyle = '#FF8888'
+        ctx.font = '11px monospace'
+        ctx.fillText(`${interconnectType} saturated - training will slow down!`, canvas.width / 2, 45)
+    }
+
+    // Update training performance metrics box
+    updateTrainingPerformanceMetrics(bandwidthUtilization, interconnectType, totalSyncTraffic, interconnectBW)
 }
 
 // Draw single GPU memory visualization
@@ -487,6 +590,45 @@ function drawLossCurve() {
     lossCtx.fillText(`${lossHistory.length} samples`, 160, 35)
 }
 
+// Update training performance metrics box
+function updateTrainingPerformanceMetrics(bandwidthUtilization, interconnectType, totalSyncTraffic, interconnectBW) {
+    const performanceBox = document.getElementById('trainingPerformanceBox')
+    const metricsContent = document.getElementById('trainingMetricsContent')
+
+    if (!performanceBox || !metricsContent) return
+
+    if (gpuCount > 1 && bandwidthUtilization > 0.1) {
+        performanceBox.style.display = 'block'
+
+        // Calculate training performance impact
+        const throughputLoss = Math.pow(bandwidthUtilization, 2) * 60  // % throughput loss
+        const stepTimeIncrease = bandwidthUtilization > 0.8 ? bandwidthUtilization * 200 : bandwidthUtilization * 50
+        const efficiencyLoss = throughputLoss * gpuCount / 100  // Wasted GPU-hours
+        const costIncrease = (stepTimeIncrease / 100) * gpuCount * 8  // $/hour impact at $8/GPU/hr
+
+        metricsContent.innerHTML = `
+            <div style="margin-bottom: 8px;">
+                <div style="color: #FFA500; font-weight: bold;">Throughput: -${throughputLoss.toFixed(1)}%</div>
+                <div style="color: #AAA; font-size: 0.9em;">samples/sec reduction</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <div style="color: #FF6B6B; font-weight: bold;">Step Time: +${stepTimeIncrease.toFixed(0)}ms</div>
+                <div style="color: #AAA; font-size: 0.9em;">per training step</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <div style="color: #9C88FF; font-weight: bold;">Efficiency: ${(100 - efficiencyLoss).toFixed(1)}%</div>
+                <div style="color: #AAA; font-size: 0.9em;">actual GPU utilization</div>
+            </div>
+            <div>
+                <div style="color: #FFB84D; font-weight: bold;">Cost Impact: +$${costIncrease.toFixed(0)}/hr</div>
+                <div style="color: #AAA; font-size: 0.9em;">cluster overhead</div>
+            </div>
+        `
+    } else {
+        performanceBox.style.display = 'none'
+    }
+}
+
 // Update UI elements
 function updateUI() {
     const model = models[currentModelIndex]
@@ -546,7 +688,18 @@ function updateUI() {
 
 // Animation loop
 function animate() {
-    ctx.fillStyle = 'rgba(10, 10, 10, 0.1)'
+    // Clear canvas completely to avoid artifacts
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // Set background with solid color to fully remove artifacts
+    ctx.fillStyle = '#0a0a0a'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Add subtle gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    gradient.addColorStop(0, 'rgba(26, 10, 10, 0.1)')
+    gradient.addColorStop(1, 'rgba(10, 10, 10, 0.1)')
+    ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
     // Training step progress
@@ -615,13 +768,13 @@ document.getElementById('playPause').addEventListener('click', function () {
         lossHistory = []
         currentLoss = 4.5
         isTraining = true
-        this.innerHTML = '<span>⏸️ Pause Training</span>'
+        this.innerHTML = '⏸️ Pause Training'
     } else {
         isTraining = !isTraining
-        if (currentStep === 0) {
-            this.innerHTML = '<span>▶️ Start Training</span>'
+        if (isTraining) {
+            this.innerHTML = '⏸️ Pause Training'
         } else {
-            this.innerHTML = isTraining ? '<span>⏸️ Pause Training</span>' : '<span>▶️ Resume Training</span>'
+            this.innerHTML = '▶️ Resume Training'
         }
     }
 })
@@ -707,7 +860,8 @@ let originalSettings = {
     batchSize: 2,
     sequenceLength: 1024,
     currentOptimizer: 'Adam',
-    gpuCount: 1
+    gpuCount: 1,
+    useHighSpeedInterconnect: true
 }
 
 // Capture initial settings
@@ -717,6 +871,7 @@ originalSettings.batchSize = batchSize
 originalSettings.sequenceLength = sequenceLength
 originalSettings.currentOptimizer = currentOptimizer
 originalSettings.gpuCount = gpuCount
+originalSettings.useHighSpeedInterconnect = useHighSpeedInterconnect
 
 document.getElementById('gpuControl').addEventListener('click', function () {
     const gpus = Object.keys(gpuConfigs)
@@ -732,82 +887,84 @@ if (gpuCountBtn) {
         const idx = validGPUCounts.indexOf(gpuCount)
         gpuCount = validGPUCounts[(idx + 1) % validGPUCounts.length]
         this.textContent = `GPUs: ${gpuCount}`
+        updateInterconnectButton()
     })
 }
 
-// World DC control for training clusters
-const worldDCBtn = document.getElementById('worldDCControl')
-if (worldDCBtn) {
-    worldDCBtn.addEventListener('click', function () {
-        // Cycle through datacenters
-        const dcKeys = Object.keys(worldDatacenters)
-        const currentIdx = dcKeys.indexOf(currentDatacenter)
-        currentDatacenter = dcKeys[(currentIdx + 1) % dcKeys.length]
+// Interconnect control
+const interconnectBtn = document.getElementById('interconnectControl')
+if (interconnectBtn) {
+    interconnectBtn.addEventListener('click', function () {
+        if (gpuCount === 1) return
+        useHighSpeedInterconnect = !useHighSpeedInterconnect
+        this.textContent = useHighSpeedInterconnect ? 'Link: NVLink' : 'Link: PCIe'
+        this.style.background = useHighSpeedInterconnect ?
+            'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))' : ''
+    })
+}
+
+// Helper function to show/hide interconnect button
+function updateInterconnectButton() {
+    const btn = document.getElementById('interconnectControl')
+    if (!btn) return
+
+    if (gpuCount > 1) {
+        btn.style.display = ''
+        btn.textContent = useHighSpeedInterconnect ? 'Link: NVLink' : 'Link: PCIe'
+        btn.style.background = useHighSpeedInterconnect ?
+            'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))' : ''
+    } else {
+        btn.style.display = 'none'
+    }
+}
+
+// Simple DC button - just triggers existing working GPU count button
+function setupDCButton() {
+    const dcBtn = document.getElementById('worldDCControl')
+    const gpuCountBtn = document.getElementById('gpuCountControl')
+
+    if (!dcBtn || !gpuCountBtn) {
+        console.error('DC or GPU count button not found!')
+        return
+    }
+
+    console.log('Setting up DC button to use existing GPU count logic...')
+
+    dcBtn.onclick = function() {
+        console.log(`=== DC CLICKED ===`)
+
+        // Cycle DC name for display
+        const dcList = ['none', 'dgx_h100', 'dgx_pod', 'meta_rsc']
+        const currentIdx = dcList.indexOf(currentDatacenter)
+        currentDatacenter = dcList[(currentIdx + 1) % dcList.length]
 
         const dc = worldDatacenters[currentDatacenter]
-        this.textContent = `DC: ${dc.name}`
+        dcBtn.textContent = `DC: ${dc.name}`
 
-        if (currentDatacenter === 'none') {
-            // Restore original settings
-            currentGPU = originalSettings.currentGPU
-            currentModelIndex = originalSettings.currentModelIndex
-            batchSize = originalSettings.batchSize
-            sequenceLength = originalSettings.sequenceLength
-            currentOptimizer = originalSettings.currentOptimizer
-            gpuCount = originalSettings.gpuCount || 1
+        // Get target GPU count
+        const targetGpuCount = currentDatacenter === 'none' ? 1 : (dc.gpus || 8)
+        console.log(`Target GPU count: ${targetGpuCount}`)
 
-            // Update UI
-            document.getElementById('gpuControl').textContent = `GPU: ${currentGPU}`
-            document.getElementById('gpuCountControl').textContent = `GPUs: ${gpuCount}`
-            document.getElementById('modelName').textContent = models[currentModelIndex].name
-            document.getElementById('paramCount').textContent = `${models[currentModelIndex].params}B`
-            document.getElementById('batchInfo').textContent = batchSize
-            document.getElementById('seqLength').textContent = sequenceLength
-            document.getElementById('optimizerControl').textContent = `Optimizer: ${currentOptimizer}`
-            document.getElementById('modelControl').textContent = `Model: ${models[currentModelIndex].name.split('-')[0]}-${models[currentModelIndex].params}B`
-            document.getElementById('batchControl').textContent = `Batch: ${batchSize}`
-            document.getElementById('seqControl').textContent = `Seq: ${sequenceLength}`
-        } else if (dc.gpu !== null) {
-            // Apply datacenter configuration
-            if (dc.gpus) {
-                gpuCount = dc.gpus
-                document.getElementById('gpuCountControl').textContent = `GPUs: ${gpuCount}`
+        // Click the GPU count button until we reach the target
+        while (gpuCount !== targetGpuCount) {
+            const oldCount = gpuCount
+            gpuCountBtn.click()
+
+            // Safety: if we cycled through all options and didn't find target, break
+            if (gpuCount === oldCount) {
+                console.log(`Couldn't reach target ${targetGpuCount}, settled on ${gpuCount}`)
+                break
             }
-
-            if (dc.gpu && gpuConfigs[dc.gpu]) {
-                currentGPU = dc.gpu
-                document.getElementById('gpuControl').textContent = `GPU: ${currentGPU}`
-            }
-
-            if (dc.model) {
-                const modelIdx = models.findIndex(m => m.name === dc.model)
-                if (modelIdx !== -1) {
-                    currentModelIndex = modelIdx
-                    document.getElementById('modelName').textContent = models[currentModelIndex].name
-                    document.getElementById('paramCount').textContent = `${models[currentModelIndex].params}B`
-                    document.getElementById('modelControl').textContent = `Model: ${models[currentModelIndex].name.split('-')[0]}-${models[currentModelIndex].params}B`
-                }
-            }
-
-            if (dc.batch) {
-                batchSize = dc.batch
-                document.getElementById('batchInfo').textContent = batchSize
-                document.getElementById('batchControl').textContent = `Batch: ${batchSize}`
-            }
-
-            if (dc.seq) {
-                sequenceLength = dc.seq
-                document.getElementById('seqLength').textContent = sequenceLength
-                document.getElementById('seqControl').textContent = `Seq: ${sequenceLength}`
-            }
-
-            if (dc.optimizer && optimizers[dc.optimizer]) {
-                currentOptimizer = dc.optimizer
-                document.getElementById('optimizerControl').textContent = `Optimizer: ${currentOptimizer}`
+            if (gpuCount === targetGpuCount) {
+                console.log(`Reached target GPU count: ${gpuCount}`)
+                break
             }
         }
-    })
+    }
 }
+
+// Setup DC button
+setupDCButton()
 
 // Start animation
 animate()
