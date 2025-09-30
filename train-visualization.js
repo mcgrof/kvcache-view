@@ -32,9 +32,9 @@ const models = [
     { name: 'Llama-3.1-405B', params: 405, layers: 126, hidden: 16384, heads: 128 },
 ]
 
-let currentModelIndex = 0 // Start with Llama-1B - fits in memory
-let batchSize = 2 // Smaller batch to start
-let sequenceLength = 1024 // Shorter sequence to start
+let currentModelIndex = 2 // Start with Llama-3.1-8B - realistic training size
+let batchSize = 4 // Modern training batch size
+let sequenceLength = 2048 // Standard context length for training
 let accumulationSteps = 1
 
 // Optimizer configurations
@@ -56,6 +56,7 @@ let gradientAccumulation = false
 
 // GPU configurations
 const gpuConfigs = {
+    'Tesla T4 16G': { memory: 16, bandwidth: 300, compute: 8.1 },
     'RTX 4090 24G': { memory: 24, bandwidth: 1008, compute: 82.6 },
     'A100 40G': { memory: 40, bandwidth: 1555, compute: 19.5 },
     'A100 80G': { memory: 80, bandwidth: 2039, compute: 19.5 },
@@ -71,18 +72,20 @@ let useHighSpeedInterconnect = true  // Use NVLink/InfinityFabric when available
 // Famous training datacenter configurations
 const worldDatacenters = {
     none: { name: 'None', gpus: null, gpu: null, model: null, batch: null, seq: null, optimizer: null, interconnect: null },
-    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'Adam', interconnect: 'nvlink' },
-    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-70B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
     meta_rsc: { name: 'Meta Training', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
-    openai_gpt: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-8B', batch: 1, seq: 1024, optimizer: 'Adam', interconnect: 'nvlink' },
-    aws_p5: { name: 'AWS P5 Train', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Adam', interconnect: 'nvlink' },
-    gcp_tpu: { name: 'GCP TPU v5e', gpus: 8, gpu: 'TPU v5e 16G', model: 'Llama-3.2-1B', batch: 8, seq: 512, optimizer: 'AdaFactor', interconnect: 'tpu' },
-    azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 2, seq: 1024, optimizer: 'Adam', interconnect: 'nvlink' },
+    openai_gpt: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    aws_p5: { name: 'AWS P5 Train', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    gcp_tpu: { name: 'GCP TPU v5e', gpus: 8, gpu: 'TPU v5e 16G', model: 'Llama-3.2-1B', batch: 8, seq: 1024, optimizer: 'AdaFactor', interconnect: 'tpu' },
+    azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
     lambda_train: { name: 'Lambda Train', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Lion', interconnect: 'nvlink' },
+    budget_train: { name: 'Budget T4', gpus: 4, gpu: 'Tesla T4 16G', model: 'Llama-3.2-1B', batch: 2, seq: 1024, optimizer: 'AdamW', interconnect: 'pcie' },
+    wl900_cluster: { name: 'WL900 Cluster', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'wl900' },
     single_gpu: { name: 'Single GPU', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.2-1B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'none' },
-    anthropic_claude: { name: 'Anthropic', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 4096, optimizer: 'AdamW', interconnect: 'nvlink' },
-    stability_sd: { name: 'Stability AI', gpus: 8, gpu: 'A100 80G', model: 'Mistral-7B', batch: 4, seq: 1024, optimizer: 'Adam', interconnect: 'nvlink' },
-    cohere_train: { name: 'Cohere Train', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    anthropic_claude: { name: 'Anthropic', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 4096, optimizer: 'AdamW', interconnect: 'nvlink' },
+    stability_sd: { name: 'Stability AI', gpus: 8, gpu: 'A100 80G', model: 'Mistral-7B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    cohere_train: { name: 'Cohere Train', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
 }
 let currentDatacenter = 'none'
 
@@ -227,9 +230,29 @@ function drawMultiGPUCluster() {
     const activationSyncTraffic = (memory.activations * 1024) * (gpuCount / 4)  // Activation sharding
     const totalSyncTraffic = gradientSyncTraffic + activationSyncTraffic
 
-    if (useHighSpeedInterconnect) {
-        interconnectType = 'NVLink 4.0'
-        interconnectBW = 900  // GB/s for NVLink
+    // Determine interconnect type from current datacenter or default
+    const currentDC = worldDatacenters[currentDatacenter]
+    let interconnectSpec = currentDC?.interconnect || (useHighSpeedInterconnect ? 'nvlink' : 'pcie')
+
+    // Set interconnect bandwidth and type based on spec
+    switch (interconnectSpec) {
+        case 'nvlink':
+            interconnectType = 'NVLink 4.0'
+            interconnectBW = 900  // GB/s for NVLink
+            break
+        case 'wl900':
+            interconnectType = 'WL900'
+            interconnectBW = 1800  // GB/s for WL900 - higher bandwidth
+            break
+        case 'tpu':
+            interconnectType = 'TPU Interconnect'
+            interconnectBW = 600  // GB/s for TPU interconnect
+            break
+        case 'pcie':
+        default:
+            interconnectType = 'PCIe 4.0'
+            interconnectBW = 32  // GB/s for PCIe
+            break
     }
 
     const bandwidthUtilization = Math.min(1.0, totalSyncTraffic / (interconnectBW * 1000))
@@ -910,9 +933,31 @@ function updateInterconnectButton() {
 
     if (gpuCount > 1) {
         btn.style.display = ''
-        btn.textContent = useHighSpeedInterconnect ? 'Link: NVLink' : 'Link: PCIe'
-        btn.style.background = useHighSpeedInterconnect ?
-            'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))' : ''
+
+        // Get current interconnect type from datacenter or default
+        const currentDC = worldDatacenters[currentDatacenter]
+        const interconnectSpec = currentDC?.interconnect || (useHighSpeedInterconnect ? 'nvlink' : 'pcie')
+
+        // Display appropriate text and styling
+        switch (interconnectSpec) {
+            case 'nvlink':
+                btn.textContent = 'Link: NVLink'
+                btn.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
+                break
+            case 'wl900':
+                btn.textContent = 'Link: WL900'
+                btn.style.background = 'linear-gradient(180deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1))'
+                break
+            case 'tpu':
+                btn.textContent = 'Link: TPU'
+                btn.style.background = 'linear-gradient(180deg, rgba(0, 150, 255, 0.2), rgba(0, 150, 255, 0.1))'
+                break
+            case 'pcie':
+            default:
+                btn.textContent = 'Link: PCIe'
+                btn.style.background = ''
+                break
+        }
     } else {
         btn.style.display = 'none'
     }
