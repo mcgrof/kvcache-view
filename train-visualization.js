@@ -693,19 +693,12 @@ function updateUI() {
     document.getElementById('optimizerBar').style.width = (memory.optimizer / maxMem) * 100 + '%'
     document.getElementById('activationsBar').style.width = (memory.activations / maxMem) * 100 + '%'
 
-    // Show warning if memory exceeds GPU
+    // Warning box disabled - was annoying and blocking interactions
     const warning = document.getElementById('warning')
-    if (memory.total > gpuConfigs[currentGPU].memory) {
-        warning.style.visibility = 'visible'
-        warning.style.opacity = '1'
-        warning.textContent = `⚠️ Out of Memory! Requires ${gpusNeeded} GPUs or enable optimizations`
-    } else if (memory.total > gpuConfigs[currentGPU].memory * 0.9) {
-        warning.style.visibility = 'visible'
-        warning.style.opacity = '1'
-        warning.textContent = `⚠️ Warning: Near memory limit (${((memory.total / gpuConfigs[currentGPU].memory) * 100).toFixed(0)}% used)`
-    } else {
+    if (warning) {
         warning.style.visibility = 'hidden'
         warning.style.opacity = '0'
+        warning.style.display = 'none'
     }
 }
 
