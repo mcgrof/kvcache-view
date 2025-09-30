@@ -189,7 +189,14 @@ let memoryBlocks = []
 let waves = []
 let currentDtype = 'FP16'
 let currentFactoidIndex = 0
+let pausedTime = Date.now() // Store time when paused
+let animationTime = Date.now() // Current animation time
 let lastFactoidUpdate = 0
+
+// Get animation time that respects pause state
+function getAnimationTime() {
+    return isPlaying ? Date.now() : pausedTime
+}
 let lastCriticalState = 'none'
 let lastPopupTime = 0
 const POPUP_COOLDOWN_MS = 10000
@@ -929,7 +936,7 @@ function drawMultiGPUCluster() {
     // Create visual metaphor for bandwidth saturation
     if (bandwidthUtilization > 0.7) {
         // Draw pulsing red glow when approaching saturation
-        const pulseIntensity = 0.3 + Math.sin(Date.now() / 200) * 0.2
+        const pulseIntensity = 0.3 + Math.sin(getAnimationTime() / 200) * 0.2
         ctx.fillStyle = `rgba(255, 68, 68, ${pulseIntensity * bandwidthUtilization})`
         ctx.fillRect(0, 0, canvas.width, canvas.height)
     }
@@ -1048,7 +1055,7 @@ function drawMultiGPUCluster() {
                 const particleCount = Math.min(maxParticles, Math.ceil(bandwidthUtilization * 5))
 
                 for (let p = 0; p < particleCount; p++) {
-                    const offset = (Date.now() / (1000 - bandwidthUtilization * 800) + p / particleCount) % 1
+                    const offset = (getAnimationTime() / (1000 - bandwidthUtilization * 800) + p / particleCount) % 1
                     const particleX = x1 + (x2 - x1) * offset
                     const particleY = y1 + (y2 - y1) * offset
 
@@ -1155,7 +1162,7 @@ function drawMultiGPUCluster() {
             if (isPlaying && bandwidthUtilization > 0) {
                 const particleCount = Math.ceil(bandwidthUtilization * 3)
                 for (let p = 0; p < particleCount; p++) {
-                    const offset = (Date.now() / (2000 - bandwidthUtilization * 1500) + i * 0.1 + p / particleCount) % 1
+                    const offset = (getAnimationTime() / (2000 - bandwidthUtilization * 1500) + i * 0.1 + p / particleCount) % 1
 
                     // Particles slow down as they approach saturated switch
                     const slowdownFactor = bandwidthUtilization > 0.7 ?
@@ -1279,7 +1286,7 @@ function drawMultiGPUCluster() {
     // Show bottleneck warning if bandwidth is saturated
     if (bandwidthUtilization > 0.8) {
         // Pulsing warning message
-        const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7
+        const pulse = Math.sin(getAnimationTime() / 200) * 0.3 + 0.7
         ctx.fillStyle = `rgba(255, 68, 68, ${pulse})`
         ctx.font = 'bold 16px monospace'
         ctx.textAlign = 'center'
@@ -1446,7 +1453,7 @@ function drawMemoryGrid() {
         const savingsY = centerY - 450
 
         // Pulsing glow effect around the savings indicator
-        const glowPulse = Math.sin(Date.now() * 0.003) * 20 + 30
+        const glowPulse = Math.sin(getAnimationTime() * 0.003) * 20 + 30
         ctx.shadowColor = 'rgba(255, 50, 50, 0.8)'
         ctx.shadowBlur = glowPulse
         ctx.shadowOffsetX = 0
@@ -1493,7 +1500,7 @@ function drawMemoryGrid() {
             const ghostHeight = Math.min(h, h * attentionRatio * activeMemModules)
 
             // Draw thick red border around what would be used
-            const borderPulse = Math.sin(Date.now() * 0.002) * 0.2 + 0.5
+            const borderPulse = Math.sin(getAnimationTime() * 0.002) * 0.2 + 0.5
             ctx.strokeStyle = `rgba(255, 50, 50, ${borderPulse})`
             ctx.lineWidth = 4
             ctx.setLineDash([15, 10])
@@ -1501,7 +1508,7 @@ function drawMemoryGrid() {
             ctx.setLineDash([])
 
             // Semi-transparent red overlay
-            const pulse = Math.sin(Date.now() * 0.002) * 0.1 + 0.25
+            const pulse = Math.sin(getAnimationTime() * 0.002) * 0.1 + 0.25
             ctx.fillStyle = `rgba(255, 50, 50, ${pulse})`
             ctx.fillRect(mem.x, mem.y, w, ghostHeight)
 
@@ -1606,7 +1613,7 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                        const pulse = Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1689,7 +1696,7 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                        const pulse = Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1809,7 +1816,7 @@ function drawMemoryGrid() {
                     const y = mem.y + by * bankSpacing + 2
 
                     if (bankIndex < filledBanks) {
-                        const pulse = Math.sin(Date.now() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
+                        const pulse = Math.sin(getAnimationTime() * 0.002 + bankIndex * 0.1) * 0.2 + 0.8
 
                         // Check if this bank contains model weights
                         if (bankIndex < weightBanks) {
@@ -1990,7 +1997,7 @@ function drawMemoryGrid() {
         const startY = dieY + 60
 
         // Animate tiles to show computation flowing
-        const animPhase = (Date.now() / 100) % (tilesX + tilesY)
+        const animPhase = (getAnimationTime() / 100) % (tilesX + tilesY)
 
         for (let ty = 0; ty < tilesY; ty++) {
             for (let tx = 0; tx < tilesX; tx++) {
@@ -2048,7 +2055,7 @@ function drawMemoryGrid() {
         const cacheTilesY = Math.floor(cacheHeight / (cacheTileSize + tilePadding))
 
         // Animate tiles with wave pattern
-        const waveOffset = Date.now() * 0.002
+        const waveOffset = getAnimationTime() * 0.002
 
         for (let ty = 0; ty < cacheTilesY; ty++) {
             for (let tx = 0; tx < cacheTilesX; tx++) {
@@ -2099,7 +2106,7 @@ function drawMemoryGrid() {
             const y = cuStartY + row * cuSpacing
 
             // Compute unit activity visualization
-            const pulse = Math.sin(Date.now() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7
+            const pulse = Math.sin(getAnimationTime() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7
             const active = Math.random() < activity
 
             if (active) {
@@ -2311,7 +2318,7 @@ function drawExponentialCurve() {
     // Pulsing circle at current position - smaller and different color with Flash Attention
     const basePulse = flashAttention ? 3 : 5 // Smaller base size with Flash Attention
     const pulseRange = flashAttention ? 2 : 5 // Less variation with Flash Attention
-    const pulse = Math.sin(Date.now() * 0.003) * pulseRange + basePulse + 5
+    const pulse = Math.sin(getAnimationTime() * 0.003) * pulseRange + basePulse + 5
 
     // Striking yellow-green for Flash Attention, original color otherwise
     const dotColor = flashAttention ? 'rgba(200, 255, 0, 1)' : model.color
@@ -3019,8 +3026,15 @@ function animate() {
     try {
         if (!canvas || !ctx) return requestAnimationFrame(animate)
 
-        ctx.fillStyle = 'rgba(15, 15, 30, 0.1)'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        // Only apply fade effect when playing
+        if (isPlaying) {
+            ctx.fillStyle = 'rgba(15, 15, 30, 0.1)'
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+        } else {
+            // When paused, clear once to prevent trails
+            ctx.fillStyle = 'rgba(15, 15, 30, 1)'
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+        }
 
         // Update and draw waves
         waves.forEach((wave) => {
@@ -3104,6 +3118,14 @@ function animate() {
 
 // Control handlers
 document.getElementById('playPause').addEventListener('click', function () {
+    if (isPlaying) {
+        // Pausing - capture current time
+        pausedTime = Date.now()
+    } else {
+        // Resuming - adjust pausedTime to maintain continuity
+        const pauseDuration = Date.now() - pausedTime
+        pausedTime = Date.now() // Update for next pause
+    }
     isPlaying = !isPlaying
     this.textContent = isPlaying ? 'Pause' : 'Play'
     this.classList.toggle('active', isPlaying)
