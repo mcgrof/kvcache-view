@@ -7,21 +7,30 @@ An impactful, animated visualization demonstrating the exponential memory growth
 ## ✨ Features
 
 - 🚀 **Real-time Animation**: Watch KV cache grow from 0 to 100M tokens
-- 🔄 **Model Comparison**: Switch between 15+ models including Llama, Qwen, Gemma, Mixtral MOE, and DeepSeek
+- 🔄 **Model Comparison**: Switch between 20+ models including Llama, Qwen3-Next, Qwen3-Omni, Gemma, Mixtral MOE, and DeepSeek
 - 📊 **SOTA Context Lengths**: 128K, 200K, 1M, 2M, 10M, up to 100M tokens
 - 🎚️ **Dynamic Data Types**: FP32, FP16, BF16, INT8, INT4 quantization
 - ⚡ **Speed Control**: 0.5x to 100x animation speed
 - 📈 **Live Metrics**: Memory usage, GPU requirements, efficiency calculations
+- 🏋️ **Training Visualization**: Interactive training memory visualization with weights, gradients, optimizer states
+- 🖥️ **Multi-GPU Support**: Distributed inference simulation with interconnect bandwidth modeling
+- 🎮 **Latest GPUs**: Support for NVIDIA Blackwell (B100, B200, GB200) and AMD MI300X
 - 🌊 **Beautiful Visuals**: Peaceful wave effects with particle animations
 
 ## 🚀 Live Demo
 
 ### View Online (No Installation Required!)
-**[View Live Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html)**
+**[🖥️ Inference Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html)** - KV Cache growth simulation
 
-Or use the direct URL:
+**[🏋️ Training Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/train.html)** - Training memory explosion
+
+Or use the direct URLs:
 ```
+# Inference (KV Cache) Visualization
 https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html
+
+# Training Memory Visualization
+https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/train.html
 ```
 
 **Note:** GitHub's HTML preview may have slight performance limitations compared to running locally.
@@ -33,8 +42,10 @@ As context lengths grow from thousands to millions of tokens, KV cache memory be
 ## What It Shows
 
 - **Real-time Memory Growth**: Watch as KV cache memory explodes with increasing context length
-- **Model Comparisons**: Switch between 15+ models from 1B to 671B parameters including MOE architectures
-- **GPU Requirements**: Live calculation of H100 GPUs needed as memory exceeds single-GPU capacity
+- **Model Comparisons**: Switch between 20+ models from 1B to 671B parameters including MOE architectures
+- **GPU Requirements**: Live calculation of modern GPUs needed as memory exceeds single-GPU capacity
+- **Training Memory**: Visualize weights, gradients, optimizer states, and activations during training
+- **Multi-GPU Scaling**: See how distributed inference works across multiple GPUs with interconnect modeling
 - **Visual Metaphors**:
   - Memory grid fills up showing utilization
   - Exponential curve traces the non-linear growth
@@ -48,7 +59,8 @@ As context lengths grow from thousands to millions of tokens, KV cache memory be
 3. **MOE Models (Mixtral, Phi-3.5 MoE)**: Efficient inference with sparse activation
 4. **Large Models (70-405B)**: Require 6+ H100s for 1M context
 5. **DeepSeek-V3 (671B)**: 7x memory reduction through KV-LoRA compression
-6. **Qwen3-Next (80B)**: Hybrid attention reduces KV cache by 75%
+6. **Qwen3-Next-80B**: Revolutionary hybrid architecture combining Gated DeltaNet (linear attention) with traditional attention in a 3:1 ratio, reducing KV cache by 75% while using only 3B of 80B parameters per token ([arXiv:2505.09388](https://arxiv.org/abs/2505.09388))
+7. **Qwen3-Omni (30B)**: Multimodal model optimized for text, audio, and vision with MoE architecture ([arXiv:2509.17765](https://arxiv.org/abs/2509.17765))
 
 ## 🎯 Quick Start
 
@@ -110,12 +122,28 @@ KV Cache = 2 × layers × tokens × kv_heads × (hidden_size/attention_heads) ×
 KV Cache = layers × tokens × (kv_lora_rank + qk_rope_head_dim) × dtype_size
 ```
 
-## Why This Matters
+## Model Architecture Innovations
 
-LMCache addresses this memory explosion through intelligent caching strategies:
+### Qwen3-Next-80B: Breaking the Memory Wall
+Based on the [Qwen3 Technical Report](https://arxiv.org/abs/2505.09388), Qwen3-Next-80B introduces several groundbreaking optimizations:
+
+- **Hybrid Attention Architecture**: 75% Gated DeltaNet (linear complexity) + 25% traditional attention for optimal memory-performance trade-off
+- **Ultra-Sparse MoE**: 512 experts with only 11 activated per token, achieving 80B total capacity with 3B active parameters
+- **Multi-Token Prediction**: Accelerates inference and improves speculative decoding acceptance rates
+- **Long Context Optimization**: Native 262K context support, expandable to 1M tokens with minimal memory overhead
+
+**Performance Gains**: 7-10x faster prefill, 4-10x faster decode, while using <80% of traditional model GPU hours.
+
+### DeepSeek-V3: KV-LoRA Innovation
+Uses KV-LoRA compression to achieve 7x memory reduction compared to standard transformer architectures.
+
+## Why These Optimizations Matter
+
+LMCache and modern model architectures address memory explosion through:
 - Prefix caching to reuse computed KV states
-- Compression techniques to reduce memory footprint
+- Compression techniques (KV-LoRA, quantization)
 - Distributed caching across multiple nodes
+- Architectural innovations (hybrid attention, sparse MoE)
 
 This visualization demonstrates why such optimizations are critical for the future of LLMs.
 
@@ -158,8 +186,10 @@ This visualization demonstrates why such optimizations are critical for the futu
 
 ```
 kvcache-view/
-├── index.html                    # Main HTML file with UI
-├── visualization.js              # Core visualization logic
+├── index.html                    # Inference visualization (KV cache growth)
+├── visualization.js              # Inference visualization logic
+├── train.html                    # Training visualization (memory explosion)
+├── train-visualization.js        # Training visualization logic
 ├── README.md                     # This file
 ├── Makefile                      # Simple server commands
 ├── CLAUDE.md                     # Development guidelines

@@ -584,10 +584,42 @@ function setGPUDefaults(gpuKey) {
         flashAttention = memGiB >= 16 // Flash for mid-range and up
     }
 
+    // Set appropriate default model based on GPU memory capacity
+    // Qwen3-Next-80B is perfect for high-memory GPUs due to its efficiency
+    if (memGiB >= 80) {
+        // Premium GPUs (H100, B100, A100 80G+, B200, GB200): Qwen3-Next-80B
+        const qwen3NextIndex = models.findIndex((m) => m.name === 'Qwen3-Next-80B')
+        if (qwen3NextIndex !== -1) {
+            currentModelIndex = qwen3NextIndex
+        }
+    } else if (memGiB >= 40) {
+        // High-end GPUs (A100 40G, L40S): Llama-3.1-8B
+        const llama8bIndex = models.findIndex((m) => m.name === 'Llama-3.1-8B')
+        if (llama8bIndex !== -1) {
+            currentModelIndex = llama8bIndex
+        }
+    } else if (memGiB >= 24) {
+        // Enthusiast GPUs (RTX 4090): Phi-3.5-mini
+        const phi35Index = models.findIndex((m) => m.name === 'Phi-3.5-mini')
+        if (phi35Index !== -1) {
+            currentModelIndex = phi35Index
+        }
+    } else {
+        // Lower memory GPUs: Llama-3.2-1B
+        const llama1bIndex = models.findIndex((m) => m.name === 'Llama-3.2-1B')
+        if (llama1bIndex !== -1) {
+            currentModelIndex = llama1bIndex
+        }
+    }
+
     // Reset animation to start position
     if (currentTokens === 0) {
         currentTokens = maxTokens * 0.01 // Start at 1% to show some progress
     }
+
+    // Update UI to reflect new model selection
+    updateInfoPanel()
+    initWaves()
 }
 
 function getCurrentGPUMemGiB() {
