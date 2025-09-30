@@ -3024,7 +3024,9 @@ function animate() {
 
         // Update and draw waves
         waves.forEach((wave) => {
-            wave.update()
+            if (isPlaying) {
+                wave.update()
+            }
             wave.draw()
         })
 
@@ -3039,19 +3041,25 @@ function animate() {
         // Update and draw data flow particles
         dataFlowParticles = dataFlowParticles.filter((particle) => particle.life > 0)
         dataFlowParticles.forEach((particle) => {
-            particle.update()
+            if (isPlaying) {
+                particle.update()
+            }
             particle.draw()
         })
 
         // Update and draw particles
         memoryBlocks = memoryBlocks.filter((block) => block.life > 0)
         memoryBlocks.forEach((block) => {
-            block.update()
+            if (isPlaying) {
+                block.update()
+            }
             block.draw()
         })
 
         // Generate new particles
-        generateParticles()
+        if (isPlaying) {
+            generateParticles()
+        }
 
         // Update token count with variable speed based on max context
         if (isPlaying) {
