@@ -76,7 +76,7 @@
                 padding: 15px 18px;
                 backdrop-filter: blur(10px);
                 box-shadow: 0 10px 40px rgba(255, 68, 68, 0.2);
-                max-width: 260px;
+                max-width: 290px;
             }
 
             .info-panel h3 {
@@ -298,11 +298,11 @@
             <h3>Training Configuration</h3>
             <div class="info-item">
                 <span class="info-label">Model:</span>
-                <span class="info-value" id="modelName">Llama-3.1-8B</span>
+                <span class="info-value" id="modelName">Llama-3.2-1B</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Parameters:</span>
-                <span class="info-value" id="paramCount">8B</span>
+                <span class="info-value" id="paramCount">1.2B</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Batch Size:</span>
@@ -310,7 +310,7 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Sequence Length:</span>
-                <span class="info-value" id="seqLength">2048</span>
+                <span class="info-value" id="seqLength">1024</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Learning Rate:</span>
@@ -383,9 +383,9 @@
         <div class="controls">
             <button id="playPause">▶️ Start Training</button>
             <button id="speedControl">Speed: 50x</button>
-            <button id="modelControl">Model: Llama-8B</button>
-            <button id="batchControl">Batch: 8</button>
-            <button id="seqControl">Seq: 2048</button>
+            <button id="modelControl">Model: Llama-1B</button>
+            <button id="batchControl">Batch: 4</button>
+            <button id="seqControl">Seq: 1024</button>
             <button id="optimizerControl">Optimizer: AdamW</button>
 
             <button
@@ -411,8 +411,8 @@
                 <span class="caption">DeepSpeed ZeRO</span>
             </button>
 
-            <button id="fsdpToggle" class="btn-two-line enabled" title="Fully Sharded Data Parallel">
-                <span>FSDP: ON</span>
+            <button id="fsdpToggle" class="btn-two-line" title="Fully Sharded Data Parallel">
+                <span>FSDP: OFF</span>
                 <span class="caption">fully sharded</span>
             </button>
 

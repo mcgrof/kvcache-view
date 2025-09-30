@@ -24,6 +24,10 @@ let lossHistory = []
 
 // Model configurations for training
 const models = [
+    { name: 'GPT-2-117M', params: 0.117, layers: 12, hidden: 768, heads: 12 },
+    { name: 'GPT-2-345M', params: 0.345, layers: 24, hidden: 1024, heads: 16 },
+    { name: 'GPT-2-762M', params: 0.762, layers: 36, hidden: 1280, heads: 20 },
+    { name: 'GPT-2-1.5B', params: 1.5, layers: 48, hidden: 1600, heads: 25 },
     { name: 'Llama-3.2-1B', params: 1.2, layers: 16, hidden: 2048, heads: 32 },
     { name: 'Phi-3.5-mini', params: 3.8, layers: 32, hidden: 3072, heads: 32 },
     { name: 'Llama-3.1-8B', params: 8, layers: 32, hidden: 4096, heads: 32 },
@@ -32,9 +36,25 @@ const models = [
     { name: 'Llama-3.1-405B', params: 405, layers: 126, hidden: 16384, heads: 128 },
 ]
 
-let currentModelIndex = 2 // Start with Llama-3.1-8B - realistic training size
-let batchSize = 8 // Realistic datacenter training batch size
-let sequenceLength = 2048 // Standard context length for training
+// Set initial model based on default GPU (H100 80G should get a larger model)
+function getDefaultModelForGPU(gpuKey) {
+    const gpu = gpuConfigs[gpuKey]
+    if (!gpu) {
+        console.error('GPU not found:', gpuKey)
+        return 4 // Default to Llama-3.2-1B
+    }
+    const gpuMemory = gpu.memory
+
+    if (gpuMemory >= 80) return 6 // Llama-3.1-8B for H100/H200/MI300X
+    if (gpuMemory >= 40) return 4 // Llama-3.2-1B for A100/W7900
+    if (gpuMemory >= 24) return 2 // GPT-2-762M for RTX 4090
+    if (gpuMemory >= 16) return 1 // GPT-2-345M for Tesla T4
+    return 0 // GPT-2-117M for very small GPUs
+}
+
+let currentModelIndex = 4 // Start with Llama-3.2-1B - more realistic single GPU default
+let batchSize = 4 // Conservative batch size
+let sequenceLength = 1024 // Conservative sequence length for single GPU
 let accumulationSteps = 1
 
 // Optimizer configurations
@@ -51,7 +71,7 @@ let currentOptimizer = 'AdamW'
 let gradientCheckpointing = true // Enabled by default to reduce memory
 let mixedPrecision = true // Enabled by default - standard practice
 let zeroOptimization = 0 // 0=off, 1=ZeRO-1, 2=ZeRO-2, 3=ZeRO-3
-let fullyShardedDataParallel = true // Enabled by default for 8B+ model training
+let fullyShardedDataParallel = false // Enable when using multiple GPUs
 let gradientAccumulation = false
 
 // GPU configurations
@@ -140,12 +160,18 @@ function getTotalTrainingMemory() {
 
     let weightsMemory = calculateModelWeightsMemory(model, dtype)
     let gradientsMemory = calculateGradientsMemory(model, dtype)
-    let optimizerMemory = calculateOptimizerMemory(model, currentOptimizer, dtype)
     let activationsMemory = calculateActivationsMemory(model, batchSize, sequenceLength, dtype)
 
-    // Mixed precision requires FP32 master weights
+    // Mixed precision: FP16 forward/gradient + FP32 master weights (no separate optimizer memory)
+    let optimizerMemory
     if (mixedPrecision) {
-        weightsMemory += calculateModelWeightsMemory(model, 'fp32') // Add master weights
+        // FP32 master weights already include the optimizer states
+        const masterWeights = calculateModelWeightsMemory(model, 'fp32')
+        weightsMemory += masterWeights
+        // Optimizer momentum/variance are part of the master weights management
+        optimizerMemory = masterWeights * (optimizers[currentOptimizer].memoryFactor - 1)
+    } else {
+        optimizerMemory = calculateOptimizerMemory(model, currentOptimizer, dtype)
     }
 
     // FSDP shards everything across GPUs
@@ -512,11 +538,12 @@ function drawGPUMemory() {
     const blocksX = Math.floor(gpuWidth / (blockSize + 2))
     const blocksY = Math.floor(gpuHeight / (blockSize + 2))
     const totalBlocks = blocksX * blocksY
+    const usedBlocks = Math.floor(totalBlocks * memoryUsage) // Only fill blocks based on actual usage
 
-    const weightsBlocks = Math.floor(totalBlocks * (memory.weights / memory.total))
-    const gradientsBlocks = Math.floor(totalBlocks * (memory.gradients / memory.total))
-    const optimizerBlocks = Math.floor(totalBlocks * (memory.optimizer / memory.total))
-    const activationsBlocks = Math.floor(totalBlocks * (memory.activations / memory.total))
+    const weightsBlocks = Math.floor(usedBlocks * (memory.weights / memory.total))
+    const gradientsBlocks = Math.floor(usedBlocks * (memory.gradients / memory.total))
+    const optimizerBlocks = Math.floor(usedBlocks * (memory.optimizer / memory.total))
+    const activationsBlocks = Math.floor(usedBlocks * (memory.activations / memory.total))
 
     let blockIndex = 0
     for (let y = 0; y < blocksY; y++) {
