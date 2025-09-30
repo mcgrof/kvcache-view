@@ -51,7 +51,7 @@ let currentOptimizer = 'AdamW'
 let gradientCheckpointing = true // Enabled by default to reduce memory
 let mixedPrecision = true // Enabled by default - standard practice
 let zeroOptimization = 0 // 0=off, 1=ZeRO-1, 2=ZeRO-2, 3=ZeRO-3
-let fullyShardedDataParallel = false
+let fullyShardedDataParallel = true // Enabled by default for 8B+ model training
 let gradientAccumulation = false
 
 // GPU configurations
