@@ -33,7 +33,7 @@ const models = [
 ]
 
 let currentModelIndex = 2 // Start with Llama-3.1-8B - realistic training size
-let batchSize = 4 // Modern training batch size
+let batchSize = 8 // Realistic datacenter training batch size
 let sequenceLength = 2048 // Standard context length for training
 let accumulationSteps = 1
 
@@ -72,14 +72,14 @@ let useHighSpeedInterconnect = true  // Use NVLink/InfinityFabric when available
 // Famous training datacenter configurations
 const worldDatacenters = {
     none: { name: 'None', gpus: null, gpu: null, model: null, batch: null, seq: null, optimizer: null, interconnect: null },
-    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
-    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-70B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
-    meta_rsc: { name: 'Meta Training', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-70B', batch: 1, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
-    openai_gpt: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-8B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
-    aws_p5: { name: 'AWS P5 Train', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-70B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    meta_rsc: { name: 'Meta Training', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-70B', batch: 2, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    openai_gpt: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    aws_p5: { name: 'AWS P5 Train', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
     gcp_tpu: { name: 'GCP TPU v5e', gpus: 8, gpu: 'TPU v5e 16G', model: 'Llama-3.2-1B', batch: 8, seq: 1024, optimizer: 'AdaFactor', interconnect: 'tpu' },
-    azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
-    lambda_train: { name: 'Lambda Train', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 2048, optimizer: 'Lion', interconnect: 'nvlink' },
+    azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
+    lambda_train: { name: 'Lambda Train', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'Lion', interconnect: 'nvlink' },
     budget_train: { name: 'Budget T4', gpus: 4, gpu: 'Tesla T4 16G', model: 'Llama-3.2-1B', batch: 2, seq: 1024, optimizer: 'AdamW', interconnect: 'pcie' },
     wl900_cluster: { name: 'WL900 Cluster', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'wl900' },
     single_gpu: { name: 'Single GPU', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.2-1B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'none' },
@@ -203,17 +203,17 @@ function drawMultiGPUCluster() {
     else if (gpuCount === 128) { cols = 16; rows = 8; }
     else { cols = Math.ceil(Math.sqrt(gpuCount)); rows = Math.ceil(gpuCount / cols); }
 
-    // Scale GPU size based on count - improved scaling to keep GPUs visible
+    // Scale GPU size based on count - aggressive scaling for large clusters
     let scaleFactor = 0.8
     if (gpuCount > 8) scaleFactor = 0.6
     if (gpuCount > 16) scaleFactor = 0.4
-    if (gpuCount > 32) scaleFactor = 0.3
-    if (gpuCount > 64) scaleFactor = 0.2
-    if (gpuCount >= 128) scaleFactor = 0.15  // Increased from 0.03 to remain visible
+    if (gpuCount > 32) scaleFactor = 0.25
+    if (gpuCount > 64) scaleFactor = 0.15
+    if (gpuCount >= 128) scaleFactor = 0.08  // Much smaller for massive clusters
 
     const maxGPUSize = Math.min(120, Math.min(canvas.width / (cols + 1), canvas.height / (rows + 1)))
-    const gpuSize = Math.max(8, maxGPUSize * scaleFactor)  // Minimum 8px to stay visible
-    const gpuSpacing = Math.max(gpuSize + 4, maxGPUSize * (gpuCount >= 128 ? 0.8 : (gpuCount > 16 ? 0.9 : 1.1)))
+    const gpuSize = Math.max(6, maxGPUSize * scaleFactor)  // Minimum 6px for 128+ GPUs
+    const gpuSpacing = Math.max(gpuSize + 2, maxGPUSize * (gpuCount >= 128 ? 0.6 : (gpuCount > 16 ? 0.9 : 1.1)))
 
     // Center the grid with better positioning
     const gridWidth = (cols - 1) * gpuSpacing
