@@ -138,6 +138,17 @@
                 min-width: 180px; /* Larger for play/pause button */
             }
 
+            /* Fixed widths for buttons that change content to prevent layout jumping */
+            #speedControl { width: 120px; }
+            #modelControl { width: 160px; }
+            #batchControl { width: 100px; }
+            #seqControl { width: 110px; }
+            #optimizerControl { width: 150px; }
+            #gpuControl { width: 150px; }
+            #gpuCountControl { width: 100px; }
+            #interconnectControl { width: 140px; }
+            #worldDCControl { width: 160px; }
+
             button:hover {
                 background: linear-gradient(180deg, rgba(255, 68, 68, 0.35), rgba(255, 68, 68, 0.25));
                 transform: translateY(-2px);
