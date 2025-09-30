@@ -2426,7 +2426,11 @@ function calculateCBPerformance() {
         const model = models[currentModelIndex]
         const gpuConfig = gpuConfigs[currentGPU]
         const kvGiB = calculateBatchKVCache(model, currentTokens)
-        const memoryUtilization = Math.min(1.0, kvGiB / (gpuConfig.memory * 0.9))
+
+        // Ensure we have valid values
+        const validKV = !isNaN(kvGiB) ? kvGiB : 1.0
+        const validMemory = gpuConfig && gpuConfig.memory ? gpuConfig.memory : 40
+        const memoryUtilization = Math.min(1.0, validKV / (validMemory * 0.9))
 
         // Base improvement: 8x minimum from CB
         // Scale up based on memory utilization and batch size
@@ -2440,7 +2444,12 @@ function calculateCBPerformance() {
         const model = models[currentModelIndex]
         const gpuConfig = gpuConfigs[currentGPU]
         const kvGiB = calculateBatchKVCache(model, currentTokens)
-        const memoryUtilization = Math.min(1.0, kvGiB / (gpuConfig.memory * 0.9))
+
+        // Ensure we have valid values
+        const validKV = !isNaN(kvGiB) ? kvGiB : 1.0
+        const validMemory = gpuConfig && gpuConfig.memory ? gpuConfig.memory : 40
+        const memoryUtilization = Math.min(1.0, validKV / (validMemory * 0.9))
+
         improvement = 4 + Math.min(4, batchSize * 0.3 + memoryUtilization * 2)
     } else if (pagedAttention) {
         // PA only: ~2x from memory efficiency
