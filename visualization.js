@@ -2107,7 +2107,8 @@ function drawMemoryGrid() {
 
             // Compute unit activity visualization
             const pulse = isPlaying ? Math.sin(getAnimationTime() * 0.003 + (row * cuCols + col) * 0.1) * 0.3 + 0.7 : 0.5
-            const active = Math.random() < activity
+            // Use deterministic pattern when paused, random when playing
+            const active = isPlaying ? Math.random() < activity : ((row + col) % 3) < (activity * 3)
 
             if (active) {
                 // Active compute unit
