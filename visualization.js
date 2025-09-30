@@ -189,8 +189,8 @@ let memoryBlocks = []
 let waves = []
 let currentDtype = 'FP16'
 let currentFactoidIndex = 0
-let pausedTime = Date.now() // Store time when paused
-let animationTime = Date.now() // Current animation time
+let pausedTime = 0 // Fixed time when paused (0 = frozen at start)
+let animationTime = 0 // Current animation time
 let lastFactoidUpdate = 0
 
 // Get animation time that respects pause state
