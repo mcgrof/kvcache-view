@@ -218,6 +218,9 @@ const gpuConfigs = {
     'A100 80G': { memGiB: 80, label: 'A100 80G', memType: 'HBM2e', l2Cache: 40, flashTileSize: 128, nvlink: true, nvlinkBW: 600, pcieGen: 4 },
     'H100 80G': { memGiB: 80, label: 'H100 80G', memType: 'HBM3', l2Cache: 50, flashTileSize: 128, nvlink: true, nvlinkBW: 900, pcieGen: 5 },
     'H200 141G': { memGiB: 141, label: 'H200 141G', memType: 'HBM3e', l2Cache: 50, flashTileSize: 128, nvlink: true, nvlinkBW: 900, pcieGen: 5 },
+    'B100 80G': { memGiB: 80, label: 'B100 80G', memType: 'HBM3e', l2Cache: 60, flashTileSize: 128, nvlink: true, nvlinkBW: 1800, pcieGen: 6 },
+    'B200 192G': { memGiB: 192, label: 'B200 192G', memType: 'HBM3e', l2Cache: 60, flashTileSize: 128, nvlink: true, nvlinkBW: 1800, pcieGen: 6 },
+    'GB200 384G': { memGiB: 384, label: 'GB200 NVL2 384G', memType: 'HBM3e', l2Cache: 120, flashTileSize: 256, nvlink: true, nvlinkBW: 1800, pcieGen: 6 },
     // AMD Radeon Pro (workstation) - No Infinity Fabric Link on workstation cards
     'AMD W7800 32G': { memGiB: 32, label: 'AMD W7800 32G', memType: 'GDDR6', l2Cache: 64, flashTileSize: 64, nvlink: false, pcieGen: 4 },
     'AMD W7900 48G': { memGiB: 48, label: 'AMD W7900 48G', memType: 'GDDR6', l2Cache: 96, flashTileSize: 64, nvlink: false, pcieGen: 4 },
@@ -278,6 +281,7 @@ let gpuCount = 1  // Number of GPUs (powers of 2: 1, 2, 4, 8, 16, 32, 64, 128)
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
 const pcie4Bandwidth = 32  // PCIe 4.0 x16 bandwidth in GB/s (most GPUs)
 const pcie5Bandwidth = 64  // PCIe 5.0 x16 bandwidth in GB/s (H100, H200, MI300X)
+const pcie6Bandwidth = 128 // PCIe 6.0 x16 bandwidth in GB/s (B100, B200, GB200)
 let useHighSpeedInterconnect = true  // Use NVLink/IFL when available vs PCIe
 
 let currentGPU = 'H100 80G'
@@ -286,6 +290,9 @@ let currentGPU = 'H100 80G'
 const worldDatacenters = {
     none: { name: 'None', gpus: null, gpu: null, model: null },
     dgx_h100: { name: 'DGX H100', gpus: 8, gpu: 'H100 80G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    dgx_h200: { name: 'DGX H200', gpus: 8, gpu: 'H200 141G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
+    dgx_b200: { name: 'DGX B200', gpus: 8, gpu: 'B200 192G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
+    dgx_gb200: { name: 'DGX GB200 NVL72', gpus: 72, gpu: 'GB200 384G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
     dgx_pod: { name: 'DGX SuperPOD', gpus: 32, gpu: 'H100 80G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
     meta_rsc: { name: 'Meta RSC', gpus: 128, gpu: 'A100 80G', model: 'Llama-3.1-405B', interconnect: 'nvlink' },
     openai_cluster: { name: 'OpenAI GPT-4', gpus: 64, gpu: 'A100 40G', model: 'Llama-3.1-70B', interconnect: 'nvlink' },
@@ -312,12 +319,20 @@ function setGPUDefaults(gpuKey) {
     const memType = config.memType
 
     // Set appropriate context length based on GPU memory
-    if (memGiB >= 128) {
-        // High-end GPUs (MI300X, Max 1550): 1M context
+    if (memGiB >= 384) {
+        // Ultra high-end GPUs (GB200): 2M context
+        maxTokens = 2000000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.5) // Start at 50%
+    } else if (memGiB >= 192) {
+        // Top-tier GPUs (B200, MI300X): 1M context
         maxTokens = 1000000
         currentTokens = Math.min(currentTokens, maxTokens * 0.5) // Start at 50%
+    } else if (memGiB >= 128) {
+        // High-end GPUs (H200, MI250X, Max 1550): 750K context
+        maxTokens = 750000
+        currentTokens = Math.min(currentTokens, maxTokens * 0.4) // Start at 40%
     } else if (memGiB >= 80) {
-        // Premium GPUs (H100, A100 80G): 512K context
+        // Premium GPUs (H100, B100, A100 80G): 512K context
         maxTokens = 512000
         currentTokens = Math.min(currentTokens, maxTokens * 0.3) // Start at 30%
     } else if (memGiB >= 40) {
@@ -888,7 +903,10 @@ function drawMultiGPUCluster() {
 
     // Check PCIe generation for this GPU
     if (!useHighSpeedInterconnect || !gpuConfig.nvlink) {
-        if (gpuConfig.pcieGen === 5) {
+        if (gpuConfig.pcieGen === 6) {
+            interconnectType = 'PCIe 6.0'
+            interconnectBW = pcie6Bandwidth
+        } else if (gpuConfig.pcieGen === 5) {
             interconnectType = 'PCIe 5.0'
             interconnectBW = pcie5Bandwidth
         } else if (gpuConfig.pcieGen === 3) {
@@ -2489,6 +2507,8 @@ function updatePerformanceMetrics() {
     let interconnectBW = pcie4Bandwidth
     if (gpuConfig.nvlink && useHighSpeedInterconnect) {
         interconnectBW = gpuConfig.nvlinkBW || 600
+    } else if (gpuConfig.pcieGen === 6) {
+        interconnectBW = pcie6Bandwidth
     } else if (gpuConfig.pcieGen === 5) {
         interconnectBW = pcie5Bandwidth
     } else if (gpuConfig.pcieGen === 3) {
@@ -2690,7 +2710,10 @@ function updateInfoPanel() {
             }
         } else {
             // Determine PCIe generation and bandwidth
-            if (gpuConfig.pcieGen === 5) {
+            if (gpuConfig.pcieGen === 6) {
+                interconnectType = 'PCIe 6.0'
+                interconnectBW = pcie6Bandwidth
+            } else if (gpuConfig.pcieGen === 5) {
                 interconnectType = 'PCIe 5.0'
                 interconnectBW = pcie5Bandwidth
             } else if (gpuConfig.pcieGen === 3) {

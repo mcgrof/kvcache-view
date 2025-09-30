@@ -47,7 +47,9 @@ function getDefaultModelForGPU(gpuKey) {
     }
     const gpuMemory = gpu.memory
 
-    if (gpuMemory >= 80) return 6 // Llama-3.1-8B for H100/H200/MI300X
+    if (gpuMemory >= 384) return 8 // Llama-3.1-70B for GB200
+    if (gpuMemory >= 192) return 7 // Mistral-7B for B200/MI300X
+    if (gpuMemory >= 80) return 6 // Llama-3.1-8B for H100/H200/B100
     if (gpuMemory >= 40) return 4 // Llama-3.2-1B for A100/W7900
     if (gpuMemory >= 24) return 2 // GPT-2-762M for RTX 4090
     if (gpuMemory >= 16) return 1 // GPT-2-345M for Tesla T4
@@ -86,6 +88,9 @@ const gpuConfigs = {
     'A100 80G': { memory: 80, bandwidth: 2039, compute: 19.5 },
     'H100 80G': { memory: 80, bandwidth: 3350, compute: 67 },
     'H200 141G': { memory: 141, bandwidth: 4800, compute: 67 },
+    'B100 80G': { memory: 80, bandwidth: 8000, compute: 140 },
+    'B200 192G': { memory: 192, bandwidth: 8000, compute: 140 },
+    'GB200 384G': { memory: 384, bandwidth: 16000, compute: 280 },
     'MI300X 192G': { memory: 192, bandwidth: 5300, compute: 163 },
 }
 // Default configuration
