@@ -1,44 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head><title>Memory Test</title></head>
-<body>
-<script>
-// Test Llama 3.2 1B memory calculation
-const model = { params: 1.2 };
+    <head>
+        <title>Memory Test</title>
+    </head>
+    <body>
+        <script>
+            // Test Llama 3.2 1B memory calculation
+            const model = { params: 1.2 }
 
-// FP16 weights (mixed precision enabled by default)
-const fp16Weights = (model.params * 1e9 * 2) / (1024 ** 3);
-console.log("FP16 Weights:", fp16Weights, "GiB");
+            // FP16 weights (mixed precision enabled by default)
+            const fp16Weights = (model.params * 1e9 * 2) / 1024 ** 3
+            console.log('FP16 Weights:', fp16Weights, 'GiB')
 
-// FP32 master weights for mixed precision
-const fp32MasterWeights = (model.params * 1e9 * 4) / (1024 ** 3);
-console.log("FP32 Master Weights:", fp32MasterWeights, "GiB");
+            // FP32 master weights for mixed precision
+            const fp32MasterWeights = (model.params * 1e9 * 4) / 1024 ** 3
+            console.log('FP32 Master Weights:', fp32MasterWeights, 'GiB')
 
-// Gradients (FP16)
-const gradients = fp16Weights;
-console.log("Gradients:", gradients, "GiB");
+            // Gradients (FP16)
+            const gradients = fp16Weights
+            console.log('Gradients:', gradients, 'GiB')
 
-// AdamW optimizer (2x for momentum + variance)
-const optimizer = fp32MasterWeights * 2;
-console.log("Optimizer:", optimizer, "GiB");
+            // AdamW optimizer (2x for momentum + variance)
+            const optimizer = fp32MasterWeights * 2
+            console.log('Optimizer:', optimizer, 'GiB')
 
-// Total with mixed precision
-const totalMixedPrecision = fp16Weights + fp32MasterWeights + gradients + optimizer;
-console.log("Total (Mixed Precision):", totalMixedPrecision, "GiB");
+            // Total with mixed precision
+            const totalMixedPrecision = fp16Weights + fp32MasterWeights + gradients + optimizer
+            console.log('Total (Mixed Precision):', totalMixedPrecision, 'GiB')
 
-// Activations (rough estimate for batch=4, seq=1024)
-const activations = 2; // Conservative estimate
-console.log("Activations:", activations, "GiB");
+            // Activations (rough estimate for batch=4, seq=1024)
+            const activations = 2 // Conservative estimate
+            console.log('Activations:', activations, 'GiB')
 
-console.log("GRAND TOTAL:", totalMixedPrecision + activations, "GiB");
-console.log("On W7900 48GB:", ((totalMixedPrecision + activations) / 48 * 100).toFixed(1) + "%");
+            console.log('GRAND TOTAL:', totalMixedPrecision + activations, 'GiB')
+            console.log('On W7900 48GB:', (((totalMixedPrecision + activations) / 48) * 100).toFixed(1) + '%')
 
-// PCIe bandwidth for this amount of data
-const dataPerStep = totalMixedPrecision * 0.5; // Moving half the data per step
-const stepsPerSecond = 4;
-const bandwidthNeeded = dataPerStep * stepsPerSecond;
-console.log("Bandwidth needed:", bandwidthNeeded, "GB/s");
-console.log("PCIe 3.0 utilization:", (bandwidthNeeded / 16 * 100).toFixed(1) + "%");
-</script>
-</body>
+            // PCIe bandwidth for this amount of data
+            const dataPerStep = totalMixedPrecision * 0.5 // Moving half the data per step
+            const stepsPerSecond = 4
+            const bandwidthNeeded = dataPerStep * stepsPerSecond
+            console.log('Bandwidth needed:', bandwidthNeeded, 'GB/s')
+            console.log('PCIe 3.0 utilization:', ((bandwidthNeeded / 16) * 100).toFixed(1) + '%')
+        </script>
+    </body>
 </html>

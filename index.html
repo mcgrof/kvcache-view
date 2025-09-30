@@ -826,12 +826,12 @@
         </div>
 
         <!-- Multi-GPU Performance Metrics box -->
-        <div class="efficiency-box" id="performanceMetricsBox" style="display: none; height: auto; min-height: 130px;">
+        <div class="efficiency-box" id="performanceMetricsBox" style="display: none; height: auto; min-height: 130px">
             <div class="efficiency-title">
                 <span class="icon">⚡</span>
                 <span class="text">Performance Impact</span>
             </div>
-            <div id="metricsContent" style="font-size: 0.72em; line-height: 1.4;">
+            <div id="metricsContent" style="font-size: 0.72em; line-height: 1.4">
                 <!-- Will be populated by JavaScript -->
             </div>
         </div>
@@ -939,7 +939,9 @@
             <button id="dtypeControl">Type: FP16</button>
             <button id="gpuControl">Device: H100 80G</button>
             <button id="gpuCountControl" title="Number of GPUs for distributed serving">GPUs: 1</button>
-            <button id="interconnectControl" title="Toggle GPU interconnect type" style="display: none;">Link: NVLink</button>
+            <button id="interconnectControl" title="Toggle GPU interconnect type" style="display: none">
+                Link: NVLink
+            </button>
             <button id="worldDCControl" title="Simulate famous GPU clusters">DC: None</button>
         </div>
 

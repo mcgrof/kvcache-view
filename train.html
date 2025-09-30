@@ -139,15 +139,33 @@
             }
 
             /* Fixed widths for buttons that change content to prevent layout jumping */
-            #speedControl { width: 120px; }
-            #modelControl { width: 160px; }
-            #batchControl { width: 100px; }
-            #seqControl { width: 110px; }
-            #optimizerControl { width: 150px; }
-            #gpuControl { width: 150px; }
-            #gpuCountControl { width: 100px; }
-            #interconnectControl { width: 140px; }
-            #worldDCControl { width: 160px; }
+            #speedControl {
+                width: 120px;
+            }
+            #modelControl {
+                width: 160px;
+            }
+            #batchControl {
+                width: 100px;
+            }
+            #seqControl {
+                width: 110px;
+            }
+            #optimizerControl {
+                width: 150px;
+            }
+            #gpuControl {
+                width: 150px;
+            }
+            #gpuCountControl {
+                width: 100px;
+            }
+            #interconnectControl {
+                width: 140px;
+            }
+            #worldDCControl {
+                width: 160px;
+            }
 
             button:hover {
                 background: linear-gradient(180deg, rgba(255, 68, 68, 0.35), rgba(255, 68, 68, 0.25));
@@ -331,9 +349,33 @@
         </div>
 
         <!-- Training Interconnect Metrics box -->
-        <div class="training-interconnect-metrics" id="trainingInterconnectMetrics" style="position: absolute; top: 350px; left: 30px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 15px 18px; backdrop-filter: blur(10px); max-width: 290px;">
-            <h3 style="color: var(--light-red); margin-bottom: 12px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em;">Interconnect Impact</h3>
-            <div id="interconnectMetricsContent" style="font-size: 0.8em; line-height: 1.4;">
+        <div
+            class="training-interconnect-metrics"
+            id="trainingInterconnectMetrics"
+            style="
+                position: absolute;
+                top: 350px;
+                left: 30px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 15px 18px;
+                backdrop-filter: blur(10px);
+                max-width: 290px;
+            "
+        >
+            <h3
+                style="
+                    color: var(--light-red);
+                    margin-bottom: 12px;
+                    font-size: 0.85em;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                "
+            >
+                Interconnect Impact
+            </h3>
+            <div id="interconnectMetricsContent" style="font-size: 0.8em; line-height: 1.4">
                 <div class="info-item">
                     <span class="info-label">Throughput:</span>
                     <span class="info-value" id="trainingThroughput">100%</span>
@@ -395,13 +437,37 @@
         </div>
 
         <!-- Training Performance Impact box -->
-        <div class="training-performance-box" id="trainingPerformanceBox" style="display: none; position: absolute; top: 350px; left: 30px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 15px 18px; backdrop-filter: blur(10px); max-width: 260px;">
-            <h3 style="color: var(--light-red); margin-bottom: 12px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em;">Training Impact</h3>
-            <div id="trainingMetricsContent" style="font-size: 0.72em; line-height: 1.4;">
+        <div
+            class="training-performance-box"
+            id="trainingPerformanceBox"
+            style="
+                display: none;
+                position: absolute;
+                top: 350px;
+                left: 30px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 15px 18px;
+                backdrop-filter: blur(10px);
+                max-width: 260px;
+            "
+        >
+            <h3
+                style="
+                    color: var(--light-red);
+                    margin-bottom: 12px;
+                    font-size: 0.85em;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                "
+            >
+                Training Impact
+            </h3>
+            <div id="trainingMetricsContent" style="font-size: 0.72em; line-height: 1.4">
                 <!-- Will be populated by JavaScript -->
             </div>
         </div>
-
 
         <div class="controls">
             <button id="playPause">▶️ Start Training</button>
