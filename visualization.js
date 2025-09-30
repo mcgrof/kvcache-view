@@ -2407,6 +2407,37 @@ function updateFactoid() {
     currentFactoidIndex++
 }
 
+// Calculate continuous batching performance improvements
+function calculateCBPerformance() {
+    // Based on Anyscale blog: up to 23x throughput with vLLM
+    // 8x with Ray Serve, 4x with FasterTransformer
+
+    const baselineTokensPerSec = 10 // Traditional batching baseline
+    let improvement = 1.0
+
+    if (continuousBatching && pagedAttention) {
+        // vLLM-like: CB + PagedAttention = up to 23x
+        improvement = 8 + Math.min(15, batchSize * 1.5) // Scale with batch size
+    } else if (continuousBatching) {
+        // CB only: 4-8x improvement
+        improvement = 4 + Math.min(4, batchSize * 0.5)
+    } else if (pagedAttention) {
+        // PA only: ~2x from memory efficiency
+        improvement = 2.0
+    }
+
+    // Flash attention adds another 1.5-2x
+    if (flashAttention) {
+        improvement *= 1.5
+    }
+
+    return {
+        throughput: baselineTokensPerSec * improvement,
+        improvement: improvement,
+        memoryEfficiency: pagedAttention ? 0.96 : (continuousBatching ? 0.7 : 0.4) // Memory utilization
+    }
+}
+
 // Update performance metrics for multi-GPU deployments
 function updatePerformanceMetrics() {
     const metricsEl = document.getElementById('metricsContent')
@@ -2700,6 +2731,48 @@ function updateInfoPanel() {
         }
     }
     document.getElementById('cacheSize').textContent = formatMemory(kvGiB)
+
+    // Show continuous batching performance improvements
+    const showCBMetrics = (continuousBatching || pagedAttention) && batchSize > 1
+    if (showCBMetrics) {
+        const cbPerf = calculateCBPerformance()
+
+        // Update the batch size display to show improvement
+        const batchSizeEl = document.getElementById('batchSizeDisplay')
+        if (batchSizeEl) {
+            batchSizeEl.innerHTML = `${batchSize} <span style="color: #4CAF50; font-size: 0.8em">(${cbPerf.improvement.toFixed(1)}x)</span>`
+        }
+
+        // Add performance comparison text
+        const kvCacheEl = document.getElementById('cacheSize')
+        if (kvCacheEl && kvCacheEl.parentElement) {
+            const parent = kvCacheEl.parentElement
+            if (!parent.querySelector('.cb-perf-note')) {
+                const note = document.createElement('div')
+                note.className = 'cb-perf-note'
+                note.style.cssText = 'font-size: 0.75em; color: #4CAF50; margin-top: 4px;'
+
+                if (continuousBatching && pagedAttention) {
+                    note.textContent = `vLLM-like: up to ${cbPerf.improvement.toFixed(0)}x throughput`
+                } else if (continuousBatching) {
+                    note.textContent = `CB: ${cbPerf.improvement.toFixed(0)}x throughput gain`
+                } else {
+                    note.textContent = `PA: ${(cbPerf.memoryEfficiency * 100).toFixed(0)}% memory util`
+                }
+
+                parent.appendChild(note)
+            }
+        }
+    } else {
+        // Remove CB metrics if disabled
+        const batchSizeEl = document.getElementById('batchSizeDisplay')
+        if (batchSizeEl) {
+            batchSizeEl.textContent = batchSize
+        }
+
+        const notes = document.querySelectorAll('.cb-perf-note')
+        notes.forEach(n => n.remove())
+    }
 
     // Show appropriate box based on GPU count
     const infoPanelEl = document.querySelector('.info-panel')

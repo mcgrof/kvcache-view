@@ -19,12 +19,14 @@ let isTraining = false
 let currentStep = 0
 let maxSteps = 100000
 let trainingSpeed = 50
-let currentLoss = 4.5 // Starting loss
+// Initial loss based on real GPT-2 training: starts ~10-11, drops to ~4
+let currentLoss = 10.8 // Realistic starting loss for GPT-2
 let lossHistory = []
 
 // Model configurations for training
 const models = [
-    { name: 'GPT-2-117M', params: 0.117, layers: 12, hidden: 768, heads: 12 },
+    // Real GPT-2 124M parameters from actual training data
+    { name: 'GPT-2-124M', params: 0.124, layers: 12, hidden: 768, heads: 12 }, // Actual: 123.69M params
     { name: 'GPT-2-345M', params: 0.345, layers: 24, hidden: 1024, heads: 16 },
     { name: 'GPT-2-762M', params: 0.762, layers: 36, hidden: 1280, heads: 20 },
     { name: 'GPT-2-1.5B', params: 1.5, layers: 48, hidden: 1600, heads: 25 },
@@ -52,10 +54,11 @@ function getDefaultModelForGPU(gpuKey) {
     return 0 // GPT-2-117M for very small GPUs
 }
 
-let currentModelIndex = 4 // Start with Llama-3.2-1B - more realistic single GPU default
-let batchSize = 4 // Conservative batch size
-let sequenceLength = 1024 // Conservative sequence length for single GPU
-let accumulationSteps = 1
+// Default training parameters based on real GPT-2 W7900 training data
+let currentModelIndex = 0 // Start with GPT-2-124M (matches real training)
+let batchSize = 32 // Real batch size from actual training
+let sequenceLength = 1024 // Real block size from actual training
+let accumulationSteps = 4 // Real gradient accumulation (effective batch = 128)
 
 // Optimizer configurations
 const optimizers = {
@@ -67,12 +70,12 @@ const optimizers = {
 }
 let currentOptimizer = 'AdamW'
 
-// Training optimizations - start with some enabled to show their benefit
-let gradientCheckpointing = true // Enabled by default to reduce memory
-let mixedPrecision = true // Enabled by default - standard practice
+// Training optimizations matching real GPT-2 W7900 training
+let gradientCheckpointing = false // Not used in the real training
+let mixedPrecision = true // Enabled in real training (CONFIG_MIXED_PRECISION=y)
 let zeroOptimization = 0 // 0=off, 1=ZeRO-1, 2=ZeRO-2, 3=ZeRO-3
-let fullyShardedDataParallel = false // Enable when using multiple GPUs
-let gradientAccumulation = false
+let fullyShardedDataParallel = false // Single GPU training
+let gradientAccumulation = true // Enabled (gradient-accumulation 4)
 
 // GPU configurations
 const gpuConfigs = {
@@ -85,11 +88,12 @@ const gpuConfigs = {
     'H200 141G': { memory: 141, bandwidth: 4800, compute: 67 },
     'MI300X 192G': { memory: 192, bandwidth: 5300, compute: 163 },
 }
-let currentGPU = 'H100 80G'
+// Default configuration
+let currentGPU = 'AMD W7900 48G'  // Default GPU
 let gpuCount = 1  // Number of GPUs for distributed training
 const validGPUCounts = [1, 2, 4, 8, 16, 32, 64, 128]
-let useHighSpeedInterconnect = true  // Use NVLink/InfinityFabric when available
-let currentInterconnect = 'pcie5'  // Default to PCIe 5.0
+let useHighSpeedInterconnect = false  // Will be set based on GPU
+let currentInterconnect = 'pcie5'  // Default to best PCIe generation available
 
 // Famous training datacenter configurations
 const worldDatacenters = {
@@ -103,7 +107,7 @@ const worldDatacenters = {
     azure_nd: { name: 'Azure ND A100', gpus: 8, gpu: 'A100 40G', model: 'Mistral-7B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
     lambda_train: { name: 'Lambda Train', gpus: 8, gpu: 'A100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'Lion', interconnect: 'nvlink' },
     budget_train: { name: 'Budget T4', gpus: 4, gpu: 'Tesla T4 16G', model: 'Llama-3.2-1B', batch: 2, seq: 1024, optimizer: 'AdamW', interconnect: 'pcie' },
-    wl900_cluster: { name: 'WL900 Cluster', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'wl900' },
+    // Removed WL900 cluster - WL900 is a GPU model not an interconnect type
     single_gpu: { name: 'Single GPU', gpus: 1, gpu: 'H100 80G', model: 'Llama-3.2-1B', batch: 8, seq: 2048, optimizer: 'AdamW', interconnect: 'none' },
     anthropic_claude: { name: 'Anthropic', gpus: 16, gpu: 'H100 80G', model: 'Llama-3.1-8B', batch: 4, seq: 4096, optimizer: 'AdamW', interconnect: 'nvlink' },
     stability_sd: { name: 'Stability AI', gpus: 8, gpu: 'A100 80G', model: 'Mistral-7B', batch: 4, seq: 2048, optimizer: 'AdamW', interconnect: 'nvlink' },
@@ -139,12 +143,16 @@ function calculateOptimizerMemory(model, optimizer, dtype = 'fp32') {
 }
 
 function calculateActivationsMemory(model, batchSize, sequenceLength, dtype = 'fp32') {
-    // Rough estimate: batch * seq * layers * hidden * factor
+    // Training needs to store activations for backprop
+    // Based on real W7900 data: GPT-2 124M uses ~24.8GB total with batch=32, seq=1024
     const bytesPerValue = dtype === 'fp16' || dtype === 'bf16' ? 2 : 4
-    let factor = 10 // Approximate factor for all intermediate activations
+
+    // Calibrated to match real memory usage
+    // Real data shows ~5.3GB allocated, ~24.8GB reserved with mixed precision
+    let factor = 18 // Adjusted based on actual measurements
 
     if (gradientCheckpointing) {
-        factor = 2 // Only store checkpoint activations
+        factor = 5 // Reduces activation memory significantly
     }
 
     // Add dynamic variation during training (activations vary based on batch)
@@ -163,14 +171,21 @@ function getTotalTrainingMemory() {
     let gradientsMemory = calculateGradientsMemory(model, dtype)
     let activationsMemory = calculateActivationsMemory(model, batchSize, sequenceLength, dtype)
 
-    // Mixed precision: FP16 forward/gradient + FP32 master weights (no separate optimizer memory)
+    // Mixed precision: FP16 compute weights + FP32 master weights + optimizer states
     let optimizerMemory
     if (mixedPrecision) {
-        // FP32 master weights already include the optimizer states
+        // With mixed precision we need:
+        // 1. FP16 weights for computation (already in weightsMemory)
+        // 2. FP32 master weights
+        // 3. FP32 optimizer states (momentum + variance for AdamW)
         const masterWeights = calculateModelWeightsMemory(model, 'fp32')
-        weightsMemory += masterWeights
-        // Optimizer momentum/variance are part of the master weights management
-        optimizerMemory = masterWeights * (optimizers[currentOptimizer].memoryFactor - 1)
+        const optimizerStates = masterWeights * optimizers[currentOptimizer].memoryFactor
+
+        // Add master weights to total
+        weightsMemory = weightsMemory + masterWeights
+
+        // Optimizer memory is the optimizer states only
+        optimizerMemory = optimizerStates
     } else {
         optimizerMemory = calculateOptimizerMemory(model, currentOptimizer, dtype)
     }
@@ -256,7 +271,27 @@ function drawMultiGPUCluster() {
     // Training synchronization traffic (gradient sync + all-reduce patterns)
     const gradientSyncTraffic = (memory.gradients * 1024) * Math.log2(gpuCount)  // All-reduce for gradients
     const activationSyncTraffic = (memory.activations * 1024) * (gpuCount / 4)  // Activation sharding
-    const totalSyncTraffic = gradientSyncTraffic + activationSyncTraffic
+
+    // Add training dynamics for multi-GPU sync
+    let syncPhaseFactor = 1.0
+    if (isTraining) {
+        // Multi-GPU has distinct sync phases
+        const syncPhase = Date.now() / 600
+        const phase = syncPhase % 3
+
+        if (phase < 1) {
+            // Forward pass - minimal sync
+            syncPhaseFactor = 0.3 + Math.sin(syncPhase * 3) * 0.1
+        } else if (phase < 2) {
+            // Gradient all-reduce - peak sync traffic
+            syncPhaseFactor = 1.3 + Math.sin(syncPhase * 2) * 0.2
+        } else {
+            // Optimizer update sync
+            syncPhaseFactor = 0.7 + Math.sin(syncPhase * 4) * 0.1
+        }
+    }
+
+    const totalSyncTraffic = (gradientSyncTraffic + activationSyncTraffic) * syncPhaseFactor
 
     // Use the selected interconnect type (works for both single and multi-GPU)
     const currentDC = worldDatacenters[currentDatacenter]
@@ -279,10 +314,6 @@ function drawMultiGPUCluster() {
         case 'nvlink':
             interconnectType = 'NVLink 4.0'
             interconnectBW = 900  // GB/s for NVLink
-            break
-        case 'wl900':
-            interconnectType = 'WL900'
-            interconnectBW = 1800  // GB/s for WL900 - higher bandwidth
             break
         case 'tpu':
             interconnectType = 'TPU Interconnect'
@@ -606,79 +637,165 @@ function drawGPUMemory() {
     ctx.font = '12px monospace'
     ctx.fillText(`Step ${currentStep.toLocaleString()} / ${maxSteps.toLocaleString()}`, centerX, progressY + 25)
 
-    // Add interconnect bandwidth meter for single GPU (for PCIe generation comparison)
-    const memory = getTotalTrainingMemory()
-
-    // Calculate single GPU data transfer (model loading, gradient sync, etc.)
-    const modelLoadTraffic = memory.weights * 0.1  // Model loading overhead
-    const gradientSaveTraffic = memory.gradients * 0.05  // Gradient checkpointing
-    const totalSingleGPUTraffic = modelLoadTraffic + gradientSaveTraffic
-
-    // Get current interconnect specs - use safe default
-    let interconnectBW = 64  // Default PCIe 5.0
-    let interconnectType = 'PCIe 5.0'
-
+    // Draw interconnect bandwidth meter for single GPU (ALL GPUs use PCIe!)
     try {
-        const currentDC = worldDatacenters[currentDatacenter]
-        let interconnectSpec = currentDC?.interconnect || currentInterconnect || 'pcie5'
+        const memory = getTotalTrainingMemory()
 
-        switch (interconnectSpec) {
-            case 'pcie3':
-                interconnectType = 'PCIe 3.0'
-                interconnectBW = 16
-                break
-            case 'pcie4':
-                interconnectType = 'PCIe 4.0'
-                interconnectBW = 32
-                break
-            case 'pcie5':
-                interconnectType = 'PCIe 5.0'
-                interconnectBW = 64
-                break
-            default:
-                interconnectType = 'PCIe 5.0'
-                interconnectBW = 64
-                break
+        // Realistic and STABLE data transfer calculation for single GPU training
+        // PCIe bandwidth usage depends on model size and training configuration
+
+        // For single GPU, main PCIe usage:
+        // 1. Data loading from CPU (continuous during training)
+        // 2. Gradient checkpointing if enabled
+        // 3. Periodic model checkpointing
+
+        // Training requires significant data movement:
+        // - Loading training data from CPU to GPU continuously
+        // - Gradient synchronization
+        // - Optimizer state updates
+        // - Checkpointing
+
+        // Training is EXTREMELY IO intensive - constantly moving data
+        const modelSizeGB = memory.total  // Use TOTAL memory, not just weights
+
+        // Very aggressive base rate - training constantly streams data
+        // Real training can easily saturate PCIe bandwidth
+        let baseTransferRate = modelSizeGB * 0.8  // 80% of total memory per second!
+
+        // Batch size has huge impact on data loading
+        const batchFactor = Math.sqrt(batchSize)  // Direct batch scaling
+
+        // Gradient checkpointing actually INCREASES bandwidth needs (more recomputation)
+        const gcOverhead = gradientCheckpointing ? 1.5 : 1.0
+
+        // Add realistic training dynamics - bandwidth varies during training phases
+        let trainingPhaseFactor = 1.0
+
+        if (isTraining) {
+            // Training has phases: data load -> forward -> backward -> optimizer update
+            const phaseTime = Date.now() / 500  // Phase changes every 500ms
+            const phase = phaseTime % 4
+
+            if (phase < 1) {
+                // Data loading phase - high bandwidth
+                trainingPhaseFactor = 1.2 + Math.sin(phaseTime * 2) * 0.1
+            } else if (phase < 2) {
+                // Forward pass - moderate bandwidth
+                trainingPhaseFactor = 0.6 + Math.sin(phaseTime * 3) * 0.05
+            } else if (phase < 3) {
+                // Backward pass - high bandwidth for gradients
+                trainingPhaseFactor = 1.1 + Math.sin(phaseTime * 2.5) * 0.08
+            } else {
+                // Optimizer update - burst of bandwidth
+                trainingPhaseFactor = 0.8 + Math.sin(phaseTime * 4) * 0.15
+            }
         }
+
+        // DEBUG: Log to see what's happening
+        if (Math.random() < 0.01) {  // Log occasionally
+            console.log('Bandwidth calc:', {
+                memory: memory.total,
+                baseRate: baseTransferRate,
+                batchFactor,
+                gcOverhead,
+                trainingPhaseFactor,
+                dataTransferRate: baseTransferRate * batchFactor * gcOverhead * trainingPhaseFactor,
+                interconnectBW,
+                interconnectType
+            })
+        }
+
+        // Final calculation with training dynamics
+        const dataTransferRate = baseTransferRate * batchFactor * gcOverhead * trainingPhaseFactor
+
+        // Get interconnect bandwidth based on current selection
+        let interconnectBW = 64  // PCIe 5.0 default
+        let interconnectType = 'PCIe 5.0'
+
+        if (typeof currentInterconnect !== 'undefined') {
+            switch (currentInterconnect) {
+                case 'pcie3':
+                    interconnectBW = 16
+                    interconnectType = 'PCIe 3.0'
+                    break
+                case 'pcie4':
+                    interconnectBW = 32
+                    interconnectType = 'PCIe 4.0'
+                    break
+                case 'pcie5':
+                default:
+                    interconnectBW = 64
+                    interconnectType = 'PCIe 5.0'
+                    break
+            }
+        }
+
+        const bandwidthUtilization = Math.min(1.0, dataTransferRate / interconnectBW)
+
+        // Draw interconnect bandwidth meter at bottom (same style as multi-GPU)
+        const meterX = 20
+        const meterY = canvas.height - 100
+        const meterWidth = 200
+        const meterHeight = 20
+
+        // Meter background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctx.fillRect(meterX, meterY, meterWidth, meterHeight)
+
+        // Meter fill based on utilization
+        const fillWidth = meterWidth * bandwidthUtilization
+        const meterColor = bandwidthUtilization > 0.8 ? '#FF4444' :
+                          bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
+        ctx.fillStyle = meterColor
+        ctx.fillRect(meterX, meterY, fillWidth, meterHeight)
+
+        // Meter border
+        ctx.strokeStyle = '#666'
+        ctx.lineWidth = 1
+        ctx.strokeRect(meterX, meterY, meterWidth, meterHeight)
+
+        // Meter label
+        ctx.fillStyle = '#FFF'
+        ctx.font = '12px monospace'
+        ctx.textAlign = 'left'
+        ctx.fillText(`${interconnectType} Bandwidth`, meterX, meterY - 5)
+
+        // Show actual achieved bandwidth (capped by interconnect limit)
+        const actualBandwidth = Math.min(dataTransferRate, interconnectBW)
+        ctx.font = '10px monospace'
+
+        // Show different text based on whether we're bottlenecked
+        if (bandwidthUtilization > 1.0) {
+            // Bottlenecked - show capped rate and what we need
+            ctx.fillStyle = '#FF8888'
+            ctx.fillText(`100% SATURATED (${actualBandwidth.toFixed(1)} GB/s capped, need ${dataTransferRate.toFixed(1)} GB/s)`,
+                        meterX, meterY + meterHeight + 15)
+        } else {
+            // Not bottlenecked - show normal utilization
+            ctx.fillStyle = '#CCC'
+            ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}% (${actualBandwidth.toFixed(1)} GB/s)`,
+                        meterX, meterY + meterHeight + 15)
+        }
+
+        // Show bottleneck warning
+        if (bandwidthUtilization > 0.8) {
+            const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7
+            ctx.fillStyle = `rgba(255, 68, 68, ${pulse})`
+            ctx.font = 'bold 14px monospace'
+            ctx.textAlign = 'center'
+            ctx.fillText('⚠️ TRAINING BOTTLENECK ⚠️', canvas.width / 2, 30)
+            ctx.fillStyle = '#FF8888'
+            ctx.font = '11px monospace'
+            ctx.fillText(`${interconnectType} saturated - training will slow down!`, canvas.width / 2, 45)
+        }
+
+        // Update single GPU interconnect metrics
+        updateSingleGPUInterconnectMetrics(bandwidthUtilization, interconnectType, dataTransferRate, interconnectBW)
+
     } catch (error) {
-        console.error('Interconnect error:', error)
-        // Use defaults
+        // Silent fail - don't break the visualization
+        console.log('Bandwidth meter error:', error)
     }
-
-    const bandwidthUtilization = Math.min(1.0, totalSingleGPUTraffic / (interconnectBW * 1000))
-
-    // Draw interconnect bandwidth meter
-    const meterX = centerX - 100
-    const meterY = progressY + 50
-    const meterWidth = 200
-    const meterHeight = 15
-
-    // Meter background
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
-    ctx.fillRect(meterX, meterY, meterWidth, meterHeight)
-
-    // Meter fill based on utilization
-    const fillWidth = meterWidth * bandwidthUtilization
-    const meterColor = bandwidthUtilization > 0.8 ? '#FF4444' :
-                      bandwidthUtilization > 0.5 ? '#FFA500' : '#4CAF50'
-    ctx.fillStyle = meterColor
-    ctx.fillRect(meterX, meterY, fillWidth, meterHeight)
-
-    // Meter border
-    ctx.strokeStyle = '#666'
-    ctx.lineWidth = 1
-    ctx.strokeRect(meterX, meterY, meterWidth, meterHeight)
-
-    // Meter label
-    ctx.fillStyle = '#FFF'
-    ctx.font = '11px monospace'
-    ctx.textAlign = 'center'
-    ctx.fillText(`${interconnectType} Bandwidth`, centerX, meterY - 8)
-
-    // Utilization percentage
-    ctx.font = '9px monospace'
-    ctx.fillStyle = '#CCC'
-    ctx.fillText(`${(bandwidthUtilization * 100).toFixed(1)}% (${(totalSingleGPUTraffic / 1024).toFixed(2)} GB/s)`, centerX, meterY + meterHeight + 12)
 }
 
 // Draw training loss curve
@@ -802,6 +919,81 @@ function updateTrainingPerformanceMetrics(bandwidthUtilization, interconnectType
     }
 }
 
+// Update single GPU interconnect metrics
+function updateSingleGPUInterconnectMetrics(bandwidthUtilization, interconnectType, dataTransferNeeded, interconnectBW) {
+    const metricsBox = document.getElementById('trainingInterconnectMetrics')
+
+    if (!metricsBox || gpuCount > 1) {
+        if (metricsBox) metricsBox.style.display = 'none'
+        return
+    }
+
+    // Show the box for single GPU
+    metricsBox.style.display = 'block'
+
+    // Calculate actual data movement - capped by interconnect bandwidth
+    // If we need 20 GB/s but PCIe 3.0 only gives 16 GB/s, we get 16 GB/s
+    const actualDataMovement = Math.min(dataTransferNeeded, interconnectBW)
+
+    // Recalculate actual utilization for metrics
+    const actualUtilization = actualDataMovement / interconnectBW
+
+    // Calculate training metrics affected by interconnect bottleneck
+    const baseStepTime = 250 // Base step time in ms
+
+    // If bandwidth is saturated, training slows down proportionally
+    const slowdownFactor = bandwidthUtilization > 1.0 ? bandwidthUtilization : 1.0
+    const actualStepTime = baseStepTime * slowdownFactor
+
+    // Throughput degrades when bandwidth saturated
+    const throughputLoss = bandwidthUtilization > 1.0 ?
+                          Math.min((bandwidthUtilization - 1.0) * 50, 60) :
+                          Math.min(actualUtilization * 20, 10)
+    const actualThroughput = 100 - throughputLoss
+
+    // Efficiency drops significantly when bottlenecked
+    const efficiency = bandwidthUtilization > 1.0 ?
+                      Math.max(40, 100 / bandwidthUtilization) :
+                      Math.max(80, 100 - (actualUtilization * 20))
+
+    // Update the metrics display
+    const throughputEl = document.getElementById('trainingThroughput')
+    const stepTimeEl = document.getElementById('stepTime')
+    const dataMovementEl = document.getElementById('dataMovement')
+    const efficiencyEl = document.getElementById('trainingEfficiency')
+
+    if (throughputEl) {
+        throughputEl.textContent = `${actualThroughput.toFixed(1)}%`
+        throughputEl.style.color = actualThroughput > 90 ? '#4CAF50' :
+                                  actualThroughput > 70 ? '#FFA500' : '#FF4444'
+    }
+
+    if (stepTimeEl) {
+        stepTimeEl.textContent = `${actualStepTime.toFixed(0)}ms`
+        stepTimeEl.style.color = actualStepTime < 300 ? '#4CAF50' :
+                                actualStepTime < 400 ? '#FFA500' : '#FF4444'
+    }
+
+    if (dataMovementEl) {
+        // Show actual vs needed if bottlenecked
+        if (bandwidthUtilization > 1.0) {
+            dataMovementEl.textContent = `${actualDataMovement.toFixed(1)} GB/s (capped!)`
+            dataMovementEl.style.color = '#FF4444'
+            dataMovementEl.title = `Need ${dataTransferNeeded.toFixed(1)} GB/s but limited by ${interconnectType}`
+        } else {
+            dataMovementEl.textContent = `${actualDataMovement.toFixed(1)} GB/s`
+            dataMovementEl.style.color = actualUtilization < 0.5 ? '#4CAF50' :
+                                        actualUtilization < 0.8 ? '#FFA500' : '#FF4444'
+        }
+    }
+
+    if (efficiencyEl) {
+        efficiencyEl.textContent = `${efficiency.toFixed(1)}%`
+        efficiencyEl.style.color = efficiency > 90 ? '#4CAF50' :
+                                  efficiency > 75 ? '#FFA500' : '#FF4444'
+    }
+}
+
 // Update UI elements
 function updateUI() {
     const model = models[currentModelIndex]
@@ -879,25 +1071,32 @@ function animate() {
                 '<span>✓ Complete</span><br><span style="font-size: 0.7em; opacity: 0.8">Restart Training</span>'
         }
 
-        // Simulate realistic loss decay with noise
+        // Realistic loss curve based on actual GPT-2 W7900 training data
+        // Real data: starts at ~10.8, drops quickly to ~5-6, then slowly to ~4
         const progress = currentStep / maxSteps
-        const warmupProgress = Math.min(1, currentStep / 1000)
+        const warmupProgress = Math.min(1, currentStep / 2000) // Real warmup: 2000 steps
 
-        // Exponential decay with warm-up
-        const targetLoss = 0.1
-        const baseLoss = 4.5
+        // Based on real loss curve: 10.8 -> 5.8 -> 5.0 -> 4.5 -> 4.0
+        let targetLoss
+        if (currentStep < 100) {
+            // Rapid initial drop: 10.8 -> 5.8
+            targetLoss = 10.8 - (10.8 - 5.8) * (currentStep / 100)
+        } else if (currentStep < 500) {
+            // Slower drop: 5.8 -> 4.2
+            targetLoss = 5.8 - (5.8 - 4.2) * ((currentStep - 100) / 400)
+        } else {
+            // Gradual convergence: 4.2 -> 4.0
+            targetLoss = 4.2 - (4.2 - 4.0) * Math.pow((currentStep - 500) / (maxSteps - 500), 0.5)
+        }
 
-        // Loss follows exponential decay with some noise
-        const idealLoss = targetLoss + (baseLoss - targetLoss) * Math.exp(-5 * progress)
+        // Add realistic training noise (based on real variance in data)
+        const noise = (Math.random() - 0.5) * 0.15 * (1 - progress * 0.5)
 
-        // Add realistic training noise
-        const noise = (Math.random() - 0.5) * 0.1 * (1 - progress * 0.8) // Noise decreases over time
+        // Pruning spikes (occurs at pruning intervals - every 50 steps)
+        const spike = (currentStep % 50 === 0 && Math.random() < 0.3) ? Math.random() * 0.2 : 0
 
-        // Occasional spikes (gradient instability)
-        const spike = Math.random() < 0.02 ? Math.random() * 0.5 : 0
-
-        // Smooth the transition
-        currentLoss = currentLoss * 0.95 + (idealLoss + noise + spike) * 0.05
+        // Smooth the transition more aggressively for stability
+        currentLoss = currentLoss * 0.9 + (targetLoss + noise + spike) * 0.1
 
         // Record loss history - keep all points but downsample for performance
         if (currentStep % 100 === 0) {
@@ -1045,6 +1244,9 @@ document.getElementById('gpuControl').addEventListener('click', function () {
     const currentIndex = gpus.indexOf(currentGPU)
     currentGPU = gpus[(currentIndex + 1) % gpus.length]
     this.textContent = `GPU: ${currentGPU}`
+
+    // Don't manually reset - let updateInterconnectButton choose best for new GPU
+    updateInterconnectButton()  // This will set the best interconnect for the new GPU
 })
 
 // GPU count control
@@ -1059,14 +1261,36 @@ if (gpuCountBtn) {
 }
 
 // Interconnect control
+let currentInterconnectIndex = 0 // Global for access from GPU control
+
 const interconnectBtn = document.getElementById('interconnectControl')
 if (interconnectBtn) {
-    // Add interconnect cycling for both single and multi-GPU
-    let interconnectOptions = ['pcie5', 'pcie4', 'pcie3', 'nvlink', 'wl900']
-    let currentInterconnectIndex = 0 // Start with PCIe 5.0
+    // Determine available interconnect options based on GPU
+    function getInterconnectOptions() {
+        // Check if it's an AMD GPU first
+        const isAMD = currentGPU.includes('AMD') || currentGPU.includes('W7900') ||
+                      currentGPU.includes('MI300X') || currentGPU.includes('Radeon')
+
+        // Only NVIDIA GPUs can use NVLink
+        const isNVIDIA = !isAMD && (
+            currentGPU.includes('Tesla') || currentGPU.includes('A100') ||
+            currentGPU.includes('H100') || currentGPU.includes('H200') ||
+            currentGPU.includes('RTX')
+        )
+
+        // NVLink is only available for NVIDIA GPUs
+        if (isNVIDIA) {
+            return ['pcie5', 'pcie4', 'pcie3', 'nvlink']
+        } else {
+            // AMD and other GPUs only have PCIe options
+            return ['pcie5', 'pcie4', 'pcie3']
+        }
+    }
 
     interconnectBtn.addEventListener('click', function () {
-        // Cycle through interconnect options
+        const interconnectOptions = getInterconnectOptions()
+
+        // Cycle through available interconnect options
         currentInterconnectIndex = (currentInterconnectIndex + 1) % interconnectOptions.length
         const selectedInterconnect = interconnectOptions[currentInterconnectIndex]
 
@@ -1088,10 +1312,6 @@ if (interconnectBtn) {
                 this.textContent = 'Link: NVLink'
                 this.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
                 break
-            case 'wl900':
-                this.textContent = 'Link: WL900'
-                this.style.background = 'linear-gradient(180deg, rgba(255, 165, 0, 0.2), rgba(255, 165, 0, 0.1))'
-                break
         }
 
         // Store current selection for bandwidth calculations
@@ -1099,19 +1319,50 @@ if (interconnectBtn) {
     })
 }
 
-// Helper function to show/hide interconnect button
+// Helper function to show/hide interconnect button and set best default
 function updateInterconnectButton() {
     const btn = document.getElementById('interconnectControl')
     if (!btn) return
 
-    // Always show interconnect button (useful for single GPU PCIe generation modeling)
+    // Always show interconnect button - ALL GPUs use PCIe or other interconnects!
     btn.style.display = ''
 
-    // Initialize button with default PCIe 5.0 if not set
-    if (!btn.textContent || btn.textContent === 'Link: NVLink') {
-        btn.textContent = 'Link: PCIe 5.0'
-        btn.style.background = 'linear-gradient(180deg, rgba(0, 123, 255, 0.2), rgba(0, 123, 255, 0.1))'
-        currentInterconnect = 'pcie5'
+    // Determine best interconnect for current GPU
+    const isAMD = currentGPU.includes('AMD') || currentGPU.includes('W7900') ||
+                  currentGPU.includes('MI300X') || currentGPU.includes('Radeon')
+
+    const isNVIDIA = !isAMD && (
+        currentGPU.includes('Tesla') || currentGPU.includes('A100') ||
+        currentGPU.includes('H100') || currentGPU.includes('H200') ||
+        currentGPU.includes('RTX')
+    )
+
+    // Set best available interconnect as default
+    let bestInterconnect = 'pcie5'  // Default to PCIe 5.0
+    let buttonText = 'Link: PCIe 5.0'
+
+    if (isNVIDIA && gpuCount > 1) {
+        // For multi-GPU NVIDIA, default to NVLink if available
+        bestInterconnect = 'nvlink'
+        buttonText = 'Link: NVLink'
+        useHighSpeedInterconnect = true
+    } else {
+        // For single GPU or AMD, use best PCIe generation
+        bestInterconnect = 'pcie5'
+        buttonText = 'Link: PCIe 5.0'
+        useHighSpeedInterconnect = false
+    }
+
+    // Only update if this is initialization or GPU change
+    if (!btn.textContent || btn.textContent === 'Link: NVLink' || currentInterconnect === 'pcie5') {
+        currentInterconnect = bestInterconnect
+        btn.textContent = buttonText
+
+        if (bestInterconnect === 'nvlink') {
+            btn.style.background = 'linear-gradient(180deg, rgba(118, 185, 0, 0.2), rgba(118, 185, 0, 0.1))'
+        } else {
+            btn.style.background = 'linear-gradient(180deg, rgba(0, 123, 255, 0.2), rgba(0, 123, 255, 0.1))'
+        }
     }
 }
 
@@ -1162,6 +1413,9 @@ function setupDCButton() {
 
 // Setup DC button
 setupDCButton()
+
+// Initialize interconnect button for single GPU
+updateInterconnectButton()
 
 // Start animation
 animate()

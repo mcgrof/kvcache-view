@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Bandwidth Test</title></head>
+<body>
+<script>
+// Simulate the bandwidth calculation
+const memory = {
+    weights: 7.2,  // Llama 1.2B with mixed precision
+    gradients: 2.4,
+    optimizer: 9.6,
+    activations: 10,
+    total: 29.2
+};
+
+// Current calculation
+const modelSizeGB = memory.total;
+const baseTransferRate = modelSizeGB * 0.3;  // 30% of total memory
+const batchFactor = Math.sqrt(4 / 2);  // batch size 4
+const gcOverhead = 1.5;  // gradient checkpointing enabled
+
+const dataTransferRate = baseTransferRate * batchFactor * gcOverhead;
+
+console.log("Memory total:", memory.total, "GB");
+console.log("Base transfer rate:", baseTransferRate, "GB/s");
+console.log("Batch factor:", batchFactor);
+console.log("GC overhead:", gcOverhead);
+console.log("Data transfer rate:", dataTransferRate, "GB/s");
+
+// PCIe limits
+const pcie3 = 16;
+const pcie4 = 32;
+const pcie5 = 64;
+
+console.log("\nActual achieved:");
+console.log("PCIe 3.0:", Math.min(dataTransferRate, pcie3), "GB/s");
+console.log("PCIe 4.0:", Math.min(dataTransferRate, pcie4), "GB/s");
+console.log("PCIe 5.0:", Math.min(dataTransferRate, pcie5), "GB/s");
+</script>
+</body>
+</html>
