@@ -59,8 +59,8 @@ As context lengths grow from thousands to millions of tokens, KV cache memory be
 3. **MOE Models (Mixtral, Phi-3.5 MoE)**: Efficient inference with sparse activation
 4. **Large Models (70-405B)**: Require 6+ H100s for 1M context
 5. **DeepSeek-V3 (671B)**: 7x memory reduction through KV-LoRA compression
-6. **Qwen3-Next-80B**: Revolutionary hybrid architecture combining Gated DeltaNet (linear attention) with traditional attention in a 3:1 ratio, reducing KV cache by 75% while using only 3B of 80B parameters per token ([arXiv:2505.09388](https://arxiv.org/abs/2505.09388))
-7. **Qwen3-Omni (30B)**: Multimodal model optimized for text, audio, and vision with MoE architecture ([arXiv:2509.17765](https://arxiv.org/abs/2509.17765))
+6. **Qwen3-Next-80B**: Revolutionary hybrid architecture combining Gated DeltaNet (linear attention) with traditional attention in a 3:1 ratio, reducing KV cache by 75% while using only 3B of 80B parameters per token ([arXiv:2505.09388](https://arxiv.org/abs/2505.09388) [Audio summary](https://open.spotify.com/episode/0uS9uYJOcSELtibF7LfWuU))
+7. **Qwen3-Omni (30B)**: Multimodal model optimized for text, audio, and vision with MoE architecture ([arXiv:2509.17765](https://arxiv.org/abs/2509.17765) [Audio summary](https://open.spotify.com/episode/0uS9uYJOcSELtibF7LfWuU))
 
 ## 🎯 Quick Start
 
@@ -125,7 +125,7 @@ KV Cache = layers × tokens × (kv_lora_rank + qk_rope_head_dim) × dtype_size
 ## Model Architecture Innovations
 
 ### Qwen3-Next-80B: Breaking the Memory Wall
-Based on the [Qwen3 Technical Report](https://arxiv.org/abs/2505.09388), Qwen3-Next-80B introduces several groundbreaking optimizations:
+Based on the [Qwen3 Technical Report](https://arxiv.org/abs/2505.09388) ([Audio summary](https://open.spotify.com/episode/0uS9uYJOcSELtibF7LfWuU)), Qwen3-Next-80B introduces several groundbreaking optimizations:
 
 - **Hybrid Attention Architecture**: 75% Gated DeltaNet (linear complexity) + 25% traditional attention for optimal memory-performance trade-off
 - **Ultra-Sparse MoE**: 512 experts with only 11 activated per token, achieving 80B total capacity with 3B active parameters
