@@ -24,7 +24,14 @@ An impactful, animated visualization demonstrating the exponential memory growth
 
 **[🏋️ Training Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/train.html)** - Training memory explosion
 
-Or use the direct URLs:
+Or visit: **[kvcache.io](https://kvcache.io/)**
+
+<div align="center">
+  <img src="kvcache-qr.png" alt="QR Code for kvcache.io" width="200"/>
+  <p><em>Scan to visit kvcache.io</em></p>
+</div>
+
+Direct URLs:
 ```
 # Inference (KV Cache) Visualization
 https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html
