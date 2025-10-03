@@ -16,6 +16,7 @@ An impactful, animated visualization demonstrating the exponential memory growth
 - 🖥️ **Multi-GPU Support**: Distributed inference simulation with interconnect bandwidth modeling
 - 🎮 **Latest GPUs**: Support for NVIDIA Blackwell (B100, B200, GB200) and AMD MI300X
 - 🌊 **Beautiful Visuals**: Dynamic particle animations and visual effects
+- 📱 **Progressive Web App**: Install as a full-screen standalone app on mobile and desktop devices
 
 ## 🚀 Live Demo
 
@@ -41,6 +42,36 @@ https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/
 ```
 
 **Note:** GitHub's HTML preview may have slight performance limitations compared to running locally.
+
+### 📱 Install as Progressive Web App (PWA)
+
+The visualization supports installation as a standalone app on your device:
+
+**On Mobile (Android/iOS):**
+1. Visit [kvcache.io](https://kvcache.io/) in Chrome (Android) or Safari (iOS)
+2. Tap the browser menu (⋮ or share icon)
+3. Select "Add to Home Screen" or "Install App"
+4. The app will launch in full-screen mode without browser UI
+
+**On Desktop (Chrome/Edge):**
+1. Visit [kvcache.io](https://kvcache.io/)
+2. Click the install icon (⊕) in the address bar
+3. Or go to Menu → "Install kvcache.io..."
+4. Launch from your applications menu or desktop
+
+**PWA Benefits:**
+- ✅ Full-screen experience without browser chrome
+- ✅ Works offline after initial load
+- ✅ Faster loading with service worker caching
+- ✅ App-like interface on mobile devices
+- ✅ Add to home screen with custom icon
+
+**Verify PWA Support:**
+```bash
+./check-pwa.sh https://kvcache.io/
+```
+
+The included `check-pwa.sh` script validates all PWA requirements (manifest, service worker, icons, meta tags).
 
 ## The Memory Wall Problem
 
@@ -196,6 +227,12 @@ kvcache-view/
 ├── visualization.js              # Inference visualization logic
 ├── train.html                    # Training visualization (memory explosion)
 ├── train-visualization.js        # Training visualization logic
+├── manifest.json                 # PWA manifest (app metadata)
+├── sw.js                         # Service worker (offline support)
+├── icon-192.png                  # PWA icon (192x192)
+├── icon-512.png                  # PWA icon (512x512)
+├── icon.svg                      # Source SVG icon
+├── check-pwa.sh                  # PWA support verification script
 ├── README.md                     # This file
 ├── Makefile                      # Simple server commands
 ├── CLAUDE.md                     # Development guidelines
@@ -209,6 +246,50 @@ kvcache-view/
 - **[GPU Optimization Defaults](GPU_OPTIMIZATION_DEFAULTS.md)** - Why certain optimizations (CB, PA, FA) are enabled/disabled by default for different GPUs
 - **[Visualization Guide](VISUALIZATION_GUIDE.md)** - Detailed explanation of all visual components and their meanings
 - **[Development Guidelines](CLAUDE.md)** - Contributing guidelines and common pitfalls
+
+## 🛠️ Developer Tools
+
+### PWA Support Checker
+
+The `check-pwa.sh` script verifies Progressive Web App support on any website:
+
+```bash
+# Check kvcache.io (default)
+./check-pwa.sh
+
+# Check any other website
+./check-pwa.sh https://example.com
+```
+
+**Checks performed:**
+- ✅ Web app manifest (manifest.json)
+- ✅ Manifest accessibility and content validation
+- ✅ Theme color meta tag
+- ✅ Apple mobile web app support
+- ✅ Service worker registration
+- ✅ App icons (standard and Apple touch icons)
+- ✅ Viewport meta tag
+
+**Example output:**
+```
+=== PWA Support Checker ===
+Checking: https://kvcache.io/
+
+1. Manifest link: ✓ Found (manifest.json)
+   Manifest accessible: ✓ Yes
+   Preview: KV Cache Memory Visualization - Interactive visualization...
+2. Theme color: ✓ Found (#1428a0)
+3. Apple mobile web app: ✓ Found
+4. Service worker: ✓ Found (./sw.js)
+5. App icons: ✓ Found (2 standard, 1 Apple)
+6. Viewport meta: ✓ Found
+
+=== Summary ===
+PWA Support: 6/6 checks passed (100%)
+✓ Good PWA support detected!
+```
+
+The script provides color-coded output with pass/fail indicators and a percentage score.
 
 ## 🔗 Related Projects
 
