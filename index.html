@@ -553,7 +553,7 @@
                 text-align: left;
             }
 
-            /* Mobile optimizations - Clean minimal layout */
+            /* Mobile optimizations - Enhanced modern mobile layout */
             @media screen and (max-width: 768px) {
                 body {
                     overflow: hidden;
@@ -567,71 +567,79 @@
                     display: none;
                 }
 
-                /* Keep SMW toggle inline with controls */
-                #smwToggle {
-                    display: inline-block !important;
-                    position: static !important;
-                    font-size: 0.65em !important;
-                    padding: 6px 10px !important;
-                    margin: 0 !important;
-                    background: rgba(255, 255, 255, 0.1) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-                    border-radius: 5px !important;
-                }
-
-                #smwToggle span:last-child {
-                    display: none;
-                }
-
-                /* Top bar containing everything */
+                /* Modern mobile status bar - compact and readable */
                 .info-panel {
                     position: fixed;
                     top: 0;
                     left: 0;
                     right: 0;
-                    padding: 8px;
-                    background: rgba(5, 8, 19, 0.95);
-                    backdrop-filter: blur(10px);
+                    padding: 12px 16px;
+                    background: linear-gradient(
+                        180deg,
+                        rgba(5, 8, 19, 0.98) 0%,
+                        rgba(5, 8, 19, 0.95) 80%,
+                        rgba(5, 8, 19, 0.85) 100%
+                    );
+                    backdrop-filter: blur(12px);
                     border-bottom: 1px solid var(--border);
                     z-index: 100;
-                    display: flex;
+                    display: grid;
+                    grid-template-columns: 1fr auto;
+                    gap: 12px;
                     align-items: center;
-                    justify-content: space-between;
-                    flex-wrap: wrap;
-                    gap: 8px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 }
 
                 .model-info {
                     display: flex;
-                    align-items: center;
-                    gap: 8px;
+                    flex-direction: column;
+                    gap: 4px;
                     margin: 0;
+                    min-width: 0;
                 }
 
                 .model-name {
-                    font-size: 0.85em;
+                    font-size: 0.95em;
                     margin: 0;
-                    font-weight: 600;
+                    font-weight: 700;
+                    color: var(--light-blue);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
 
                 .metric {
                     margin: 0;
-                    font-size: 0.8em;
+                    font-size: 0.85em;
                     display: none;
+                    border: none;
+                    padding: 0;
                 }
 
-                /* Show only memory metric */
-                .metric:nth-child(3) {
-                    display: inline-block;
+                /* Show key metrics in a compact row */
+                .metric:nth-child(2),
+                .metric:nth-child(3),
+                .metric:nth-child(6) {
+                    display: inline-flex;
+                    gap: 6px;
+                    align-items: center;
+                    margin-right: 12px;
                 }
 
                 .metric-label {
-                    display: none;
+                    color: var(--text-muted);
+                    font-size: 0.85em;
                 }
 
                 .metric-value {
-                    font-weight: 600;
+                    font-weight: 700;
                     color: var(--accent-cyan);
+                    font-size: 0.9em;
+                }
+
+                .memory-value {
+                    color: var(--accent-warn);
+                    font-size: 1em;
                 }
 
                 /* Hide all non-essential elements on mobile */
@@ -639,10 +647,20 @@
                 .efficiency-box,
                 .instruction-panel,
                 #criticalEvent,
-                .progress-bar,
                 .progress-details,
-                .legend {
+                .legend,
+                #smwToggle {
                     display: none !important;
+                }
+
+                /* Keep progress bar visible on mobile */
+                .progress-bar {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    z-index: 101;
                 }
 
                 /* Also hide the bottom attribution links on mobile */
@@ -650,38 +668,83 @@
                     display: none !important;
                 }
 
-                /* Controls inline in top bar */
+                /* Modern bottom control panel */
                 .controls {
-                    position: static;
-                    display: flex;
-                    gap: 5px;
-                    padding: 0;
-                    background: transparent;
-                    border: none;
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 12px 16px 16px 16px;
+                    background: linear-gradient(
+                        0deg,
+                        rgba(5, 8, 19, 0.98) 0%,
+                        rgba(5, 8, 19, 0.95) 80%,
+                        rgba(5, 8, 19, 0.85) 100%
+                    );
+                    backdrop-filter: blur(12px);
+                    border-top: 1px solid var(--border);
+                    z-index: 100;
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+                    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
                 }
 
                 .btn,
                 button {
-                    padding: 6px 10px;
-                    font-size: 0.65em;
+                    padding: 12px 8px;
+                    font-size: 0.75em;
                     min-width: unset;
-                    background: rgba(255, 255, 255, 0.1);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 5px;
+                    background: linear-gradient(180deg, rgba(20, 40, 160, 0.3), rgba(20, 40, 160, 0.15));
+                    border: 1.5px solid var(--primary-blue);
+                    border-radius: 8px;
                     white-space: nowrap;
+                    font-weight: 700;
+                    letter-spacing: 0.3px;
+                    text-transform: uppercase;
+                    box-shadow: 0 2px 8px rgba(20, 40, 160, 0.2);
+                    transition: all 0.2s ease;
+                }
+
+                button:active {
+                    transform: scale(0.95);
+                    background: linear-gradient(180deg, rgba(20, 40, 160, 0.5), rgba(20, 40, 160, 0.3));
+                }
+
+                .btn-two-line {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                    align-items: center;
+                    padding: 10px 6px;
+                }
+
+                .btn-two-line span:first-child {
+                    font-size: 0.85em;
+                    font-weight: 700;
                 }
 
                 .btn-two-line span:last-child {
+                    display: block;
+                    font-size: 0.65em;
+                    opacity: 0.7;
+                    text-transform: none;
+                    letter-spacing: 0;
+                }
+
+                .btn-two-line.enabled {
+                    background: linear-gradient(135deg, var(--accent-cyan), var(--light-blue)) !important;
+                    border-color: var(--accent-cyan) !important;
+                    box-shadow: 0 2px 12px rgba(0, 212, 255, 0.4) !important;
+                }
+
+                /* Hide datacenter and interconnect controls on mobile */
+                #worldDCControl,
+                #interconnectControl {
                     display: none;
                 }
 
-                /* Hide less important controls on mobile */
-                #dataTypeBtn,
-                #speedBtn {
-                    display: none;
-                }
-
-                /* Full screen canvas */
+                /* Full screen canvas with padding for top/bottom bars */
                 canvas {
                     position: fixed;
                     top: 0;
@@ -701,43 +764,90 @@
                     margin-left: 10px;
                     font-size: 0.85em;
                 }
+
+                /* Warning banner for mobile */
+                .warning {
+                    position: fixed;
+                    top: 80px;
+                    left: 16px;
+                    right: 16px;
+                    margin: 0;
+                    padding: 10px 12px;
+                    border-radius: 8px;
+                    font-size: 0.8em;
+                    z-index: 99;
+                    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+                }
             }
 
-            /* Very small mobile screens */
+            /* Very small mobile screens - compact for older/smaller devices */
             @media screen and (max-width: 480px) {
                 .info-panel {
-                    top: 5px;
-                    left: 5px;
-                    padding: 8px;
-                    font-size: 0.75em;
-                    max-width: 55%;
-                }
-
-                .controls {
-                    top: 5px;
-                    right: 5px;
-                    gap: 3px;
-                    max-width: 40%;
-                }
-
-                .btn,
-                button {
-                    font-size: 0.65em;
-                    padding: 6px 10px;
-                }
-
-                #smwToggle {
-                    bottom: 5px !important;
-                    font-size: 0.7em !important;
-                    padding: 6px 12px !important;
+                    padding: 10px 12px;
                 }
 
                 .model-name {
-                    font-size: 0.9em;
+                    font-size: 0.85em;
                 }
 
                 .metric {
                     font-size: 0.75em;
+                }
+
+                .metric-label {
+                    font-size: 0.75em;
+                }
+
+                .metric-value {
+                    font-size: 0.8em;
+                }
+
+                .controls {
+                    padding: 10px 12px 12px 12px;
+                    gap: 6px;
+                }
+
+                .btn,
+                button {
+                    font-size: 0.7em;
+                    padding: 10px 6px;
+                }
+
+                .btn-two-line {
+                    padding: 8px 4px;
+                }
+
+                .btn-two-line span:first-child {
+                    font-size: 0.8em;
+                }
+
+                .btn-two-line span:last-child {
+                    font-size: 0.6em;
+                }
+            }
+
+            /* Landscape mode optimizations */
+            @media screen and (max-width: 900px) and (orientation: landscape) {
+                .info-panel {
+                    padding: 8px 16px;
+                }
+
+                .controls {
+                    padding: 8px 16px 12px 16px;
+                    grid-template-columns: repeat(6, 1fr);
+                }
+
+                button {
+                    padding: 10px 6px;
+                    font-size: 0.7em;
+                }
+
+                .btn-two-line {
+                    padding: 8px 4px;
+                }
+
+                .btn-two-line span:last-child {
+                    display: none;
                 }
             }
         </style>
