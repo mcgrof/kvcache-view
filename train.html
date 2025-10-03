@@ -278,28 +278,107 @@
 
             /* Mobile responsiveness */
             @media (max-width: 768px) {
+                body {
+                    overflow: hidden;
+                    position: fixed;
+                    width: 100%;
+                    height: 100%;
+                }
+
                 h1 {
                     font-size: 1.8em;
                 }
                 .subtitle {
                     font-size: 0.9em;
                 }
-                .controls {
-                    bottom: 10px;
-                    gap: 8px;
+
+                /* Make canvas fullscreen behind panels */
+                canvas {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    z-index: 1;
                 }
-                button {
-                    padding: 8px 12px;
-                    font-size: 0.75em;
-                }
+
+                /* Panels flow as content above canvas */
                 .info-panel,
-                .memory-breakdown {
-                    position: static;
+                .memory-breakdown,
+                .training-interconnect-metrics,
+                .training-performance-box {
+                    position: static !important;
                     margin: 10px;
                     max-width: calc(100% - 20px);
+                    z-index: 2;
                 }
                 .loss-curve {
                     display: none;
+                }
+
+                /* Hide nav and center attribution on mobile */
+                .nav-link {
+                    display: none !important;
+                }
+                div[style*='bottom: 10px'][style*='left: 50%'] {
+                    display: none !important;
+                }
+
+                /* Bottom control bar: horizontal scroll with safe-area padding */
+                .controls {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    transform: none;
+                    padding: 12px 16px;
+                    padding-bottom: calc(12px + constant(safe-area-inset-bottom));
+                    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+                    background: linear-gradient(
+                        0deg,
+                        rgba(26, 10, 10, 0.98) 0%,
+                        rgba(26, 10, 10, 0.95) 80%,
+                        rgba(26, 10, 10, 0.85) 100%
+                    );
+                    backdrop-filter: blur(12px);
+                    border-top: 1px solid var(--border);
+                    z-index: 100;
+                    display: flex;
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    gap: 8px;
+                    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+                    scroll-snap-type: x proximity;
+                    justify-content: flex-start;
+                    max-width: none;
+                    height: auto;
+                }
+                .controls::-webkit-scrollbar { display: none; }
+                .controls { scrollbar-width: none; -ms-overflow-style: none; }
+
+                button {
+                    padding: 10px 10px;
+                    font-size: 0.75em;
+                    min-width: unset;
+                    border-width: 1.5px;
+                    white-space: nowrap;
+                    flex: 0 0 auto;
+                    scroll-snap-align: start;
+                }
+                #playPause { min-width: 140px; }
+
+                /* Mobile warning placement below header */
+                #warning {
+                    position: fixed;
+                    top: calc(var(--mobile-header-bottom, 56px) + 12px);
+                    left: 16px;
+                    right: 16px;
+                    margin: 0;
+                    padding: 12px 14px;
+                    border-radius: 10px;
+                    font-size: 0.85em;
+                    z-index: 99;
                 }
             }
         </style>
@@ -546,5 +625,110 @@
         </div>
 
         <script src="train-visualization.js"></script>
+        <script>
+            // --- Mobile helpers to set header offset and compact control labels ---
+            function setMobileHeaderBottomVar() {
+                if (window.innerWidth > 768) return
+                const header = document.querySelector('.header')
+                if (!header) return
+                const rect = header.getBoundingClientRect()
+                document.documentElement.style.setProperty('--mobile-header-bottom', rect.bottom + 'px')
+            }
+
+            function storeOriginal(el) {
+                if (el && el.dataset && el.dataset.originalText === undefined) {
+                    el.dataset.originalText = el.innerText
+                }
+            }
+
+            function shortenControlLabels() {
+                if (window.innerWidth > 768) return
+                const mapStatic = {
+                    modelControl: 'Model',
+                    interconnectControl: 'Link',
+                    worldDCControl: 'DC',
+                }
+                Object.entries(mapStatic).forEach(([id, label]) => {
+                    const el = document.getElementById(id)
+                    if (el) {
+                        storeOriginal(el)
+                        el.innerText = label
+                    }
+                })
+
+                const pairs = [
+                    ['speedControl', /^Speed:/, 'Spd:'],
+                    ['batchControl', /^Batch:\s*/, 'Batch: '],
+                    ['seqControl', /^Seq(ence)?:\s*/i, 'Seq: '],
+                    ['optimizerControl', /^Optimizer:\s*/i, 'Opt: '],
+                    ['gpuControl', /^Device:/, 'GPU:'],
+                    ['gpuCountControl', /^GPUs:\s*/, 'GPUs: '],
+                ]
+                pairs.forEach(([id, re, rep]) => {
+                    const el = document.getElementById(id)
+                    if (el) {
+                        storeOriginal(el)
+                        el.innerText = el.innerText.replace(re, rep)
+                    }
+                })
+            }
+
+            function restoreControlLabels() {
+                const ids = [
+                    'playPause',
+                    'speedControl',
+                    'modelControl',
+                    'seqControl',
+                    'batchControl',
+                    'optimizerControl',
+                    'gpuControl',
+                    'gpuCountControl',
+                    'interconnectControl',
+                    'worldDCControl',
+                ]
+                ids.forEach((id) => {
+                    const el = document.getElementById(id)
+                    if (el && el.dataset && el.dataset.originalText !== undefined) {
+                        el.innerText = el.dataset.originalText
+                        delete el.dataset.originalText
+                    }
+                })
+            }
+
+            function setupControlsObserver() {
+                const controls = document.querySelector('.controls')
+                if (!controls || window._trainControlsObserver) return
+                const mo = new MutationObserver(() => {
+                    if (window.innerWidth <= 768) {
+                        shortenControlLabels()
+                        setMobileHeaderBottomVar()
+                    }
+                })
+                mo.observe(controls, { subtree: true, childList: true, characterData: true })
+                window._trainControlsObserver = mo
+            }
+
+            function teardownControlsObserver() {
+                if (window._trainControlsObserver) {
+                    window._trainControlsObserver.disconnect()
+                    window._trainControlsObserver = null
+                }
+            }
+
+            function updateMobileLayout() {
+                if (window.innerWidth <= 768) {
+                    setMobileHeaderBottomVar()
+                    shortenControlLabels()
+                    setupControlsObserver()
+                } else {
+                    restoreControlLabels()
+                    document.documentElement.style.removeProperty('--mobile-header-bottom')
+                    teardownControlsObserver()
+                }
+            }
+
+            window.addEventListener('load', updateMobileLayout)
+            window.addEventListener('resize', updateMobileLayout)
+        </script>
     </body>
 </html>

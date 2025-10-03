@@ -574,6 +574,9 @@
                     left: 0;
                     right: 0;
                     padding: 12px 16px;
+                    /* Respect notches/status bars */
+                    padding-top: calc(12px + constant(safe-area-inset-top));
+                    padding-top: calc(12px + env(safe-area-inset-top));
                     background: linear-gradient(
                         180deg,
                         rgba(5, 8, 19, 0.98) 0%,
@@ -653,10 +656,10 @@
                     display: none !important;
                 }
 
-                /* Keep progress bar visible on mobile */
+                /* Keep progress bar visible on mobile under the top info panel */
                 .progress-bar {
                     position: fixed;
-                    bottom: 0;
+                    top: var(--mobile-info-bottom, 64px);
                     left: 0;
                     right: 0;
                     height: 3px;
@@ -667,6 +670,10 @@
                 div[style*='bottom: 10px'][style*='left: 50%'] {
                     display: none !important;
                 }
+                /* Hide the left training link as well */
+                div[style*='bottom: 10px'][style*='left: 10px'] {
+                    display: none !important;
+                }
 
                 /* Modern bottom control panel */
                 .controls {
@@ -674,7 +681,10 @@
                     bottom: 0;
                     left: 0;
                     right: 0;
-                    padding: 12px 16px 16px 16px;
+                    padding: 12px 16px;
+                    /* Respect bottom safe area for iOS */
+                    padding-bottom: calc(12px + constant(safe-area-inset-bottom));
+                    padding-bottom: calc(12px + env(safe-area-inset-bottom));
                     background: linear-gradient(
                         0deg,
                         rgba(5, 8, 19, 0.98) 0%,
@@ -684,11 +694,16 @@
                     backdrop-filter: blur(12px);
                     border-top: 1px solid var(--border);
                     z-index: 100;
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
+                    display: flex;
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
                     gap: 8px;
                     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+                    scroll-snap-type: x proximity;
                 }
+                .controls::-webkit-scrollbar { display: none; }
+                .controls { scrollbar-width: none; -ms-overflow-style: none; }
 
                 .btn,
                 button {
@@ -704,6 +719,8 @@
                     text-transform: uppercase;
                     box-shadow: 0 2px 8px rgba(20, 40, 160, 0.2);
                     transition: all 0.2s ease;
+                    flex: 0 0 auto;
+                    scroll-snap-align: start;
                 }
 
                 button:active {
@@ -768,7 +785,7 @@
                 /* Warning banner for mobile */
                 .warning {
                     position: fixed;
-                    top: 80px;
+                    top: calc(var(--mobile-info-bottom, 64px) + 12px);
                     left: 16px;
                     right: 16px;
                     margin: 0;
@@ -1260,6 +1277,124 @@
             setTimeout(positionDatacenterNote, 260)
 
             // Don't use interval - let visualization.js call when needed
+            // --- Mobile layout helpers: compute top offsets and compact labels ---
+            function setMobileInfoBottomVar() {
+                if (window.innerWidth > 768) return
+                const info = document.querySelector('.info-panel')
+                if (!info) return
+                const rect = info.getBoundingClientRect()
+                document.documentElement.style.setProperty('--mobile-info-bottom', rect.bottom + 'px')
+            }
+
+            function storeOriginal(el) {
+                if (!el) return
+                if (!el.dataset) return
+                if (el.dataset.originalText === undefined) {
+                    el.dataset.originalText = el.innerText
+                }
+            }
+
+            function shortenControlLabels() {
+                if (window.innerWidth > 768) return
+                const ids = {
+                    modelSwitch: 'Model',
+                }
+                // Static relabels
+                Object.entries(ids).forEach(([id, label]) => {
+                    const el = document.getElementById(id)
+                    if (el) {
+                        storeOriginal(el)
+                        el.innerText = label
+                    }
+                })
+                // Prefix shortenings that retain values
+                const ctx = document.getElementById('contextControl')
+                if (ctx) {
+                    storeOriginal(ctx)
+                    ctx.innerText = ctx.innerText.replace(/^Context:/, 'Ctx:')
+                }
+                const spd = document.getElementById('speedControl')
+                if (spd) {
+                    storeOriginal(spd)
+                    spd.innerText = spd.innerText.replace(/^Speed:/, 'Spd:')
+                }
+                const bch = document.getElementById('batchControl')
+                if (bch) {
+                    storeOriginal(bch)
+                    // Keep "Batch:" but trim whitespace
+                    bch.innerText = bch.innerText.replace(/^Batch:\s*/, 'Batch: ')
+                }
+                const dtype = document.getElementById('dtypeControl')
+                if (dtype) {
+                    storeOriginal(dtype)
+                    dtype.innerText = dtype.innerText.replace(/^Type:\s*/, 'Type: ')
+                }
+                const gpu = document.getElementById('gpuControl')
+                if (gpu) {
+                    storeOriginal(gpu)
+                    gpu.innerText = gpu.innerText.replace(/^Device:/, 'GPU:')
+                }
+                const gpn = document.getElementById('gpuCountControl')
+                if (gpn) {
+                    storeOriginal(gpn)
+                    gpn.innerText = gpn.innerText.replace(/^GPUs:\s*/, 'GPUs: ')
+                }
+            }
+
+            function restoreControlLabels() {
+                const ids = [
+                    'modelSwitch',
+                    'contextControl',
+                    'speedControl',
+                    'batchControl',
+                    'dtypeControl',
+                    'gpuControl',
+                    'gpuCountControl',
+                ]
+                ids.forEach((id) => {
+                    const el = document.getElementById(id)
+                    if (el && el.dataset && el.dataset.originalText !== undefined) {
+                        el.innerText = el.dataset.originalText
+                        delete el.dataset.originalText
+                    }
+                })
+            }
+
+            function setupControlsObserver() {
+                const controls = document.querySelector('.controls')
+                if (!controls || window._controlsObserver) return
+                const mo = new MutationObserver(() => {
+                    if (window.innerWidth <= 768) {
+                        shortenControlLabels()
+                        setMobileInfoBottomVar()
+                    }
+                })
+                mo.observe(controls, { subtree: true, childList: true, characterData: true })
+                window._controlsObserver = mo
+            }
+
+            function teardownControlsObserver() {
+                if (window._controlsObserver) {
+                    window._controlsObserver.disconnect()
+                    window._controlsObserver = null
+                }
+            }
+
+            function updateMobileLayout() {
+                if (window.innerWidth <= 768) {
+                    setMobileInfoBottomVar()
+                    shortenControlLabels()
+                    setupControlsObserver()
+                } else {
+                    restoreControlLabels()
+                    document.documentElement.style.removeProperty('--mobile-info-bottom')
+                    teardownControlsObserver()
+                }
+            }
+
+            window.addEventListener('load', updateMobileLayout)
+            window.addEventListener('resize', updateMobileLayout)
+            // End mobile helpers
         </script>
     </body>
 </html>
