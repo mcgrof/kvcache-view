@@ -1062,8 +1062,9 @@ class Wave {
 function initWaves() {
     waves = []
     const model = models[currentModelIndex]
+    const waveCount = isMobile ? 1 : 5
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < waveCount; i++) {
         waves.push(
             new Wave(
                 canvas.height / 2 + (i - 2) * 50,
@@ -1581,6 +1582,45 @@ function drawMultiGPUCluster() {
 }
 
 function drawMemoryGrid() {
+    if (isMobile) {
+        const model = models[currentModelIndex]
+        const kvGiB = calculateBatchKVCache(model, currentTokens)
+        const weightsGiB = includeWeights ? calculateWeightMemoryGiB(model) : 0
+        const totalGiB = kvGiB + weightsGiB
+        const gpuMemGiB = getCurrentGPUMemGiB()
+        const fillRatio = totalGiB / gpuMemGiB
+
+        const centerX = canvas.width / 2
+        const centerY = canvas.height / 2
+
+        const gpuWidth = 150
+        const gpuHeight = 200
+
+        // Draw GPU outline
+        ctx.strokeStyle = '#404060'
+        ctx.lineWidth = 2
+        ctx.strokeRect(centerX - gpuWidth / 2, centerY - gpuHeight / 2, gpuWidth, gpuHeight)
+
+        // Draw memory fill
+        const usageColor = fillRatio > 0.9 ? '#FF4444' : fillRatio > 0.7 ? '#FFA500' : '#4CAF50'
+        ctx.fillStyle = usageColor
+        const fillHeight = gpuHeight * fillRatio
+        ctx.fillRect(centerX - gpuWidth / 2, centerY + gpuHeight / 2 - fillHeight, gpuWidth, fillHeight)
+
+        // Draw GPU label
+        ctx.fillStyle = '#C0C0C0'
+        ctx.font = '14px monospace'
+        ctx.textAlign = 'center'
+        ctx.fillText(currentGPU, centerX, centerY - gpuHeight / 2 - 10)
+
+        // Memory text
+        ctx.fillStyle = '#FFFFFF'
+        ctx.font = '12px monospace'
+        ctx.fillText(`${totalGiB.toFixed(1)}/${gpuMemGiB}G`, centerX, centerY)
+
+        return
+    }
+
     const model = models[currentModelIndex]
 
     // For traditional batching: show ALLOCATED memory (max context)
@@ -3288,6 +3328,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Generate particles based on memory growth
 function generateParticles() {
+    if (isMobile) return
     const model = models[currentModelIndex]
     const memoryGiB = calculateKVCacheSize(model, currentTokens)
 
