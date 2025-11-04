@@ -354,8 +354,13 @@
                     max-width: none;
                     height: auto;
                 }
-                .controls::-webkit-scrollbar { display: none; }
-                .controls { scrollbar-width: none; -ms-overflow-style: none; }
+                .controls::-webkit-scrollbar {
+                    display: none;
+                }
+                .controls {
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
+                }
 
                 button {
                     padding: 10px 10px;
@@ -366,7 +371,9 @@
                     flex: 0 0 auto;
                     scroll-snap-align: start;
                 }
-                #playPause { min-width: 140px; }
+                #playPause {
+                    min-width: 140px;
+                }
 
                 /* Mobile warning placement below header */
                 #warning {
@@ -615,7 +622,7 @@
             <div>
                 Training Memory Visualization |
                 <a
-                    href="https://github.com/mcgrof/kvcache-view"
+                    href="https://github.com/LMCache/kvcache-view"
                     target="_blank"
                     style="color: var(--light-red); text-decoration: none"
                 >

@@ -21,9 +21,9 @@ An impactful, animated visualization demonstrating the exponential memory growth
 ## 🚀 Live Demo
 
 ### View Online (No Installation Required!)
-**[🖥️ Inference Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html)** - KV Cache growth simulation
+**[🖥️ Inference Visualization](https://htmlpreview.github.io/?https://github.com/LMCache/kvcache-view/blob/main/index.html)** - KV Cache growth simulation
 
-**[🏋️ Training Visualization](https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/train.html)** - Training memory explosion
+**[🏋️ Training Visualization](https://htmlpreview.github.io/?https://github.com/LMCache/kvcache-view/blob/main/train.html)** - Training memory explosion
 
 Or visit: **[kvcache.io](https://kvcache.io/)**
 
@@ -35,10 +35,10 @@ Or visit: **[kvcache.io](https://kvcache.io/)**
 Direct URLs:
 ```
 # Inference (KV Cache) Visualization
-https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/index.html
+https://htmlpreview.github.io/?https://github.com/LMCache/kvcache-view/blob/main/index.html
 
 # Training Memory Visualization
-https://htmlpreview.github.io/?https://github.com/mcgrof/kvcache-view/blob/main/train.html
+https://htmlpreview.github.io/?https://github.com/LMCache/kvcache-view/blob/main/train.html
 ```
 
 **Note:** GitHub's HTML preview may have slight performance limitations compared to running locally.
