@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="KV Cache memory projections for future LLMs based on Chinchilla scaling laws"
+        />
+        <meta name="theme-color" content="#1428a0" />
+        <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+        <title>KV Cache Memory Envelope (2020-2030)</title>
+        <style>
+            :root {
+                --primary-blue: #1428a0;
+                --light-blue: #5fa3e6;
+                --accent-purple: #691fff;
+                --accent-cyan: #00d4ff;
+                --dark-ink: #0b1026;
+                --surface: rgba(10, 16, 44, 0.92);
+                --surface-2: rgba(13, 22, 58, 0.85);
+                --border: rgba(95, 163, 230, 0.45);
+                --text-primary: #eaf2ff;
+                --text-secondary: #c7d4f8;
+                --text-muted: #a5b4e0;
+                --accent-warn: #ff6b00;
+                --accent-good: #00ff88;
+                --accent-mid: #ffb800;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+                background:
+                    radial-gradient(1200px 600px at 20% -10%, rgba(20, 40, 160, 0.35), transparent),
+                    radial-gradient(1000px 800px at 100% 10%, rgba(95, 163, 230, 0.25), transparent),
+                    linear-gradient(135deg, #050813 0%, #0e173a 55%, #0b1026 100%);
+                color: var(--text-primary);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                padding: 30px 40px;
+                background: linear-gradient(to bottom, rgba(8, 12, 28, 0.95), transparent);
+            }
+
+            h1 {
+                font-size: 2.2em;
+                font-weight: 700;
+                margin-bottom: 8px;
+                color: var(--text-primary);
+                text-shadow: 0 8px 40px rgba(20, 40, 160, 0.45);
+            }
+
+            .subtitle {
+                font-size: 1em;
+                color: var(--text-secondary);
+            }
+
+            .main-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 20px 40px;
+                gap: 20px;
+            }
+
+            .controls-panel {
+                background: linear-gradient(180deg, var(--surface), var(--surface-2));
+                padding: 20px;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                display: flex;
+                gap: 30px;
+                flex-wrap: wrap;
+            }
+
+            .control-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .control-group label {
+                font-size: 0.85em;
+                font-weight: 600;
+                color: var(--text-secondary);
+            }
+
+            .control-group input[type='range'] {
+                width: 200px;
+                accent-color: var(--light-blue);
+            }
+
+            .control-group select {
+                background: rgba(20, 40, 160, 0.2);
+                border: 1px solid var(--border);
+                color: var(--text-primary);
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 0.9em;
+            }
+
+            .control-value {
+                font-size: 0.9em;
+                color: var(--accent-cyan);
+                font-weight: 700;
+            }
+
+            .chart-container {
+                flex: 1;
+                background: linear-gradient(180deg, var(--surface), var(--surface-2));
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                padding: 20px;
+                min-height: 400px;
+                position: relative;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .info-panels {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+            }
+
+            .info-box {
+                background: linear-gradient(180deg, var(--surface), var(--surface-2));
+                padding: 16px;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+            }
+
+            .info-box h3 {
+                font-size: 1em;
+                color: var(--light-blue);
+                margin-bottom: 12px;
+                font-weight: 700;
+            }
+
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                font-size: 0.85em;
+            }
+
+            .info-row:last-child {
+                border-bottom: none;
+            }
+
+            .info-label {
+                color: var(--text-secondary);
+            }
+
+            .info-value {
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .info-value.red {
+                color: #ef4444;
+            }
+            .info-value.orange {
+                color: #f97316;
+            }
+            .info-value.yellow {
+                color: #fbbf24;
+            }
+            .info-value.green {
+                color: #10b981;
+            }
+            .info-value.purple {
+                color: #a78bfa;
+            }
+
+            .formula-box {
+                font-family: 'Courier New', monospace;
+                font-size: 0.8em;
+                line-height: 1.6;
+            }
+
+            .formula-box .formula-line {
+                margin: 4px 0;
+            }
+
+            .formula-box .formula-label {
+                color: var(--accent-cyan);
+            }
+
+            .tooltip {
+                position: absolute;
+                background: rgba(10, 16, 44, 0.95);
+                border: 1px solid var(--border);
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 0.85em;
+                pointer-events: none;
+                display: none;
+                z-index: 100;
+                max-width: 280px;
+            }
+
+            .tooltip-title {
+                font-weight: 700;
+                margin-bottom: 8px;
+            }
+
+            .tooltip-row {
+                margin: 4px 0;
+            }
+
+            .back-link {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                font-size: 0.8em;
+                z-index: 10;
+            }
+
+            .back-link a {
+                color: rgba(95, 163, 230, 0.7);
+                text-decoration: none;
+                transition: color 0.3s;
+            }
+
+            .back-link a:hover {
+                color: var(--light-blue);
+            }
+
+            @media (max-width: 768px) {
+                .header {
+                    padding: 20px;
+                }
+
+                h1 {
+                    font-size: 1.5em;
+                }
+
+                .main-content {
+                    padding: 10px 20px;
+                }
+
+                .controls-panel {
+                    flex-direction: column;
+                    gap: 15px;
+                }
+
+                .control-group input[type='range'] {
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>KV Cache Memory Envelope (2020-2030)</h1>
+            <div class="subtitle">Chinchilla-optimal model scaling with SOTA compression techniques</div>
+        </div>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>
+                        Context Length:
+                        <span class="control-value" id="contextValue">128K</span>
+                    </label>
+                    <input type="range" id="contextSlider" min="32" max="512" step="32" value="128" />
+                </div>
+                <div class="control-group">
+                    <label>Precision</label>
+                    <select id="precisionSelect">
+                        <option value="4">FP32 (4 bytes)</option>
+                        <option value="2" selected>FP16/BF16 (2 bytes)</option>
+                        <option value="1">INT8 (1 byte)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+                <div class="tooltip" id="tooltip"></div>
+            </div>
+
+            <div class="info-panels">
+                <div class="info-box">
+                    <h3>Compression Stack</h3>
+                    <div class="info-row">
+                        <span class="info-label">GQA-8</span>
+                        <span class="info-value orange">8x reduction</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">INT4 quantization</span>
+                        <span class="info-value yellow">2x reduction</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">MoD (12.5% active)</span>
+                        <span class="info-value green">8x reduction</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">StreamingLLM eviction</span>
+                        <span class="info-value" style="color: #60a5fa">2x reduction</span>
+                    </div>
+                    <div
+                        class="info-row"
+                        style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px; margin-top: 4px"
+                    >
+                        <span class="info-label" style="font-weight: 700">Total SOTA</span>
+                        <span class="info-value purple">~256x reduction</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>2030 Projection</h3>
+                    <div class="info-row">
+                        <span class="info-label">Model Size</span>
+                        <span class="info-value" id="proj2030Model">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">High Bound</span>
+                        <span class="info-value red" id="proj2030High">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">SOTA (achievable)</span>
+                        <span class="info-value green" id="proj2030Sota">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Compression</span>
+                        <span class="info-value purple" id="proj2030Ratio">—</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>Mathematical Foundation</h3>
+                    <div class="formula-box">
+                        <div class="formula-line">
+                            <span class="formula-label">High Bound:</span>
+                            M = (T/2) * sqrt(2*N*L)
+                        </div>
+                        <div class="formula-line">
+                            <span class="formula-label">Chinchilla:</span>
+                            N(t) = N0 * 2^((t-2020)/1.8)
+                        </div>
+                        <div class="formula-line">
+                            <span class="formula-label">Layers:</span>
+                            L proportional to N^0.25
+                        </div>
+                        <div class="formula-line">
+                            <span class="formula-label">SOTA:</span>
+                            M / (8*8*2*2) = M/256
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>References</h3>
+                    <div style="font-size: 0.8em; line-height: 1.5">
+                        <div style="margin-bottom: 8px">
+                            <a
+                                href="https://arxiv.org/pdf/2510.18245"
+                                target="_blank"
+                                style="color: var(--accent-cyan); text-decoration: none"
+                            >
+                                Scaling Laws Meet Model Architecture
+                            </a>
+                            <div style="color: var(--text-muted); font-size: 0.9em">
+                                Inference-efficient LLM scaling analysis
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 8px">
+                            <a
+                                href="https://arxiv.org/pdf/2404.02258"
+                                target="_blank"
+                                style="color: var(--accent-cyan); text-decoration: none"
+                            >
+                                Mixture-of-Depths
+                            </a>
+                            <div style="color: var(--text-muted); font-size: 0.9em">
+                                Dynamic compute allocation (8x reduction)
+                            </div>
+                        </div>
+                        <div>
+                            <a
+                                href="https://arxiv.org/abs/2203.15556"
+                                target="_blank"
+                                style="color: var(--accent-cyan); text-decoration: none"
+                            >
+                                Chinchilla Scaling Laws
+                            </a>
+                            <div style="color: var(--text-muted); font-size: 0.9em">Hoffmann et al. (2022)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to KV Cache Visualization</a>
+        </div>
+
+        <script>
+            // Configuration
+            const config = {
+                startYear: 2020,
+                endYear: 2030,
+                startParams: 175, // GPT-3 baseline in billions
+                doublingTime: 1.8, // years (Chinchilla scaling)
+            }
+
+            // State
+            let contextLength = 128 // K tokens
+            let precision = 2 // bytes per element
+
+            // DOM elements
+            const canvas = document.getElementById('chart')
+            const ctx = canvas.getContext('2d')
+            const tooltip = document.getElementById('tooltip')
+            const contextSlider = document.getElementById('contextSlider')
+            const contextValue = document.getElementById('contextValue')
+            const precisionSelect = document.getElementById('precisionSelect')
+
+            // Helper functions
+            function estimateLayers(nBillions) {
+                // GPT-3 had 96 layers for 175B params
+                return Math.round(96 * Math.pow(nBillions / 175, 0.25))
+            }
+
+            function calcKVCache(tokens, nBillions, nLayers) {
+                // M_KV = (T/2) * sqrt(2 * N * n_layers)
+                const nElements = nBillions * 1e9
+                const elements = (tokens / 2) * Math.sqrt(2 * nElements * nLayers)
+                return elements / 1e9 // billions of elements
+            }
+
+            function formatBytes(gb) {
+                if (gb >= 1000) return `${(gb / 1000).toFixed(1)} TB`
+                if (gb >= 1) return `${gb.toFixed(1)} GB`
+                return `${(gb * 1024).toFixed(0)} MB`
+            }
+
+            function generateData() {
+                const data = []
+                const tokens = contextLength * 1024
+
+                for (let year = config.startYear; year <= config.endYear; year += 0.5) {
+                    const yearsElapsed = year - config.startYear
+                    const nBillions = config.startParams * Math.pow(2, yearsElapsed / config.doublingTime)
+                    const nLayers = estimateLayers(nBillions)
+
+                    // High bound (theoretical max): MHA, r=1.0
+                    const highBoundElements = calcKVCache(tokens, nBillions, nLayers)
+                    const highBoundGB = highBoundElements * precision
+
+                    // With GQA-8 only
+                    const gqaGB = highBoundGB / 8
+
+                    // With GQA-8 + INT4 quantization
+                    const gqaQuantGB = highBoundGB / 16
+
+                    // SOTA: MoD (8x) + GQA-8 (8x) + INT4 (2x) + eviction (2x) = ~256x
+                    const sotaGB = highBoundGB / 256
+
+                    data.push({
+                        year,
+                        params: nBillions,
+                        layers: nLayers,
+                        highBound: highBoundGB,
+                        gqa: gqaGB,
+                        gqaQuant: gqaQuantGB,
+                        sota: sotaGB,
+                    })
+                }
+
+                return data
+            }
+
+            function drawChart() {
+                const data = generateData()
+                const dpr = window.devicePixelRatio || 1
+                const rect = canvas.getBoundingClientRect()
+
+                canvas.width = rect.width * dpr
+                canvas.height = rect.height * dpr
+                ctx.scale(dpr, dpr)
+
+                const width = rect.width
+                const height = rect.height
+                const padding = { top: 40, right: 80, bottom: 60, left: 80 }
+                const chartWidth = width - padding.left - padding.right
+                const chartHeight = height - padding.top - padding.bottom
+
+                // Clear
+                ctx.clearRect(0, 0, width, height)
+
+                // Calculate scales (log scale for Y)
+                const minY = Math.min(...data.map((d) => d.sota)) * 0.5
+                const maxY = Math.max(...data.map((d) => d.highBound)) * 1.2
+                const logMin = Math.log10(minY)
+                const logMax = Math.log10(maxY)
+
+                function xScale(year) {
+                    return padding.left + ((year - config.startYear) / (config.endYear - config.startYear)) * chartWidth
+                }
+
+                function yScale(value) {
+                    const logValue = Math.log10(value)
+                    return padding.top + chartHeight - ((logValue - logMin) / (logMax - logMin)) * chartHeight
+                }
+
+                // Draw grid
+                ctx.strokeStyle = 'rgba(95, 163, 230, 0.15)'
+                ctx.lineWidth = 1
+
+                // Vertical grid (years)
+                for (let year = config.startYear; year <= config.endYear; year += 2) {
+                    const x = xScale(year)
+                    ctx.beginPath()
+                    ctx.moveTo(x, padding.top)
+                    ctx.lineTo(x, height - padding.bottom)
+                    ctx.stroke()
+                }
+
+                // Horizontal grid (log scale)
+                const gridValues = [1, 10, 100, 1000, 10000]
+                gridValues.forEach((val) => {
+                    if (val >= minY && val <= maxY) {
+                        const y = yScale(val)
+                        ctx.beginPath()
+                        ctx.moveTo(padding.left, y)
+                        ctx.lineTo(width - padding.right, y)
+                        ctx.stroke()
+
+                        // Y-axis label
+                        ctx.fillStyle = 'rgba(199, 212, 248, 0.7)'
+                        ctx.font = '11px -apple-system, sans-serif'
+                        ctx.textAlign = 'right'
+                        ctx.fillText(formatBytes(val), padding.left - 10, y + 4)
+                    }
+                })
+
+                // Draw filled areas
+                const colors = {
+                    highBound: { stroke: '#ef4444', fill: 'rgba(239, 68, 68, 0.15)' },
+                    gqa: { stroke: '#f97316', fill: 'rgba(249, 115, 22, 0.15)' },
+                    gqaQuant: { stroke: '#fbbf24', fill: 'rgba(251, 191, 36, 0.1)' },
+                    sota: { stroke: '#10b981', fill: 'rgba(16, 185, 129, 0.2)' },
+                }
+
+                // Draw areas (from top to bottom)
+                const series = ['highBound', 'gqa', 'sota']
+                series.forEach((key) => {
+                    ctx.beginPath()
+                    ctx.moveTo(xScale(data[0].year), yScale(data[0][key]))
+                    data.forEach((d) => ctx.lineTo(xScale(d.year), yScale(d[key])))
+                    ctx.lineTo(xScale(data[data.length - 1].year), height - padding.bottom)
+                    ctx.lineTo(xScale(data[0].year), height - padding.bottom)
+                    ctx.closePath()
+                    ctx.fillStyle = colors[key].fill
+                    ctx.fill()
+                })
+
+                // Draw lines
+                series.forEach((key) => {
+                    ctx.beginPath()
+                    ctx.moveTo(xScale(data[0].year), yScale(data[0][key]))
+                    data.forEach((d) => ctx.lineTo(xScale(d.year), yScale(d[key])))
+                    ctx.strokeStyle = colors[key].stroke
+                    ctx.lineWidth = key === 'sota' ? 3 : 2
+                    ctx.stroke()
+                })
+
+                // Draw GQA+Quant as dashed line
+                ctx.beginPath()
+                ctx.setLineDash([5, 5])
+                ctx.moveTo(xScale(data[0].year), yScale(data[0].gqaQuant))
+                data.forEach((d) => ctx.lineTo(xScale(d.year), yScale(d.gqaQuant)))
+                ctx.strokeStyle = colors.gqaQuant.stroke
+                ctx.lineWidth = 2
+                ctx.stroke()
+                ctx.setLineDash([])
+
+                // X-axis labels
+                ctx.fillStyle = 'rgba(199, 212, 248, 0.7)'
+                ctx.font = '11px -apple-system, sans-serif'
+                ctx.textAlign = 'center'
+                for (let year = config.startYear; year <= config.endYear; year += 2) {
+                    ctx.fillText(year.toString(), xScale(year), height - padding.bottom + 20)
+                }
+
+                // Axis titles
+                ctx.fillStyle = 'rgba(199, 212, 248, 0.8)'
+                ctx.font = '12px -apple-system, sans-serif'
+                ctx.textAlign = 'center'
+                ctx.fillText('Year', width / 2, height - 10)
+
+                ctx.save()
+                ctx.translate(15, height / 2)
+                ctx.rotate(-Math.PI / 2)
+                ctx.fillText('KV Cache Size (log scale)', 0, 0)
+                ctx.restore()
+
+                // Legend
+                const legendItems = [
+                    { label: 'High Bound (MHA)', color: colors.highBound.stroke },
+                    { label: '+ GQA-8', color: colors.gqa.stroke },
+                    { label: '+ GQA-8 + INT4', color: colors.gqaQuant.stroke, dashed: true },
+                    { label: 'SOTA (all)', color: colors.sota.stroke },
+                ]
+
+                const legendX = width - padding.right - 120
+                let legendY = padding.top + 10
+
+                legendItems.forEach((item) => {
+                    ctx.beginPath()
+                    if (item.dashed) ctx.setLineDash([4, 4])
+                    ctx.moveTo(legendX, legendY + 6)
+                    ctx.lineTo(legendX + 20, legendY + 6)
+                    ctx.strokeStyle = item.color
+                    ctx.lineWidth = 2
+                    ctx.stroke()
+                    ctx.setLineDash([])
+
+                    ctx.fillStyle = 'rgba(234, 242, 255, 0.9)'
+                    ctx.font = '10px -apple-system, sans-serif'
+                    ctx.textAlign = 'left'
+                    ctx.fillText(item.label, legendX + 26, legendY + 10)
+                    legendY += 18
+                })
+
+                // Update 2030 projection panel
+                const lastPoint = data[data.length - 1]
+                document.getElementById('proj2030Model').textContent = `${lastPoint.params.toFixed(0)}B params`
+                document.getElementById('proj2030High').textContent = formatBytes(lastPoint.highBound)
+                document.getElementById('proj2030Sota').textContent = formatBytes(lastPoint.sota)
+                document.getElementById('proj2030Ratio').textContent =
+                    `${(lastPoint.highBound / lastPoint.sota).toFixed(0)}x`
+
+                // Store data for tooltip
+                canvas._chartData = data
+                canvas._scales = { xScale, yScale, padding, chartWidth, chartHeight }
+            }
+
+            // Tooltip handling
+            canvas.addEventListener('mousemove', (e) => {
+                const data = canvas._chartData
+                const scales = canvas._scales
+                if (!data || !scales) return
+
+                const rect = canvas.getBoundingClientRect()
+                const x = e.clientX - rect.left
+                const y = e.clientY - rect.top
+
+                // Check if in chart area
+                if (
+                    x < scales.padding.left ||
+                    x > rect.width - scales.padding.right ||
+                    y < scales.padding.top ||
+                    y > rect.height - scales.padding.bottom
+                ) {
+                    tooltip.style.display = 'none'
+                    return
+                }
+
+                // Find closest data point
+                const year =
+                    config.startYear +
+                    ((x - scales.padding.left) / scales.chartWidth) * (config.endYear - config.startYear)
+                const closest = data.reduce((prev, curr) =>
+                    Math.abs(curr.year - year) < Math.abs(prev.year - year) ? curr : prev,
+                )
+
+                tooltip.innerHTML = `
+                    <div class="tooltip-title">Year ${closest.year.toFixed(1)}</div>
+                    <div class="tooltip-row" style="color: var(--text-secondary);">
+                        Model: ${closest.params.toFixed(0)}B params, ${closest.layers} layers
+                    </div>
+                    <div class="tooltip-row" style="color: #ef4444;">
+                        High Bound: ${formatBytes(closest.highBound)}
+                    </div>
+                    <div class="tooltip-row" style="color: #f97316;">
+                        + GQA-8: ${formatBytes(closest.gqa)}
+                    </div>
+                    <div class="tooltip-row" style="color: #fbbf24;">
+                        + GQA-8 + INT4: ${formatBytes(closest.gqaQuant)}
+                    </div>
+                    <div class="tooltip-row" style="color: #10b981;">
+                        SOTA: ${formatBytes(closest.sota)}
+                    </div>
+                    <div class="tooltip-row" style="color: #a78bfa; margin-top: 4px;">
+                        Compression: ${(closest.highBound / closest.sota).toFixed(0)}x
+                    </div>
+                `
+
+                tooltip.style.display = 'block'
+                tooltip.style.left = `${Math.min(e.clientX - rect.left + 15, rect.width - 290)}px`
+                tooltip.style.top = `${Math.min(e.clientY - rect.top + 15, rect.height - tooltip.offsetHeight - 10)}px`
+            })
+
+            canvas.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none'
+            })
+
+            // Event listeners
+            contextSlider.addEventListener('input', (e) => {
+                contextLength = parseInt(e.target.value)
+                contextValue.textContent = `${contextLength}K`
+                drawChart()
+            })
+
+            precisionSelect.addEventListener('change', (e) => {
+                precision = parseInt(e.target.value)
+                drawChart()
+            })
+
+            // Handle resize
+            let resizeTimeout
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout)
+                resizeTimeout = setTimeout(drawChart, 100)
+            })
+
+            // Initial draw
+            drawChart()
+        </script>
+    </body>
+</html>
