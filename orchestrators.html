@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Comparison of KV cache orchestrators: LMCache, SGLang HiCache, UCM, and FlexKV"
+        />
+        <meta name="theme-color" content="#1428a0" />
+        <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+        <title>KV Cache Orchestrators Comparison</title>
+        <style>
+            :root {
+                --primary-blue: #1428a0;
+                --light-blue: #5fa3e6;
+                --accent-purple: #691fff;
+                --accent-cyan: #00d4ff;
+                --dark-ink: #0b1026;
+                --surface: rgba(10, 16, 44, 0.92);
+                --surface-2: rgba(13, 22, 58, 0.85);
+                --border: rgba(95, 163, 230, 0.45);
+                --text-primary: #eaf2ff;
+                --text-secondary: #c7d4f8;
+                --text-muted: #a5b4e0;
+                --accent-warn: #ff6b00;
+                --accent-good: #00ff88;
+                --accent-mid: #ffb800;
+                --lmcache-color: #ff6b35;
+                --sglang-color: #00d4aa;
+                --ucm-color: #7c3aed;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+                background:
+                    radial-gradient(1200px 600px at 20% -10%, rgba(20, 40, 160, 0.35), transparent),
+                    radial-gradient(1000px 800px at 100% 10%, rgba(95, 163, 230, 0.25), transparent),
+                    linear-gradient(135deg, #050813 0%, #0e173a 55%, #0b1026 100%);
+                color: var(--text-primary);
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+
+            /* Background effects */
+            .bg-effects {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                overflow: hidden;
+                z-index: -1;
+            }
+
+            .bg-effects .blob {
+                position: absolute;
+                border-radius: 50%;
+                filter: blur(128px);
+            }
+
+            .bg-effects .blob-1 {
+                top: 0;
+                left: 25%;
+                width: 384px;
+                height: 384px;
+                background: rgba(128, 90, 213, 0.1);
+            }
+
+            .bg-effects .blob-2 {
+                bottom: 0;
+                right: 25%;
+                width: 384px;
+                height: 384px;
+                background: rgba(59, 130, 246, 0.1);
+            }
+
+            .bg-effects .blob-3 {
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 256px;
+                height: 256px;
+                background: rgba(249, 115, 22, 0.05);
+                filter: blur(96px);
+            }
+
+            .container {
+                max-width: 1152px;
+                margin: 0 auto;
+                padding: 32px;
+                position: relative;
+            }
+
+            /* Header */
+            .header {
+                text-align: center;
+                margin-bottom: 48px;
+            }
+
+            h1 {
+                font-size: 3em;
+                font-weight: 900;
+                margin-bottom: 16px;
+                background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+                color: rgba(255, 255, 255, 0.5);
+                max-width: 640px;
+                margin: 0 auto;
+            }
+
+            /* Tab Navigation */
+            .tab-nav {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 32px;
+            }
+
+            .tab-container {
+                display: inline-flex;
+                gap: 4px;
+                padding: 6px;
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .tab-btn {
+                padding: 10px 24px;
+                border-radius: 12px;
+                font-weight: 500;
+                font-size: 0.95em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: transparent;
+                border: none;
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .tab-btn:hover {
+                color: #fff;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .tab-btn.active {
+                background: #fff;
+                color: #000;
+            }
+
+            /* Content area */
+            .content {
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 24px;
+                padding: 32px;
+            }
+
+            .tab-panel {
+                display: none;
+            }
+
+            .tab-panel.active {
+                display: block;
+            }
+
+            /* Architecture Tab */
+            .section-title {
+                font-size: 1.25em;
+                font-weight: 700;
+                color: rgba(255, 255, 255, 0.9);
+                margin-bottom: 24px;
+            }
+
+            .tiers-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 32px;
+            }
+
+            .tier-item {
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 16px;
+                border-radius: 12px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.05);
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .tier-item:hover {
+                border-color: rgba(255, 255, 255, 0.6);
+                background: rgba(255, 255, 255, 0.1);
+                transform: scale(1.02);
+            }
+
+            .tier-icon {
+                font-size: 1.8em;
+            }
+
+            .tier-info {
+                flex: 1;
+            }
+
+            .tier-name {
+                font-weight: 700;
+                color: #fff;
+                margin-bottom: 4px;
+            }
+
+            .tier-specs {
+                font-size: 0.85em;
+                color: rgba(255, 255, 255, 0.6);
+                display: flex;
+                gap: 24px;
+            }
+
+            .tier-indicators {
+                display: flex;
+                gap: 8px;
+            }
+
+            .tier-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+            }
+
+            .tier-arrow {
+                position: absolute;
+                left: 50%;
+                bottom: -20px;
+                transform: translateX(-50%);
+                color: rgba(255, 255, 255, 0.4);
+                font-size: 1.5em;
+                z-index: 10;
+            }
+
+            /* System Cards */
+            .systems-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+            }
+
+            .system-card {
+                padding: 20px;
+                border-radius: 16px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .system-card:hover {
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+
+            .system-card.selected {
+                border-color: rgba(255, 255, 255, 0.6);
+                transform: scale(1.05);
+            }
+
+            .system-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-weight: 900;
+                font-size: 1.25em;
+            }
+
+            .system-name {
+                font-weight: 700;
+                font-size: 1.1em;
+                color: #fff;
+                margin-bottom: 4px;
+            }
+
+            .system-tagline {
+                font-size: 0.9em;
+                color: rgba(255, 255, 255, 0.6);
+                margin-bottom: 8px;
+            }
+
+            .system-origin {
+                font-size: 0.75em;
+                color: rgba(255, 255, 255, 0.4);
+                margin-bottom: 12px;
+            }
+
+            .system-engines {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .engine-tag {
+                padding: 2px 8px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+                font-size: 0.75em;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            .system-details {
+                margin-top: 16px;
+                padding-top: 16px;
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+                display: none;
+            }
+
+            .system-card.selected .system-details {
+                display: block;
+            }
+
+            .system-description {
+                font-size: 0.9em;
+                color: rgba(255, 255, 255, 0.8);
+                margin-bottom: 8px;
+            }
+
+            .system-architecture {
+                font-size: 0.75em;
+                font-family: monospace;
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            /* Feature Matrix */
+            .feature-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .feature-table th,
+            .feature-table td {
+                padding: 16px;
+                text-align: center;
+            }
+
+            .feature-table th {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .feature-table th:first-child {
+                text-align: left;
+            }
+
+            .feature-table td:first-child {
+                text-align: left;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            .feature-table tbody tr {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                transition: background 0.2s ease;
+            }
+
+            .feature-table tbody tr:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .feature-table tbody tr:nth-child(even) {
+                background: rgba(255, 255, 255, 0.02);
+            }
+
+            .feature-table tbody tr:nth-child(even):hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .system-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 4px 12px;
+                border-radius: 9999px;
+                font-weight: 700;
+                color: #fff;
+            }
+
+            .check-mark {
+                font-size: 1.5em;
+            }
+
+            .check-mark.enabled {
+                opacity: 1;
+            }
+
+            .check-mark.disabled {
+                opacity: 0.3;
+            }
+
+            /* Pros & Cons */
+            .proscons-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 24px;
+            }
+
+            .proscons-card {
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                overflow: hidden;
+            }
+
+            .proscons-header {
+                padding: 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .proscons-header span {
+                font-size: 1.5em;
+                font-weight: 900;
+                color: #fff;
+            }
+
+            .proscons-body {
+                padding: 16px;
+            }
+
+            .proscons-section {
+                margin-bottom: 16px;
+            }
+
+            .proscons-section:last-child {
+                margin-bottom: 0;
+            }
+
+            .section-label {
+                font-size: 0.85em;
+                font-weight: 700;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .section-label.strengths {
+                color: #4ade80;
+            }
+
+            .section-label.limitations {
+                color: #f87171;
+            }
+
+            .section-label.bestfor {
+                color: #60a5fa;
+            }
+
+            .proscons-list {
+                list-style: none;
+            }
+
+            .proscons-list li {
+                font-size: 0.85em;
+                color: rgba(255, 255, 255, 0.7);
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+
+            .proscons-list li .bullet {
+                opacity: 0.6;
+            }
+
+            .proscons-list.strengths .bullet {
+                color: #4ade80;
+            }
+
+            .proscons-list.limitations .bullet {
+                color: #f87171;
+            }
+
+            .proscons-list.bestfor .bullet {
+                color: #60a5fa;
+            }
+
+            /* Back link */
+            .back-link {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                font-size: 0.8em;
+                z-index: 10;
+            }
+
+            .back-link a {
+                color: rgba(95, 163, 230, 0.7);
+                text-decoration: none;
+                transition: color 0.3s;
+            }
+
+            .back-link a:hover {
+                color: var(--light-blue);
+            }
+
+            /* Responsive */
+            @media (max-width: 900px) {
+                .systems-grid,
+                .proscons-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                h1 {
+                    font-size: 2em;
+                }
+
+                .container {
+                    padding: 16px;
+                }
+
+                .content {
+                    padding: 16px;
+                }
+
+                .tab-container {
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+
+                .feature-table {
+                    font-size: 0.85em;
+                }
+
+                .feature-table th,
+                .feature-table td {
+                    padding: 10px 6px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="bg-effects">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <h1>KV Cache Orchestrators</h1>
+                <p class="subtitle">Comparing tiered storage and prefix caching approaches for LLM inference</p>
+            </div>
+
+            <div class="tab-nav">
+                <div class="tab-container">
+                    <button class="tab-btn active" data-tab="architecture">Architecture</button>
+                    <button class="tab-btn" data-tab="features">Feature Matrix</button>
+                    <button class="tab-btn" data-tab="proscons">Pros & Cons</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Architecture Tab -->
+                <div id="architecture" class="tab-panel active">
+                    <h3 class="section-title">Storage Hierarchy</h3>
+                    <div class="tiers-list" id="tiersList"></div>
+
+                    <div class="systems-grid" id="systemsGrid"></div>
+                </div>
+
+                <!-- Features Tab -->
+                <div id="features" class="tab-panel">
+                    <table class="feature-table">
+                        <thead>
+                            <tr>
+                                <th style="font-weight: 700; color: rgba(255, 255, 255, 0.9)">Feature</th>
+                                <th id="featureHeaderLmcache"></th>
+                                <th id="featureHeaderSglang"></th>
+                                <th id="featureHeaderUcm"></th>
+                                <th id="featureHeaderFlexkv"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="featureTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Pros & Cons Tab -->
+                <div id="proscons" class="tab-panel">
+                    <div class="proscons-grid" id="prosconsGrid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">&larr; Back to KV Cache Visualization</a>
+        </div>
+
+        <script>
+            // Data
+            const systems = {
+                lmcache: {
+                    name: 'LMCache',
+                    tagline: 'Enterprise-Scale KV Connector',
+                    color: '#FF6B35',
+                    gradient: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)',
+                    origin: 'UChicago / Tensormesh',
+                    engines: ['vLLM', 'SGLang'],
+                    architecture: 'Connector/Plugin Model',
+                    description:
+                        'Modular KV cache layer that plugs into inference engines via connector interface. Decoupled from engine evolution.',
+                },
+                sglang: {
+                    name: 'SGLang HiCache',
+                    tagline: 'RadixAttention Extended',
+                    color: '#00D4AA',
+                    gradient: 'linear-gradient(135deg, #00D4AA 0%, #00A080 100%)',
+                    origin: 'LMSYS / UC Berkeley',
+                    engines: ['SGLang'],
+                    architecture: 'Native Integration',
+                    description:
+                        'HiRadixTree extends RadixAttention with hierarchical storage. GPU-assisted I/O kernels for 3x faster CPU-GPU transfers.',
+                },
+                ucm: {
+                    name: 'UCM',
+                    tagline: 'Unified Cache Manager',
+                    color: '#7C3AED',
+                    gradient: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+                    origin: 'Huawei / ModelEngine',
+                    engines: ['vLLM-Ascend', 'vLLM'],
+                    architecture: 'Storage-Compute Separation',
+                    description:
+                        'Sparse attention retrieval + tiered storage. Designed for HBM-constrained environments (Ascend NPUs).',
+                },
+                flexkv: {
+                    name: 'FlexKV',
+                    tagline: 'Multi-Level Cache Manager',
+                    color: '#0EA5E9',
+                    gradient: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)',
+                    origin: 'Tencent Cloud / TACO',
+                    engines: ['vLLM', 'SGLang', 'TensorRT-LLM'],
+                    architecture: 'Three-Tier Storage Engine',
+                    description:
+                        'Distributed KV store with CPU, SSD, and cloud storage tiers. Features RadixTree prefix matching, async APIs, and GPU Direct Storage support.',
+                },
+            }
+
+            const tiers = [
+                {
+                    id: 'gpu',
+                    name: 'L1: GPU HBM',
+                    latency: '~1\u03BCs',
+                    bandwidth: '3+ TB/s',
+                    color: '#FF4444',
+                    icon: '\u26A1',
+                },
+                {
+                    id: 'cpu',
+                    name: 'L2: CPU DRAM',
+                    latency: '~100\u03BCs',
+                    bandwidth: '200-400 GB/s',
+                    color: '#FF8C00',
+                    icon: '\uD83E\uDDE0',
+                },
+                {
+                    id: 'nvme',
+                    name: 'L3a: NVMe/SSD',
+                    latency: '~1ms',
+                    bandwidth: '6-14 GB/s',
+                    color: '#FFD700',
+                    icon: '\uD83D\uDCBE',
+                },
+                {
+                    id: 'remote',
+                    name: 'L3b: Remote/S3',
+                    latency: '~10ms',
+                    bandwidth: '1-60 GB/s',
+                    color: '#32CD32',
+                    icon: '\u2601\uFE0F',
+                },
+            ]
+
+            const features = [
+                { name: 'Prefix Caching', lmcache: true, sglang: true, ucm: true, flexkv: true },
+                { name: 'P/D Disaggregation', lmcache: true, sglang: true, ucm: true, flexkv: false },
+                { name: 'Sparse Attention', lmcache: false, sglang: false, ucm: true, flexkv: false },
+                { name: 'CacheBlend (Non-Prefix)', lmcache: true, sglang: false, ucm: false, flexkv: false },
+                { name: 'Content-Addressable', lmcache: true, sglang: false, ucm: false, flexkv: false },
+                { name: 'RadixTree Management', lmcache: false, sglang: true, ucm: false, flexkv: true },
+                { name: 'Mooncake Integration', lmcache: true, sglang: true, ucm: true, flexkv: false },
+                { name: '3FS Integration', lmcache: false, sglang: true, ucm: true, flexkv: false },
+                { name: 'NIXL Support', lmcache: true, sglang: true, ucm: false, flexkv: false },
+                { name: 'Ascend NPU Support', lmcache: true, sglang: false, ucm: true, flexkv: false },
+                { name: 'Multi-Engine Support', lmcache: true, sglang: false, ucm: true, flexkv: true },
+                { name: 'GPU Direct Storage', lmcache: true, sglang: true, ucm: false, flexkv: true },
+                { name: 'Async Transfer APIs', lmcache: true, sglang: true, ucm: false, flexkv: true },
+                { name: 'Cloud Storage Tier', lmcache: true, sglang: false, ucm: false, flexkv: true },
+                { name: 'Tensor Parallel (TP16)', lmcache: true, sglang: true, ucm: true, flexkv: true },
+            ]
+
+            const proscons = {
+                lmcache: {
+                    pros: [
+                        'Engine-agnostic connector design',
+                        'Widest storage backend support',
+                        'Production-proven at scale',
+                        'CacheBlend for non-prefix reuse',
+                        'Active enterprise adoption',
+                    ],
+                    cons: [
+                        'Additional layer = integration complexity',
+                        'No built-in sparse attention',
+                        'Chunk size tuning required',
+                    ],
+                    useCases: [
+                        'Multi-engine deployments',
+                        'Enterprise production systems',
+                        'RAG with scattered context',
+                    ],
+                },
+                sglang: {
+                    pros: [
+                        'Native RadixTree efficiency',
+                        'GPU-assisted I/O (3x faster)',
+                        'Clean storage backend abstraction',
+                        'Tight SGLang optimization',
+                        'Layer-wise pipelining built-in',
+                    ],
+                    cons: ['SGLang-only (no vLLM)', 'No cross-engine sharing', 'Limited sparse attention'],
+                    useCases: ['SGLang-native deployments', 'Multi-turn conversations', 'High prefix-hit workloads'],
+                },
+                ucm: {
+                    pros: [
+                        'Training-free sparse attention',
+                        'Ascend NPU optimized',
+                        'Storage-compute separation',
+                        'P/D disaggregation focus',
+                        'HBM-constrained environments',
+                    ],
+                    cons: ['Newer, less battle-tested', 'Limited NVIDIA optimization', 'Ascend-first design'],
+                    useCases: ['Ascend NPU deployments', 'Long-context with sparsity', 'HBM-constrained hardware'],
+                },
+                flexkv: {
+                    pros: [
+                        'Three-tier storage hierarchy',
+                        'Async APIs for compute overlap',
+                        'GPU Direct Storage support',
+                        'RadixTree prefix matching',
+                        'Cross-node cache sharing',
+                    ],
+                    cons: ['Newer project, maturing', 'No sparse attention support', 'Tencent Cloud ecosystem focus'],
+                    useCases: [
+                        'Large-scale cloud deployments',
+                        'Multi-framework environments',
+                        'Distributed KV cache sharing',
+                    ],
+                },
+            }
+
+            // State
+            let hoveredTier = null
+            let selectedSystem = null
+
+            // DOM Elements
+            const tabBtns = document.querySelectorAll('.tab-btn')
+            const tabPanels = document.querySelectorAll('.tab-panel')
+            const tiersList = document.getElementById('tiersList')
+            const systemsGrid = document.getElementById('systemsGrid')
+            const featureTableBody = document.getElementById('featureTableBody')
+            const prosconsGrid = document.getElementById('prosconsGrid')
+
+            // Tab switching
+            tabBtns.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab
+
+                    tabBtns.forEach((b) => b.classList.remove('active'))
+                    btn.classList.add('active')
+
+                    tabPanels.forEach((panel) => {
+                        panel.classList.remove('active')
+                        if (panel.id === tabId) {
+                            panel.classList.add('active')
+                        }
+                    })
+                })
+            })
+
+            // Render tiers
+            function renderTiers() {
+                tiersList.innerHTML = ''
+                tiers.forEach((tier, idx) => {
+                    const tierEl = document.createElement('div')
+                    tierEl.className = 'tier-item'
+                    tierEl.style.borderLeftWidth = '6px'
+                    tierEl.style.borderLeftColor = tier.color
+
+                    tierEl.innerHTML = `
+                        <span class="tier-icon">${tier.icon}</span>
+                        <div class="tier-info">
+                            <div class="tier-name">${tier.name}</div>
+                            <div class="tier-specs">
+                                <span>Latency: ${tier.latency}</span>
+                                <span>BW: ${tier.bandwidth}</span>
+                            </div>
+                        </div>
+                        <div class="tier-indicators">
+                            ${Object.values(systems)
+                                .map(
+                                    (sys) =>
+                                        `<div class="tier-dot" style="background: ${sys.color}" title="${sys.name} supports this tier"></div>`,
+                                )
+                                .join('')}
+                        </div>
+                        ${idx < tiers.length - 1 ? '<div class="tier-arrow">\u2193</div>' : ''}
+                    `
+
+                    tiersList.appendChild(tierEl)
+                })
+            }
+
+            // Render system cards
+            function renderSystems() {
+                systemsGrid.innerHTML = ''
+                Object.entries(systems).forEach(([key, sys]) => {
+                    const card = document.createElement('div')
+                    card.className = 'system-card'
+                    card.style.background = `${sys.color}15`
+                    card.dataset.system = key
+
+                    card.innerHTML = `
+                        <div class="system-icon" style="background: ${sys.gradient}">${sys.name[0]}</div>
+                        <div class="system-name">${sys.name}</div>
+                        <div class="system-tagline">${sys.tagline}</div>
+                        <div class="system-origin">${sys.origin}</div>
+                        <div class="system-engines">
+                            ${sys.engines.map((e) => `<span class="engine-tag">${e}</span>`).join('')}
+                        </div>
+                        <div class="system-details">
+                            <div class="system-description">${sys.description}</div>
+                            <div class="system-architecture">${sys.architecture}</div>
+                        </div>
+                    `
+
+                    card.addEventListener('click', () => {
+                        if (selectedSystem === key) {
+                            selectedSystem = null
+                            card.classList.remove('selected')
+                        } else {
+                            document.querySelectorAll('.system-card').forEach((c) => c.classList.remove('selected'))
+                            selectedSystem = key
+                            card.classList.add('selected')
+                        }
+                    })
+
+                    systemsGrid.appendChild(card)
+                })
+            }
+
+            // Render feature matrix
+            function renderFeatures() {
+                // Headers
+                document.getElementById('featureHeaderLmcache').innerHTML = `
+                    <span class="system-badge" style="background: ${systems.lmcache.gradient}">${systems.lmcache.name}</span>
+                `
+                document.getElementById('featureHeaderSglang').innerHTML = `
+                    <span class="system-badge" style="background: ${systems.sglang.gradient}">${systems.sglang.name}</span>
+                `
+                document.getElementById('featureHeaderUcm').innerHTML = `
+                    <span class="system-badge" style="background: ${systems.ucm.gradient}">${systems.ucm.name}</span>
+                `
+                document.getElementById('featureHeaderFlexkv').innerHTML = `
+                    <span class="system-badge" style="background: ${systems.flexkv.gradient}">${systems.flexkv.name}</span>
+                `
+
+                // Rows
+                featureTableBody.innerHTML = ''
+                features.forEach((feature) => {
+                    const row = document.createElement('tr')
+                    row.innerHTML = `
+                        <td>${feature.name}</td>
+                        <td><span class="check-mark ${feature.lmcache ? 'enabled' : 'disabled'}">${feature.lmcache ? '\u2713' : '\u25CB'}</span></td>
+                        <td><span class="check-mark ${feature.sglang ? 'enabled' : 'disabled'}">${feature.sglang ? '\u2713' : '\u25CB'}</span></td>
+                        <td><span class="check-mark ${feature.ucm ? 'enabled' : 'disabled'}">${feature.ucm ? '\u2713' : '\u25CB'}</span></td>
+                        <td><span class="check-mark ${feature.flexkv ? 'enabled' : 'disabled'}">${feature.flexkv ? '\u2713' : '\u25CB'}</span></td>
+                    `
+                    featureTableBody.appendChild(row)
+                })
+            }
+
+            // Render pros/cons
+            function renderProscons() {
+                prosconsGrid.innerHTML = ''
+                Object.entries(systems).forEach(([key, sys]) => {
+                    const data = proscons[key]
+                    const card = document.createElement('div')
+                    card.className = 'proscons-card'
+                    card.style.background = `${sys.color}08`
+
+                    card.innerHTML = `
+                        <div class="proscons-header" style="background: ${sys.gradient}">
+                            <span>${sys.name}</span>
+                        </div>
+                        <div class="proscons-body">
+                            <div class="proscons-section">
+                                <div class="section-label strengths">
+                                    <span>\u2713</span> Strengths
+                                </div>
+                                <ul class="proscons-list strengths">
+                                    ${data.pros.map((p) => `<li><span class="bullet">\u2022</span>${p}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="proscons-section">
+                                <div class="section-label limitations">
+                                    <span>\u2715</span> Limitations
+                                </div>
+                                <ul class="proscons-list limitations">
+                                    ${data.cons.map((c) => `<li><span class="bullet">\u2022</span>${c}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="proscons-section">
+                                <div class="section-label bestfor">
+                                    <span>\u25C6</span> Best For
+                                </div>
+                                <ul class="proscons-list bestfor">
+                                    ${data.useCases.map((u) => `<li><span class="bullet">\u2192</span>${u}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `
+
+                    prosconsGrid.appendChild(card)
+                })
+            }
+
+            // Initialize
+            renderTiers()
+            renderSystems()
+            renderFeatures()
+            renderProscons()
+        </script>
+    </body>
+</html>
