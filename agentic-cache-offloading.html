@@ -961,9 +961,9 @@
             // ─── CHART SVG ──────────────────────────────────────────
             function renderChart(allData, effRamTiers, effMaxRamFn) {
                 var showFullRam = budgetFrac < 1.0
-                var W = 780,
+                var W = 820,
                     H = 440,
-                    PAD = { t: 36, r: 85, b: 52, l: 118 }
+                    PAD = { t: 36, r: 85, b: 52, l: 155 }
                 var plotW = W - PAD.l - PAD.r,
                     plotH = H - PAD.t - PAD.b
                 var allVals = []
@@ -1328,10 +1328,10 @@
                     var y = scaleY(t.bytes)
                     if (y < PAD.t - 5 || y > PAD.t + plotH + 5) return
                     s +=
-                        '<rect x="2" y="' +
+                        '<rect x="26" y="' +
                         (y - 8) +
                         '" width="' +
-                        (PAD.l - 6) +
+                        (PAD.l - 30) +
                         '" height="16" rx="3" fill="' +
                         t.color +
                         '" opacity="0.12"/>'
