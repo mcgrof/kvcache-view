@@ -1653,7 +1653,7 @@
                 // What is this
                 h += '<div class="card"><div class="sec-title">What this model does</div><div class="sec-body">'
                 h +=
-                    'Agentic AI systems cache intermediate work products — plan templates, embedding indexes, execution summaries, tool call transcripts — so they can reuse past reasoning instead of re-computing from scratch. As these caches grow, they eventually outstrip available RAM and require SSD or object-store offloading.'
+                    'Agentic AI systems cache intermediate work products — primarily plan templates keyed by task keywords — so they can reuse past reasoning instead of re-computing from scratch. Beyond basic keyword-keyed caching, production systems may optionally add semantic matching via vector embeddings, execution summaries, and tool call transcripts. As these caches grow, they can eventually outstrip available RAM and require SSD or object-store offloading.'
                 h +=
                     '<br><br>This model projects the <strong style="color:#fff">steady-state working-set size</strong> of agentic caches over time, across three deployment scales (single app, enterprise, hyperscale). It answers one question: <em style="color:#22d3ee">when does the cache footprint exceed available RAM, forcing SSD?</em>'
                 h +=
@@ -1675,13 +1675,13 @@
                 h +=
                     '<div style="padding:12px 14px;background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.12);border-radius:8px">'
                 h +=
-                    '<div style="font-size:14px;color:#a78bfa;font-weight:700;margin-bottom:6px">&#x1F50D; Vector index</div>'
+                    '<div style="font-size:14px;color:#a78bfa;font-weight:700;margin-bottom:6px">&#x1F50D; Vector index (optional)</div>'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">When semantic (fuzzy) matching is enabled, each entry gets an embedding vector (384–3072 dims) plus HNSW graph edges for approximate nearest-neighbor search. Overhead = (raw vector + ' +
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6"><strong style="color:#fff">Not part of basic plan caching.</strong> When scaling a plan cache in production, teams may add semantic matching via embeddings (MiniLM, OpenAI text-embedding-3, etc.) to increase the effective hit surface — catching paraphrased queries that exact keyword match would miss. This architectural choice has a real memory cost: each entry gains an embedding vector (384–3072 dims) plus an HNSW graph for approximate nearest-neighbor search, stored alongside the plan template. The model accounts for this per-entry overhead so you can see the storage impact of choosing embeddings vs. staying with exact match. Overhead = (raw vector + ' +
                     INDEX_FIXED_PER_NODE +
                     'B fixed) &times; overhead multiplier.</div>'
                 h +=
-                    '<div style="font-size:12px;color:rgba(255,255,255,0.82);margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Placement: <strong style="color:#a78bfa">RAM preferred</strong> — may spill to SSD when large</div>'
+                    '<div style="font-size:12px;color:rgba(255,255,255,0.82);margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Placement: <strong style="color:#a78bfa">RAM preferred</strong> — may spill to SSD when large. Off by default (APC baseline uses exact match).</div>'
                 h += '</div>'
                 h +=
                     '<div style="padding:12px 14px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.12);border-radius:8px">'
@@ -1710,13 +1710,13 @@
                 h +=
                     '<div><div style="font-size:14px;color:#f472b6;font-weight:700;margin-bottom:6px">&#x1F4E6; Per-entry bytes</div>'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Each cache entry = template (2 KiB default) + metadata (256 B) + vector index (if enabled) + per-entry extras (logs/transcripts proxy).<br><br>Index overhead = (raw_vector + ' +
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Each cache entry = template (2 KiB default) + metadata (256 B) + vector index (<strong style="color:#fff">only if</strong> embeddings are enabled) + per-entry extras (logs/transcripts proxy). The APC baseline has no vector index — entry cost is just template + metadata.<br><br>When embeddings are enabled: index overhead = (raw_vector + ' +
                     INDEX_FIXED_PER_NODE +
                     'B fixed per node) &times; multiplier. The fixed cost covers HNSW graph edges, alignment, and entry metadata that does not scale with vector dimensionality.</div></div>'
                 h +=
                     '<div><div style="font-size:14px;color:#22c55e;font-weight:700;margin-bottom:6px">&#x1F3D7; What forces SSD</div>'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Lean plan templates alone stay in low GiB even at hyperscale. The multipliers that push storage past RAM:<br><br><strong style="color:#fff">Replication</strong> — 3–6x for HA / multi-region<br><strong style="color:#fff">Tenant isolation</strong> — 1K–10K separate caches<br><strong style="color:#fff">Vector indexes</strong> — HNSW is memory-hungry<br><strong style="color:#fff">Rich artifacts</strong> — execution logs, reward traces<br><br>Total storage = base &times; tenants &times; replicas.</div></div>'
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Lean plan templates alone stay in low GiB even at hyperscale. The multipliers that push storage past RAM:<br><br><strong style="color:#fff">Replication</strong> — 3–6x for HA / multi-region<br><strong style="color:#fff">Tenant isolation</strong> — 1K–10K separate caches<br><strong style="color:#fff">Vector indexes</strong> — optional, but HNSW is memory-hungry when enabled<br><strong style="color:#fff">Rich artifacts</strong> — execution logs, reward traces<br><br>Total storage = base &times; tenants &times; replicas. Plain keyword-keyed caching (no embeddings, no extras) does not force SSD.</div></div>'
                 h += '</div></div>'
 
                 // RAM budget
@@ -1805,7 +1805,7 @@
                     },
                     {
                         term: 'Index overhead',
-                        def: 'ANN graph + metadata cost beyond raw vector bytes. Includes HNSW edges, alignment padding, and per-node bookkeeping.',
+                        def: 'Only applies when embeddings are enabled. ANN graph + metadata cost beyond raw vector bytes. Includes HNSW edges, alignment padding, and per-node bookkeeping. Zero for exact-match (keyword-keyed) caches.',
                     },
                     {
                         term: 'Extras per entry',
@@ -1836,7 +1836,7 @@
                     '<div style="font-size:12px;color:#a78bfa;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Model basis and limits</div>'
                 h += '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.55">'
                 h +=
-                    '<strong style="color:rgba(255,255,255,0.85)">Grounded in data:</strong> Saturation curve validated against APC Table 4. Per-entry bytes from real embedding specs. Hit-rate ceilings calibrated from APC FinanceBench (46%) and GAIA. Vector index overhead includes ' +
+                    '<strong style="color:rgba(255,255,255,0.85)">Grounded in data:</strong> Saturation curve validated against APC Table 4. Per-entry bytes for embedding presets use real vector specs (MiniLM, OAI text-embedding-3). Hit-rate ceilings calibrated from APC FinanceBench (46%) and GAIA. When embeddings are enabled, vector index overhead includes ' +
                     INDEX_FIXED_PER_NODE +
                     'B fixed per-node cost. Cumulative taxonomy ceiling prevents saturation loss.'
                 h +=
