@@ -1,0 +1,2394 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Working-set storage projections for agentic caches - from lean plan templates to fat agent memory stores"
+        />
+        <meta name="theme-color" content="#0b0b14" />
+        <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <title>Agentic Cache Offloading - What Forces SSD?</title>
+        <style>
+            :root {
+                --mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+                --display: 'Sora', 'Space Grotesk', sans-serif;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                min-height: 100vh;
+                background: #0b0b14;
+                color: #fff;
+                font-family: var(--mono);
+                padding: 24px 20px;
+            }
+            .wrap {
+                max-width: 880px;
+                margin: 0 auto;
+            }
+            h1 {
+                font-family: var(--display);
+                font-size: 24px;
+                font-weight: 800;
+                line-height: 1.2;
+                margin: 0 0 6px 0;
+                background: linear-gradient(135deg, #22d3ee, #a78bfa, #f472b6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            .subtitle {
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.78);
+                margin: 0 0 16px 0;
+                line-height: 1.45;
+                max-width: 680px;
+            }
+            /* top-level tabs */
+            .top-tabs {
+                display: flex;
+                gap: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                margin-bottom: 20px;
+            }
+            .top-tab {
+                padding: 8px 20px;
+                font-size: 11px;
+                font-weight: 500;
+                cursor: pointer;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid transparent;
+                color: rgba(255, 255, 255, 0.45);
+                font-family: var(--display);
+                transition: all 0.15s ease;
+            }
+            .top-tab.active {
+                font-weight: 700;
+                background: rgba(167, 139, 250, 0.12);
+                border-bottom-color: #a78bfa;
+                color: #fff;
+            }
+            .page {
+                display: none;
+            }
+            .page.active {
+                display: block;
+            }
+            /* card */
+            .card {
+                background: rgba(255, 255, 255, 0.025);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 10px;
+                padding: 16px 20px;
+                margin-bottom: 16px;
+            }
+            .sec-title {
+                font-size: 13px;
+                color: #fff;
+                font-weight: 700;
+                font-family: var(--display);
+                margin-bottom: 12px;
+            }
+            .sec-body {
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.9);
+                line-height: 1.65;
+            }
+            /* slider row */
+            .slider-row {
+                margin-bottom: 10px;
+            }
+            .slider-row .hdr {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2px;
+            }
+            .slider-row .hdr .lbl {
+                color: rgba(255, 255, 255, 0.88);
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+            }
+            .slider-row .hdr .val {
+                color: #fff;
+                font-size: 10px;
+                font-weight: 600;
+            }
+            .slider-row input[type='range'] {
+                width: 100%;
+                accent-color: #a78bfa;
+                cursor: pointer;
+            }
+            /* tooltip */
+            .tip {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 13px;
+                height: 13px;
+                border-radius: 50%;
+                font-size: 8px;
+                font-weight: 700;
+                background: rgba(255, 255, 255, 0.12);
+                color: rgba(255, 255, 255, 0.7);
+                cursor: help;
+                margin-left: 4px;
+                position: relative;
+                flex-shrink: 0;
+            }
+            .tip .tip-text {
+                display: none;
+                position: absolute;
+                bottom: 18px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1e1e3a;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 6px;
+                padding: 6px 10px;
+                font-size: 9px;
+                color: rgba(255, 255, 255, 0.85);
+                font-weight: 400;
+                white-space: nowrap;
+                z-index: 100;
+                pointer-events: none;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            }
+            .tip:hover .tip-text {
+                display: block;
+            }
+            /* sub-tabs */
+            .sub-tabs {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+            .sub-tab {
+                padding: 5px 14px;
+                font-size: 10px;
+                font-weight: 500;
+                cursor: pointer;
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 6px;
+                color: rgba(255, 255, 255, 0.5);
+                font-family: var(--mono);
+            }
+            .sub-tab.active {
+                font-weight: 700;
+                background: rgba(167, 139, 250, 0.15);
+                border-color: rgba(167, 139, 250, 0.3);
+                color: #a78bfa;
+            }
+            /* select */
+            .sel {
+                width: 100%;
+                padding: 4px 8px;
+                background: #16162a;
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 5px;
+                font-size: 10px;
+                font-family: var(--mono);
+                cursor: pointer;
+            }
+            .sel-lg {
+                flex: 1;
+                max-width: 380px;
+                padding: 5px 10px;
+                background: #16162a;
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 6px;
+                font-size: 10px;
+                font-family: var(--mono);
+                cursor: pointer;
+            }
+            /* grid helpers */
+            .g3 {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 4px 20px;
+            }
+            .g2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            .g12 {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 4px 20px;
+            }
+            /* table */
+            .dt {
+                overflow-x: auto;
+            }
+            .dt table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 10px;
+            }
+            /* back link */
+            .back-link {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                z-index: 100;
+            }
+            .back-link a {
+                color: rgba(95, 163, 230, 0.7);
+                text-decoration: none;
+                font-size: 0.85rem;
+            }
+            .back-link a:hover {
+                color: #5fa3e6;
+            }
+            /* footer */
+            .footer {
+                margin-top: 24px;
+                padding: 16px;
+                text-align: center;
+                color: rgba(255, 255, 255, 0.4);
+                font-size: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <h1>Agentic Cache Offloading — What Forces SSD?</h1>
+            <p class="subtitle">
+                Working-set storage projections for agentic caches — from lean plan templates to fat agent memory
+                stores.
+            </p>
+
+            <div class="top-tabs">
+                <button class="top-tab active" data-page="projections">Projections</button>
+                <button class="top-tab" data-page="background">Background</button>
+                <button class="top-tab" data-page="sources">Sources</button>
+            </div>
+
+            <!-- ═══ PROJECTIONS PAGE ═══ -->
+            <div id="page-projections" class="page active">
+                <!-- modeled banner -->
+                <div
+                    style="
+                        background: rgba(34, 211, 238, 0.03);
+                        border: 1px solid rgba(34, 211, 238, 0.1);
+                        border-radius: 6px;
+                        padding: 8px 14px;
+                        margin-bottom: 12px;
+                        display: flex;
+                        gap: 10px;
+                        align-items: center;
+                    "
+                >
+                    <span style="font-size: 14px">&#x1F4CF;</span>
+                    <span style="font-size: 9.5px; color: rgba(255, 255, 255, 0.82); line-height: 1.4">
+                        <strong style="color: #22d3ee">Modeled:</strong>
+                        steady-state working-set (cache footprint), not cumulative history. Templates + index = RAM.
+                        Artifacts = disk proxy.
+                        <span style="color: rgba(255, 255, 255, 0.78)">&#8594; see Background tab for details</span>
+                    </span>
+                </div>
+
+                <!-- placement legend -->
+                <div id="placement-legend"></div>
+
+                <!-- preset card -->
+                <div class="card" style="padding: 14px 18px">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px">
+                        <div
+                            style="
+                                font-size: 10px;
+                                color: #fff;
+                                font-weight: 700;
+                                font-family: var(--display);
+                                white-space: nowrap;
+                            "
+                        >
+                            Preset
+                        </div>
+                        <select id="sel-preset" class="sel-lg"></select>
+                    </div>
+                    <div id="preset-badges"></div>
+
+                    <!-- cache shape -->
+                    <div style="font-size: 10px; color: rgba(255, 255, 255, 0.9); font-weight: 600; margin-bottom: 4px">
+                        Cache shape
+                    </div>
+                    <div class="g3">
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">Template size</span>
+                                <span class="val" id="v-template"></span>
+                            </div>
+                            <input type="range" id="sl-template" min="512" max="16384" step="256" />
+                        </div>
+                        <div style="margin-bottom: 10px">
+                            <div style="color: rgba(255, 255, 255, 0.88); font-size: 10px; margin-bottom: 4px">
+                                Embedding
+                            </div>
+                            <select id="sel-emb" class="sel"></select>
+                        </div>
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">
+                                    Per-entry extras
+                                    <span class="tip">
+                                        ?
+                                        <span class="tip-text">Persistent artifact proxy (logs/traces)</span>
+                                    </span>
+                                </span>
+                                <span class="val" id="v-trace"></span>
+                            </div>
+                            <input type="range" id="sl-trace" min="0" max="32768" step="512" />
+                        </div>
+                    </div>
+
+                    <!-- multipliers -->
+                    <div
+                        style="
+                            font-size: 10px;
+                            color: rgba(255, 255, 255, 0.9);
+                            font-weight: 600;
+                            margin-bottom: 4px;
+                            margin-top: 4px;
+                        "
+                    >
+                        Multipliers
+                    </div>
+                    <div class="g3">
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">Replicas</span>
+                                <span class="val" id="v-replicas"></span>
+                            </div>
+                            <input type="range" id="sl-replicas" min="1" max="6" step="1" />
+                        </div>
+                        <div style="margin-bottom: 10px">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 2px">
+                                <span style="color: rgba(255, 255, 255, 0.88); font-size: 10px">Tenants</span>
+                                <span id="v-tenants" style="color: #fff; font-size: 10px; font-weight: 600"></span>
+                            </div>
+                            <select id="sel-tenants" class="sel"></select>
+                        </div>
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">
+                                    Index overhead
+                                    <span class="tip">
+                                        ?
+                                        <span class="tip-text">ANN graph + metadata beyond raw vectors</span>
+                                    </span>
+                                </span>
+                                <span class="val" id="v-idxoh"></span>
+                            </div>
+                            <input type="range" id="sl-idxoh" min="1.0" max="4.0" step="0.25" />
+                        </div>
+                    </div>
+
+                    <!-- RAM + growth -->
+                    <div class="g3" style="margin-top: 4px">
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">
+                                    Cache RAM fraction
+                                    <span class="tip">
+                                        ?
+                                        <span class="tip-text">% of system RAM for cache (rest: model, KV, OS)</span>
+                                    </span>
+                                </span>
+                                <span class="val" id="v-budget"></span>
+                            </div>
+                            <input type="range" id="sl-budget" min="0.01" max="1.0" step="0.01" />
+                        </div>
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">
+                                    Domain growth
+                                    <span class="tip">
+                                        ?
+                                        <span class="tip-text">Cumulative ceiling annual expansion</span>
+                                    </span>
+                                </span>
+                                <span class="val" id="v-dg"></span>
+                            </div>
+                            <input type="range" id="sl-dg" min="0" max="1.0" step="0.05" />
+                        </div>
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">Agent adoption</span>
+                                <span class="val" id="v-ag"></span>
+                            </div>
+                            <input type="range" id="sl-ag" min="0" max="2.0" step="0.1" />
+                        </div>
+                    </div>
+                    <div class="g12">
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">Years</span>
+                                <span class="val" id="v-years"></span>
+                            </div>
+                            <input type="range" id="sl-years" min="2" max="10" step="1" />
+                        </div>
+                        <div
+                            id="per-entry-info"
+                            style="font-size: 9px; color: rgba(255, 255, 255, 0.82); display: flex; align-items: center"
+                        ></div>
+                    </div>
+                </div>
+
+                <!-- sub tabs -->
+                <div class="sub-tabs">
+                    <button class="sub-tab active" data-sub="chart">Chart</button>
+                    <button class="sub-tab" data-sub="table">Data Table</button>
+                    <button class="sub-tab" data-sub="crossover">SSD Crossover</button>
+                </div>
+
+                <!-- sub content area -->
+                <div
+                    id="sub-content"
+                    style="
+                        background: rgba(255, 255, 255, 0.015);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        border-radius: 10px;
+                        padding: 12px 8px 8px;
+                        margin-bottom: 14px;
+                    "
+                ></div>
+
+                <!-- bottom line -->
+                <div
+                    style="
+                        background: rgba(239, 68, 68, 0.04);
+                        border: 1px solid rgba(239, 68, 68, 0.12);
+                        border-radius: 8px;
+                        padding: 12px 16px;
+                    "
+                >
+                    <div
+                        style="
+                            font-size: 9px;
+                            color: #ef4444;
+                            font-weight: 700;
+                            letter-spacing: 0.1em;
+                            text-transform: uppercase;
+                            margin-bottom: 4px;
+                        "
+                    >
+                        Bottom line
+                    </div>
+                    <div style="font-size: 11px; color: rgba(255, 255, 255, 0.9); line-height: 1.55">
+                        Lean plan-template caches produce a
+                        <em>tiny</em>
+                        working set (500K templates at 2 KiB = ~1 GiB). SSD is forced by
+                        <strong style="color: #fff">entry richness x copies</strong>
+                        , not queries/day.
+                        <em style="color: rgba(255, 255, 255, 0.85)">
+                            Minimal plan caching does not force SSD by 2030. Multi-tenant replication + embedding
+                            indexes + richer artifacts can.
+                        </em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ BACKGROUND PAGE ═══ -->
+            <div id="page-background" class="page"></div>
+
+            <!-- ═══ SOURCES PAGE ═══ -->
+            <div id="page-sources" class="page"></div>
+
+            <div class="footer">
+                Agentic Cache Offloading Model — part of the
+                <a href="index.html" style="color: rgba(255, 255, 255, 0.6); text-decoration: none">
+                    KV Cache Visualization
+                </a>
+                project
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">&larr; Back to KV Cache Visualization</a>
+        </div>
+
+        <script>
+            // ─── BINARY UNITS ──────────────────────────────────────────
+            var GiB = 1073741824
+            var TiB = 1099511627776
+            var PiB = 1125899906842624
+
+            // ═══ MODEL PARAMETERS ══════════════════════════════════════
+            var EMBEDDING_PROFILES = [
+                {
+                    key: 'none',
+                    label: 'No embeddings (exact match)',
+                    dims: 0,
+                    bytes: 0,
+                },
+                {
+                    key: 'minilm',
+                    label: 'MiniLM-L6-v2 (384d)',
+                    dims: 384,
+                    bytes: 1536,
+                },
+                {
+                    key: 'oai-small',
+                    label: 'OAI text-embedding-3-small (1536d)',
+                    dims: 1536,
+                    bytes: 6144,
+                },
+                {
+                    key: 'oai-large',
+                    label: 'OAI text-embedding-3-large (3072d)',
+                    dims: 3072,
+                    bytes: 12288,
+                },
+            ]
+
+            var SCALE_SCENARIOS = [
+                {
+                    key: 'single',
+                    label: 'Single App',
+                    desc: 'One platform, narrow domain',
+                    color: '#22d3ee',
+                    agents: 1000,
+                    tasksPerDay: 50,
+                    domainKeywords: 500,
+                    hitCeiling: 0.65,
+                },
+                {
+                    key: 'enterprise',
+                    label: 'Enterprise',
+                    desc: 'Multi-department, diverse workflows',
+                    color: '#a78bfa',
+                    agents: 50000,
+                    tasksPerDay: 2000,
+                    domainKeywords: 10000,
+                    hitCeiling: 0.48,
+                },
+                {
+                    key: 'hyperscale',
+                    label: 'Hyperscale',
+                    desc: 'Platform serving millions',
+                    color: '#f472b6',
+                    agents: 5000000,
+                    tasksPerDay: 500000,
+                    domainKeywords: 500000,
+                    hitCeiling: 0.35,
+                },
+            ]
+
+            var RAM_TIERS = [
+                {
+                    key: 'small',
+                    label: 'Small',
+                    bytes: 256 * GiB,
+                    color: '#f97316',
+                    desc: 'Agent cache on single Redis node',
+                },
+                {
+                    key: 'medium',
+                    label: 'Medium',
+                    bytes: 1 * TiB,
+                    color: '#eab308',
+                    desc: 'Agent cache across enterprise Redis cluster',
+                },
+                {
+                    key: 'large',
+                    label: 'Large',
+                    bytes: 8 * TiB,
+                    color: '#22c55e',
+                    desc: 'Agent cache on hyperscale distributed tier',
+                },
+            ]
+
+            var MAX_RAM_TiB = {
+                2025: 4,
+                2026: 8,
+                2027: 16,
+                2028: 24,
+                2029: 32,
+                2030: 48,
+                2031: 56,
+                2032: 64,
+                2033: 80,
+                2034: 96,
+            }
+            function maxRamTiBVal(yr) {
+                return MAX_RAM_TiB[yr] || (yr < 2025 ? 3 : 64)
+            }
+            function maxRamBytes(yr) {
+                return maxRamTiBVal(yr) * TiB
+            }
+
+            var TENANT_OPTIONS = [1, 10, 100, 1000, 5000, 10000]
+
+            var PRESETS = [
+                {
+                    key: 'apc-paper',
+                    label: 'APC baseline (exact match)',
+                    oldName: null,
+                    desc: "APC's published design: keyword lookup, no embeddings, no extras, single cache",
+                    values: {
+                        embIdx: 0,
+                        templateBytes: 2048,
+                        traceBytes: 0,
+                        replicas: 1,
+                        tenants: 1,
+                        indexOverhead: 1.0,
+                        domainGrowth: 0.15,
+                        agentGrowth: 0.5,
+                        years: 6,
+                    },
+                },
+                {
+                    key: 'prod-shared',
+                    label: 'Production shared cache (Replicated)',
+                    oldName: 'formerly: Production shared cache (HA)',
+                    desc: 'Semantic matching via MiniLM embeddings, 3x replication, exec summaries stored per entry',
+                    values: {
+                        embIdx: 1,
+                        templateBytes: 2048,
+                        traceBytes: 2048,
+                        replicas: 3,
+                        tenants: 1,
+                        indexOverhead: 2.0,
+                        domainGrowth: 0.25,
+                        agentGrowth: 0.5,
+                        years: 6,
+                    },
+                },
+                {
+                    key: 'b2b-saas',
+                    label: 'Multi-tenant SaaS — partitioned caches (1K)',
+                    oldName: 'formerly: B2B SaaS multi-tenant (1K tenants)',
+                    desc: 'Per-tenant cache isolation, moderate embeddings, replicated across AZs',
+                    values: {
+                        embIdx: 1,
+                        templateBytes: 2048,
+                        traceBytes: 4096,
+                        replicas: 3,
+                        tenants: 1000,
+                        indexOverhead: 2.5,
+                        domainGrowth: 0.3,
+                        agentGrowth: 1.0,
+                        years: 6,
+                    },
+                },
+                {
+                    key: 'b2b-saas-10k',
+                    label: 'Multi-tenant SaaS — partitioned caches (10K)',
+                    oldName: 'formerly: B2B SaaS multi-tenant (10K tenants)',
+                    desc: 'Same as above at larger enterprise SaaS scale',
+                    values: {
+                        embIdx: 2,
+                        templateBytes: 2048,
+                        traceBytes: 4096,
+                        replicas: 3,
+                        tenants: 10000,
+                        indexOverhead: 2.5,
+                        domainGrowth: 0.3,
+                        agentGrowth: 1.0,
+                        years: 6,
+                    },
+                },
+                {
+                    key: 'agent-memory',
+                    label: 'Full agent memory store',
+                    oldName: null,
+                    desc: 'Fat embeddings, full transcripts, multi-region — persistent agent memory, not a plan cache',
+                    values: {
+                        embIdx: 3,
+                        templateBytes: 4096,
+                        traceBytes: 32768,
+                        replicas: 6,
+                        tenants: 1,
+                        indexOverhead: 3.5,
+                        domainGrowth: 0.5,
+                        agentGrowth: 1.5,
+                        years: 8,
+                    },
+                },
+                {
+                    key: 'custom',
+                    label: 'Custom',
+                    oldName: null,
+                    desc: 'Your own settings',
+                    values: null,
+                },
+            ]
+
+            var INDEX_FIXED_PER_NODE = 128
+
+            // ─── FORMAT ────────────────────────────────────────────────
+            function fmtB(b) {
+                if (b >= PiB) return (b / PiB).toFixed(2) + ' PiB'
+                if (b >= TiB) return (b / TiB).toFixed(2) + ' TiB'
+                if (b >= GiB) return (b / GiB).toFixed(2) + ' GiB'
+                if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MiB'
+                if (b >= 1024) return (b / 1024).toFixed(1) + ' KiB'
+                return b.toFixed(0) + ' B'
+            }
+            function fmtBShort(b) {
+                if (b >= PiB) return (b / PiB).toFixed(1) + ' PiB'
+                if (b >= TiB) return (b / TiB).toFixed(1) + ' TiB'
+                if (b >= GiB) return (b / GiB).toFixed(0) + ' GiB'
+                if (b >= 1048576) return (b / 1048576).toFixed(0) + ' MiB'
+                return (b / 1024).toFixed(0) + ' KiB'
+            }
+            function fmtN(n) {
+                if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B'
+                if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'
+                if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K'
+                return n.toFixed(0)
+            }
+
+            // ═══ CACHE MODEL ═══════════════════════════════════════════
+            function computeCache(
+                sc,
+                years,
+                embProfile,
+                templateBytes,
+                traceBytes,
+                domainGrowthRate,
+                agentGrowthRate,
+                replicas,
+                tenants,
+                indexOverhead,
+            ) {
+                var METADATA_BYTES = 256
+                var RAW = embProfile.bytes
+                var IDX = RAW > 0 ? Math.ceil((RAW + INDEX_FIXED_PER_NODE) * indexOverhead) : 0
+                var BPE = templateBytes + METADATA_BYTES + IDX + traceBytes
+                var results = [],
+                    cumCeil = 0,
+                    cumQ = 0
+                for (var y = 0; y < years; y++) {
+                    var cY = sc.domainKeywords * Math.pow(1 + domainGrowthRate, y)
+                    var cP = y === 0 ? 0 : sc.domainKeywords * Math.pow(1 + domainGrowthRate, y - 1)
+                    cumCeil += y === 0 ? sc.domainKeywords : cY - cP
+                    var agents = sc.agents * Math.pow(1 + agentGrowthRate, y)
+                    cumQ += agents * sc.tasksPerDay * 365
+                    var uniq = Math.ceil(cumCeil * (1 - Math.exp(-cumQ / cumCeil)))
+                    var inst = uniq * BPE,
+                        tot = inst * tenants * replicas
+                    var sf = uniq / cumCeil
+                    results.push({
+                        year: y + 1,
+                        calYear: 2025 + y,
+                        domainCeiling: Math.ceil(cumCeil),
+                        queriesThisYear: agents * sc.tasksPerDay * 365,
+                        uniqueTemplates: uniq,
+                        instanceBytes: inst,
+                        storageBytes: tot,
+                        bytesPerEntry: BPE,
+                        hitRate: sc.hitCeiling * sf,
+                        tenants: tenants,
+                        replicas: replicas,
+                    })
+                }
+                return results
+            }
+
+            function crossoverYear(data, ramFn, startYear) {
+                for (var i = 0; i < data.length; i++) {
+                    var ram = typeof ramFn === 'function' ? ramFn(startYear + i) : ramFn
+                    if (data[i].storageBytes > ram) return { year: i + 1, calYear: startYear + i }
+                }
+                return null
+            }
+
+            // ═══ STATE ═════════════════════════════════════════════════
+            var startYear = 2025
+            var years = 6
+            var embIdx = 0
+            var templateBytes = 2048
+            var traceBytes = 0
+            var domainGrowth = 0.15
+            var agentGrowth = 0.5
+            var replicas = 1
+            var tenants = 1
+            var indexOverhead = 2.0
+            var budgetFrac = 1.0
+            var presetKey = 'apc-paper'
+            var subTab = 'chart'
+
+            // ═══ DOM REFS ══════════════════════════════════════════════
+            var $ = function (id) {
+                return document.getElementById(id)
+            }
+
+            // ═══ RENDER HELPERS ════════════════════════════════════════
+            function badge(text, bg, color, border) {
+                return (
+                    '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:8px;font-weight:700;letter-spacing:0.02em;background:' +
+                    (bg || 'rgba(255,255,255,0.06)') +
+                    ';color:' +
+                    (color || 'rgba(255,255,255,0.7)') +
+                    ';border:1px solid ' +
+                    (border || 'rgba(255,255,255,0.08)') +
+                    ';margin-right:4px">' +
+                    text +
+                    '</span>'
+                )
+            }
+
+            // ─── PLACEMENT LEGEND ──────────────────────────────────────
+            function renderPlacementLegend() {
+                var hasEmb = embIdx > 0
+                var isAgent = presetKey === 'agent-memory'
+                var h = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">'
+                // templates
+                h +=
+                    '<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:rgba(34,211,238,0.03);border:1px solid rgba(34,211,238,0.06)">'
+                h += '<span style="font-size:11px">&#x1F4C4;</span>'
+                h +=
+                    '<div><div style="font-size:8.5px;color:#22d3ee;font-weight:700">Templates</div><div style="font-size:7.5px;color:rgba(255,255,255,0.82)">&#8594; RAM</div></div>'
+                h += '</div>'
+                // index
+                h +=
+                    '<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:' +
+                    (hasEmb ? 'rgba(167,139,250,0.03)' : 'transparent') +
+                    ';border:1px solid ' +
+                    (hasEmb ? 'rgba(167,139,250,0.06)' : 'rgba(255,255,255,0.03)') +
+                    ';opacity:' +
+                    (hasEmb ? '1' : '0.4') +
+                    '">'
+                h += '<span style="font-size:11px">&#x1F50D;</span>'
+                h +=
+                    '<div><div style="font-size:8.5px;color:' +
+                    (hasEmb ? '#a78bfa' : 'rgba(255,255,255,0.4)') +
+                    ';font-weight:700">Index' +
+                    (hasEmb ? '' : ' (off)') +
+                    '</div><div style="font-size:7.5px;color:rgba(255,255,255,0.82)">' +
+                    (hasEmb ? '&#8594; RAM (spills SSD)' : '&#8594; N/A') +
+                    '</div></div>'
+                h += '</div>'
+                // artifacts
+                h +=
+                    '<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:' +
+                    (isAgent ? 'rgba(239,68,68,0.05)' : 'transparent') +
+                    ';border:1px solid ' +
+                    (isAgent
+                        ? 'rgba(239,68,68,0.12)'
+                        : traceBytes > 0
+                          ? 'rgba(255,255,255,0.04)'
+                          : 'rgba(255,255,255,0.03)') +
+                    ';opacity:' +
+                    (traceBytes > 0 ? '1' : '0.4') +
+                    '">'
+                h += '<span style="font-size:11px">&#x1F4CB;</span>'
+                h +=
+                    '<div><div style="font-size:8.5px;color:' +
+                    (isAgent ? '#ef4444' : 'rgba(255,255,255,0.5)') +
+                    ';font-weight:700">Artifacts' +
+                    (traceBytes === 0 ? ' (off)' : '') +
+                    '</div><div style="font-size:7.5px;color:rgba(255,255,255,0.82)">' +
+                    (traceBytes > 0 ? '&#8594; SSD / obj store' : '&#8594; N/A') +
+                    '</div></div>'
+                h += '</div>'
+                h += '</div>'
+                $('placement-legend').innerHTML = h
+            }
+
+            // ─── PRESET BADGES ─────────────────────────────────────────
+            function renderPresetBadges() {
+                var ap = PRESETS.find(function (p) {
+                    return p.key === presetKey
+                })
+                if (!ap || ap.key === 'custom' || !ap.values) {
+                    $('preset-badges').innerHTML = ''
+                    return
+                }
+                var h = ''
+                if (ap.oldName)
+                    h +=
+                        '<div style="font-size:7.5px;color:rgba(255,255,255,0.9);margin-bottom:3px">' +
+                        ap.oldName +
+                        '</div>'
+                h += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">'
+                if (ap.values.embIdx > 0)
+                    h += badge(
+                        'Semantic: ' + EMBEDDING_PROFILES[ap.values.embIdx].label.split(' ')[0],
+                        'rgba(167,139,250,0.12)',
+                        '#a78bfa',
+                        'rgba(167,139,250,0.25)',
+                    )
+                else h += badge('Exact match')
+                if (ap.values.replicas > 1)
+                    h += badge(
+                        'Replicated (' + ap.values.replicas + 'x)',
+                        'rgba(34,211,238,0.1)',
+                        '#22d3ee',
+                        'rgba(34,211,238,0.2)',
+                    )
+                else h += badge('Single copy')
+                h += badge(ap.values.tenants === 1 ? 'Shared' : fmtN(ap.values.tenants) + ' tenants')
+                var tb = ap.values.traceBytes
+                var abg = tb > 8192 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.04)'
+                var acol = tb > 8192 ? '#ef4444' : 'rgba(255,255,255,0.6)'
+                var abor = tb > 8192 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)'
+                var atxt =
+                    tb === 0 ? 'No artifacts' : tb < 2048 ? 'Summaries' : tb < 8192 ? 'Transcripts' : 'Full traces'
+                h += badge(atxt, abg, acol, abor)
+                h += '</div>'
+                h +=
+                    '<div style="font-size:9px;color:rgba(255,255,255,0.9);line-height:1.4;margin-bottom:10px">' +
+                    ap.desc +
+                    '</div>'
+                $('preset-badges').innerHTML = h
+            }
+
+            // ─── CHART SVG ──────────────────────────────────────────
+            function renderChart(allData, effRamTiers, effMaxRamFn) {
+                var showFullRam = budgetFrac < 1.0
+                var W = 780,
+                    H = 440,
+                    PAD = { t: 36, r: 85, b: 52, l: 118 }
+                var plotW = W - PAD.l - PAD.r,
+                    plotH = H - PAD.t - PAD.b
+                var allVals = []
+                allData.forEach(function (d) {
+                    d.forEach(function (p) {
+                        if (p.storageBytes > 0) allVals.push(p.storageBytes)
+                    })
+                })
+                effRamTiers.forEach(function (t) {
+                    allVals.push(t.bytes)
+                })
+                if (showFullRam)
+                    RAM_TIERS.forEach(function (t) {
+                        allVals.push(t.bytes)
+                    })
+                for (var i = 0; i < years; i++) {
+                    allVals.push(effMaxRamFn(startYear + i))
+                    if (showFullRam) allVals.push(maxRamBytes(startYear + i))
+                }
+                if (allVals.length === 0) return ''
+                var minLog = Math.floor(Math.log10(Math.min.apply(null, allVals)))
+                var maxLog = Math.ceil(Math.log10(Math.max.apply(null, allVals) * 1.5))
+                function scaleX(yr) {
+                    return PAD.l + ((yr - startYear) / (years - 1 || 1)) * plotW
+                }
+                function scaleY(v) {
+                    return v <= 0
+                        ? PAD.t + plotH
+                        : PAD.t + plotH - ((Math.log10(v) - minLog) / (maxLog - minLog)) * plotH
+                }
+                var rawTicks = []
+                ;[1048576, 16777216, 268435456].forEach(function (v) {
+                    rawTicks.push(v)
+                })
+                ;[GiB, TiB, PiB].forEach(function (u) {
+                    ;[1, 32, 1024].forEach(function (m) {
+                        rawTicks.push(m * u)
+                    })
+                })
+                var ticks = rawTicks.filter(function (v) {
+                    var y = scaleY(v)
+                    return y >= PAD.t - 5 && y <= PAD.t + plotH + 5
+                })
+                ticks.sort(function (a, b) {
+                    return a - b
+                })
+                var filteredTicks = []
+                ticks.forEach(function (v) {
+                    var y = scaleY(v)
+                    if (
+                        !filteredTicks.some(function (p) {
+                            return Math.abs(scaleY(p) - y) < 38
+                        })
+                    )
+                        filteredTicks.push(v)
+                })
+                var boxes = []
+                function canPlace(cx, cy, hw, hh) {
+                    for (var j = 0; j < boxes.length; j++) {
+                        var b = boxes[j]
+                        if (Math.abs(cx - b.cx) < hw + b.hw + 2 && Math.abs(cy - b.cy) < hh + b.hh + 2) return false
+                    }
+                    return true
+                }
+                function place(cx, cy, hw, hh) {
+                    boxes.push({ cx: cx, cy: cy, hw: hw, hh: hh })
+                }
+                effRamTiers.forEach(function (t) {
+                    var y = scaleY(t.bytes)
+                    if (y >= PAD.t - 5 && y <= PAD.t + plotH + 5) place(PAD.l / 2, y, PAD.l / 2, 9)
+                })
+                var dLabels = []
+                filteredTicks.forEach(function (v) {
+                    var y = scaleY(v)
+                    var txt = fmtBShort(v)
+                    var hw = txt.length * 3
+                    var ramTierYs = effRamTiers.map(function (t) {
+                        return scaleY(t.bytes)
+                    })
+                    if (
+                        !ramTierYs.some(function (ry) {
+                            return Math.abs(ry - y) < 22
+                        }) &&
+                        canPlace(PAD.l - 10 - hw, y, hw, 5)
+                    ) {
+                        place(PAD.l - 10 - hw, y, hw, 5)
+                        dLabels.push({
+                            x: PAD.l - 10,
+                            y: y + 3,
+                            text: txt,
+                            anchor: 'end',
+                            fill: 'rgba(255,255,255,0.55)',
+                            size: 9,
+                            w: '400',
+                            bg: true,
+                        })
+                    }
+                })
+                var sLines = allData.map(function (data) {
+                    var pts = data.map(function (p, i) {
+                        return {
+                            x: scaleX(startYear + i),
+                            y: scaleY(p.storageBytes),
+                            s: p.storageBytes,
+                        }
+                    })
+                    return {
+                        pts: pts,
+                        d: pts
+                            .map(function (p, i) {
+                                return (i === 0 ? 'M' : 'L') + p.x + ',' + p.y
+                            })
+                            .join(' '),
+                    }
+                })
+                var mrPts = []
+                for (var mi = 0; mi < years; mi++)
+                    mrPts.push({
+                        x: scaleX(startYear + mi),
+                        y: scaleY(effMaxRamFn(startYear + mi)),
+                        tib: maxRamTiBVal(startYear + mi),
+                    })
+                var mrD = mrPts
+                    .map(function (p, i) {
+                        return (i === 0 ? 'M' : 'L') + p.x + ',' + p.y
+                    })
+                    .join(' ')
+                var mrArea =
+                    mrD +
+                    ' L' +
+                    mrPts[mrPts.length - 1].x +
+                    ',' +
+                    (PAD.t + plotH) +
+                    ' L' +
+                    mrPts[0].x +
+                    ',' +
+                    (PAD.t + plotH) +
+                    ' Z'
+                var fullMrD = ''
+                if (showFullRam) {
+                    var fp = []
+                    for (var fi = 0; fi < years; fi++)
+                        fp.push({
+                            x: scaleX(startYear + fi),
+                            y: scaleY(maxRamBytes(startYear + fi)),
+                        })
+                    fullMrD = fp
+                        .map(function (p, i) {
+                            return (i === 0 ? 'M' : 'L') + p.x + ',' + p.y
+                        })
+                        .join(' ')
+                }
+                sLines.forEach(function (sl, si) {
+                    sl.pts.forEach(function (p) {
+                        var txt = fmtB(p.s)
+                        var hw = txt.length * 2.6
+                        if (canPlace(p.x, p.y - 12, hw, 5)) {
+                            place(p.x, p.y - 12, hw, 5)
+                            dLabels.push({
+                                x: p.x,
+                                y: p.y - 12,
+                                text: txt,
+                                anchor: 'middle',
+                                fill: SCALE_SCENARIOS[si].color,
+                                size: 8,
+                                w: '600',
+                                bg: true,
+                            })
+                        }
+                    })
+                })
+                mrPts.forEach(function (p, i) {
+                    if (i % 2 !== 0 && i !== mrPts.length - 1) return
+                    var txt = showFullRam ? p.tib + ' TiBx' + Math.round(budgetFrac * 100) + '%' : p.tib + ' TiB'
+                    var hw = txt.length * 2.6
+                    if (canPlace(p.x + 4, p.y - 10, hw, 5)) {
+                        place(p.x + 4, p.y - 10, hw, 5)
+                        dLabels.push({
+                            x: p.x + 4,
+                            y: p.y - 10,
+                            text: txt,
+                            anchor: 'start',
+                            fill: '#10b981',
+                            size: 8,
+                            w: '600',
+                            bg: true,
+                        })
+                    }
+                })
+                // Build SVG string
+                var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">'
+                s +=
+                    '<defs><filter id="gl"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
+                // grid lines
+                filteredTicks.forEach(function (v) {
+                    s +=
+                        '<line x1="' +
+                        PAD.l +
+                        '" y1="' +
+                        scaleY(v) +
+                        '" x2="' +
+                        (W - PAD.r) +
+                        '" y2="' +
+                        scaleY(v) +
+                        '" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,4"/>'
+                })
+                // full RAM tier lines (reference)
+                if (showFullRam)
+                    RAM_TIERS.forEach(function (t) {
+                        var y = scaleY(t.bytes)
+                        if (y < PAD.t - 5 || y > PAD.t + plotH + 5) return
+                        s +=
+                            '<line x1="' +
+                            PAD.l +
+                            '" y1="' +
+                            y +
+                            '" x2="' +
+                            (W - PAD.r) +
+                            '" y2="' +
+                            y +
+                            '" stroke="' +
+                            t.color +
+                            '" stroke-width="0.75" opacity="0.2" stroke-dasharray="2,4"/>'
+                    })
+                // effective RAM tier fills + lines
+                effRamTiers.forEach(function (t) {
+                    var y = scaleY(t.bytes)
+                    if (y < PAD.t - 5 || y > PAD.t + plotH + 5) return
+                    s +=
+                        '<rect x="' +
+                        PAD.l +
+                        '" y="' +
+                        y +
+                        '" width="' +
+                        plotW +
+                        '" height="' +
+                        (PAD.t + plotH - y) +
+                        '" fill="' +
+                        t.color +
+                        '" opacity="0.02"/>'
+                    s +=
+                        '<line x1="' +
+                        PAD.l +
+                        '" y1="' +
+                        y +
+                        '" x2="' +
+                        (W - PAD.r) +
+                        '" y2="' +
+                        y +
+                        '" stroke="' +
+                        t.color +
+                        '" stroke-width="1.5" opacity="0.4" stroke-dasharray="6,3"/>'
+                })
+                // full max RAM dashed line
+                if (showFullRam && fullMrD)
+                    s +=
+                        '<path d="' +
+                        fullMrD +
+                        '" fill="none" stroke="#10b981" stroke-width="0.75" stroke-dasharray="2,4" opacity="0.25"/>'
+                // max RAM area + line + dots
+                s += '<path d="' + mrArea + '" fill="rgba(16,185,129,0.025)"/>'
+                s +=
+                    '<path d="' +
+                    mrD +
+                    '" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="8,5" opacity="0.65"/>'
+                mrPts.forEach(function (p) {
+                    s +=
+                        '<circle cx="' +
+                        p.x +
+                        '" cy="' +
+                        p.y +
+                        '" r="3" fill="#10b981" stroke="#0b0b14" stroke-width="1.5"/>'
+                })
+                // scenario lines + dots
+                sLines.forEach(function (sl, si) {
+                    var sc = SCALE_SCENARIOS[si]
+                    s +=
+                        '<path d="' +
+                        sl.d +
+                        '" fill="none" stroke="' +
+                        sc.color +
+                        '" stroke-width="2.5" opacity="0.85"/>'
+                    sl.pts.forEach(function (p) {
+                        s +=
+                            '<circle cx="' +
+                            p.x +
+                            '" cy="' +
+                            p.y +
+                            '" r="3.5" fill="' +
+                            sc.color +
+                            '" stroke="#0b0b14" stroke-width="1.5"/>'
+                    })
+                })
+                // crossover diamonds
+                allData.forEach(function (data, si) {
+                    effRamTiers.forEach(function (t) {
+                        var co = crossoverYear(data, t.bytes, startYear)
+                        if (!co) return
+                        var cx = scaleX(co.calYear),
+                            cy = scaleY(t.bytes)
+                        s +=
+                            '<g transform="translate(' +
+                            cx +
+                            ',' +
+                            cy +
+                            ')"><polygon points="0,-5.5 5.5,0 0,5.5 -5.5,0" fill="#ef4444" stroke="#0b0b14" stroke-width="1.5" filter="url(#gl)"/></g>'
+                    })
+                })
+                // axes
+                s +=
+                    '<line x1="' +
+                    PAD.l +
+                    '" y1="' +
+                    PAD.t +
+                    '" x2="' +
+                    PAD.l +
+                    '" y2="' +
+                    (PAD.t + plotH) +
+                    '" stroke="rgba(255,255,255,0.1)"/>'
+                s +=
+                    '<line x1="' +
+                    PAD.l +
+                    '" y1="' +
+                    (PAD.t + plotH) +
+                    '" x2="' +
+                    (W - PAD.r) +
+                    '" y2="' +
+                    (PAD.t + plotH) +
+                    '" stroke="rgba(255,255,255,0.1)"/>'
+                // x-axis ticks and labels
+                for (var xi = 0; xi < years; xi++) {
+                    var xx = scaleX(startYear + xi)
+                    s +=
+                        '<line x1="' +
+                        xx +
+                        '" y1="' +
+                        (PAD.t + plotH) +
+                        '" x2="' +
+                        xx +
+                        '" y2="' +
+                        (PAD.t + plotH + 4) +
+                        '" stroke="rgba(255,255,255,0.15)"/>'
+                    s +=
+                        '<text x="' +
+                        xx +
+                        '" y="' +
+                        (PAD.t + plotH + 16) +
+                        '" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10" font-weight="600" font-family="var(--mono)">' +
+                        (startYear + xi) +
+                        '</text>'
+                    s +=
+                        '<text x="' +
+                        xx +
+                        '" y="' +
+                        (PAD.t + plotH + 27) +
+                        '" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="var(--mono)">Y' +
+                        (xi + 1) +
+                        '</text>'
+                }
+                // RAM tier labels on left
+                effRamTiers.forEach(function (t) {
+                    var y = scaleY(t.bytes)
+                    if (y < PAD.t - 5 || y > PAD.t + plotH + 5) return
+                    s +=
+                        '<rect x="2" y="' +
+                        (y - 8) +
+                        '" width="' +
+                        (PAD.l - 6) +
+                        '" height="16" rx="3" fill="' +
+                        t.color +
+                        '" opacity="0.12"/>'
+                    s +=
+                        '<text x="' +
+                        (PAD.l - 8) +
+                        '" y="' +
+                        (y + 4) +
+                        '" text-anchor="end" fill="' +
+                        t.color +
+                        '" font-size="8" font-family="var(--mono)" font-weight="700">' +
+                        t.label +
+                        ' ' +
+                        fmtB(t.bytes) +
+                        '</text>'
+                })
+                // right label
+                s +=
+                    '<text x="' +
+                    (W - PAD.r + 6) +
+                    '" y="' +
+                    (mrPts[mrPts.length - 1].y + 4) +
+                    '" fill="#10b981" font-size="8" font-family="var(--mono)" font-weight="700">&#x1F9E0; Cache RAM</text>'
+                // y-axis label
+                s +=
+                    '<text x="12" y="' +
+                    (PAD.t + plotH / 2) +
+                    '" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="var(--mono)" transform="rotate(-90,12,' +
+                    (PAD.t + plotH / 2) +
+                    ')">Working-Set Cache Size (log scale)</text>'
+                // data labels
+                dLabels.forEach(function (lbl) {
+                    var aw = lbl.text.length * (lbl.size * 0.56)
+                    var px =
+                        lbl.anchor === 'end' ? lbl.x - aw - 2 : lbl.anchor === 'middle' ? lbl.x - aw / 2 - 2 : lbl.x - 2
+                    if (lbl.bg)
+                        s +=
+                            '<rect x="' +
+                            px +
+                            '" y="' +
+                            (lbl.y - lbl.size + 1) +
+                            '" width="' +
+                            (aw + 4) +
+                            '" height="' +
+                            (lbl.size + 3) +
+                            '" rx="2" fill="#0b0b14" opacity="0.85"/>'
+                    s +=
+                        '<text x="' +
+                        lbl.x +
+                        '" y="' +
+                        lbl.y +
+                        '" text-anchor="' +
+                        lbl.anchor +
+                        '" fill="' +
+                        lbl.fill +
+                        '" font-size="' +
+                        lbl.size +
+                        '" font-weight="' +
+                        lbl.w +
+                        '" font-family="var(--mono)">' +
+                        lbl.text +
+                        '</text>'
+                })
+                s += '</svg>'
+                return s
+            }
+
+            // ─── STORAGE BREAKDOWN BAR ─────────────────────────────────
+            function renderBreakdownBar(allData, idxBytes) {
+                var isAgent = presetKey === 'agent-memory'
+                var rows = SCALE_SCENARIOS.map(function (sc, si) {
+                    var d = allData[si][years - 1]
+                    var entries = d.uniqueTemplates
+                    var mul = replicas * tenants
+                    var memB = entries * (templateBytes + 256 + idxBytes) * mul
+                    var artB = entries * traceBytes * mul
+                    return {
+                        sc: sc,
+                        entries: entries,
+                        mul: mul,
+                        memB: memB,
+                        artB: artB,
+                        total: memB + artB,
+                    }
+                })
+                var maxTotal = Math.max.apply(
+                    null,
+                    rows.map(function (r) {
+                        return r.total
+                    }),
+                )
+                if (maxTotal === 0) return ''
+                var logMax = Math.log10(maxTotal)
+                function barWidthPct(total) {
+                    if (total <= 0) return 0
+                    var logVal = Math.log10(total)
+                    var logFrac = logVal / logMax
+                    var linFrac = total / maxTotal
+                    var mixed = 0.6 * logFrac + 0.4 * linFrac
+                    return Math.max(8, mixed * 100)
+                }
+                var h =
+                    '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px 14px;margin-top:10px">'
+                h +=
+                    '<div style="font-size:9px;color:rgba(255,255,255,0.82);font-weight:600;margin-bottom:10px">Storage breakdown — end year, absolute scale</div>'
+                rows.forEach(function (r) {
+                    if (r.total === 0) return
+                    var pct = barWidthPct(r.total)
+                    var memFrac = r.memB / r.total
+                    var artFrac = r.artB / r.total
+                    h += '<div style="margin-bottom:10px">'
+                    h += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:3px">'
+                    h +=
+                        '<span style="font-size:9px;color:' +
+                        r.sc.color +
+                        ';font-weight:700;width:80px;flex-shrink:0">' +
+                        r.sc.label +
+                        '</span>'
+                    h += '<span style="font-size:10px;color:#fff;font-weight:700">' + fmtB(r.total) + '</span>'
+                    h +=
+                        '<span style="font-size:8px;color:rgba(255,255,255,0.78)">(' +
+                        fmtN(r.entries) +
+                        ' entries' +
+                        (r.mul > 1 ? ' &times; ' + fmtN(r.mul) + ' copies' : '') +
+                        ')</span>'
+                    h += '</div>'
+                    h +=
+                        '<div style="width:' +
+                        pct +
+                        '%;display:flex;height:20px;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);transition:width 0.3s ease">'
+                    if (memFrac > 0) {
+                        h +=
+                            '<div style="width:' +
+                            memFrac * 100 +
+                            '%;min-width:2px;background:linear-gradient(135deg,#22d3ee,#a78bfa);display:flex;align-items:center;justify-content:center">'
+                        if (memFrac > 0.15 && pct > 25)
+                            h +=
+                                '<span style="font-size:7px;color:#0b0b14;font-weight:700">RAM ' +
+                                fmtBShort(r.memB) +
+                                '</span>'
+                        h += '</div>'
+                    }
+                    if (artFrac > 0) {
+                        h +=
+                            '<div style="width:' +
+                            artFrac * 100 +
+                            '%;min-width:2px;background:' +
+                            (isAgent ? 'linear-gradient(135deg,#ef4444,#f97316)' : 'rgba(255,255,255,0.08)') +
+                            ';display:flex;align-items:center;justify-content:center">'
+                        if (artFrac > 0.15 && pct > 25)
+                            h +=
+                                '<span style="font-size:7px;color:' +
+                                (isAgent ? '#0b0b14' : 'rgba(255,255,255,0.82)') +
+                                ';font-weight:700">Disk ' +
+                                fmtBShort(r.artB) +
+                                '</span>'
+                        h += '</div>'
+                    }
+                    h += '</div></div>'
+                })
+                // legend
+                h += '<div style="display:flex;gap:16px;margin-top:6px">'
+                h +=
+                    '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:linear-gradient(135deg,#22d3ee,#a78bfa)"></div><span style="font-size:8px;color:rgba(255,255,255,0.82)">In-memory (templates + index + meta)</span></div>'
+                if (traceBytes > 0)
+                    h +=
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:' +
+                        (isAgent ? 'linear-gradient(135deg,#ef4444,#f97316)' : 'rgba(255,255,255,0.12)') +
+                        '"></div><span style="font-size:8px;color:rgba(255,255,255,0.82)">Persistent artifacts — disk-native</span></div>'
+                h += '</div>'
+                h +=
+                    '<div style="font-size:8px;color:rgba(255,255,255,0.7);margin-top:4px">Bar width reflects total footprint (blended log/linear scale). Compare bar lengths across scenarios.</div>'
+                h += '</div>'
+                return h
+            }
+
+            // ─── CHART LEGEND ──────────────────────────────────────────
+            function renderChartLegend(effRamTiers) {
+                var h = '<div style="display:flex;gap:10px;justify-content:center;margin-top:8px;flex-wrap:wrap">'
+                SCALE_SCENARIOS.forEach(function (sc) {
+                    h +=
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:3px;background:' +
+                        sc.color +
+                        ';border-radius:2px"></div><span style="font-size:8px;color:rgba(255,255,255,0.82)">' +
+                        sc.label +
+                        ' (' +
+                        (sc.hitCeiling * 100).toFixed(0) +
+                        '%)</span></div>'
+                })
+                effRamTiers.forEach(function (t) {
+                    h +=
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:1.5px;background:' +
+                        t.color +
+                        ';opacity:0.6"></div><span style="font-size:8px;color:rgba(255,255,255,0.9)">' +
+                        t.label +
+                        (budgetFrac < 1 ? ' (' + (budgetFrac * 100).toFixed(0) + '%)' : '') +
+                        '</span></div>'
+                })
+                if (budgetFrac < 1)
+                    h +=
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:0.75px;background:#f97316;opacity:0.3"></div><span style="font-size:8px;color:rgba(255,255,255,0.78)">Full RAM (ref)</span></div>'
+                h +=
+                    '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:2px;border-top:2px dashed #10b981"></div><span style="font-size:8px;color:rgba(255,255,255,0.9)">' +
+                    (budgetFrac < 1
+                        ? '&#x1F9E0; Budget (' + (budgetFrac * 100).toFixed(0) + '%)'
+                        : '&#x1F9E0; All RAM') +
+                    '</span></div>'
+                h +=
+                    '<div style="display:flex;align-items:center;gap:4px"><svg width="8" height="8"><polygon points="4,0 8,4 4,8 0,4" fill="#ef4444"/></svg><span style="font-size:8px;color:rgba(255,255,255,0.9)">SSD crossover</span></div>'
+                h += '</div>'
+                return h
+            }
+
+            // ─── DATA TABLE ─────────────────────────────────────────
+            function renderDataTable(allData) {
+                var h =
+                    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="text-align:left;padding:5px 8px;color:rgba(255,255,255,0.9)">Year</th>'
+                SCALE_SCENARIOS.forEach(function (sc) {
+                    h +=
+                        '<th style="text-align:right;padding:5px 5px;color:' +
+                        sc.color +
+                        ';font-weight:700;border-left:1px solid rgba(255,255,255,0.06)">Templates</th>'
+                    h += '<th style="text-align:right;padding:5px 5px;color:' + sc.color + ';font-weight:600">Size</th>'
+                    h +=
+                        '<th style="text-align:right;padding:5px 5px;color:' + sc.color + ';font-weight:600">Hit %</th>'
+                })
+                h += '</tr></thead><tbody>'
+                for (var yi = 0; yi < years; yi++) {
+                    h +=
+                        '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:4px 8px;color:rgba(255,255,255,0.82)">' +
+                        (startYear + yi) +
+                        '</td>'
+                    allData.forEach(function (data, si) {
+                        var p = data[yi]
+                        h +=
+                            '<td style="text-align:right;padding:4px 5px;color:' +
+                            SCALE_SCENARIOS[si].color +
+                            ';border-left:1px solid rgba(255,255,255,0.06)">' +
+                            fmtN(p.uniqueTemplates) +
+                            '</td>'
+                        h +=
+                            '<td style="text-align:right;padding:4px 5px;color:rgba(255,255,255,0.88)">' +
+                            fmtB(p.storageBytes) +
+                            '</td>'
+                        var hc = p.hitRate > 0.5 ? '#22c55e' : p.hitRate > 0.3 ? '#eab308' : '#f97316'
+                        h +=
+                            '<td style="text-align:right;padding:4px 5px;color:' +
+                            hc +
+                            '">' +
+                            (p.hitRate * 100).toFixed(1) +
+                            '%</td>'
+                    })
+                    h += '</tr>'
+                }
+                h += '</tbody></table></div>'
+                return h
+            }
+
+            // ─── CROSSOVER TABLE ───────────────────────────────────────
+            function renderCrossoverTable(allData, effRamTiers, effMaxRamFn) {
+                var tiers = effRamTiers.concat([
+                    {
+                        key: 'maxram',
+                        label: '&#x1F9E0; All RAM',
+                        bytes: null,
+                        color: '#10b981',
+                    },
+                ])
+                var h =
+                    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08)"><th style="text-align:left;padding:5px 8px;color:rgba(255,255,255,0.9)"></th>'
+                tiers.forEach(function (t) {
+                    h +=
+                        '<th style="text-align:center;padding:5px 8px;color:' +
+                        t.color +
+                        ';font-weight:700">' +
+                        t.label +
+                        '<div style="font-size:8px;font-weight:500;opacity:0.7">' +
+                        (t.bytes ? fmtB(t.bytes) : 'per-year max') +
+                        '</div></th>'
+                })
+                h += '</tr></thead><tbody>'
+                SCALE_SCENARIOS.forEach(function (sc, si) {
+                    h +=
+                        '<tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px"><span style="color:' +
+                        sc.color +
+                        ';font-weight:700">' +
+                        sc.label +
+                        '</span><div style="font-size:8px;color:rgba(255,255,255,0.9)">Y1: ' +
+                        fmtB(allData[si][0].storageBytes) +
+                        '</div></td>'
+                    tiers.forEach(function (t) {
+                        var ramFn = t.bytes != null ? t.bytes : effMaxRamFn
+                        var co = crossoverYear(allData[si], ramFn, startYear)
+                        if (!co) {
+                            h +=
+                                '<td style="text-align:center;padding:6px 8px;color:#22c55e;font-weight:700">&#10003; Fits</td>'
+                        } else {
+                            var col = co.year <= 1 ? '#ef4444' : co.year <= 3 ? '#fbbf24' : '#f97316'
+                            var bg = co.year <= 1 ? 'rgba(239,68,68,0.05)' : 'transparent'
+                            h +=
+                                '<td style="text-align:center;padding:6px 8px;color:' +
+                                col +
+                                ';font-weight:700;background:' +
+                                bg +
+                                '">' +
+                                (co.year <= 1 ? 'DAY 1' : 'Y' + co.year + ' (' + co.calYear + ')') +
+                                '</td>'
+                        }
+                    })
+                    h += '</tr>'
+                })
+                h += '</tbody></table></div>'
+                return h
+            }
+
+            // ─── BACKGROUND PAGE ───────────────────────────────────────
+            function renderBackgroundPage() {
+                var h = ''
+                // What is this
+                h += '<div class="card"><div class="sec-title">What this model does</div><div class="sec-body">'
+                h +=
+                    'Agentic AI systems cache intermediate work products — plan templates, embedding indexes, execution summaries, tool call transcripts — so they can reuse past reasoning instead of re-computing from scratch. As these caches grow, they eventually outstrip available RAM and require SSD or object-store offloading.'
+                h +=
+                    '<br><br>This model projects the <strong style="color:#fff">steady-state working-set size</strong> of agentic caches over time, across three deployment scales (single app, enterprise, hyperscale). It answers one question: <em style="color:#22d3ee">when does the cache footprint exceed available RAM, forcing SSD?</em>'
+                h +=
+                    '<br><br>The leanest projection uses <a href="https://arxiv.org/abs/2506.14852" target="_blank" rel="noopener" style="color:#22d3ee;text-decoration:none">APC</a> (Agentic Plan Cache, Zhang et al., NeurIPS 2025) as the baseline — exact keyword matching with minimal plan templates that saturate quickly and stay small. Richer presets add embedding-based fuzzy matching, execution artifacts, multi-tenant isolation, and replication to show what actually drives storage into SSD territory.'
+                h += '</div></div>'
+
+                // Cache vs archive
+                h += '<div class="card"><div class="sec-title">Cache vs. archive: what lives where</div>'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'
+                h +=
+                    '<div style="padding:12px 14px;background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.12);border-radius:8px">'
+                h +=
+                    '<div style="font-size:11px;color:#22d3ee;font-weight:700;margin-bottom:6px">&#x1F4C4; Plan templates</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6">Structured JSON with steps, keywords, and metadata. ~2 KiB each. These are the core cache entries — always in <strong style="color:#fff">host RAM</strong> for sub-millisecond lookup. The working set saturates because the number of distinct task patterns in any domain is finite.</div>'
+                h +=
+                    '<div style="font-size:9px;color:rgba(255,255,255,0.82);margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Placement: <strong style="color:#22d3ee">RAM (always)</strong></div>'
+                h += '</div>'
+                h +=
+                    '<div style="padding:12px 14px;background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.12);border-radius:8px">'
+                h +=
+                    '<div style="font-size:11px;color:#a78bfa;font-weight:700;margin-bottom:6px">&#x1F50D; Vector index</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6">When semantic (fuzzy) matching is enabled, each entry gets an embedding vector (384–3072 dims) plus HNSW graph edges for approximate nearest-neighbor search. Overhead = (raw vector + ' +
+                    INDEX_FIXED_PER_NODE +
+                    'B fixed) &times; overhead multiplier.</div>'
+                h +=
+                    '<div style="font-size:9px;color:rgba(255,255,255,0.82);margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Placement: <strong style="color:#a78bfa">RAM preferred</strong> — may spill to SSD when large</div>'
+                h += '</div>'
+                h +=
+                    '<div style="padding:12px 14px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.12);border-radius:8px">'
+                h +=
+                    '<div style="font-size:11px;color:#ef4444;font-weight:700;margin-bottom:6px">&#x1F4CB; Rich artifacts</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6">Execution logs, tool call transcripts, reward traces, full reasoning chains. These grow linearly with usage and do not saturate. In production they are typically written to <strong style="color:#fff">SSD or object storage</strong>, not kept in the hot cache.</div>'
+                h +=
+                    '<div style="font-size:9px;color:rgba(255,255,255,0.82);margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Placement: <strong style="color:#ef4444">SSD / object store</strong> (default)</div>'
+                h += '</div></div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.5">The model includes "per-entry extras" as a proxy for the total cost of rich artifacts co-located with cache entries. In practice these are usually on disk, but modeling them in the working set shows the full per-entry cost and helps size the total storage footprint.</div>'
+                h += '</div>'
+
+                // How the math works
+                h += '<div class="card"><div class="sec-title">How the math works</div>'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+                h +=
+                    '<div><div style="font-size:11px;color:#a78bfa;font-weight:700;margin-bottom:6px">&#x1F4D0; Saturation curve</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6"><strong style="color:#fff">U(t) = cumulative_ceiling &times; (1 &minus; e<sup>&minus;queries/ceiling</sup>)</strong><br><br>The taxonomy ceiling is cumulative: new verticals add to the total discovered template space, never subtract. Once saturated, more traffic only improves the hit rate without increasing storage. Validated against APC Table 4: cache size 50&rarr;100 barely changes hit rate (45%&rarr;46%). This applies to any template-keyed or keyword-keyed cache, not just APC.</div></div>'
+                h +=
+                    '<div><div style="font-size:11px;color:#22d3ee;font-weight:700;margin-bottom:6px">&#x1F4CA; Hit-rate ceilings</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6">Each scenario has a maximum achievable hit rate set by workload heterogeneity:<br><br><span style="color:#22d3ee">Single App 65%</span> — narrow domain, high pattern reuse<br><span style="color:#a78bfa">Enterprise 48%</span> — matches APC FinanceBench (46–48%)<br><span style="color:#f472b6">Hyperscale 35%</span> — heterogeneous tasks (per GAIA: "many task descriptions are highly specific and rarely recur")<br><br>Hit rate is a <em>warm-up proxy for storage sizing</em> — it tracks cache fill progress, not production query performance.</div></div>'
+                h +=
+                    '<div><div style="font-size:11px;color:#f472b6;font-weight:700;margin-bottom:6px">&#x1F4E6; Per-entry bytes</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6">Each cache entry = template (2 KiB default) + metadata (256 B) + vector index (if enabled) + per-entry extras (logs/transcripts proxy).<br><br>Index overhead = (raw_vector + ' +
+                    INDEX_FIXED_PER_NODE +
+                    'B fixed per node) &times; multiplier. The fixed cost covers HNSW graph edges, alignment, and entry metadata that does not scale with vector dimensionality.</div></div>'
+                h +=
+                    '<div><div style="font-size:11px;color:#22c55e;font-weight:700;margin-bottom:6px">&#x1F3D7; What forces SSD</div>'
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.6">Lean plan templates alone stay in low GiB even at hyperscale. The multipliers that push storage past RAM:<br><br><strong style="color:#fff">Replication</strong> — 3–6x for HA / multi-region<br><strong style="color:#fff">Tenant isolation</strong> — 1K–10K separate caches<br><strong style="color:#fff">Vector indexes</strong> — HNSW is memory-hungry<br><strong style="color:#fff">Rich artifacts</strong> — execution logs, reward traces<br><br>Total storage = base &times; tenants &times; replicas.</div></div>'
+                h += '</div></div>'
+
+                // RAM budget
+                h +=
+                    '<div class="card"><div class="sec-title">RAM budget vs. total system RAM</div><div class="sec-body">'
+                h +=
+                    'The chart compares cache size against RAM tier lines. But in production, caches share system memory with model weights, KV cache, activations, the OS page cache, and other services. The <strong style="color:#fff">cache RAM fraction</strong> slider lets you set what percentage of system RAM is actually available for the cache.'
+                h +=
+                    '<br><br>At 100%, the lines represent a dedicated cache box. At 5%, they represent a small sidecar allocation on a GPU inference node. The chart shows both the full system RAM (thin dashed reference) and the budget-adjusted line (thick dashed) when the fraction is below 100%.'
+                h += '</div></div>'
+
+                // Scenario presets
+                h +=
+                    '<div class="card"><div class="sec-title">Scenario presets — from lean plan cache to full agent memory</div>'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px">'
+                var presetCards = [
+                    {
+                        color: '#22d3ee',
+                        bg: 'rgba(34,211,238,0.04)',
+                        border: 'rgba(34,211,238,0.1)',
+                        icon: '&#x1F52C;',
+                        title: 'APC baseline (exact match)',
+                        body: "Leanest agentic cache: APC's published design. Exact keyword matching, no embeddings. Single shared cache, no replication. Plan caching does not force SSD — even at hyperscale, working set stays in low GiB.",
+                        tags: 'Embed: none &middot; Extras: none &middot; Replicas: 1 &middot; Tenants: 1',
+                    },
+                    {
+                        color: '#a78bfa',
+                        bg: 'rgba(167,139,250,0.04)',
+                        border: 'rgba(167,139,250,0.1)',
+                        icon: '&#x1F3ED;',
+                        title: 'Production shared cache (Replicated)',
+                        body: 'Beyond APC. Semantic matching via MiniLM embeddings catches paraphrased queries. Exec summaries stored per entry. Replicated 3x across availability zones. Shared cache, not multi-tenant. Replication adds HA — it is separate from the embedding decision.',
+                        tags: 'Embed: MiniLM 384d &middot; Extras: 2 KiB &middot; Replicas: 3 &middot; Tenants: 1',
+                    },
+                    {
+                        color: '#f472b6',
+                        bg: 'rgba(244,114,182,0.04)',
+                        border: 'rgba(244,114,182,0.1)',
+                        icon: '&#x1F3E2;',
+                        title: 'Multi-tenant SaaS (partitioned caches)',
+                        body: 'Per-tenant isolation for regulatory compliance or data separation. "Small x many" starts mattering: 1K–10K tenants each with a modest cache, replicated 3x. Tool transcripts stored for audit trails.',
+                        tags: 'Embed: MiniLM/OAI-small &middot; Extras: 4 KiB &middot; Replicas: 3 &middot; Tenants: 1K–10K',
+                    },
+                    {
+                        color: '#ef4444',
+                        bg: 'rgba(239,68,68,0.04)',
+                        border: 'rgba(239,68,68,0.1)',
+                        icon: '&#x1F525;',
+                        title: 'Full agent memory store',
+                        body: 'No longer a plan cache — persistent agent memory. Full 3072-dim embeddings with heavy HNSW, complete execution transcripts and tool call logs, 6x multi-region replication. Crosses into SSD territory — well beyond lean plan caching.',
+                        tags: 'Embed: OAI-large 3072d &middot; Extras: 32 KiB &middot; Replicas: 6 &middot; Tenants: 1',
+                    },
+                ]
+                presetCards.forEach(function (p) {
+                    h +=
+                        '<div style="padding:10px 12px;background:' +
+                        p.bg +
+                        ';border:1px solid ' +
+                        p.border +
+                        ';border-radius:8px">'
+                    h +=
+                        '<div style="font-size:10px;color:' +
+                        p.color +
+                        ';font-weight:700;margin-bottom:4px">' +
+                        p.icon +
+                        ' ' +
+                        p.title +
+                        '</div>'
+                    h +=
+                        '<div style="font-size:9.5px;color:rgba(255,255,255,0.88);line-height:1.5">' + p.body + '</div>'
+                    h += '<div style="font-size:8.5px;color:rgba(255,255,255,0.82);margin-top:4px">' + p.tags + '</div>'
+                    h += '</div>'
+                })
+                h += '</div></div>'
+
+                // Glossary
+                h += '<div class="card"><div class="sec-title">Key terms</div>'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px">'
+                var glossary = [
+                    {
+                        term: 'Hit ceiling',
+                        def: 'Maximum steady-state reuse rate for a given workload. Determined by how heterogeneous the task distribution is — narrow domains hit higher ceilings.',
+                    },
+                    {
+                        term: 'Cumulative ceiling',
+                        def: 'Total discoverable unique templates across all domain verticals seen so far. Grows with domain expansion, never shrinks.',
+                    },
+                    {
+                        term: 'Index overhead',
+                        def: 'ANN graph + metadata cost beyond raw vector bytes. Includes HNSW edges, alignment padding, and per-node bookkeeping.',
+                    },
+                    {
+                        term: 'Extras per entry',
+                        def: 'Persistent artifact payload proxy. Models the size of execution logs, tool transcripts, or reward traces stored alongside each template.',
+                    },
+                    {
+                        term: 'Replication factor',
+                        def: 'Number of cache copies maintained for high availability or multi-region serving. Separate from embedding choice — you can replicate without embeddings.',
+                    },
+                    {
+                        term: 'Saturation',
+                        def: 'The point at which the cache has discovered most unique patterns in the domain. Beyond saturation, new queries hit existing entries rather than creating new ones.',
+                    },
+                ]
+                glossary.forEach(function (g) {
+                    h +=
+                        '<div style="padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.04)">'
+                    h += '<div style="font-size:10px;color:#fff;font-weight:700;margin-bottom:2px">' + g.term + '</div>'
+                    h += '<div style="font-size:9.5px;color:rgba(255,255,255,0.82);line-height:1.5">' + g.def + '</div>'
+                    h += '</div>'
+                })
+                h += '</div></div>'
+
+                // Model limits
+                h +=
+                    '<div style="background:rgba(167,139,250,0.03);border:1px solid rgba(167,139,250,0.08);border-radius:8px;padding:14px 18px">'
+                h +=
+                    '<div style="font-size:9px;color:#a78bfa;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Model basis and limits</div>'
+                h += '<div style="font-size:10px;color:rgba(255,255,255,0.88);line-height:1.55">'
+                h +=
+                    '<strong style="color:rgba(255,255,255,0.85)">Grounded in data:</strong> Saturation curve validated against APC Table 4. Per-entry bytes from real embedding specs. Hit-rate ceilings calibrated from APC FinanceBench (46%) and GAIA. Vector index overhead includes ' +
+                    INDEX_FIXED_PER_NODE +
+                    'B fixed per-node cost. Cumulative taxonomy ceiling prevents saturation loss.'
+                h +=
+                    '<br><strong style="color:rgba(255,255,255,0.85)">User-supplied estimates:</strong> Domain keyword ceilings are the primary storage driver and are inherently domain-specific. Agent adoption growth rates and multi-tenant counts vary by deployment. SSD crossover is driven by the multiplier stack (tenants &times; replicas &times; entry richness), not by template count alone.'
+                h += '</div></div>'
+
+                return h
+            }
+
+            // ─── SOURCES PAGE ───────────────────────────────────────
+            function renderSourcesPage() {
+                var h = ''
+                function srcHead(color, text) {
+                    return (
+                        '<div style="font-size:10px;color:' +
+                        color +
+                        ';font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">' +
+                        text +
+                        '</div>'
+                    )
+                }
+                var srcBody = 'font-size:10px;color:rgba(255,255,255,0.82);line-height:1.8'
+                function a(href, text) {
+                    return (
+                        '<a href="' +
+                        href +
+                        '" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.8);text-decoration:none">' +
+                        text +
+                        '</a>'
+                    )
+                }
+
+                // Cache architecture
+                h += '<div class="card">' + srcHead('#22d3ee', 'Cache architecture &amp; saturation model')
+                h += '<div style="' + srcBody + '">'
+                h +=
+                    a('https://arxiv.org/abs/2506.14852', 'APC: Agentic Plan Cache (Zhang et al., NeurIPS 2025)') +
+                    ' — arxiv 2506.14852v2. Table 4: cache saturation behavior. Table 5: fuzzy matching latency. Table 7: cold start hit rates. &sect;3.2: keyword vs embedding design choices. &sect;4.4: scalability analysis showing diminishing returns beyond saturation.'
+                h +=
+                    '<br>' +
+                    a('https://openreview.net/pdf?id=n4V3MSqK77', 'APC OpenReview (camera-ready)') +
+                    ' — NeurIPS 2025 proceedings version with final figures and supplementary material.'
+                h += '</div></div>'
+
+                // Embeddings
+                h += '<div class="card">' + srcHead('#a78bfa', 'Embedding dimensions &amp; vector index overhead')
+                h += '<div style="' + srcBody + '">'
+                h +=
+                    a('https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2', 'all-MiniLM-L6-v2') +
+                    ' — 384-dim embeddings, Sentence Transformers (HuggingFace). The fuzzy matching baseline used in APC Table 5.'
+                h +=
+                    '<br>' +
+                    a('https://platform.openai.com/docs/guides/embeddings', 'OpenAI text-embedding-3') +
+                    ' — small: 1,536-dim, large: 3,072-dim. Priced per token; the model uses raw vector bytes (dims &times; 4B float32) for storage calculations.'
+                h +=
+                    '<br>HNSW overhead estimates from ' +
+                    a('https://github.com/facebookresearch/faiss/wiki', 'Faiss') +
+                    ' and ' +
+                    a('https://milvus.io/docs/index.md', 'Milvus') +
+                    ' documentation. Per-node fixed cost (' +
+                    INDEX_FIXED_PER_NODE +
+                    'B) covers graph edges, alignment padding, and entry metadata.'
+                h += '</div></div>'
+
+                // RAM roadmap
+                h += '<div class="card">' + srcHead('#22c55e', 'Max RAM roadmap')
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.9);margin-bottom:10px">Per-server addressable memory is expanding via higher-density DIMMs and CXL-attached memory expansion. The model\'s per-year max RAM roadmap (4 TiB in 2025 &rarr; 96 TiB by 2034) is informed by announced products and disclosed timelines from the three major DRAM vendors.</div>'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+
+                var vendors = [
+                    {
+                        vendor: 'Micron',
+                        color: '#22c55e',
+                        items: [
+                            {
+                                href: 'https://www.micron.com/products/memory/dram-modules/mrdimm',
+                                text: 'Micron MRDIMM product page',
+                                note: '32–256 GB DDR5-8800 modules, Gen1 shipping 2H24',
+                            },
+                            {
+                                href: 'https://www.tomshardware.com/pc-components/ddr5/micron-plans-hbm4e-in-2028-256gb-ddr5-12800-ram-sticks-in-2026',
+                                text: "Micron roadmap (Tom's Hardware)",
+                                note: '256 GB DDR5-12800 MRDIMMs in 2026–27, CXL 2.0 memory expansion',
+                            },
+                            {
+                                href: 'https://www.tomshardware.com/pc-components/ddr5/micron-shows-massive-256gb-ddr5-8800-memory-sticks-high-capacity-20-watt-mcrdimm-modules-for-next-generation-servers-come-in-different-flavors',
+                                text: '256 GB MCRDIMM at GTC 2024',
+                                note: '6 TB per 2-socket Granite Rapids server (24 slots x 256 GB)',
+                            },
+                            {
+                                href: 'https://files.futurememorystorage.com/proceedings/2025/20250807_DRAM-303-1_Potter.pdf',
+                                text: 'Micron MRDIMM at FMS 2025 (PDF)',
+                                note: 'Bandwidth and energy benchmarks vs RDIMM',
+                            },
+                        ],
+                    },
+                    {
+                        vendor: 'SK hynix',
+                        color: '#22d3ee',
+                        items: [
+                            {
+                                href: 'https://news.skhynix.com/sk-hynix-completes-customer-validation-of-cxl-based-ddr5/',
+                                text: 'SK hynix CXL 2.0 CMM-DDR5 validation',
+                                note: '96 GB CXL module validated; 128 GB (32 Gb 1bnm) in progress',
+                            },
+                            {
+                                href: 'https://news.skhynix.com/sk-hynix-develops-ddr5-dram-cxltm-memory-to-expand-the-cxl-memory-ecosystem/',
+                                text: 'SK hynix DDR5 CXL memory ecosystem',
+                                note: '96 GB EDSFF E3.S modules, PCIe 5.0 x8, mass production 2023+',
+                            },
+                            {
+                                href: 'https://product.skhynix.com/products/cmm/cmm.go',
+                                text: 'SK hynix CMM product page',
+                                note: 'CXL Memory Module spec sheets',
+                            },
+                        ],
+                    },
+                    {
+                        vendor: 'Samsung',
+                        color: '#f472b6',
+                        items: [
+                            {
+                                href: 'https://news.samsung.com/global/samsung-develops-industrys-first-hkmg-based-ddr5-memory-ideal-for-bandwidth-intensive-advanced-computing-applications',
+                                text: 'Samsung HKMG DDR5 512 GB module',
+                                note: '8-layer TSV, DDR5-7200, first 512 GB RDIMM',
+                            },
+                            {
+                                href: 'https://news.samsung.com/global/samsung-electronics-introduces-industrys-first-512gb-cxl-memory-module',
+                                text: 'Samsung 512 GB CXL DRAM',
+                                note: 'Industry-first 512 GB CXL module, PCIe 5.0, EDSFF E3.S',
+                            },
+                            {
+                                href: 'https://semiconductor.samsung.com/cxl-memory/',
+                                text: 'Samsung CXL Memory (CMM-D)',
+                                note: 'CXL 2.0 memory pooling, multi-TB capacity expansion',
+                            },
+                            {
+                                href: 'https://www.tomshardware.com/news/samsung-talks-1tb-ddr5-modules-ddr5-7200',
+                                text: "Samsung 1 TB DDR5 roadmap (Tom's Hardware)",
+                                note: '32 Gb dies &rarr; 1 TB modules (2024), DDR5-7200',
+                            },
+                        ],
+                    },
+                    {
+                        vendor: 'Industry / Standards',
+                        color: '#eab308',
+                        items: [
+                            {
+                                href: 'https://www.serversimply.com/blog/mr-dimms-next-gen-memory',
+                                text: 'JEDEC MRDIMM standard overview',
+                                note: 'Gen1 8.8 GT/s &rarr; Gen2 12.8 GT/s &rarr; Gen3 17.6 GT/s',
+                            },
+                            {
+                                href: 'https://memverge.com/wp-content/uploads/Memory-Fabric-Forum-at-OCP-Global-Summit-2024-%E2%80%93-Montage-Technology.pdf',
+                                text: 'Montage MXC at OCP 2024 (PDF)',
+                                note: 'CXL controller roadmap, 1.28 TB CXL-attached memory noted',
+                            },
+                            {
+                                href: 'https://www.trendforce.com/news/2024/07/29/news-mrdimmmcrdimm-to-be-the-new-sought-afters-in-memory-field/',
+                                text: 'TrendForce: MRDIMM/MCRDIMM market outlook',
+                                note: 'Industry-wide MRDIMM adoption timeline and competitive landscape',
+                            },
+                        ],
+                    },
+                ]
+                vendors.forEach(function (v) {
+                    h +=
+                        '<div style="padding:10px 12px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);border-radius:8px">'
+                    h +=
+                        '<div style="font-size:10px;color:' +
+                        v.color +
+                        ';font-weight:700;margin-bottom:6px">' +
+                        v.vendor +
+                        '</div>'
+                    v.items.forEach(function (item) {
+                        h += '<div style="margin-bottom:5px">'
+                        h +=
+                            '<a href="' +
+                            item.href +
+                            '" target="_blank" rel="noopener" style="font-size:9.5px;color:rgba(255,255,255,0.92);text-decoration:none">' +
+                            item.text +
+                            '</a>'
+                        h +=
+                            '<div style="font-size:8.5px;color:rgba(255,255,255,0.82);padding-left:8px">' +
+                            item.note +
+                            '</div>'
+                        h += '</div>'
+                    })
+                    h += '</div>'
+                })
+                h += '</div>'
+                h +=
+                    '<div style="font-size:9px;color:rgba(255,255,255,0.88);margin-top:10px;line-height:1.5">Model RAM tiers: Small (256 GiB, single Redis node), Medium (1 TiB, enterprise cluster), Large (8 TiB, hyperscale distributed). Max per-year roadmap: 4 TiB (2025) &rarr; 96 TiB (2034).</div>'
+                h += '</div>'
+
+                // Agentic projections
+                h += '<div class="card">' + srcHead('#f472b6', 'Agentic workflow adoption &amp; market projections')
+                h +=
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.9);margin-bottom:10px">Market projections are cited for context on the scale and velocity of agentic AI deployment. This model does not incorporate market size directly — the projections inform the growth rate assumptions for agent adoption.</div>'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+                var mktSources = [
+                    {
+                        src: 'Gartner (Aug 2025)',
+                        href: 'https://www.gartner.com/en/newsroom/press-releases/2025-08-26-gartner-predicts-40-percent-of-enterprise-apps-will-feature-task-specific-ai-agents-by-2026-up-from-less-than-5-percent-in-2025',
+                        points: [
+                            '40% of enterprise apps with task-specific AI agents by 2026 (up from &lt;5%)',
+                            'Agentic AI driving ~30% of enterprise software revenue (~$450B) by 2035',
+                        ],
+                    },
+                    {
+                        src: 'Gartner (Jun 2025)',
+                        href: 'https://www.gartner.com/en/newsroom/press-releases/2025-06-25-gartner-predicts-over-40-percent-of-agentic-ai-projects-will-be-canceled-by-end-of-2027',
+                        points: [
+                            '33% of enterprise software with agentic AI by 2028',
+                            '15% of day-to-day work decisions made autonomously by 2028',
+                            '&gt;40% of agentic AI projects canceled by end of 2027 (cost/complexity)',
+                        ],
+                    },
+                    {
+                        src: 'Gartner Predictions 2026',
+                        href: 'https://www.gartner.com/en/articles/strategic-predictions-for-2026',
+                        points: [
+                            '90% of B2B buying AI-agent-intermediated by 2028',
+                            '$15T+ in B2B spending channeled through AI agent exchanges',
+                        ],
+                    },
+                    {
+                        src: 'MarketsandMarkets',
+                        href: 'https://www.marketsandmarkets.com/Market-Reports/ai-agents-market-15761548.html',
+                        points: [
+                            'AI agents market: $7.84B (2025) &rarr; $52.62B (2030)',
+                            'CAGR 46.3%, vertical AI agents segment at 62.7%',
+                        ],
+                    },
+                    {
+                        src: 'Grand View Research',
+                        href: 'https://www.grandviewresearch.com/industry-analysis/enterprise-agentic-ai-market-report',
+                        points: [
+                            'Enterprise agentic AI: $2.58B (2024) &rarr; $24.50B (2030)',
+                            'CAGR 46.2%, North America 39% share',
+                        ],
+                    },
+                    {
+                        src: 'Bain &amp; Company',
+                        href: 'https://www.bain.com/insights/2030-forecast-how-agentic-ai-will-reshape-us-retail-snap-chart/',
+                        points: [
+                            'US agentic commerce: $300–500B by 2030 (15–25% of e-commerce)',
+                            '30–45% of US consumers already using GenAI for product research',
+                        ],
+                    },
+                    {
+                        src: 'PRISM MediaWire (Jul 2025)',
+                        href: 'https://prismmediawire.com/agentic-ai-a-strategic-forecast-and-market-analysis-2025-2030/',
+                        points: [
+                            '$2.6–4.4T in annual GDP gains by 2030',
+                            'Enterprise CAGR consensus across firms: 41–57%',
+                        ],
+                    },
+                    {
+                        src: 'Capgemini / Statista',
+                        href: 'https://www.statista.com/statistics/1552183/global-agentic-ai-market-value/',
+                        points: [
+                            'Agentic AI market: $5.1B (2024) &rarr; $47B+ (2030)',
+                            'CAGR &gt;44% (Capgemini estimate)',
+                        ],
+                    },
+                ]
+                mktSources.forEach(function (s) {
+                    h +=
+                        '<div style="padding:10px 12px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);border-radius:8px">'
+                    h +=
+                        '<a href="' +
+                        s.href +
+                        '" target="_blank" rel="noopener" style="font-size:10px;color:#f472b6;font-weight:700;text-decoration:none;display:block;margin-bottom:4px">' +
+                        s.src +
+                        '</a>'
+                    s.points.forEach(function (pt) {
+                        h +=
+                            '<div style="font-size:9.5px;color:rgba(255,255,255,0.78);line-height:1.5;padding-left:10px;text-indent:-10px">&bull; ' +
+                            pt +
+                            '</div>'
+                    })
+                    h += '</div>'
+                })
+                h += '</div></div>'
+
+                h +=
+                    '<div style="font-size:8px;color:rgba(255,255,255,0.78);margin-top:8px">All storage units binary (GiB = 2&sup3;&#x2070;, TiB = 2&#x2074;&#x2070;). Market projections for deployment-scale context only.</div>'
+                return h
+            }
+
+            // ═══ UPDATE ALL ════════════════════════════════════════════
+            function updateAll() {
+                var embProfile = EMBEDDING_PROFILES[embIdx]
+                var rawEmbBytes = embProfile.bytes
+                var idxBytes = rawEmbBytes > 0 ? Math.ceil((rawEmbBytes + INDEX_FIXED_PER_NODE) * indexOverhead) : 0
+                var entryBytes = templateBytes + 256 + idxBytes + traceBytes
+
+                var effRamTiers = RAM_TIERS.map(function (t) {
+                    return {
+                        key: t.key,
+                        label: t.label,
+                        bytes: Math.floor(t.bytes * budgetFrac),
+                        color: t.color,
+                        desc: t.desc,
+                    }
+                })
+                function effMaxRamFn(yr) {
+                    return Math.floor(maxRamBytes(yr) * budgetFrac)
+                }
+
+                var allData = SCALE_SCENARIOS.map(function (sc) {
+                    return computeCache(
+                        sc,
+                        years,
+                        embProfile,
+                        templateBytes,
+                        traceBytes,
+                        domainGrowth,
+                        agentGrowth,
+                        replicas,
+                        tenants,
+                        indexOverhead,
+                    )
+                })
+
+                // Update slider value displays
+                $('v-template').textContent = (templateBytes / 1024).toFixed(1) + ' KiB'
+                $('v-trace').textContent =
+                    traceBytes === 0
+                        ? 'None'
+                        : traceBytes < 2048
+                          ? (traceBytes / 1024).toFixed(1) + ' KiB'
+                          : (traceBytes / 1024).toFixed(0) + ' KiB'
+                $('v-replicas').textContent = replicas + 'x'
+                $('v-tenants').textContent = tenants === 1 ? '1 (shared)' : fmtN(tenants)
+                $('v-idxoh').textContent = embIdx === 0 ? 'N/A' : indexOverhead.toFixed(2) + 'x'
+                $('v-budget').textContent = (budgetFrac * 100).toFixed(0) + '%'
+                $('v-dg').textContent = (domainGrowth * 100).toFixed(0) + '% YoY'
+                $('v-ag').textContent = (agentGrowth * 100).toFixed(0) + '% YoY'
+                $('v-years').textContent = years + ' (' + startYear + '–' + (startYear + years - 1) + ')'
+
+                // Per entry info
+                var pei =
+                    'Per entry: <strong style="color:rgba(255,255,255,0.9);margin-left:4px">' +
+                    (entryBytes / 1024).toFixed(1) +
+                    ' KiB</strong>'
+                if (replicas * tenants > 1)
+                    pei += '<span style="margin-left:6px">&times; ' + fmtN(replicas * tenants) + ' copies</span>'
+                if (budgetFrac < 1.0)
+                    pei +=
+                        '<span style="margin-left:6px">&middot; RAM budget: ' +
+                        (budgetFrac * 100).toFixed(0) +
+                        '%</span>'
+                $('per-entry-info').innerHTML = pei
+
+                // Render dynamic sections
+                renderPlacementLegend()
+                renderPresetBadges()
+
+                // Sub-tab content
+                var subEl = $('sub-content')
+                if (subTab === 'chart') {
+                    subEl.style.padding = '12px 8px 8px'
+                    subEl.innerHTML =
+                        renderChart(allData, effRamTiers, effMaxRamFn) +
+                        renderChartLegend(effRamTiers) +
+                        renderBreakdownBar(allData, idxBytes)
+                } else if (subTab === 'table') {
+                    subEl.style.padding = '14px 16px'
+                    subEl.innerHTML = renderDataTable(allData)
+                } else {
+                    subEl.style.padding = '14px 16px'
+                    subEl.innerHTML = renderCrossoverTable(allData, effRamTiers, effMaxRamFn)
+                }
+            }
+
+            // ═══ PRESET ════════════════════════════════════════════════
+            function applyPreset(key) {
+                var p = PRESETS.find(function (pp) {
+                    return pp.key === key
+                })
+                if (!p || !p.values) {
+                    presetKey = key
+                    updateAll()
+                    return
+                }
+                presetKey = key
+                embIdx = p.values.embIdx
+                templateBytes = p.values.templateBytes
+                traceBytes = p.values.traceBytes
+                replicas = p.values.replicas
+                tenants = p.values.tenants
+                indexOverhead = p.values.indexOverhead
+                domainGrowth = p.values.domainGrowth
+                agentGrowth = p.values.agentGrowth
+                years = p.values.years
+                if (p.values.budgetFrac != null) budgetFrac = p.values.budgetFrac
+                // Sync DOM
+                $('sl-template').value = templateBytes
+                $('sel-emb').value = embIdx
+                $('sl-trace').value = traceBytes
+                $('sl-replicas').value = replicas
+                $('sel-tenants').value = tenants
+                $('sl-idxoh').value = indexOverhead
+                $('sl-budget').value = budgetFrac
+                $('sl-dg').value = domainGrowth
+                $('sl-ag').value = agentGrowth
+                $('sl-years').value = years
+                $('sel-preset').value = key
+                // Switch to projections tab if not there
+                document.querySelectorAll('.top-tab').forEach(function (btn) {
+                    btn.classList.toggle('active', btn.dataset.page === 'projections')
+                })
+                document.querySelectorAll('.page').forEach(function (p) {
+                    p.classList.toggle('active', p.id === 'page-projections')
+                })
+                updateAll()
+            }
+
+            function markCustom() {
+                if (presetKey !== 'custom') {
+                    presetKey = 'custom'
+                    $('sel-preset').value = 'custom'
+                }
+            }
+
+            // ═══ INIT ══════════════════════════════════════════════════
+            ;(function init() {
+                // Populate selects
+                var presetSel = $('sel-preset')
+                PRESETS.forEach(function (p) {
+                    var o = document.createElement('option')
+                    o.value = p.key
+                    o.textContent = p.label
+                    presetSel.appendChild(o)
+                })
+                presetSel.value = presetKey
+
+                var embSel = $('sel-emb')
+                EMBEDDING_PROFILES.forEach(function (ep, i) {
+                    var o = document.createElement('option')
+                    o.value = i
+                    o.textContent = ep.label
+                    embSel.appendChild(o)
+                })
+                embSel.value = embIdx
+
+                var tenSel = $('sel-tenants')
+                TENANT_OPTIONS.forEach(function (n) {
+                    var o = document.createElement('option')
+                    o.value = n
+                    o.textContent = n === 1 ? '1 — shared' : fmtN(n)
+                    tenSel.appendChild(o)
+                })
+                tenSel.value = tenants
+
+                // Set initial slider values
+                $('sl-template').value = templateBytes
+                $('sl-trace').value = traceBytes
+                $('sl-replicas').value = replicas
+                $('sl-idxoh').value = indexOverhead
+                $('sl-budget').value = budgetFrac
+                $('sl-dg').value = domainGrowth
+                $('sl-ag').value = agentGrowth
+                $('sl-years').value = years
+
+                // Slider event listeners
+                $('sl-template').addEventListener('input', function (e) {
+                    templateBytes = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-trace').addEventListener('input', function (e) {
+                    traceBytes = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-replicas').addEventListener('input', function (e) {
+                    replicas = parseInt(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-idxoh').addEventListener('input', function (e) {
+                    indexOverhead = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-budget').addEventListener('input', function (e) {
+                    budgetFrac = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-dg').addEventListener('input', function (e) {
+                    domainGrowth = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-ag').addEventListener('input', function (e) {
+                    agentGrowth = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-years').addEventListener('input', function (e) {
+                    years = parseInt(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+
+                // Select listeners
+                $('sel-preset').addEventListener('change', function (e) {
+                    applyPreset(e.target.value)
+                })
+                $('sel-emb').addEventListener('change', function (e) {
+                    embIdx = parseInt(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sel-tenants').addEventListener('change', function (e) {
+                    tenants = parseInt(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+
+                // Top-level tabs
+                document.querySelectorAll('.top-tab').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var pg = btn.dataset.page
+                        document.querySelectorAll('.top-tab').forEach(function (b) {
+                            b.classList.toggle('active', b === btn)
+                        })
+                        document.querySelectorAll('.page').forEach(function (p) {
+                            p.classList.toggle('active', p.id === 'page-' + pg)
+                        })
+                    })
+                })
+
+                // Sub-tabs
+                document.querySelectorAll('.sub-tab').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        subTab = btn.dataset.sub
+                        document.querySelectorAll('.sub-tab').forEach(function (b) {
+                            b.classList.toggle('active', b === btn)
+                        })
+                        updateAll()
+                    })
+                })
+
+                // Render static pages
+                $('page-background').innerHTML = renderBackgroundPage()
+                $('page-sources').innerHTML = renderSourcesPage()
+
+                // Initial render
+                updateAll()
+            })()
+        </script>
+    </body>
+</html>
