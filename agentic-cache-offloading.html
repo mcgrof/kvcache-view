@@ -1779,6 +1779,40 @@
                     '<div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.5">The model breaks artifacts into three sliders — tool-call results, experiences, and exec traces — so you can see which artifact type drives storage and make targeted architectural decisions. In practice these are usually on disk, but modeling them in the working set shows the full per-entry cost and helps size the total storage footprint.</div>'
                 h += '</div>'
 
+                // Why three artifact categories
+                h +=
+                    '<div class="card"><div class="sec-title">Why three artifact categories</div><div class="sec-body">'
+                h +=
+                    'APC alone gives no guidance on artifact sizing. Its design is a lean keyword-keyed plan cache with no execution logs, no tool-call storage, and no experience accumulation. The "per-entry extras" were an ungrounded knob — users had to guess how many bytes their artifacts would need.'
+                h +=
+                    '<br><br>Two recent papers fill that gap with research-grounded size ranges for each artifact category:'
+                h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">'
+                h +=
+                    '<div style="padding:10px 12px;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.12);border-radius:8px">'
+                h +=
+                    '<div style="font-size:13px;color:#06b6d4;font-weight:700;margin-bottom:4px">Tool-call results</div>'
+                h +=
+                    '<div style="font-size:12px;color:rgba(255,255,255,0.88);line-height:1.5"><a href="https://arxiv.org/abs/2509.17360" target="_blank" rel="noopener" style="color:#06b6d4;text-decoration:none">Asteria</a> demonstrates semantic caching of API/tool query-response pairs. Typical per-entry cost: <strong style="color:#fff">1&ndash;8 KiB</strong>. Meaningful but bounded — tool results add up across entries but do not dominate storage on their own.</div>'
+                h += '</div>'
+                h +=
+                    '<div style="padding:10px 12px;background:rgba(234,179,8,0.05);border:1px solid rgba(234,179,8,0.12);border-radius:8px">'
+                h +=
+                    '<div style="font-size:13px;color:#eab308;font-weight:700;margin-bottom:4px">Experiences / Playbooks</div>'
+                h +=
+                    '<div style="font-size:12px;color:rgba(255,255,255,0.88);line-height:1.5"><a href="https://arxiv.org/abs/2510.04618" target="_blank" rel="noopener" style="color:#eab308;text-decoration:none">ACE</a> (<a href="https://github.com/ace-agent/ace/" target="_blank" rel="noopener" style="color:#eab308;text-decoration:none">code</a>) uses an 80K token budget (~160 KiB) per playbook, but the per-entry share is modest: <strong style="color:#fff">0.5&ndash;4 KiB</strong>. Experiences are not the SSD driver — they accumulate slowly through the generate-reflect-curate loop.</div>'
+                h += '</div>'
+                h +=
+                    '<div style="padding:10px 12px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.12);border-radius:8px">'
+                h +=
+                    '<div style="font-size:13px;color:#ef4444;font-weight:700;margin-bottom:4px">Execution traces</div>'
+                h +=
+                    '<div style="font-size:12px;color:rgba(255,255,255,0.88);line-height:1.5">Full reasoning chains, reward traces, and step logs remain the heaviest artifact category: <strong style="color:#fff">4&ndash;32 KiB</strong> per entry. This is the primary force pushing storage into SSD territory. Unlike tool results and experiences, traces scale linearly with task complexity and do not saturate.</div>'
+                h += '</div>'
+                h += '</div>'
+                h +=
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.55">The three sliders let users make targeted architectural decisions: keep tool results and experiences in a warm tier while offloading heavy exec traces to SSD, or drop all artifacts for a lean plan-only cache. The breakdown bar shows exactly which category dominates at each scale.</div>'
+                h += '</div></div>'
+
                 // How the math works
                 h += '<div class="card"><div class="sec-title">How the math works</div>'
                 h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
