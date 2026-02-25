@@ -1996,6 +1996,11 @@
                     '<br>' +
                     a('https://openreview.net/pdf?id=n4V3MSqK77', 'APC OpenReview (camera-ready)') +
                     ' — NeurIPS 2025 proceedings version with final figures and supplementary material.'
+                h +=
+                    '<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px">' +
+                    '<a href="https://open.spotify.com/episode/6c0eq5F5EwNf0nch2TMFSq" target="_blank" rel="noopener"><img src="podcasts/apc.png" alt="APC podcast" style="width:64px;height:64px;border-radius:8px;flex-shrink:0"></a>' +
+                    '<a href="https://open.spotify.com/episode/6c0eq5F5EwNf0nch2TMFSq" target="_blank" rel="noopener" style="font-size:12px;color:rgba(255,255,255,0.78);text-decoration:none;line-height:1.5">&#x1F3A7; <strong style="color:#22d3ee">Podcast summary</strong> — APC: Agentic Plan Cache deep dive</a>' +
+                    '</div>'
                 h += '</div></div>'
 
                 // Agentic artifact research
@@ -2006,8 +2011,21 @@
                     ' — arxiv 2510.04618. Evolving contexts for self-improving language models. Introduces the generate-reflect-curate loop for building experience playbooks with helpful/harmful counters. Uses an 80K token budget (~160 KiB) per playbook. Informs the "Experiences" artifact slider.'
                 h +=
                     '<br>' +
-                    a('https://arxiv.org/abs/2509.17360', 'Asteria: Semantic-Aware Cross-Region Caching (2025)') +
+                    a('https://arxiv.org/abs/2509.17360', 'Cortex / Asteria: Semantic-Aware Knowledge Caching (2025)') +
                     ' — arxiv 2509.17360. Semantic caching for agentic LLM tool access. Caches tool-call query-response pairs as "Semantic Elements" so repeated or semantically similar tool calls can be served from cache. Informs the "Tool-call results" artifact slider.'
+                h +=
+                    '<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+                h +=
+                    '<div style="display:flex;align-items:center;gap:10px">' +
+                    '<a href="https://open.spotify.com/episode/4GlFbautmOLpbpfWoEttOv" target="_blank" rel="noopener"><img src="podcasts/ace.png" alt="ACE podcast" style="width:64px;height:64px;border-radius:8px;flex-shrink:0"></a>' +
+                    '<a href="https://open.spotify.com/episode/4GlFbautmOLpbpfWoEttOv" target="_blank" rel="noopener" style="font-size:12px;color:rgba(255,255,255,0.78);text-decoration:none;line-height:1.5">&#x1F3A7; <strong style="color:#eab308">Podcast summary</strong> — ACE: Agentic Context Engineering</a>' +
+                    '</div>'
+                h +=
+                    '<div style="display:flex;align-items:center;gap:10px">' +
+                    '<a href="https://open.spotify.com/episode/5wdxbmvjmUePK3Sr54bzef" target="_blank" rel="noopener"><img src="podcasts/cortex.png" alt="Cortex podcast" style="width:64px;height:64px;border-radius:8px;flex-shrink:0"></a>' +
+                    '<a href="https://open.spotify.com/episode/5wdxbmvjmUePK3Sr54bzef" target="_blank" rel="noopener" style="font-size:12px;color:rgba(255,255,255,0.78);text-decoration:none;line-height:1.5">&#x1F3A7; <strong style="color:#06b6d4">Podcast summary</strong> — Cortex: Semantic Knowledge Caching</a>' +
+                    '</div>'
+                h += '</div>'
                 h += '</div></div>'
 
                 // Embeddings
@@ -2251,7 +2269,13 @@
                     })
                     h += '</div>'
                 })
-                h += '</div></div>'
+                h += '</div>'
+                h +=
+                    '<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px">' +
+                    '<a href="https://open.spotify.com/episode/0qpHTDenZuloDHxWseGRZq" target="_blank" rel="noopener"><img src="podcasts/scale-agents.png" alt="Scaling agents podcast" style="width:64px;height:64px;border-radius:8px;flex-shrink:0"></a>' +
+                    '<a href="https://open.spotify.com/episode/0qpHTDenZuloDHxWseGRZq" target="_blank" rel="noopener" style="font-size:12px;color:rgba(255,255,255,0.78);text-decoration:none;line-height:1.5">&#x1F3A7; <strong style="color:#f472b6">Podcast summary</strong> — Projections for Agentic AI growth</a>' +
+                    '</div>'
+                h += '</div>'
 
                 h +=
                     '<div style="font-size:11px;color:rgba(255,255,255,0.78);margin-top:8px">All storage units binary (GiB = 2&sup3;&#x2070;, TiB = 2&#x2074;&#x2070;). Market projections for deployment-scale context only.</div>'
