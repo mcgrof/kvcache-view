@@ -300,7 +300,7 @@
                     <span style="font-size: 16px; color: rgba(255, 255, 255, 0.82); line-height: 1.4">
                         <strong style="color: #22d3ee">Modeled:</strong>
                         steady-state working-set (cache footprint), not cumulative history. Templates + index = RAM.
-                        Artifacts = disk proxy.
+                        Artifacts (tools, experiences, traces) = disk proxy.
                         <span style="color: rgba(255, 255, 255, 0.78)">&#8594; see Background tab for details</span>
                     </span>
                 </div>
@@ -347,16 +347,47 @@
                         <div class="slider-row">
                             <div class="hdr">
                                 <span class="lbl">
-                                    Per-entry extras
+                                    Tool-call results
                                     <span class="tip">
                                         ?
-                                        <span class="tip-text">Persistent artifact proxy (logs/traces)</span>
+                                        <span class="tip-text">
+                                            Cached API/tool responses (search snippets, code outputs)
+                                        </span>
                                     </span>
                                 </span>
-                                <span class="val" id="v-trace"></span>
+                                <span class="val" id="v-tool"></span>
                             </div>
-                            <input type="range" id="sl-trace" min="0" max="32768" step="512" />
+                            <input type="range" id="sl-tool" min="0" max="8192" step="256" />
                         </div>
+                    </div>
+                    <div class="g3" style="margin-top: 0">
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">
+                                    Experiences
+                                    <span class="tip">
+                                        ?
+                                        <span class="tip-text">ACE-style playbook entries, learned strategies</span>
+                                    </span>
+                                </span>
+                                <span class="val" id="v-exp"></span>
+                            </div>
+                            <input type="range" id="sl-exp" min="0" max="8192" step="256" />
+                        </div>
+                        <div class="slider-row">
+                            <div class="hdr">
+                                <span class="lbl">
+                                    Exec traces
+                                    <span class="tip">
+                                        ?
+                                        <span class="tip-text">Full reasoning chains, reward traces, step logs</span>
+                                    </span>
+                                </span>
+                                <span class="val" id="v-exec"></span>
+                            </div>
+                            <input type="range" id="sl-exec" min="0" max="32768" step="512" />
+                        </div>
+                        <div></div>
                     </div>
 
                     <!-- multipliers -->
@@ -501,11 +532,11 @@
                         Lean plan-template caches produce a
                         <em>tiny</em>
                         working set (500K templates at 2 KiB = ~1 GiB). SSD is forced by
-                        <strong style="color: #fff">entry richness x copies</strong>
+                        <strong style="color: #fff">artifact richness x copies</strong>
                         , not queries/day.
                         <em style="color: rgba(255, 255, 255, 0.85)">
                             Minimal plan caching does not force SSD by 2030. Multi-tenant replication + embedding
-                            indexes + richer artifacts can.
+                            indexes + rich artifacts (tool results, experiences, exec traces) can.
                         </em>
                     </div>
                 </div>
@@ -647,11 +678,13 @@
                     key: 'apc-paper',
                     label: 'APC baseline (exact match)',
                     oldName: null,
-                    desc: "APC's published design: keyword lookup, no embeddings, no extras, single cache",
+                    desc: "APC's published design: keyword lookup, no embeddings, no artifacts, single cache",
                     values: {
                         embIdx: 0,
                         templateBytes: 2048,
-                        traceBytes: 0,
+                        toolResultBytes: 0,
+                        experienceBytes: 0,
+                        execTraceBytes: 0,
                         replicas: 1,
                         tenants: 1,
                         indexOverhead: 1.0,
@@ -664,11 +697,13 @@
                     key: 'prod-shared',
                     label: 'Production shared cache (Replicated)',
                     oldName: 'formerly: Production shared cache (HA)',
-                    desc: 'Semantic matching via MiniLM embeddings, 3x replication, exec summaries stored per entry',
+                    desc: 'Semantic matching via MiniLM embeddings, 3x replication, cached tool results and exec summaries per entry',
                     values: {
                         embIdx: 1,
                         templateBytes: 2048,
-                        traceBytes: 2048,
+                        toolResultBytes: 1024,
+                        experienceBytes: 1024,
+                        execTraceBytes: 0,
                         replicas: 3,
                         tenants: 1,
                         indexOverhead: 2.0,
@@ -681,11 +716,13 @@
                     key: 'b2b-saas',
                     label: 'Multi-tenant SaaS — partitioned caches (1K)',
                     oldName: 'formerly: B2B SaaS multi-tenant (1K tenants)',
-                    desc: 'Per-tenant cache isolation, moderate embeddings, replicated across AZs',
+                    desc: 'Per-tenant cache isolation, moderate embeddings, replicated across AZs with tool results and experience playbooks',
                     values: {
                         embIdx: 1,
                         templateBytes: 2048,
-                        traceBytes: 4096,
+                        toolResultBytes: 2048,
+                        experienceBytes: 1024,
+                        execTraceBytes: 1024,
                         replicas: 3,
                         tenants: 1000,
                         indexOverhead: 2.5,
@@ -702,7 +739,9 @@
                     values: {
                         embIdx: 2,
                         templateBytes: 2048,
-                        traceBytes: 4096,
+                        toolResultBytes: 2048,
+                        experienceBytes: 1024,
+                        execTraceBytes: 1024,
                         replicas: 3,
                         tenants: 10000,
                         indexOverhead: 2.5,
@@ -715,11 +754,13 @@
                     key: 'agent-memory',
                     label: 'Full agent memory store',
                     oldName: null,
-                    desc: 'Fat embeddings, full transcripts, multi-region — persistent agent memory, not a plan cache',
+                    desc: 'Fat embeddings, full transcripts, multi-region — persistent agent memory with all three artifact types',
                     values: {
                         embIdx: 3,
                         templateBytes: 4096,
-                        traceBytes: 32768,
+                        toolResultBytes: 4096,
+                        experienceBytes: 4096,
+                        execTraceBytes: 24576,
                         replicas: 6,
                         tenants: 1,
                         indexOverhead: 3.5,
@@ -768,7 +809,7 @@
                 years,
                 embProfile,
                 templateBytes,
-                traceBytes,
+                artifactBytes,
                 domainGrowthRate,
                 agentGrowthRate,
                 replicas,
@@ -778,7 +819,7 @@
                 var METADATA_BYTES = 256
                 var RAW = embProfile.bytes
                 var IDX = RAW > 0 ? Math.ceil((RAW + INDEX_FIXED_PER_NODE) * indexOverhead) : 0
-                var BPE = templateBytes + METADATA_BYTES + IDX + traceBytes
+                var BPE = templateBytes + METADATA_BYTES + IDX + artifactBytes
                 var results = [],
                     cumCeil = 0,
                     cumQ = 0
@@ -822,7 +863,9 @@
             var years = 6
             var embIdx = 0
             var templateBytes = 2048
-            var traceBytes = 0
+            var toolResultBytes = 0
+            var experienceBytes = 0
+            var execTraceBytes = 0
             var domainGrowth = 0.15
             var agentGrowth = 0.5
             var replicas = 1
@@ -856,6 +899,9 @@
             function renderPlacementLegend() {
                 var hasEmb = embIdx > 0
                 var isAgent = presetKey === 'agent-memory'
+                var artifactBytes = toolResultBytes + experienceBytes + execTraceBytes
+                var activeTypes =
+                    (toolResultBytes > 0 ? 1 : 0) + (experienceBytes > 0 ? 1 : 0) + (execTraceBytes > 0 ? 1 : 0)
                 var h = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">'
                 // templates
                 h +=
@@ -884,26 +930,30 @@
                     '</div></div>'
                 h += '</div>'
                 // artifacts
+                var artLabel =
+                    activeTypes === 0
+                        ? 'Artifacts (off)'
+                        : 'Artifacts (' + activeTypes + ' type' + (activeTypes > 1 ? 's' : '') + ')'
                 h +=
                     '<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:' +
                     (isAgent ? 'rgba(239,68,68,0.05)' : 'transparent') +
                     ';border:1px solid ' +
                     (isAgent
                         ? 'rgba(239,68,68,0.12)'
-                        : traceBytes > 0
+                        : artifactBytes > 0
                           ? 'rgba(255,255,255,0.04)'
                           : 'rgba(255,255,255,0.03)') +
                     ';opacity:' +
-                    (traceBytes > 0 ? '1' : '0.4') +
+                    (artifactBytes > 0 ? '1' : '0.4') +
                     '">'
                 h += '<span style="font-size:14px">&#x1F4CB;</span>'
                 h +=
                     '<div><div style="font-size:11px;color:' +
                     (isAgent ? '#ef4444' : 'rgba(255,255,255,0.5)') +
-                    ';font-weight:700">Artifacts' +
-                    (traceBytes === 0 ? ' (off)' : '') +
+                    ';font-weight:700">' +
+                    artLabel +
                     '</div><div style="font-size:10px;color:rgba(255,255,255,0.82)">' +
-                    (traceBytes > 0 ? '&#8594; SSD / obj store' : '&#8594; N/A') +
+                    (artifactBytes > 0 ? '&#8594; SSD / obj store' : '&#8594; N/A') +
                     '</div></div>'
                 h += '</div>'
                 h += '</div>'
@@ -943,12 +993,16 @@
                     )
                 else h += badge('Single copy')
                 h += badge(ap.values.tenants === 1 ? 'Shared' : fmtN(ap.values.tenants) + ' tenants')
-                var tb = ap.values.traceBytes
-                var abg = tb > 8192 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.04)'
-                var acol = tb > 8192 ? '#ef4444' : 'rgba(255,255,255,0.6)'
-                var abor = tb > 8192 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)'
+                var artTotal = ap.values.toolResultBytes + ap.values.experienceBytes + ap.values.execTraceBytes
+                var artCount =
+                    (ap.values.toolResultBytes > 0 ? 1 : 0) +
+                    (ap.values.experienceBytes > 0 ? 1 : 0) +
+                    (ap.values.execTraceBytes > 0 ? 1 : 0)
+                var abg = artTotal > 8192 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.04)'
+                var acol = artTotal > 8192 ? '#ef4444' : 'rgba(255,255,255,0.6)'
+                var abor = artTotal > 8192 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)'
                 var atxt =
-                    tb === 0 ? 'No artifacts' : tb < 2048 ? 'Summaries' : tb < 8192 ? 'Transcripts' : 'Full traces'
+                    artCount === 0 ? 'No artifacts' : artCount === 1 ? '1 artifact type' : artCount + ' artifact types'
                 h += badge(atxt, abg, acol, abor)
                 h += '</div>'
                 h +=
@@ -1401,18 +1455,24 @@
 
             // ─── STORAGE BREAKDOWN BAR ─────────────────────────────────
             function renderBreakdownBar(allData, idxBytes) {
-                var isAgent = presetKey === 'agent-memory'
+                var artifactBytes = toolResultBytes + experienceBytes + execTraceBytes
                 var rows = SCALE_SCENARIOS.map(function (sc, si) {
                     var d = allData[si][years - 1]
                     var entries = d.uniqueTemplates
                     var mul = replicas * tenants
                     var memB = entries * (templateBytes + 256 + idxBytes) * mul
-                    var artB = entries * traceBytes * mul
+                    var toolB = entries * toolResultBytes * mul
+                    var expB = entries * experienceBytes * mul
+                    var execB = entries * execTraceBytes * mul
+                    var artB = toolB + expB + execB
                     return {
                         sc: sc,
                         entries: entries,
                         mul: mul,
                         memB: memB,
+                        toolB: toolB,
+                        expB: expB,
+                        execB: execB,
                         artB: artB,
                         total: memB + artB,
                     }
@@ -1441,7 +1501,9 @@
                     if (r.total === 0) return
                     var pct = barWidthPct(r.total)
                     var memFrac = r.memB / r.total
-                    var artFrac = r.artB / r.total
+                    var toolFrac = r.toolB / r.total
+                    var expFrac = r.expB / r.total
+                    var execFrac = r.execB / r.total
                     h += '<div style="margin-bottom:10px">'
                     h += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:3px">'
                     h +=
@@ -1474,33 +1536,48 @@
                                 '</span>'
                         h += '</div>'
                     }
-                    if (artFrac > 0) {
+                    if (toolFrac > 0) {
                         h +=
                             '<div style="width:' +
-                            artFrac * 100 +
-                            '%;min-width:2px;background:' +
-                            (isAgent ? 'linear-gradient(135deg,#ef4444,#f97316)' : 'rgba(255,255,255,0.08)') +
-                            ';display:flex;align-items:center;justify-content:center">'
-                        if (artFrac > 0.15 && pct > 25)
-                            h +=
-                                '<span style="font-size:10px;color:' +
-                                (isAgent ? '#0b0b14' : 'rgba(255,255,255,0.82)') +
-                                ';font-weight:700">Disk ' +
-                                fmtBShort(r.artB) +
-                                '</span>'
+                            toolFrac * 100 +
+                            '%;min-width:2px;background:#06b6d4;display:flex;align-items:center;justify-content:center">'
+                        if (toolFrac > 0.12 && pct > 30)
+                            h += '<span style="font-size:9px;color:#0b0b14;font-weight:700">Tools</span>'
+                        h += '</div>'
+                    }
+                    if (expFrac > 0) {
+                        h +=
+                            '<div style="width:' +
+                            expFrac * 100 +
+                            '%;min-width:2px;background:#eab308;display:flex;align-items:center;justify-content:center">'
+                        if (expFrac > 0.12 && pct > 30)
+                            h += '<span style="font-size:9px;color:#0b0b14;font-weight:700">Exp</span>'
+                        h += '</div>'
+                    }
+                    if (execFrac > 0) {
+                        h +=
+                            '<div style="width:' +
+                            execFrac * 100 +
+                            '%;min-width:2px;background:linear-gradient(135deg,#ef4444,#f97316);display:flex;align-items:center;justify-content:center">'
+                        if (execFrac > 0.12 && pct > 30)
+                            h += '<span style="font-size:9px;color:#0b0b14;font-weight:700">Traces</span>'
                         h += '</div>'
                     }
                     h += '</div></div>'
                 })
                 // legend
-                h += '<div style="display:flex;gap:16px;margin-top:6px">'
+                h += '<div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">'
                 h +=
                     '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:linear-gradient(135deg,#22d3ee,#a78bfa)"></div><span style="font-size:11px;color:rgba(255,255,255,0.82)">In-memory (templates + index + meta)</span></div>'
-                if (traceBytes > 0)
+                if (toolResultBytes > 0)
                     h +=
-                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:' +
-                        (isAgent ? 'linear-gradient(135deg,#ef4444,#f97316)' : 'rgba(255,255,255,0.12)') +
-                        '"></div><span style="font-size:11px;color:rgba(255,255,255,0.82)">Persistent artifacts — disk-native</span></div>'
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:#06b6d4"></div><span style="font-size:11px;color:rgba(255,255,255,0.82)">Tool-call results</span></div>'
+                if (experienceBytes > 0)
+                    h +=
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:#eab308"></div><span style="font-size:11px;color:rgba(255,255,255,0.82)">Experiences</span></div>'
+                if (execTraceBytes > 0)
+                    h +=
+                        '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:linear-gradient(135deg,#ef4444,#f97316)"></div><span style="font-size:11px;color:rgba(255,255,255,0.82)">Exec traces</span></div>'
                 h += '</div>'
                 h +=
                     '<div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:4px">Bar width reflects total footprint (blended log/linear scale). Compare bar lengths across scenarios.</div>'
@@ -1686,14 +1763,20 @@
                 h +=
                     '<div style="padding:12px 14px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.12);border-radius:8px">'
                 h +=
-                    '<div style="font-size:14px;color:#ef4444;font-weight:700;margin-bottom:6px">&#x1F4CB; Rich artifacts</div>'
+                    '<div style="font-size:14px;color:#ef4444;font-weight:700;margin-bottom:6px">&#x1F4CB; Rich artifacts (3 types)</div>'
+                h += '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Execution logs, tool call transcripts, reward traces, full reasoning chains. These grow linearly with usage and do not saturate. In production they are typically written to <strong style="color:#fff">SSD or object storage</strong>, not kept in the hot cache.</div>'
+                    '<div style="margin-bottom:8px"><strong style="color:#06b6d4">Tool-call results</strong> — Cached responses from external tools and APIs. Semantic caching systems like <a href="https://arxiv.org/abs/2509.17360" target="_blank" rel="noopener" style="color:#06b6d4;text-decoration:none">Asteria</a> store query-response pairs so repeated or semantically similar tool calls can be served from cache. Typical: 1&ndash;8 KiB per entry.</div>'
+                h +=
+                    '<div style="margin-bottom:8px"><strong style="color:#eab308">Experiences / Playbooks</strong> — Evolved strategy contexts per <a href="https://arxiv.org/abs/2510.04618" target="_blank" rel="noopener" style="color:#eab308;text-decoration:none">ACE</a> (Agentic Context Engineering). The system accumulates domain insights with helpful/harmful counters through a generate-reflect-curate loop. Per-entry share of the playbook budget. Typical: 0.5&ndash;4 KiB per entry.</div>'
+                h +=
+                    '<div><strong style="color:#ef4444">Execution traces</strong> — Full reasoning chains, tool call transcripts, reward traces. The heaviest artifact type, typically written to SSD or object store. Typical: 4&ndash;32 KiB per entry.</div>'
+                h += '</div>'
                 h +=
                     '<div style="font-size:12px;color:rgba(255,255,255,0.82);margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px">Placement: <strong style="color:#ef4444">SSD / object store</strong> (default)</div>'
                 h += '</div></div>'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.5">The model includes "per-entry extras" as a proxy for the total cost of rich artifacts co-located with cache entries. In practice these are usually on disk, but modeling them in the working set shows the full per-entry cost and helps size the total storage footprint.</div>'
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.5">The model breaks artifacts into three sliders — tool-call results, experiences, and exec traces — so you can see which artifact type drives storage and make targeted architectural decisions. In practice these are usually on disk, but modeling them in the working set shows the full per-entry cost and helps size the total storage footprint.</div>'
                 h += '</div>'
 
                 // How the math works
@@ -1710,13 +1793,13 @@
                 h +=
                     '<div><div style="font-size:14px;color:#f472b6;font-weight:700;margin-bottom:6px">&#x1F4E6; Per-entry bytes</div>'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Each cache entry = template (2 KiB default) + metadata (256 B) + vector index (<strong style="color:#fff">only if</strong> embeddings are enabled) + per-entry extras (logs/transcripts proxy). The APC baseline has no vector index — entry cost is just template + metadata.<br><br>When embeddings are enabled: index overhead = (raw_vector + ' +
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Each cache entry = template (2 KiB default) + metadata (256 B) + vector index (<strong style="color:#fff">only if</strong> embeddings are enabled) + artifact bytes (<span style="color:#06b6d4">tool results</span> + <span style="color:#eab308">experiences</span> + <span style="color:#ef4444">exec traces</span>). The APC baseline has no vector index and no artifacts — entry cost is just template + metadata.<br><br>When embeddings are enabled: index overhead = (raw_vector + ' +
                     INDEX_FIXED_PER_NODE +
                     'B fixed per node) &times; multiplier. The fixed cost covers HNSW graph edges, alignment, and entry metadata that does not scale with vector dimensionality.</div></div>'
                 h +=
                     '<div><div style="font-size:14px;color:#22c55e;font-weight:700;margin-bottom:6px">&#x1F3D7; What forces SSD</div>'
                 h +=
-                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Lean plan templates alone stay in low GiB even at hyperscale. The multipliers that push storage past RAM:<br><br><strong style="color:#fff">Replication</strong> — 3–6x for HA / multi-region<br><strong style="color:#fff">Tenant isolation</strong> — 1K–10K separate caches<br><strong style="color:#fff">Vector indexes</strong> — optional, but HNSW is memory-hungry when enabled<br><strong style="color:#fff">Rich artifacts</strong> — execution logs, reward traces<br><br>Total storage = base &times; tenants &times; replicas. Plain keyword-keyed caching (no embeddings, no extras) does not force SSD.</div></div>'
+                    '<div style="font-size:13px;color:rgba(255,255,255,0.88);line-height:1.6">Lean plan templates alone stay in low GiB even at hyperscale. The multipliers that push storage past RAM:<br><br><strong style="color:#fff">Replication</strong> — 3–6x for HA / multi-region<br><strong style="color:#fff">Tenant isolation</strong> — 1K–10K separate caches<br><strong style="color:#fff">Vector indexes</strong> — optional, but HNSW is memory-hungry when enabled<br><strong style="color:#fff">Rich artifacts</strong> — <span style="color:#06b6d4">tool-call results</span>, <span style="color:#eab308">experience playbooks</span>, and <span style="color:#ef4444">execution traces</span><br><br>Total storage = base &times; tenants &times; replicas. Plain keyword-keyed caching (no embeddings, no artifacts) does not force SSD.</div></div>'
                 h += '</div></div>'
 
                 // RAM budget
@@ -1739,8 +1822,8 @@
                         border: 'rgba(34,211,238,0.1)',
                         icon: '&#x1F52C;',
                         title: 'APC baseline (exact match)',
-                        body: "Leanest agentic cache: APC's published design. Exact keyword matching, no embeddings. Single shared cache, no replication. Plan caching does not force SSD — even at hyperscale, working set stays in low GiB.",
-                        tags: 'Embed: none &middot; Extras: none &middot; Replicas: 1 &middot; Tenants: 1',
+                        body: "Leanest agentic cache: APC's published design. Exact keyword matching, no embeddings. No artifact types enabled — pure plan template caching. Single shared cache, no replication. Does not force SSD even at hyperscale.",
+                        tags: 'Embed: none &middot; Artifacts: none &middot; Replicas: 1 &middot; Tenants: 1',
                     },
                     {
                         color: '#a78bfa',
@@ -1748,8 +1831,8 @@
                         border: 'rgba(167,139,250,0.1)',
                         icon: '&#x1F3ED;',
                         title: 'Production shared cache (Replicated)',
-                        body: 'Beyond APC. Semantic matching via MiniLM embeddings catches paraphrased queries. Exec summaries stored per entry. Replicated 3x across availability zones. Shared cache, not multi-tenant. Replication adds HA — it is separate from the embedding decision.',
-                        tags: 'Embed: MiniLM 384d &middot; Extras: 2 KiB &middot; Replicas: 3 &middot; Tenants: 1',
+                        body: 'Beyond APC. Semantic matching via MiniLM embeddings catches paraphrased queries. Includes cached tool-call results and experience playbooks (1 KiB each) for exec summaries. Replicated 3x across availability zones.',
+                        tags: 'Embed: MiniLM 384d &middot; Tools: 1 KiB &middot; Exp: 1 KiB &middot; Traces: none &middot; Replicas: 3',
                     },
                     {
                         color: '#f472b6',
@@ -1757,8 +1840,8 @@
                         border: 'rgba(244,114,182,0.1)',
                         icon: '&#x1F3E2;',
                         title: 'Multi-tenant SaaS (partitioned caches)',
-                        body: 'Per-tenant isolation for regulatory compliance or data separation. "Small x many" starts mattering: 1K–10K tenants each with a modest cache, replicated 3x. Tool transcripts stored for audit trails.',
-                        tags: 'Embed: MiniLM/OAI-small &middot; Extras: 4 KiB &middot; Replicas: 3 &middot; Tenants: 1K–10K',
+                        body: 'Per-tenant isolation for regulatory compliance. All three artifact types enabled: tool results (2 KiB) for API audit trails, experience playbooks (1 KiB), and lightweight exec traces (1 KiB). 1K–10K tenants, replicated 3x.',
+                        tags: 'Embed: MiniLM/OAI-small &middot; Tools: 2 KiB &middot; Exp: 1 KiB &middot; Traces: 1 KiB &middot; Tenants: 1K–10K',
                     },
                     {
                         color: '#ef4444',
@@ -1766,8 +1849,8 @@
                         border: 'rgba(239,68,68,0.1)',
                         icon: '&#x1F525;',
                         title: 'Full agent memory store',
-                        body: 'No longer a plan cache — persistent agent memory. Full 3072-dim embeddings with heavy HNSW, complete execution transcripts and tool call logs, 6x multi-region replication. Crosses into SSD territory — well beyond lean plan caching.',
-                        tags: 'Embed: OAI-large 3072d &middot; Extras: 32 KiB &middot; Replicas: 6 &middot; Tenants: 1',
+                        body: 'No longer a plan cache — persistent agent memory. Full 3072-dim embeddings with heavy HNSW. All three artifact types at high volume: tool results (4 KiB), ACE-style experience playbooks (4 KiB), and full execution traces (24 KiB). 6x multi-region replication. Crosses deep into SSD territory.',
+                        tags: 'Embed: OAI-large 3072d &middot; Tools: 4 KiB &middot; Exp: 4 KiB &middot; Traces: 24 KiB &middot; Replicas: 6',
                     },
                 ]
                 presetCards.forEach(function (p) {
@@ -1808,8 +1891,8 @@
                         def: 'Only applies when embeddings are enabled. ANN graph + metadata cost beyond raw vector bytes. Includes HNSW edges, alignment padding, and per-node bookkeeping. Zero for exact-match (keyword-keyed) caches.',
                     },
                     {
-                        term: 'Extras per entry',
-                        def: 'Persistent artifact payload proxy. Models the size of execution logs, tool transcripts, or reward traces stored alongside each template.',
+                        term: 'Artifact types',
+                        def: 'Three categories of persistent data stored per cache entry: tool-call results (cached API responses), experiences (ACE-style playbook entries), and execution traces (reasoning chains, reward logs). Each is sized independently.',
                     },
                     {
                         term: 'Replication factor',
@@ -1840,7 +1923,7 @@
                     INDEX_FIXED_PER_NODE +
                     'B fixed per-node cost. Cumulative taxonomy ceiling prevents saturation loss.'
                 h +=
-                    '<br><strong style="color:rgba(255,255,255,0.85)">User-supplied estimates:</strong> Domain keyword ceilings are the primary storage driver and are inherently domain-specific. Agent adoption growth rates and multi-tenant counts vary by deployment. SSD crossover is driven by the multiplier stack (tenants &times; replicas &times; entry richness), not by template count alone.'
+                    '<br><strong style="color:rgba(255,255,255,0.85)">User-supplied estimates:</strong> Domain keyword ceilings are the primary storage driver and are inherently domain-specific. Agent adoption growth rates and multi-tenant counts vary by deployment. SSD crossover is driven by the multiplier stack (tenants &times; replicas &times; artifact richness), not by template count alone.'
                 h += '</div></div>'
 
                 return h
@@ -1879,6 +1962,18 @@
                     '<br>' +
                     a('https://openreview.net/pdf?id=n4V3MSqK77', 'APC OpenReview (camera-ready)') +
                     ' — NeurIPS 2025 proceedings version with final figures and supplementary material.'
+                h += '</div></div>'
+
+                // Agentic artifact research
+                h += '<div class="card">' + srcHead('#eab308', 'Agentic artifact types &amp; semantic caching')
+                h += '<div style="' + srcBody + '">'
+                h +=
+                    a('https://arxiv.org/abs/2510.04618', 'ACE: Agentic Context Engineering (Zhang et al., 2025)') +
+                    ' — arxiv 2510.04618. Evolving contexts for self-improving language models. Introduces the generate-reflect-curate loop for building experience playbooks with helpful/harmful counters. Uses an 80K token budget (~160 KiB) per playbook. Informs the "Experiences" artifact slider.'
+                h +=
+                    '<br>' +
+                    a('https://arxiv.org/abs/2509.17360', 'Asteria: Semantic-Aware Cross-Region Caching (2025)') +
+                    ' — arxiv 2509.17360. Semantic caching for agentic LLM tool access. Caches tool-call query-response pairs as "Semantic Elements" so repeated or semantically similar tool calls can be served from cache. Informs the "Tool-call results" artifact slider.'
                 h += '</div></div>'
 
                 // Embeddings
@@ -2130,11 +2225,15 @@
             }
 
             // ═══ UPDATE ALL ════════════════════════════════════════════
+            function fmtKiB(b) {
+                return b === 0 ? '0' : b < 1024 ? (b / 1024).toFixed(1) : (b / 1024).toFixed(0)
+            }
             function updateAll() {
                 var embProfile = EMBEDDING_PROFILES[embIdx]
                 var rawEmbBytes = embProfile.bytes
                 var idxBytes = rawEmbBytes > 0 ? Math.ceil((rawEmbBytes + INDEX_FIXED_PER_NODE) * indexOverhead) : 0
-                var entryBytes = templateBytes + 256 + idxBytes + traceBytes
+                var artifactBytes = toolResultBytes + experienceBytes + execTraceBytes
+                var entryBytes = templateBytes + 256 + idxBytes + artifactBytes
 
                 var effRamTiers = RAM_TIERS.map(function (t) {
                     return {
@@ -2155,7 +2254,7 @@
                         years,
                         embProfile,
                         templateBytes,
-                        traceBytes,
+                        artifactBytes,
                         domainGrowth,
                         agentGrowth,
                         replicas,
@@ -2166,12 +2265,9 @@
 
                 // Update slider value displays
                 $('v-template').textContent = (templateBytes / 1024).toFixed(1) + ' KiB'
-                $('v-trace').textContent =
-                    traceBytes === 0
-                        ? 'None'
-                        : traceBytes < 2048
-                          ? (traceBytes / 1024).toFixed(1) + ' KiB'
-                          : (traceBytes / 1024).toFixed(0) + ' KiB'
+                $('v-tool').textContent = toolResultBytes === 0 ? 'None' : fmtKiB(toolResultBytes) + ' KiB'
+                $('v-exp').textContent = experienceBytes === 0 ? 'None' : fmtKiB(experienceBytes) + ' KiB'
+                $('v-exec').textContent = execTraceBytes === 0 ? 'None' : fmtKiB(execTraceBytes) + ' KiB'
                 $('v-replicas').textContent = replicas + 'x'
                 $('v-tenants').textContent = tenants === 1 ? '1 (shared)' : fmtN(tenants)
                 $('v-idxoh').textContent = embIdx === 0 ? 'N/A' : indexOverhead.toFixed(2) + 'x'
@@ -2180,11 +2276,19 @@
                 $('v-ag').textContent = (agentGrowth * 100).toFixed(0) + '% YoY'
                 $('v-years').textContent = years + ' (' + startYear + '–' + (startYear + years - 1) + ')'
 
-                // Per entry info
+                // Per entry info with component breakdown
                 var pei =
                     'Per entry: <strong style="color:rgba(255,255,255,0.9);margin-left:4px">' +
                     (entryBytes / 1024).toFixed(1) +
                     ' KiB</strong>'
+                var parts = []
+                parts.push('tmpl ' + fmtKiB(templateBytes))
+                parts.push('meta 0.25')
+                if (idxBytes > 0) parts.push('idx ' + fmtKiB(idxBytes))
+                if (toolResultBytes > 0) parts.push('tools ' + fmtKiB(toolResultBytes))
+                if (experienceBytes > 0) parts.push('exp ' + fmtKiB(experienceBytes))
+                if (execTraceBytes > 0) parts.push('trace ' + fmtKiB(execTraceBytes))
+                pei += '<span style="margin-left:6px;color:rgba(255,255,255,0.6)">(' + parts.join(' + ') + ')</span>'
                 if (replicas * tenants > 1)
                     pei += '<span style="margin-left:6px">&times; ' + fmtN(replicas * tenants) + ' copies</span>'
                 if (budgetFrac < 1.0)
@@ -2228,7 +2332,9 @@
                 presetKey = key
                 embIdx = p.values.embIdx
                 templateBytes = p.values.templateBytes
-                traceBytes = p.values.traceBytes
+                toolResultBytes = p.values.toolResultBytes
+                experienceBytes = p.values.experienceBytes
+                execTraceBytes = p.values.execTraceBytes
                 replicas = p.values.replicas
                 tenants = p.values.tenants
                 indexOverhead = p.values.indexOverhead
@@ -2239,7 +2345,9 @@
                 // Sync DOM
                 $('sl-template').value = templateBytes
                 $('sel-emb').value = embIdx
-                $('sl-trace').value = traceBytes
+                $('sl-tool').value = toolResultBytes
+                $('sl-exp').value = experienceBytes
+                $('sl-exec').value = execTraceBytes
                 $('sl-replicas').value = replicas
                 $('sel-tenants').value = tenants
                 $('sl-idxoh').value = indexOverhead
@@ -2297,7 +2405,9 @@
 
                 // Set initial slider values
                 $('sl-template').value = templateBytes
-                $('sl-trace').value = traceBytes
+                $('sl-tool').value = toolResultBytes
+                $('sl-exp').value = experienceBytes
+                $('sl-exec').value = execTraceBytes
                 $('sl-replicas').value = replicas
                 $('sl-idxoh').value = indexOverhead
                 $('sl-budget').value = budgetFrac
@@ -2311,8 +2421,18 @@
                     markCustom()
                     updateAll()
                 })
-                $('sl-trace').addEventListener('input', function (e) {
-                    traceBytes = parseFloat(e.target.value)
+                $('sl-tool').addEventListener('input', function (e) {
+                    toolResultBytes = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-exp').addEventListener('input', function (e) {
+                    experienceBytes = parseFloat(e.target.value)
+                    markCustom()
+                    updateAll()
+                })
+                $('sl-exec').addEventListener('input', function (e) {
+                    execTraceBytes = parseFloat(e.target.value)
                     markCustom()
                     updateAll()
                 })
