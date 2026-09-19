@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Sparse recurrent checkpoints against dense attention blocks">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#071019" />
+            <stop offset="1" stop-color="#0d1823" />
+        </linearGradient>
+        <linearGradient id="rec" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5de1d1" />
+            <stop offset="1" stop-color="#3fb6ad" />
+        </linearGradient>
+        <linearGradient id="attn" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#77a7ff" />
+            <stop offset="1" stop-color="#4f7fd6" />
+        </linearGradient>
+    </defs>
+
+    <rect width="512" height="512" fill="url(#bg)" />
+
+    <!-- attention: many small slice-able blocks -->
+    <g opacity="0.95">
+        <rect x="40" y="150" width="432" height="54" rx="8" fill="#162838" stroke="#22384a" />
+        <g fill="url(#attn)">
+            <rect x="46" y="156" width="24" height="42" rx="4" />
+            <rect x="74" y="156" width="24" height="42" rx="4" />
+            <rect x="102" y="156" width="24" height="42" rx="4" />
+            <rect x="130" y="156" width="24" height="42" rx="4" />
+            <rect x="158" y="156" width="24" height="42" rx="4" />
+            <rect x="186" y="156" width="24" height="42" rx="4" />
+            <rect x="214" y="156" width="24" height="42" rx="4" />
+            <rect x="242" y="156" width="24" height="42" rx="4" />
+            <rect x="270" y="156" width="24" height="42" rx="4" />
+            <rect x="298" y="156" width="24" height="42" rx="4" />
+            <rect x="326" y="156" width="24" height="42" rx="4" />
+            <rect x="354" y="156" width="24" height="42" rx="4" />
+            <rect x="382" y="156" width="24" height="42" rx="4" />
+            <rect x="410" y="156" width="24" height="42" rx="4" />
+            <rect x="438" y="156" width="28" height="42" rx="4" />
+        </g>
+    </g>
+
+    <!-- recurrent: a few large checkpoints, far apart -->
+    <g opacity="0.95">
+        <rect x="40" y="300" width="432" height="86" rx="8" fill="#162838" stroke="#22384a" />
+        <rect x="46" y="306" width="128" height="74" rx="6" fill="url(#rec)" />
+        <rect x="192" y="306" width="128" height="74" rx="6" fill="url(#rec)" />
+        <rect x="338" y="306" width="128" height="74" rx="6" fill="url(#rec)" />
+    </g>
+
+    <!-- gap markers showing what cannot be resumed from -->
+    <g stroke="#ffb86c" stroke-width="3" stroke-linecap="round" opacity="0.85">
+        <line x1="180" y1="343" x2="186" y2="343" />
+        <line x1="326" y1="343" x2="332" y2="343" />
+    </g>
+
+    <g fill="#7f93a2" font-family="ui-monospace, Menlo, monospace" font-size="19">
+        <text x="40" y="132">attention: slice anywhere</text>
+        <text x="40" y="282">recurrent: whole checkpoints only</text>
+    </g>
+
+    <g fill="#5de1d1" font-family="ui-monospace, Menlo, monospace" font-size="22" font-weight="700">
+        <text x="40" y="440">4128 tokens apart</text>
+    </g>
+    <g fill="#7f93a2" font-family="ui-monospace, Menlo, monospace" font-size="17">
+        <text x="40" y="466">Falcon-H1-3B</text>
+    </g>
+</svg>

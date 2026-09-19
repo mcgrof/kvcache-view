@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Why hybrid attention plus recurrent models can only reuse a cached prefix every few hundred to few thousand tokens, and how the stored checkpoint size sets that floor"
+        />
+        <title>Hybrid Model Checkpoint Spacing</title>
+        <style>
+            :root {
+                color-scheme: dark;
+                --bg: #071019;
+                --surface: #0d1823;
+                --surface-2: #111f2d;
+                --surface-3: #162838;
+                --border: #22384a;
+                --border-strong: #315169;
+                --text: #f3f7fa;
+                --text-2: #b7c5cf;
+                --muted: #7f93a2;
+                --cyan: #5de1d1;
+                --cyan-soft: rgba(93, 225, 209, 0.12);
+                --blue: #77a7ff;
+                --orange: #ffb86c;
+                --purple: #c3a0ff;
+                --red: #ff7f7f;
+                --green: #79d99a;
+                --shadow: 0 20px 55px rgba(0, 0, 0, 0.26);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html {
+                scroll-behavior: smooth;
+            }
+
+            body {
+                margin: 0;
+                background: var(--bg);
+                color: var(--text);
+                font:
+                    15px/1.65 'Inter',
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    'Segoe UI',
+                    sans-serif;
+            }
+
+            a {
+                color: var(--cyan);
+            }
+
+            .wrap {
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: 34px 20px 80px;
+            }
+
+            .hero h1 {
+                font-size: clamp(30px, 5vw, 46px);
+                line-height: 1.08;
+                letter-spacing: -0.02em;
+                margin: 10px 0 14px;
+            }
+
+            .eyebrow {
+                font:
+                    700 11px/1 ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    monospace;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                color: var(--cyan);
+            }
+
+            .lead {
+                color: var(--text-2);
+                font-size: 17px;
+                max-width: 820px;
+            }
+
+            .callout {
+                margin: 22px 0 0;
+                padding: 16px 18px;
+                border: 1px solid var(--border-strong);
+                border-left: 4px solid var(--orange);
+                border-radius: 10px;
+                background: var(--surface-2);
+                color: var(--text-2);
+            }
+
+            .callout b {
+                color: var(--text);
+            }
+
+            .panel {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: var(--shadow);
+                margin-top: 22px;
+            }
+
+            .panel h2 {
+                margin: 0 0 4px;
+                font-size: 20px;
+                letter-spacing: -0.01em;
+            }
+
+            .panel-sub {
+                color: var(--muted);
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
+
+            .controls {
+                display: flex;
+                gap: 18px;
+                flex-wrap: wrap;
+                align-items: flex-end;
+            }
+
+            .ctl {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                min-width: 180px;
+            }
+
+            .ctl label {
+                font:
+                    700 10px/1 ui-monospace,
+                    Menlo,
+                    monospace;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            select,
+            input[type='range'] {
+                width: 100%;
+                accent-color: var(--cyan);
+            }
+
+            select {
+                background: var(--surface-3);
+                color: var(--text);
+                border: 1px solid var(--border-strong);
+                border-radius: 8px;
+                padding: 8px 10px;
+                font: inherit;
+            }
+
+            .val {
+                font:
+                    700 13px/1 ui-monospace,
+                    Menlo,
+                    monospace;
+                color: var(--cyan);
+            }
+
+            .metrics {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 14px;
+                margin-top: 18px;
+            }
+
+            .metric {
+                background: var(--surface-2);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 15px;
+            }
+
+            .metric .k {
+                font:
+                    700 10px/1 ui-monospace,
+                    Menlo,
+                    monospace;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .metric .v {
+                font:
+                    700 27px/1.15 ui-monospace,
+                    Menlo,
+                    monospace;
+                margin-top: 8px;
+            }
+
+            .metric .n {
+                color: var(--muted);
+                font-size: 12px;
+                margin-top: 6px;
+            }
+
+            .good {
+                color: var(--green);
+            }
+
+            .warn {
+                color: var(--orange);
+            }
+
+            .bad {
+                color: var(--red);
+            }
+
+            .accent {
+                color: var(--cyan);
+            }
+
+            .bars {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .barrow {
+                display: grid;
+                grid-template-columns: 170px 1fr 120px;
+                gap: 12px;
+                align-items: center;
+                font-size: 13px;
+            }
+
+            .track {
+                background: var(--surface-3);
+                border-radius: 6px;
+                height: 26px;
+                overflow: hidden;
+                border: 1px solid var(--border);
+                display: flex;
+            }
+
+            .seg {
+                height: 100%;
+            }
+
+            .seg.rec {
+                background: linear-gradient(90deg, #5de1d1, #3fb6ad);
+            }
+
+            .seg.attn {
+                background: linear-gradient(90deg, #77a7ff, #4f7fd6);
+            }
+
+            .seg.pad {
+                background: repeating-linear-gradient(45deg, #ffb86c33, #ffb86c33 5px, #ffb86c55 5px, #ffb86c55 10px);
+            }
+
+            .legend {
+                display: flex;
+                gap: 18px;
+                flex-wrap: wrap;
+                margin-top: 14px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+            .sw {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border-radius: 3px;
+                margin-right: 6px;
+                vertical-align: -1px;
+            }
+
+            .timeline {
+                margin-top: 8px;
+            }
+
+            .tl {
+                position: relative;
+                height: 46px;
+                background: var(--surface-3);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .tick {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: var(--cyan);
+            }
+
+            .tl-label {
+                display: flex;
+                justify-content: space-between;
+                color: var(--muted);
+                font-size: 12px;
+                margin-top: 5px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-variant-numeric: tabular-nums;
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                text-align: left;
+                padding: 10px 12px;
+                border-bottom: 1px solid var(--border);
+            }
+
+            th {
+                font:
+                    700 10px/1 ui-monospace,
+                    Menlo,
+                    monospace;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            td.num {
+                text-align: right;
+            }
+
+            tr.sel td {
+                background: var(--cyan-soft);
+            }
+
+            .scroll {
+                overflow-x: auto;
+            }
+
+            .note {
+                margin-top: 16px;
+                padding: 13px 15px;
+                border-left: 3px solid var(--border-strong);
+                background: var(--surface-2);
+                color: var(--muted);
+                font-size: 13px;
+            }
+
+            .back {
+                display: inline-block;
+                margin-bottom: 8px;
+                font-size: 13px;
+            }
+
+            @media (max-width: 760px) {
+                .barrow {
+                    grid-template-columns: 110px 1fr 90px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <a class="back" href="index.html">&#8592; All visualizations</a>
+
+            <header class="hero">
+                <div class="eyebrow">Hybrid attention + recurrent models</div>
+                <h1>A recurrent checkpoint is big, so reusable prefixes are far apart</h1>
+                <p class="lead">
+                    Attention caches can be sliced: the entries for the first 500 tokens are literally the front of the
+                    entries for the whole sequence. A recurrent state cannot. It is one matrix that has been overwritten
+                    once per token, and there is no way to rewind it. To reuse a prefix at all, a serving engine must
+                    have stored a whole separate checkpoint at that point. How far apart those checkpoints can sit is
+                    not a tuning choice. It is set by how many bytes one checkpoint takes.
+                </p>
+                <div class="callout">
+                    <b>The rule.</b>
+                    vLLM makes every layer use one page size. A recurrent page holds one whole checkpoint and does not
+                    grow with tokens; an attention page grows with its block. So the attention block is raised until one
+                    attention page is at least as large as one recurrent page, and the recurrent page is then padded to
+                    match. That block size is the spacing between resume points, and the arithmetic only ever rounds up.
+                    No setting makes checkpoints closer together while the checkpoint stays the size it is.
+                </div>
+            </header>
+
+            <section class="panel">
+                <h2>Pick a model and a checkpoint format</h2>
+                <div class="panel-sub">
+                    Sizes come from each model's shipped configuration. The storage format changes only how the
+                    checkpoint is stored, not how the model computes. The narrower formats are shown to size the effect;
+                    whether a given model tolerates one is a separate question this page does not answer.
+                </div>
+                <div class="controls">
+                    <div class="ctl">
+                        <label for="model">Model</label>
+                        <select id="model"></select>
+                    </div>
+                    <div class="ctl">
+                        <label for="fmt">Stored checkpoint format</label>
+                        <select id="fmt">
+                            <option value="4">fp32, what these configs ask for</option>
+                            <option value="2">bf16, half width</option>
+                            <option value="1">8 bits per number</option>
+                            <option value="0.375">0.375 bytes per number</option>
+                        </select>
+                    </div>
+                    <div class="ctl">
+                        <label for="ctx">
+                            Conversation length
+                            <span class="val" id="ctxv"></span>
+                        </label>
+                        <input id="ctx" type="range" min="512" max="32768" step="512" value="8192" />
+                    </div>
+                </div>
+
+                <div class="metrics" id="metrics"></div>
+            </section>
+
+            <section class="panel">
+                <h2>Where the resume points land</h2>
+                <div class="panel-sub">
+                    Each mark is a point a later request could jump in at. Everything between two marks has to be
+                    recomputed from the previous one.
+                </div>
+                <div class="timeline">
+                    <div class="tl" id="tl"></div>
+                    <div class="tl-label">
+                        <span>0 tokens</span>
+                        <span id="tlend"></span>
+                    </div>
+                </div>
+                <div class="note" id="tlnote"></div>
+            </section>
+
+            <section class="panel">
+                <h2>What one page is made of</h2>
+                <div class="panel-sub">
+                    Both kinds of page are forced to the same size. The recurrent one is one checkpoint plus padding;
+                    the attention one is however many tokens fit in that many bytes.
+                </div>
+                <div class="bars" id="pagebars"></div>
+                <div class="legend">
+                    <span>
+                        <i class="sw" style="background: #5de1d1"></i>
+                        recurrent checkpoint
+                    </span>
+                    <span>
+                        <i class="sw" style="background: #ffb86c"></i>
+                        padding to match
+                    </span>
+                    <span>
+                        <i class="sw" style="background: #77a7ff"></i>
+                        attention keys and values
+                    </span>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Every model, and what the format buys</h2>
+                <div class="panel-sub">
+                    Checkpoint spacing in tokens. Smaller is better: it means a later request can rejoin the
+                    conversation sooner.
+                </div>
+                <div class="scroll">
+                    <table id="tbl">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th class="num">Recurrent layers</th>
+                                <th class="num">Attention layers</th>
+                                <th class="num">fp32</th>
+                                <th class="num">bf16</th>
+                                <th class="num">8 bits</th>
+                                <th class="num">0.375 B</th>
+                                <th class="num">Finer by</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblb"></tbody>
+                    </table>
+                </div>
+                <div class="note">
+                    A cache layered on top, such as LMCache, has to pick a chunk size, and 256 tokens is a common
+                    default. It is below the spacing of every model here in every format down to 8 bits, so it would
+                    address a position where no checkpoint was ever written. The chunk has to be the spacing or a
+                    multiple of it.
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Caveats</h2>
+                <div class="panel-sub">Read before quoting any number on this page.</div>
+                <div class="note">
+                    This is arithmetic from vLLM's sizing rule and each model's configuration, not a measurement of a
+                    running server. Kernel alignment is taken as 16 tokens; a backend that demands more pushes the
+                    spacing up. The state dtype is read from configuration and can be overridden. Making the stored
+                    checkpoint smaller is not free: the page pool holds the state the recurrent kernel actually reads,
+                    so either that kernel reads the compressed form or the design separates the stored checkpoint from
+                    the live state and expands it on restore. The second has not been built. Finally, a smaller
+                    checkpoint only helps if the model tolerates the format, and that is strongly model-dependent.
+                </div>
+            </section>
+        </div>
+
+        <script>
+            const KERNEL_ALIGN = 16
+            const BF16 = 2
+
+            // Counts per layer, read from each model's config.json. `ssm` and `conv`
+            // are numbers of state values; `kvPerToken` counts keys and values for
+            // one attention layer for one token.
+            const MODELS = [
+                {
+                    name: 'Qwen3.5-4B',
+                    vendor: 'Alibaba',
+                    rec: 24,
+                    attn: 8,
+                    ssm: 32 * 128 * 128,
+                    conv: (16 * 128 + 16 * 128 + 32 * 128) * 3,
+                    kvPerToken: 4 * 256 * 2,
+                },
+                {
+                    name: 'Nemotron-H-4B',
+                    vendor: 'NVIDIA',
+                    rec: 24,
+                    attn: 4,
+                    ssm: 112 * 64 * 128,
+                    conv: (2 * 3072 + 2 * 128) * 3,
+                    kvPerToken: 8 * 128 * 2,
+                },
+                {
+                    name: 'Granite-4.0-h-micro',
+                    vendor: 'IBM',
+                    rec: 36,
+                    attn: 4,
+                    ssm: 64 * 64 * 128,
+                    conv: (2 * 2048 + 2 * 128) * 3,
+                    kvPerToken: 8 * 64 * 2,
+                },
+                {
+                    name: 'Falcon-H1-3B',
+                    vendor: 'TII',
+                    rec: 32,
+                    attn: 32,
+                    ssm: 32 * 128 * 256,
+                    conv: (4096 + 2 * 256) * 3,
+                    kvPerToken: 2 * 128 * 2,
+                },
+            ]
+
+            const cdiv = (a, b) => Math.ceil(a / b)
+
+            // Mirrors Platform.check_and_update_config in vllm/platforms/interface.py
+            function geometry(m, bytesPerNumber) {
+                const recPage = Math.round(m.ssm * bytesPerNumber) + m.conv * BF16
+                const attnPerToken = m.kvPerToken * BF16
+                const block = KERNEL_ALIGN * cdiv(recPage, KERNEL_ALIGN * attnPerToken)
+                const attnPage = block * attnPerToken
+                return {
+                    recPage,
+                    attnPerToken,
+                    block,
+                    attnPage,
+                    padding: (attnPage - recPage) / recPage,
+                }
+            }
+
+            const mib = (b) => (b / 1048576).toFixed(2) + ' MiB'
+            const num = (n) => n.toLocaleString('en-US')
+
+            const el = (id) => document.getElementById(id)
+            const modelSel = el('model')
+            const fmtSel = el('fmt')
+            const ctx = el('ctx')
+
+            MODELS.forEach((m, i) => {
+                const o = document.createElement('option')
+                o.value = String(i)
+                o.textContent = m.name + ' · ' + m.vendor
+                modelSel.appendChild(o)
+            })
+
+            function render() {
+                const m = MODELS[Number(modelSel.value)]
+                const bpn = Number(fmtSel.value)
+                const g = geometry(m, bpn)
+                const length = Number(ctx.value)
+                const points = Math.floor(length / g.block)
+                el('ctxv').textContent = num(length) + ' tokens'
+
+                const fp32 = geometry(m, 4).block
+                const finer = fp32 / g.block
+
+                const cls = points === 0 ? 'bad' : points < 4 ? 'warn' : 'good'
+                el('metrics').innerHTML = [
+                    `<div class="metric"><div class="k">Checkpoint spacing</div>
+                     <div class="v accent">${num(g.block)}</div>
+                     <div class="n">tokens between resume points</div></div>`,
+                    `<div class="metric"><div class="k">Resume points available</div>
+                     <div class="v ${cls}">${points}</div>
+                     <div class="n">inside a ${num(length)} token conversation</div></div>`,
+                    `<div class="metric"><div class="k">One checkpoint</div>
+                     <div class="v">${mib(g.recPage)}</div>
+                     <div class="n">per recurrent layer, ${m.rec} of them</div></div>`,
+                    `<div class="metric"><div class="k">Page padding</div>
+                     <div class="v">${(g.padding * 100).toFixed(2)}%</div>
+                     <div class="n">wasted making the pages match</div></div>`,
+                    `<div class="metric"><div class="k">Versus fp32</div>
+                     <div class="v ${finer > 1 ? 'good' : ''}">${finer.toFixed(1)}&times;</div>
+                     <div class="n">finer reuse than this model ships with</div></div>`,
+                ].join('')
+
+                // resume-point timeline
+                const tl = el('tl')
+                tl.innerHTML = ''
+                for (let p = g.block; p <= length; p += g.block) {
+                    const d = document.createElement('div')
+                    d.className = 'tick'
+                    d.style.left = (100 * p) / length + '%'
+                    tl.appendChild(d)
+                }
+                el('tlend').textContent = num(length) + ' tokens'
+                el('tlnote').textContent =
+                    points === 0
+                        ? `No resume point exists inside a conversation this long. A later request sharing this whole prefix still has to prefill all of it.`
+                        : `A later request sharing this prefix can skip at most ${num(points * g.block)} of ${num(length)} tokens, and must recompute the remaining ${num(length - points * g.block)}.`
+
+                // page composition bars
+                const recFrac = g.recPage / g.attnPage
+                el('pagebars').innerHTML = `
+                    <div class="barrow">
+                        <div>Recurrent page</div>
+                        <div class="track">
+                            <div class="seg rec" style="width:${(recFrac * 100).toFixed(2)}%"></div>
+                            <div class="seg pad" style="width:${((1 - recFrac) * 100).toFixed(2)}%"></div>
+                        </div>
+                        <div class="num">${mib(g.attnPage)}</div>
+                    </div>
+                    <div class="barrow">
+                        <div>Attention page</div>
+                        <div class="track"><div class="seg attn" style="width:100%"></div></div>
+                        <div class="num">${num(g.block)} tokens</div>
+                    </div>`
+
+                // all-model comparison
+                el('tblb').innerHTML = MODELS.map((x) => {
+                    const a = geometry(x, 4).block
+                    const b = geometry(x, 2).block
+                    const c = geometry(x, 1).block
+                    const d = geometry(x, 0.375).block
+                    const sel = x.name === m.name ? ' class="sel"' : ''
+                    return `<tr${sel}><td>${x.name}</td><td class="num">${x.rec}</td>
+                        <td class="num">${x.attn}</td><td class="num">${num(a)}</td>
+                        <td class="num">${num(b)}</td><td class="num">${num(c)}</td>
+                        <td class="num accent">${num(d)}</td>
+                        <td class="num">${(a / d).toFixed(1)}&times;</td></tr>`
+                }).join('')
+            }
+
+            modelSel.addEventListener('change', render)
+            fmtSel.addEventListener('change', render)
+            ctx.addEventListener('input', render)
+            render()
+        </script>
+    </body>
+</html>
