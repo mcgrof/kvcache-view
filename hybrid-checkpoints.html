@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
-            content="Why hybrid attention plus recurrent models can only reuse a cached prefix every few hundred to few thousand tokens, and how the stored checkpoint size sets that floor"
+            content="Explore how live-state page geometry, checkpoint retention, and storage compression affect prefix reuse in hybrid attention and recurrent models"
         />
         <title>Hybrid Model Checkpoint Spacing</title>
         <style>
@@ -121,9 +121,9 @@
             }
 
             .controls {
-                display: flex;
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 18px;
-                flex-wrap: wrap;
                 align-items: flex-end;
             }
 
@@ -131,7 +131,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 6px;
-                min-width: 180px;
+                min-width: 0;
             }
 
             .ctl label {
@@ -145,12 +145,13 @@
             }
 
             select,
-            input[type='range'] {
+            input[type='number'] {
                 width: 100%;
                 accent-color: var(--cyan);
             }
 
-            select {
+            select,
+            input[type='number'] {
                 background: var(--surface-3);
                 color: var(--text);
                 border: 1px solid var(--border-strong);
@@ -169,7 +170,7 @@
 
             .metrics {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 14px;
                 margin-top: 18px;
             }
@@ -189,6 +190,10 @@
                 letter-spacing: 0.1em;
                 text-transform: uppercase;
                 color: var(--muted);
+            }
+
+            .metric {
+                min-height: 138px;
             }
 
             .metric .v {
@@ -229,7 +234,7 @@
 
             .barrow {
                 display: grid;
-                grid-template-columns: 170px 1fr 120px;
+                grid-template-columns: 160px minmax(0, 1fr) 110px;
                 gap: 12px;
                 align-items: center;
                 font-size: 13px;
@@ -291,11 +296,60 @@
                 overflow: hidden;
             }
 
+            .tick.saved {
+                background: var(--green);
+                width: 3px;
+            }
+            .tick.excluded {
+                background: var(--orange);
+            }
+            .seg.stored {
+                background: var(--green);
+            }
+            .tl-title {
+                font-size: 13px;
+                margin: 10px 0 5px;
+                color: var(--text-2);
+            }
+            .check {
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+                margin-top: 18px;
+            }
+            .check input {
+                margin-top: 6px;
+                accent-color: var(--cyan);
+            }
+            :focus-visible {
+                outline: 2px solid var(--cyan);
+                outline-offset: 3px;
+            }
+            code {
+                overflow-wrap: anywhere;
+            }
+            .sources li {
+                margin: 9px 0;
+                overflow-wrap: anywhere;
+            }
+            .formula {
+                overflow-x: auto;
+                padding: 14px;
+                background: var(--surface-2);
+                font-size: 13px;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
+                }
+            }
+
             .tick {
                 position: absolute;
                 top: 0;
                 bottom: 0;
                 width: 2px;
+                transform: translateX(-100%);
                 background: var(--cyan);
             }
 
@@ -335,7 +389,15 @@
                 text-align: right;
             }
 
-            tr.sel td {
+            th[scope='row'] {
+                font: inherit;
+                letter-spacing: normal;
+                text-transform: none;
+                color: var(--text);
+            }
+
+            tr.sel td,
+            tr.sel th {
                 background: var(--cyan-soft);
             }
 
@@ -358,9 +420,41 @@
                 font-size: 13px;
             }
 
+            @media (max-width: 1000px) {
+                .controls {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+
             @media (max-width: 760px) {
                 .barrow {
-                    grid-template-columns: 110px 1fr 90px;
+                    grid-template-columns: 1fr 90px;
+                }
+                .barrow > div:first-child {
+                    grid-column: 1 / -1;
+                }
+                .wrap {
+                    padding-inline: 14px;
+                }
+                .panel {
+                    padding: 16px;
+                }
+                .metrics {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .metric .v {
+                    font-size: 21px;
+                }
+                .metric {
+                    padding: 12px;
+                    overflow-wrap: anywhere;
+                }
+                .controls {
+                    gap: 14px;
+                    grid-template-columns: minmax(0, 1fr);
+                }
+                .metric .k {
+                    line-height: 1.4;
                 }
             }
         </style>
@@ -370,302 +464,371 @@
             <a class="back" href="index.html">&#8592; All visualizations</a>
 
             <header class="hero">
-                <div class="eyebrow">Hybrid attention + recurrent models</div>
-                <h1>A recurrent checkpoint is big, so reusable prefixes are far apart</h1>
+                <div class="eyebrow">Hybrid attention + recurrent models · reviewed 20 September 2026</div>
+                <h1>Checkpoint size shapes reuse. The engine decides where.</h1>
                 <p class="lead">
-                    Attention caches can be sliced: the entries for the first 500 tokens are literally the front of the
-                    entries for the whole sequence. A recurrent state cannot. It is one matrix that has been overwritten
-                    once per token, and there is no way to rewind it. To reuse a prefix at all, a serving engine must
-                    have stored a whole separate checkpoint at that point. How far apart those checkpoints can sit is
-                    not a tuning choice. It is set by how many bytes one checkpoint takes.
+                    Full-attention KV preserves token history. A recurrent layer keeps a state that is updated in place;
+                    a later state cannot simply be sliced to recover an earlier prefix. Reuse needs a checkpoint at the
+                    chosen boundary, its convolution and other persistent state, and the matching attention history.
                 </p>
                 <div class="callout">
-                    <b>The rule.</b>
-                    vLLM makes every layer use one page size. A recurrent page holds one whole checkpoint and does not
-                    grow with tokens; an attention page grows with its block. So the attention block is raised until one
-                    attention page is at least as large as one recurrent page, and the recurrent page is then padded to
-                    match. That block size is the spacing between resume points, and the arithmetic only ever rounds up.
-                    No setting makes checkpoints closer together while the checkpoint stays the size it is.
+                    <b>Three separate questions.</b>
+                    How large is the engine's allocation block? Which boundaries actually get a checkpoint? How many
+                    bytes does a saved checkpoint occupy? In vLLM's aligned shared-page path, live-state size constrains
+                    the first. Scheduling and retention determine the second. A storage codec can reduce the third
+                    without changing either of the others. This is an implementation trade-off, not a universal minimum
+                    interval imposed by recurrent models.
                 </div>
             </header>
 
-            <section class="panel">
-                <h2>Pick a model and a checkpoint format</h2>
-                <div class="panel-sub">
-                    Sizes come from each model's shipped configuration. The storage format changes only how the
-                    checkpoint is stored, not how the model computes. The narrower formats are shown to size the effect;
-                    whether a given model tolerates one is a separate question this page does not answer.
-                </div>
-                <div class="controls">
-                    <div class="ctl">
-                        <label for="model">Model</label>
-                        <select id="model"></select>
-                    </div>
-                    <div class="ctl">
-                        <label for="fmt">Stored checkpoint format</label>
-                        <select id="fmt">
-                            <option value="4">fp32, what these configs ask for</option>
-                            <option value="2">bf16, half width</option>
-                            <option value="1">8 bits per number</option>
-                            <option value="0.375">0.375 bytes per number</option>
-                        </select>
-                    </div>
-                    <div class="ctl">
-                        <label for="ctx">
-                            Conversation length
-                            <span class="val" id="ctxv"></span>
-                        </label>
-                        <input id="ctx" type="range" min="512" max="32768" step="512" value="8192" />
-                    </div>
-                </div>
-
-                <div class="metrics" id="metrics"></div>
-            </section>
-
-            <section class="panel">
-                <h2>Where the resume points land</h2>
-                <div class="panel-sub">
-                    Each mark is a point a later request could jump in at. Everything between two marks has to be
-                    recomputed from the previous one.
-                </div>
-                <div class="timeline">
-                    <div class="tl" id="tl"></div>
-                    <div class="tl-label">
-                        <span>0 tokens</span>
-                        <span id="tlend"></span>
-                    </div>
-                </div>
-                <div class="note" id="tlnote"></div>
-            </section>
-
-            <section class="panel">
-                <h2>What one page is made of</h2>
-                <div class="panel-sub">
-                    Both kinds of page are forced to the same size. The recurrent one is one checkpoint plus padding;
-                    the attention one is however many tokens fit in that many bytes.
-                </div>
-                <div class="bars" id="pagebars"></div>
-                <div class="legend">
-                    <span>
-                        <i class="sw" style="background: #5de1d1"></i>
-                        recurrent checkpoint
-                    </span>
-                    <span>
-                        <i class="sw" style="background: #ffb86c"></i>
-                        padding to match
-                    </span>
-                    <span>
-                        <i class="sw" style="background: #77a7ff"></i>
-                        attention keys and values
-                    </span>
-                </div>
-            </section>
-
-            <section class="panel">
-                <h2>Every model, and what the format buys</h2>
-                <div class="panel-sub">
-                    Checkpoint spacing in tokens. Smaller is better: it means a later request can rejoin the
-                    conversation sooner.
-                </div>
-                <div class="scroll">
-                    <table id="tbl">
-                        <thead>
-                            <tr>
-                                <th>Model</th>
-                                <th class="num">Recurrent layers</th>
-                                <th class="num">Attention layers</th>
-                                <th class="num">fp32</th>
-                                <th class="num">bf16</th>
-                                <th class="num">8 bits</th>
-                                <th class="num">0.375 B</th>
-                                <th class="num">Finer by</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tblb"></tbody>
-                    </table>
-                </div>
-                <div class="note">
-                    A cache layered on top, such as LMCache, has to pick a chunk size, and 256 tokens is a common
-                    default. It is below the spacing of every model here in every format down to 8 bits, so it would
-                    address a position where no checkpoint was ever written. The chunk has to be the spacing or a
-                    multiple of it.
-                </div>
-            </section>
-
-            <section class="panel">
-                <h2>Caveats</h2>
-                <div class="panel-sub">Read before quoting any number on this page.</div>
-                <div class="note">
-                    This is arithmetic from vLLM's sizing rule and each model's configuration, not a measurement of a
-                    running server. Kernel alignment is taken as 16 tokens; a backend that demands more pushes the
-                    spacing up. The state dtype is read from configuration and can be overridden. Making the stored
-                    checkpoint smaller is not free: the page pool holds the state the recurrent kernel actually reads,
-                    so either that kernel reads the compressed form or the design separates the stored checkpoint from
-                    the live state and expands it on restore. The second has not been built. Finally, a smaller
-                    checkpoint only helps if the model tolerates the format, and that is strongly model-dependent.
-                </div>
-            </section>
-        </div>
-
-        <script>
-            const KERNEL_ALIGN = 16
-            const BF16 = 2
-
-            // Counts per layer, read from each model's config.json. `ssm` and `conv`
-            // are numbers of state values; `kvPerToken` counts keys and values for
-            // one attention layer for one token.
-            const MODELS = [
-                {
-                    name: 'Qwen3.5-4B',
-                    vendor: 'Alibaba',
-                    rec: 24,
-                    attn: 8,
-                    ssm: 32 * 128 * 128,
-                    conv: (16 * 128 + 16 * 128 + 32 * 128) * 3,
-                    kvPerToken: 4 * 256 * 2,
-                },
-                {
-                    name: 'Nemotron-H-4B',
-                    vendor: 'NVIDIA',
-                    rec: 24,
-                    attn: 4,
-                    ssm: 112 * 64 * 128,
-                    conv: (2 * 3072 + 2 * 128) * 3,
-                    kvPerToken: 8 * 128 * 2,
-                },
-                {
-                    name: 'Granite-4.0-h-micro',
-                    vendor: 'IBM',
-                    rec: 36,
-                    attn: 4,
-                    ssm: 64 * 64 * 128,
-                    conv: (2 * 2048 + 2 * 128) * 3,
-                    kvPerToken: 8 * 64 * 2,
-                },
-                {
-                    name: 'Falcon-H1-3B',
-                    vendor: 'TII',
-                    rec: 32,
-                    attn: 32,
-                    ssm: 32 * 128 * 256,
-                    conv: (4096 + 2 * 256) * 3,
-                    kvPerToken: 2 * 128 * 2,
-                },
-            ]
-
-            const cdiv = (a, b) => Math.ceil(a / b)
-
-            // Mirrors Platform.check_and_update_config in vllm/platforms/interface.py
-            function geometry(m, bytesPerNumber) {
-                const recPage = Math.round(m.ssm * bytesPerNumber) + m.conv * BF16
-                const attnPerToken = m.kvPerToken * BF16
-                const block = KERNEL_ALIGN * cdiv(recPage, KERNEL_ALIGN * attnPerToken)
-                const attnPage = block * attnPerToken
-                return {
-                    recPage,
-                    attnPerToken,
-                    block,
-                    attnPage,
-                    padding: (attnPage - recPage) / recPage,
-                }
-            }
-
-            const mib = (b) => (b / 1048576).toFixed(2) + ' MiB'
-            const num = (n) => n.toLocaleString('en-US')
-
-            const el = (id) => document.getElementById(id)
-            const modelSel = el('model')
-            const fmtSel = el('fmt')
-            const ctx = el('ctx')
-
-            MODELS.forEach((m, i) => {
-                const o = document.createElement('option')
-                o.value = String(i)
-                o.textContent = m.name + ' · ' + m.vendor
-                modelSel.appendChild(o)
-            })
-
-            function render() {
-                const m = MODELS[Number(modelSel.value)]
-                const bpn = Number(fmtSel.value)
-                const g = geometry(m, bpn)
-                const length = Number(ctx.value)
-                const points = Math.floor(length / g.block)
-                el('ctxv').textContent = num(length) + ' tokens'
-
-                const fp32 = geometry(m, 4).block
-                const finer = fp32 / g.block
-
-                const cls = points === 0 ? 'bad' : points < 4 ? 'warn' : 'good'
-                el('metrics').innerHTML = [
-                    `<div class="metric"><div class="k">Checkpoint spacing</div>
-                     <div class="v accent">${num(g.block)}</div>
-                     <div class="n">tokens between resume points</div></div>`,
-                    `<div class="metric"><div class="k">Resume points available</div>
-                     <div class="v ${cls}">${points}</div>
-                     <div class="n">inside a ${num(length)} token conversation</div></div>`,
-                    `<div class="metric"><div class="k">One checkpoint</div>
-                     <div class="v">${mib(g.recPage)}</div>
-                     <div class="n">per recurrent layer, ${m.rec} of them</div></div>`,
-                    `<div class="metric"><div class="k">Page padding</div>
-                     <div class="v">${(g.padding * 100).toFixed(2)}%</div>
-                     <div class="n">wasted making the pages match</div></div>`,
-                    `<div class="metric"><div class="k">Versus fp32</div>
-                     <div class="v ${finer > 1 ? 'good' : ''}">${finer.toFixed(1)}&times;</div>
-                     <div class="n">finer reuse than this model ships with</div></div>`,
-                ].join('')
-
-                // resume-point timeline
-                const tl = el('tl')
-                tl.innerHTML = ''
-                for (let p = g.block; p <= length; p += g.block) {
-                    const d = document.createElement('div')
-                    d.className = 'tick'
-                    d.style.left = (100 * p) / length + '%'
-                    tl.appendChild(d)
-                }
-                el('tlend').textContent = num(length) + ' tokens'
-                el('tlnote').textContent =
-                    points === 0
-                        ? `No resume point exists inside a conversation this long. A later request sharing this whole prefix still has to prefill all of it.`
-                        : `A later request sharing this prefix can skip at most ${num(points * g.block)} of ${num(length)} tokens, and must recompute the remaining ${num(length - points * g.block)}.`
-
-                // page composition bars
-                const recFrac = g.recPage / g.attnPage
-                el('pagebars').innerHTML = `
-                    <div class="barrow">
-                        <div>Recurrent page</div>
-                        <div class="track">
-                            <div class="seg rec" style="width:${(recFrac * 100).toFixed(2)}%"></div>
-                            <div class="seg pad" style="width:${((1 - recFrac) * 100).toFixed(2)}%"></div>
+            <main>
+                <section class="panel" aria-labelledby="calculator-title">
+                    <h2 id="calculator-title">Explore a concrete sizing scenario</h2>
+                    <p class="panel-sub" id="modelnote"></p>
+                    <div class="controls">
+                        <div class="ctl">
+                            <label for="model">Model</label>
+                            <select id="model"></select>
                         </div>
-                        <div class="num">${mib(g.attnPage)}</div>
+                        <div class="ctl">
+                            <label for="live">Working recurrent-state precision</label>
+                            <select id="live">
+                                <option value="4">FP32 sizing scenario</option>
+                                <option value="2">BF16 sizing scenario</option>
+                            </select>
+                        </div>
+                        <div class="ctl">
+                            <label for="fmt">Saved checkpoint format</label>
+                            <select id="fmt">
+                                <option value="native">Same precision as working state</option>
+                                <option value="bf16">BF16 storage projection</option>
+                                <option value="int8">INT8 + FP32 row scales (projection)</option>
+                            </select>
+                        </div>
+                        <div class="ctl">
+                            <label for="alignment">Assumed allocation alignment</label>
+                            <select id="alignment">
+                                <option value="16">16 tokens</option>
+                                <option value="64">64 tokens</option>
+                                <option value="128">128 tokens</option>
+                                <option value="256">256 tokens</option>
+                            </select>
+                        </div>
+                        <div class="ctl">
+                            <label for="every">Illustrative checkpoint retention</label>
+                            <select id="every">
+                                <option value="1">Every allocation block</option>
+                                <option value="2">Every 2 blocks</option>
+                                <option value="4">Every 4 blocks</option>
+                                <option value="8">Every 8 blocks</option>
+                            </select>
+                        </div>
+                        <div class="ctl">
+                            <label for="ctx">Shared prompt length (tokens)</label>
+                            <input id="ctx" type="number" min="1" max="131072" step="1" value="8192" required />
+                        </div>
                     </div>
-                    <div class="barrow">
-                        <div>Attention page</div>
-                        <div class="track"><div class="seg attn" style="width:100%"></div></div>
-                        <div class="num">${num(g.block)} tokens</div>
-                    </div>`
+                    <label class="check" for="replay">
+                        <input id="replay" type="checkbox" checked />
+                        Reserve the last prompt token for logits, as in the inspected vLLM prefix lookup.
+                    </label>
+                    <p id="input-error" role="alert" hidden>
+                        Enter a whole token count from 1 to 131,072. Results below still show the last valid value.
+                    </p>
+                    <div class="metrics" id="metrics" aria-live="polite" aria-atomic="true"></div>
+                    <p class="note">
+                        These are sizing projections, not benchmark results or a supported launch configuration.
+                        Changing working precision needs backend support and quality validation. Changing only the saved
+                        format leaves the live allocation unchanged. INT8 includes one four-byte scale per last-axis
+                        row; convolution history stays BF16. A real format may have different metadata and padding.
+                    </p>
+                    <noscript>
+                        <p class="callout">
+                            Enable JavaScript to use the calculator. The explanation, assumptions and sources below
+                            remain readable.
+                        </p>
+                    </noscript>
+                </section>
 
-                // all-model comparison
-                el('tblb').innerHTML = MODELS.map((x) => {
-                    const a = geometry(x, 4).block
-                    const b = geometry(x, 2).block
-                    const c = geometry(x, 1).block
-                    const d = geometry(x, 0.375).block
-                    const sel = x.name === m.name ? ' class="sel"' : ''
-                    return `<tr${sel}><td>${x.name}</td><td class="num">${x.rec}</td>
-                        <td class="num">${x.attn}</td><td class="num">${num(a)}</td>
-                        <td class="num">${num(b)}</td><td class="num">${num(c)}</td>
-                        <td class="num accent">${num(d)}</td>
-                        <td class="num">${(a / d).toFixed(1)}&times;</td></tr>`
-                }).join('')
-            }
+                <section class="panel" aria-labelledby="timeline-title">
+                    <h2 id="timeline-title">An allocation boundary is only a candidate</h2>
+                    <p class="panel-sub">
+                        The lower row is an explicit example of retained checkpoints, not a prediction of vLLM
+                        scheduling. A hit also requires all matching attention blocks and recurrent components to be
+                        present.
+                    </p>
+                    <div class="timeline">
+                        <div class="tl-title">Allocation boundaries</div>
+                        <div class="tl" id="tl-grid" aria-hidden="true"></div>
+                        <div class="tl-title">Assumed retained checkpoints</div>
+                        <div class="tl" id="tl-stored" aria-hidden="true"></div>
+                        <div class="tl-label">
+                            <span>0 tokens</span>
+                            <span id="tlend"></span>
+                        </div>
+                    </div>
+                    <div class="legend">
+                        <span>
+                            <i class="sw" style="background: #5de1d1"></i>
+                            allocation boundary
+                        </span>
+                        <span>
+                            <i class="sw" style="background: #79d99a"></i>
+                            retained checkpoint
+                        </span>
+                        <span>
+                            <i class="sw" style="background: #ffb86c"></i>
+                            prompt-end checkpoint excluded by replay
+                        </span>
+                    </div>
+                    <p class="note" id="tlnote"></p>
+                    <p class="note">
+                        In the ordinary
+                        <code>align</code>
+                        path, checkpoints are exported at eligible scheduler-step ends. A step spanning several blocks
+                        need not preserve each intermediate state. Backend-specific checkpoint exports, eviction and
+                        prefix sharing can change the available set. The older
+                        <code>all</code>
+                        mode is deprecated in the inspected vLLM tree; it is not a promise of dense checkpoints on
+                        current backends. A compute kernel's 64-token chunk is a separate quantity.
+                    </p>
+                </section>
 
-            modelSel.addEventListener('change', render)
-            fmtSel.addEventListener('change', render)
-            ctx.addEventListener('input', render)
-            render()
-        </script>
+                <section class="panel" aria-labelledby="pages-title">
+                    <h2 id="pages-title">Live pages and saved bytes are different budgets</h2>
+                    <p class="panel-sub">
+                        All bars use the same byte scale, per layer. The first two illustrate a shared GPU page size.
+                        The third is a serialized recurrent checkpoint, which expands back into working state on
+                        restore.
+                    </p>
+                    <div class="bars" id="pagebars"></div>
+                    <div class="legend">
+                        <span>
+                            <i class="sw" style="background: #5de1d1"></i>
+                            live recurrent payload
+                        </span>
+                        <span>
+                            <i class="sw" style="background: #ffb86c"></i>
+                            GPU page padding
+                        </span>
+                        <span>
+                            <i class="sw" style="background: #77a7ff"></i>
+                            attention KV
+                        </span>
+                        <span>
+                            <i class="sw" style="background: #79d99a"></i>
+                            saved recurrent payload + scales
+                        </span>
+                    </div>
+                    <p class="note" id="pagenote"></p>
+                    <p class="note">
+                        Separate compressed checkpoint pools already exist:
+                        <a href="https://github.com/sgl-project/sglang/pull/28185">
+                            SGLang merged an INT8 checkpoint pool on 18 June 2026
+                        </a>
+                        , retaining a BF16 working pool. That is evidence for a storage/working-state split, not for
+                        automatic finer checkpoint spacing or quality equivalence on every model. CPU or NVMe offload
+                        likewise needs the engine to supply a complete state at the advertised boundary; a faster I/O
+                        path cannot recreate a missing checkpoint.
+                    </p>
+                </section>
+
+                <section class="panel" aria-labelledby="comparison-title">
+                    <h2 id="comparison-title">Compare working-state geometry</h2>
+                    <p class="panel-sub">
+                        Estimated allocation block sizes at the selected alignment. Only the last column follows the
+                        saved-format selector. Model counts are branches: Falcon-H1 has both branches in each of 32
+                        decoder blocks.
+                    </p>
+                    <div class="scroll">
+                        <table>
+                            <caption>
+                                TP=1 sizing estimates; storage figures exclude attention KV and object headers.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Model</th>
+                                    <th scope="col">Recurrent / attention</th>
+                                    <th scope="col">FP32 block (tokens)</th>
+                                    <th scope="col">BF16 block (tokens)</th>
+                                    <th scope="col">Saved recurrent snapshot</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblb"></tbody>
+                        </table>
+                    </div>
+                    <p class="note" id="chunknote"></p>
+                    <p class="note">
+                        For
+                        <a
+                            href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
+                        >
+                            the documented LMCache multiprocess hybrid path
+                        </a>
+                        , read the resolved engine block size, enable prefix caching with
+                        <code>align</code>
+                        , and use separate object groups. Derive compatible storage chunks from that geometry. For mixed
+                        group spans, satisfy every relevant group's alignment. The recipe is not a claim that every
+                        model, backend, codec or storage tier is validated.
+                    </p>
+                </section>
+
+                <section class="panel" aria-labelledby="assumptions-title">
+                    <h2 id="assumptions-title">What this calculation assumes</h2>
+                    <p>The simplified aligned-page model is:</p>
+                    <pre class="formula">
+S = recurrent matrix values × working bytes + convolution values × 2
+T = KV values per attention layer per token × 2
+N = A × ceil(S / (A × T))
+P = N × T</pre>
+                    <p>
+                        <code>S</code>
+                        is live recurrent payload,
+                        <code>T</code>
+                        is attention bytes per token,
+                        <code>A</code>
+                        is the assumed effective allocation alignment,
+                        <code>N</code>
+                        is the allocation block, and
+                        <code>P</code>
+                        is the shared page. The selected
+                        <code>A</code>
+                        stands in for backend constraints and requested block size; it is not inferred from a GPU.
+                        Additional groups, MLA layouts, quantized KV, tensor parallelism, speculative scratch state and
+                        extra auxiliary state can change this calculation.
+                    </p>
+                    <p>
+                        Model configuration describes dimensions; the engine resolves state dtype and layout. FP32 is an
+                        explicit scenario here, not a default attributed to all four models. The Qwen config requests
+                        FP32 SSM state, while the other linked configs do not establish that same request. Inspect
+                        actual cache specs and startup logs before quoting a deployment number.
+                    </p>
+                    <p>
+                        One live state per conversation and many retained prefix checkpoints have different memory
+                        costs. If every attention block has one recurrent checkpoint and per-layer pages are equal, the
+                        recurrent share is the recurrent branch count divided by the total branch count. Sparse
+                        checkpoints, shared prefixes, padding and eviction change that share. Count unique retained
+                        objects, and report GPU allocation, serialized bytes and transferred bytes separately.
+                    </p>
+                    <p>
+                        For a real deployment, verify checkpoint positions and actual restores after GPU eviction;
+                        require complete attention, recurrent and convolution state at the same boundary. Test changed
+                        suffixes, exact block boundaries and missing components. Storage compression also needs quality
+                        measurements at its actual store/restore cadence, including chained reuse.
+                    </p>
+                </section>
+
+                <section class="panel sources" aria-labelledby="sources-title">
+                    <h2 id="sources-title">Sources and reproducibility</h2>
+                    <p class="panel-sub">
+                        Primary sources checked 20 September 2026. Code references pin development snapshots; they do
+                        not imply support in every release. No GPU benchmark was run for this page.
+                    </p>
+                    <ul>
+                        <li>
+                            vLLM
+                            <code>133b71e0</code>
+                            :
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/platforms/interface.py"
+                            >
+                                hybrid block alignment
+                            </a>
+                            ,
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/model_executor/layers/mamba/mamba_utils.py"
+                            >
+                                state shapes and dtypes
+                            </a>
+                            ,
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/v1/kv_cache_interface.py"
+                            >
+                                checkpoint interface
+                            </a>
+                            , and
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/v1/core/kv_cache_manager.py"
+                            >
+                                last-token replay rule
+                            </a>
+                            .
+                            <a href="https://github.com/vllm-project/vllm/pull/55041">PR 55041</a>
+                            explains the
+                            <code>all</code>
+                            -mode deprecation.
+                        </li>
+                        <li>
+                            <a
+                                href="https://huggingface.co/Qwen/Qwen3.5-4B/blob/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/config.json"
+                            >
+                                Qwen3.5-4B configuration
+                            </a>
+                            : 32 × 128 × 128 recurrent matrix; 8,192 convolution channels with three history slots; four
+                            KV heads of dimension 256.
+                        </li>
+                        <li>
+                            <a
+                                href="https://huggingface.co/nvidia/Nemotron-H-4B-Instruct-128K/blob/f3c0b6c3b7fcb39e132b6007386e33a586d6e6cb/config.json"
+                            >
+                                Nemotron-H configuration
+                            </a>
+                            and
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/model_executor/models/nemotron_h.py"
+                            >
+                                vLLM adapter
+                            </a>
+                            : 112 × 64 × 128 recurrent matrix; convolution channels are 112 × 64 + 2 × 8 × 128 = 9,216,
+                            with three history slots.
+                        </li>
+                        <li>
+                            <a
+                                href="https://huggingface.co/ibm-granite/granite-4.0-h-micro/blob/d5f01a3ea75f088947be3aae039f4ad52837dfde/config.json"
+                            >
+                                Granite configuration
+                            </a>
+                            : 64 × 64 × 128 recurrent matrix; 4,352 convolution channels with three history slots; eight
+                            KV heads of dimension 64.
+                        </li>
+                        <li>
+                            <a
+                                href="https://huggingface.co/tiiuae/Falcon-H1-3B-Instruct/blob/01087ec4c132d7f186908716b3530ea187f062a1/config.json"
+                            >
+                                Falcon-H1 configuration
+                            </a>
+                            : 32 × 128 × 256 recurrent matrix; 4,608 convolution channels with three history slots; two
+                            KV heads of dimension 128.
+                        </li>
+                        <li>
+                            <a href="https://github.com/sgl-project/sglang/pull/28185">
+                                SGLang's merged INT8 checkpoint pool
+                            </a>
+                            and
+                            <a
+                                href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/recipes/qwen3_5.rst"
+                            >
+                                LMCache's Qwen hybrid recipe
+                            </a>
+                            provide concrete implementations and configuration guidance. Their reported validation is
+                            separate from this calculator.
+                        </li>
+                        <li>
+                            <a href="https://github.com/mcgrof/kvcache-view/blob/main/hybrid-checkpoints.js">
+                                Calculator source
+                            </a>
+                            and
+                            <a href="https://github.com/mcgrof/kvcache-view/blob/main/hybrid-checkpoints.test.js">
+                                arithmetic and boundary tests
+                            </a>
+                            . Run
+                            <code>node --test hybrid-checkpoints.test.js</code>
+                            to reproduce the calculation checks.
+                        </li>
+                    </ul>
+                </section>
+            </main>
+        </div>
+        <script src="hybrid-checkpoints.js"></script>
     </body>
 </html>

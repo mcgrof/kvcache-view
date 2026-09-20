@@ -53,14 +53,14 @@
     </g>
 
     <g fill="#7f93a2" font-family="ui-monospace, Menlo, monospace" font-size="19">
-        <text x="40" y="132">attention: slice anywhere</text>
+        <text x="40" y="132">attention: token history</text>
         <text x="40" y="282">recurrent: whole checkpoints only</text>
     </g>
 
     <g fill="#5de1d1" font-family="ui-monospace, Menlo, monospace" font-size="22" font-weight="700">
-        <text x="40" y="440">4128 tokens apart</text>
+        <text x="40" y="440">Pages ≠ saved checkpoints</text>
     </g>
     <g fill="#7f93a2" font-family="ui-monospace, Menlo, monospace" font-size="17">
-        <text x="40" y="466">Falcon-H1-3B</text>
+        <text x="40" y="466">Explore geometry and retention</text>
     </g>
 </svg>

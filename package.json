@@ -9,7 +9,7 @@
     "scripts": {
         "format": "prettier --write '*.html' '*.js'",
         "check-format": "prettier --check '*.html' '*.js'",
-        "test": "node --test cartridge-economics.test.js"
+        "test": "node --test cartridge-economics.test.js hybrid-checkpoints.test.js"
     },
     "devDependencies": {
         "prettier": "^3.1.0"
