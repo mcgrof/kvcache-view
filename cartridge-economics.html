@@ -447,6 +447,105 @@
             <div id="page-breakeven" class="page active">
                 <div id="be-status" class="status-banner status-neutral">&nbsp;</div>
 
+                <div class="card">
+                    <div class="sec-title">Measured KNLP evidence · Qwen3-8B / LongHealth patient_02</div>
+                    <div class="sec-note">
+                        The completed reproduction now supplies training time, artifact size, seed variation, quality,
+                        quantization, and scoped serving measurements. It still lacks self-study cost, matched
+                        production cost/request, and storage-load behavior, so it cannot establish economic break-even.
+                    </div>
+                    <div class="metric-grid" style="margin-top: 12px">
+                        <div class="metric">
+                            <div class="k">
+                                Isolated training job
+                                <span class="prov prov-measured">measured</span>
+                            </div>
+                            <div class="v">8.21–8.29 H100 h</div>
+                        </div>
+                        <div class="metric">
+                            <div class="k">
+                                Distinct-seed outcomes
+                                <span class="prov prov-measured">measured</span>
+                            </div>
+                            <div class="v" style="color: #fbbf24">5 / 7 healthy</div>
+                            <div class="sec-note">2 / 7 scored 40%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="k">
+                                Serialized BF16 artifact
+                                <span class="prov prov-measured">measured</span>
+                            </div>
+                            <div class="v">88.923 MiB</div>
+                        </div>
+                        <div class="metric">
+                            <div class="k">
+                                Selected seed-42 quality
+                                <span class="prov prov-measured">measured</span>
+                            </div>
+                            <div class="v" style="color: #f87171">78.33% vs 98.33%</div>
+                            <div class="sec-note">Cartridge vs full document</div>
+                        </div>
+                    </div>
+                    <div class="price-scroll" style="margin-top: 12px">
+                        <table class="prices">
+                            <thead>
+                                <tr>
+                                    <th>Finding</th>
+                                    <th>Measured result</th>
+                                    <th>Scope</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>K16/V8 post-training quantization</td>
+                                    <td>
+                                        <span style="color: #34d399">25% smaller raw payload</span>
+                                        with loss +0.029–0.038%
+                                    </td>
+                                    <td>Three trained patient_02 artifacts; lower evaluation loss is better</td>
+                                </tr>
+                                <tr>
+                                    <td>Symmetric K8/V8 post-training quantization</td>
+                                    <td><span style="color: #f87171">Loss +0.873–1.303%</span></td>
+                                    <td>The keys cause almost all of the measured quantization penalty</td>
+                                </tr>
+                                <tr>
+                                    <td>Fused K16/V8 vs ordinary BF16 Cartridge</td>
+                                    <td>
+                                        Throughput
+                                        <span style="color: #34d399">+0.42% / +0.52%</span>
+                                        and TTFT
+                                        <span style="color: #34d399">−2.92% / −3.96%</span>
+                                    </td>
+                                    <td>Corrected patient_01 H100 run, batches 1 / 16</td>
+                                </tr>
+                                <tr>
+                                    <td>Full text vs Cartridge path</td>
+                                    <td>Median TTFT 757 ms → 80.6 ms</td>
+                                    <td>
+                                        Older patient_01 single-stream run; useful latency evidence, not production
+                                        cost/request
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sec-note" style="margin-top: 10px">
+                        Five accepted runs and two screened-out runs imply 40% failed work per accepted artifact if this
+                        small-sample rate holds. The measured preset loads that derived retry allowance and the specific
+                        seed-42 artifact; its quality gate fails visibly. Read the
+                        <a href="https://knlp.io/cas.html">CAS reproduction</a>
+                        and
+                        <a href="https://knlp.io/cartridge-asymmetric-quantization.html">
+                            asymmetric-quantization results
+                        </a>
+                        .
+                    </div>
+                    <button class="btn" id="load-measured" style="margin-top: 12px">
+                        Load measured patient_02 snapshot
+                    </button>
+                </div>
+
                 <div id="planning-banner" class="warn-box" style="display: none">
                     ILLUSTRATIVE planning-assumption mode: prefill wall times below are estimated from an assumed
                     throughput, not measured, and are NOT results from the CAS paper. Use measured wall times for real
@@ -654,7 +753,10 @@
                     </div>
                     <div class="g3" style="margin-top: 10px">
                         <div class="field">
-                            <label for="in-retry-pct">Failed/preempted training retry overhead (%)</label>
+                            <label for="in-retry-pct">
+                                Failed/preempted training retry overhead (%)
+                                <span class="prov prov-derived">derived</span>
+                            </label>
                             <input type="number" id="in-retry-pct" value="0" min="0" step="1" />
                         </div>
                         <div class="field">
@@ -665,7 +767,9 @@
                     <div class="sec-note" style="margin-top: 8px">
                         Frequently updated corpora retrain a fraction of their Cartridges every month; that fraction of
                         the (retry-inflated) build cost recurs monthly. Model/checkpoint migrations that invalidate
-                        every Cartridge are the lifetime input above.
+                        every Cartridge are the lifetime input above. The measured patient_02 preset derives 40% retry
+                        work from two screened-out runs for every five accepted runs; treat that seven-seed observation
+                        as a local estimate, not a universal failure rate.
                     </div>
                 </div>
 

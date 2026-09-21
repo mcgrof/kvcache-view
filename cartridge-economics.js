@@ -804,16 +804,20 @@ if (typeof document !== 'undefined') {
         const el = $('be-status')
         const benchmarkMissing =
             r.buildCost === null || r.textVar === null || r.cartComputeVar === null || r.net === null
+        const missing = []
+        if (r.buildCost === null)
+            missing.push('total construction cost (training GPU-hours + self-study, or components)')
+        if (r.textVar === null || r.cartComputeVar === null)
+            missing.push('matched per-query inference cost for both paths')
+        if (!r.loadIncluded && r.loadCost === null) missing.push('Cartridge load pricing (GET/retrieval/egress)')
+        if (r.quality === 'unknown') missing.push('quality parity scores')
         let cls, text
-        if (benchmarkMissing) {
+        if (r.quality === 'fail') {
+            cls = 'status-fail'
+            text = 'Quality gate failed — Cartridge accuracy is below the allowed degradation. Economics are moot.'
+            if (benchmarkMissing) text += ' The snapshot also still needs: ' + missing.join('; ') + '.'
+        } else if (benchmarkMissing) {
             // List only what is actually missing, and say what is already known
-            const missing = []
-            if (r.buildCost === null)
-                missing.push('total construction cost (training GPU-hours + self-study, or components)')
-            if (r.textVar === null || r.cartComputeVar === null)
-                missing.push('matched per-query inference cost for both paths')
-            if (!r.loadIncluded && r.loadCost === null) missing.push('Cartridge load pricing (GET/retrieval/egress)')
-            if (r.quality === 'unknown') missing.push('quality parity scores')
             const known = []
             if (r.corpus !== null) known.push(`corpus KV ${formatBytesBinary(r.corpus)}`)
             if (r.bytesDoc !== null) known.push(`${formatBytesBinary(r.bytesDoc)}/Cartridge`)
@@ -824,9 +828,6 @@ if (typeof document !== 'undefined') {
                 missing.join('; ') +
                 '. The CAS paper does not report these, and this calculator refuses to invent them.' +
                 (known.length ? ' Known now: ' + known.join(' · ') + '.' : '')
-        } else if (r.quality === 'fail') {
-            cls = 'status-fail'
-            text = 'Quality gate failed — Cartridge accuracy is below the allowed degradation. Economics are moot.'
         } else if (r.net <= 0 || !isFinite(r.beQueries)) {
             cls = 'status-fail'
             text = 'No economic break-even — per-query net saving is not positive at these inputs.'
@@ -1520,6 +1521,12 @@ if (typeof document !== 'undefined') {
         if (el) el.value = v
     }
 
+    const MEASURED_RECORD_ID = 'qwen3-8b-patient02-cas-seed42-20260920'
+
+    function measuredReproduction() {
+        return CARTRIDGE_BENCHMARKS.records.find((record) => record.id === MEASURED_RECORD_ID)
+    }
+
     // Paper-derived workload values only: runtime and training fields are
     // cleared, never filled with invented numbers. Illustrative values live
     // exclusively in the separate example loader below.
@@ -1539,6 +1546,7 @@ if (typeof document !== 'undefined') {
             'in-train-gpuhours',
             'in-selfstudy',
             'in-other-build',
+            'in-run-meta',
             'in-text-ms',
             'in-cart-ms',
             'in-text-gpuhours',
@@ -1547,9 +1555,13 @@ if (typeof document !== 'undefined') {
             'in-cart-queries',
             'in-text-usd1k',
             'in-cart-usd1k',
+            'in-ttft-delta',
+            'in-ttft-slo',
             'in-q-text',
             'in-q-cart',
         ].forEach((id) => setVal(id, ''))
+        setVal('in-retry-pct', 0)
+        setVal('in-rebuild-pct', 0)
         $('in-selfstudy-included').checked = false
         $('in-q-format').checked = false
         $('in-planning').checked = false
@@ -1563,6 +1575,38 @@ if (typeof document !== 'undefined') {
 
     function loadPaperPreset() {
         applyPaperPreset()
+        recompute()
+    }
+
+    function loadMeasuredReproduction() {
+        const record = measuredReproduction()
+        if (!record || record.validity !== 'valid') return
+
+        applyPaperPreset()
+        setVal('in-docs', 1)
+        setVal('in-corpus-tokens', record.corpusTokens)
+        setVal('in-doc-tokens', record.docTokens)
+        $('in-compression').value = 'custom'
+        setVal('in-compression-custom', record.compression.toFixed(3))
+        $('in-model').value = 'qwen3-8b'
+        $('in-kvformat').value = 'bf16'
+        setVal('in-actual-mib-doc', (record.serializedBytesDoc / (1024 * 1024)).toFixed(3))
+        setVal('in-unique', 1)
+
+        $('in-mode-a').checked = false
+        $('in-mode-b').checked = true
+        setVal('in-train-gpuhours', record.constructionGpuHours)
+        $('in-train-gpu-preset').value = 'runpod-h100-sxm-community'
+        setVal('in-retry-pct', record.screenedRetryOverheadPct)
+        setVal(
+            'in-run-meta',
+            'patient_02 seed 42; one H100; training only; self-study, matched inference, and load measurements absent',
+        )
+
+        setVal('in-q-text', (record.qualityBaseline * 100).toFixed(2))
+        setVal('in-q-cart', (record.qualityCartridge * 100).toFixed(2))
+        setVal('in-q-tol', 1)
+        $('in-q-format').checked = true
         recompute()
     }
 
@@ -1658,6 +1702,7 @@ if (typeof document !== 'undefined') {
             el.addEventListener('change', recompute)
         })
         $('load-paper').addEventListener('click', loadPaperPreset)
+        $('load-measured').addEventListener('click', loadMeasuredReproduction)
         $('load-example').addEventListener('click', loadIllustrativeExample)
         $('copy-link').addEventListener('click', () => {
             pushState()

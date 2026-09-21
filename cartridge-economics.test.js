@@ -180,6 +180,39 @@ test('benchmark records carry validity, and invalid runs never become presets', 
     }
 })
 
+test('measured patient_02 preset keeps evidence and missing inputs distinct', () => {
+    const B = require('./cartridge-benchmarks.js')
+    const record = B.records.find((r) => r.id === 'qwen3-8b-patient02-cas-seed42-20260920')
+
+    assert.ok(record, 'measured patient_02 record exists')
+    assert.strictEqual(record.validity, 'valid')
+    assert.strictEqual(record.constructionGpuHours, 8.25)
+    assert.strictEqual(record.serializedBytesDoc, 93242105)
+    assert.strictEqual(record.qualityBaseline, 0.9833)
+    assert.strictEqual(record.qualityCartridge, 0.7833)
+    assert.strictEqual(record.trainingVariation.distinctSeeds, 7)
+    assert.strictEqual(record.trainingVariation.accepted, 5)
+    assert.strictEqual(record.trainingVariation.failed, 2)
+    assert.strictEqual(record.screenedRetryOverheadPct, 40)
+    closeTo(record.quantization.rawPayloadMiB.k16v8 / record.quantization.rawPayloadMiB.bf16, 0.75)
+    assert.deepStrictEqual(record.quantization.relativeLossIncreasePct, {
+        k16v8Min: 0.029,
+        k16v8Max: 0.038,
+        k8v8Min: 0.873,
+        k8v8Max: 1.303,
+    })
+
+    assert.strictEqual(record.selfStudyCostUsd, null)
+    assert.strictEqual(record.baselineRun, null)
+    assert.strictEqual(record.cartridgeRun, null)
+    assert.strictEqual(record.loadPath, null)
+
+    const html = fs.readFileSync(path.join(__dirname, 'cartridge-economics.html'), 'utf8')
+    const econ = fs.readFileSync(path.join(__dirname, 'cartridge-economics.js'), 'utf8')
+    assert.ok(html.includes('id="load-measured"'))
+    assert.ok(econ.includes(record.id), 'calculator references only the valid measurement record')
+})
+
 test('service worker caches the cartridge assets', () => {
     const sw = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8')
     for (const asset of [

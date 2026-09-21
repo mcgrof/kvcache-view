@@ -4,7 +4,9 @@
 // entry into) the calculator is recorded here with its provenance, validity
 // and known defects, so numbers never circulate detached from how they were
 // produced. Records marked validity 'invalid' or 'exploratory' MUST NOT be
-// surfaced as presets; only 'valid' records may seed calculator fields.
+// surfaced as presets; only measurement-valid records may seed calculator
+// fields. A valid record can still fail the calculator's quality gate or lack
+// enough cost inputs for an economic verdict.
 //
 // Field reference (one record):
 //   id                    unique slug
@@ -35,6 +37,11 @@
 //   qualityMetric         metric name
 //   qualityBaseline       baseline score
 //   qualityCartridge      Cartridge score
+//   screenedRetryOverheadPct
+//                         failed work / accepted work after quality screening
+//   trainingVariation     seed-count and quality-spread summary
+//   quantization          post-training payload and loss measurements
+//   servingComparisons    scoped latency and throughput comparisons
 //   notes                 free text: methodology, known defects
 //
 // Unknown values are null, never zero — the same discipline as the
@@ -135,6 +142,97 @@ const CARTRIDGE_BENCHMARKS = {
                 'ceiling, so it is not a deployable preset. Method, deltas against the public Cartridges ' +
                 'implementation, and where the remaining gap lives are documented at ' +
                 'https://mcgrof.github.io/knlp/cas.html',
+        },
+        {
+            id: 'qwen3-8b-patient02-cas-seed42-20260920',
+            validity: 'valid',
+            provenance: 'knlp CAS reproduction, gpu1',
+            date: '2026-09-20',
+            model: 'Qwen3-8B',
+            dataset: 'LongHealth patient_02',
+            corpusTokens: 12628,
+            docTokens: 12628,
+            cartridgeTokens: 632,
+            compression: 12628 / 632,
+            serializedFormat: 'bf16',
+            serializedBytesDoc: 93242105,
+            harness: 'knlp d562cde; research/cartridges_cas; HazyResearch cartridges 8cb6823; Table-15 protocol',
+            engine: 'Qwen3-8B teacher and FlexQwen3 Cartridge train/evaluation path',
+            hardware: '1x NVIDIA H100 80GB per training job',
+            constructionGpuHours: 8.25,
+            selfStudyCostUsd: null,
+            otherBuildCostUsd: null,
+            requestShape: null,
+            concurrency: null,
+            baselineRun: null,
+            cartridgeRun: null,
+            loadPath: null,
+            ttftMs: null,
+            throughputQps: null,
+            qualityMetric: 'LongHealth option-match accuracy (60 questions, temperature 0.6)',
+            qualityBaseline: 0.9833,
+            qualityCartridge: 0.7833,
+            screenedRetryOverheadPct: 40,
+            trainingVariation: {
+                distinctSeeds: 7,
+                accepted: 5,
+                failed: 2,
+                meanAccuracy: 0.6667,
+                sampleStdDev: 0.1828,
+                acceptedMinAccuracy: 0.75,
+                acceptedMaxAccuracy: 0.8,
+            },
+            quantization: {
+                rawPayloadMiB: {
+                    bf16: 88.875,
+                    k16v8: 66.65625,
+                    k8v8: 44.4375,
+                },
+                relativeLossIncreasePct: {
+                    k16v8Min: 0.029,
+                    k16v8Max: 0.038,
+                    k8v8Min: 0.873,
+                    k8v8Max: 1.303,
+                },
+                nativePatient01DecisionMatch: '20/20',
+            },
+            servingComparisons: {
+                fullTextToCartridge: {
+                    baselineP50Ms: 757,
+                    cartridgeP50Ms: 80.6,
+                    scope: 'Older patient_01 single-stream run with a 512-token Cartridge',
+                },
+                fusedK16V8VsBf16: [
+                    {
+                        batch: 1,
+                        throughputDeltaPct: 0.42,
+                        ttftDeltaPct: -2.92,
+                    },
+                    {
+                        batch: 16,
+                        throughputDeltaPct: 0.52,
+                        ttftDeltaPct: -3.96,
+                    },
+                ],
+            },
+            notes:
+                'Measurement-valid patient_02 seed-42 reproduction. Four clean one-job-per-GPU runs took ' +
+                "8.21-8.29 H100 hours; 8.25 GPU-hours is this preset's rounded training-only measurement. " +
+                'The self-study generation cost was not captured, so total construction cost remains unknown. ' +
+                'Across seven distinct seeds, five scored 0.75-0.80 and two scored 0.40. Screening the two failed ' +
+                'artifacts and replacing them would add two failed runs per five accepted runs, or 40% retry work ' +
+                'if this small-sample rate held. The selected deterministic seed-42 artifact scored 0.7833 versus ' +
+                'the patient_02 full-document reference at 0.9833, so it fails a one-point parity gate. The BF16 ' +
+                'file is 93,242,105 bytes; raw payload is 88.875 MiB because serialization adds framing and ' +
+                'metadata. Post-training fake quantization over three trained patient_02 artifacts raises ' +
+                'evaluation loss by 0.029-0.038% for K16/V8 and 0.873-1.303% for symmetric K8/V8. Lower loss is ' +
+                'better. Corrected native K16/V8 serving matches BF16 decisions on all 20 patient_01 questions; ' +
+                'that small check is not a broad quality result. The fused H100 comparison uses patient_01 and ' +
+                'shows +0.42%/+0.52% throughput and -2.92%/-3.96% TTFT at batches 1/16 versus the ordinary BF16 ' +
+                'Cartridge. The older 757 ms to 80.6 ms full-text/Cartridge TTFT result is single-stream and is ' +
+                'not a matched production-cost measurement. Self-study, matched all-in inference, concurrent load, ' +
+                'and storage-load measurements remain null. See https://knlp.io/cas.html and ' +
+                'https://knlp.io/cartridge-asymmetric-quantization.html.',
         },
     ],
 }
