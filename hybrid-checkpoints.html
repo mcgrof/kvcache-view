@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
-            content="Explore how live-state page geometry, checkpoint retention, and storage compression affect prefix reuse in hybrid attention and recurrent models"
+            content="See where a hybrid attention and recurrent model can resume a cached prefix, why vLLM places those points hundreds of tokens apart, and how the token budget decides which ones exist"
         />
         <title>Hybrid Model Checkpoint Spacing</title>
         <style>
@@ -283,33 +283,8 @@
                 vertical-align: -1px;
             }
 
-            .timeline {
-                margin-top: 8px;
-            }
-
-            .tl {
-                position: relative;
-                height: 46px;
-                background: var(--surface-3);
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .tick.saved {
-                background: var(--green);
-                width: 3px;
-            }
-            .tick.excluded {
-                background: var(--orange);
-            }
             .seg.stored {
                 background: var(--green);
-            }
-            .tl-title {
-                font-size: 13px;
-                margin: 10px 0 5px;
-                color: var(--text-2);
             }
             .check {
                 display: flex;
@@ -342,23 +317,6 @@
                 html {
                     scroll-behavior: auto;
                 }
-            }
-
-            .tick {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 2px;
-                transform: translateX(-100%);
-                background: var(--cyan);
-            }
-
-            .tl-label {
-                display: flex;
-                justify-content: space-between;
-                color: var(--muted);
-                font-size: 12px;
-                margin-top: 5px;
             }
 
             table {
@@ -420,7 +378,14 @@
                 font-size: 13px;
             }
 
+            .metrics.four {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
             @media (max-width: 1000px) {
+                .metrics.four {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
                 .controls {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
@@ -457,6 +422,287 @@
                     line-height: 1.4;
                 }
             }
+
+            .toc {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px 18px;
+                margin-top: 18px;
+                font-size: 13px;
+            }
+
+            .nread {
+                margin-top: 16px;
+                color: var(--text-2);
+            }
+
+            .nread b {
+                font:
+                    700 22px/1 ui-monospace,
+                    Menlo,
+                    monospace;
+                color: var(--cyan);
+            }
+
+            .fig {
+                margin: 18px 0 0;
+            }
+
+            .fig-scroll {
+                overflow-x: auto;
+            }
+
+            .fig svg {
+                display: block;
+                width: 100%;
+                height: auto;
+                min-width: 720px;
+            }
+
+            .fig figcaption {
+                color: var(--text-2);
+                font-size: 14px;
+                margin-top: 12px;
+                max-width: 920px;
+            }
+
+            .prose {
+                color: var(--text-2);
+                max-width: 920px;
+            }
+
+            .prose b {
+                color: var(--text);
+            }
+
+            .summary {
+                margin-top: 14px;
+                padding: 13px 15px;
+                border-left: 3px solid var(--cyan);
+                background: var(--surface-2);
+                color: var(--text);
+                font-size: 14px;
+            }
+
+            input[type='range'] {
+                width: 100%;
+                accent-color: var(--cyan);
+            }
+
+            input[type='range']:disabled {
+                opacity: 0.4;
+            }
+
+            .cmd {
+                overflow-x: auto;
+                padding: 14px;
+                background: var(--surface-2);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                font-size: 13px;
+                color: var(--text);
+            }
+
+            svg .t {
+                fill: var(--text-2);
+                font:
+                    12px ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    monospace;
+            }
+
+            svg .t-small {
+                fill: var(--muted);
+                font:
+                    11px ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    monospace;
+            }
+
+            svg .t-formula {
+                fill: var(--text);
+                font:
+                    13px ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    monospace;
+            }
+
+            svg .t-dark {
+                fill: #071019;
+                font:
+                    700 12px ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    monospace;
+            }
+
+            svg .t-strong,
+            svg .t-muted,
+            svg .t-green,
+            svg .t-orange {
+                font:
+                    13px 'Inter',
+                    ui-sans-serif,
+                    system-ui,
+                    sans-serif;
+            }
+
+            svg .t-strong {
+                fill: var(--text);
+                font-weight: 600;
+            }
+
+            svg .t-muted {
+                fill: var(--muted);
+                font-size: 12px;
+            }
+
+            svg .t-green {
+                fill: var(--green);
+            }
+
+            svg .t-orange {
+                fill: var(--orange);
+                font-size: 12px;
+            }
+
+            svg .tok {
+                fill: var(--surface-3);
+                stroke: var(--border-strong);
+            }
+
+            svg .kv-k,
+            svg .pg-attn,
+            svg .seg-attn {
+                fill: var(--blue);
+            }
+
+            svg .kv-v,
+            svg .pg-attn2 {
+                fill: #4f7fd6;
+            }
+
+            svg .state,
+            svg .pg-rec {
+                fill: var(--cyan);
+            }
+
+            svg .state-ghost {
+                fill: none;
+                stroke: var(--muted);
+                stroke-dasharray: 4 3;
+            }
+
+            svg .ckpt {
+                fill: rgba(121, 217, 154, 0.12);
+                stroke: var(--green);
+                stroke-width: 2;
+            }
+
+            svg .flow {
+                stroke: var(--muted);
+                stroke-width: 1.5;
+                fill: none;
+            }
+
+            svg .arrowhead {
+                fill: var(--muted);
+            }
+
+            svg .save-line {
+                stroke: var(--green);
+                stroke-width: 1.5;
+                stroke-dasharray: 4 3;
+            }
+
+            svg .bracket {
+                stroke: var(--green);
+                stroke-width: 2;
+                fill: none;
+            }
+
+            svg .pad-fill {
+                fill: url(#pad-hatch);
+            }
+
+            svg .pad-bg {
+                fill: rgba(255, 184, 108, 0.25);
+            }
+
+            svg .pad-line {
+                stroke: var(--orange);
+                stroke-width: 2;
+            }
+
+            svg .step-a {
+                fill: var(--purple);
+            }
+
+            svg .step-b {
+                fill: #9a7fd1;
+            }
+
+            svg .axis {
+                stroke: var(--border-strong);
+                stroke-width: 2;
+            }
+
+            svg .ck-saved {
+                fill: var(--green);
+            }
+
+            svg .ck-skip {
+                fill: var(--bg);
+                stroke: var(--muted);
+                stroke-width: 1.5;
+            }
+
+            svg .end-line {
+                stroke: var(--text-2);
+                stroke-dasharray: 3 4;
+            }
+
+            svg .seg-reuse {
+                fill: var(--green);
+            }
+
+            svg .seg-recompute {
+                fill: var(--orange);
+            }
+
+            svg .seg-new {
+                fill: url(#new-hatch);
+            }
+
+            svg .new-bg {
+                fill: var(--surface-3);
+            }
+
+            svg .new-line {
+                stroke: var(--border-strong);
+                stroke-width: 2;
+            }
+
+            svg .pointer {
+                fill: var(--text);
+            }
+
+            .sw.round {
+                border-radius: 50%;
+            }
+
+            .sw.hollow {
+                border-radius: 50%;
+                border: 1.5px solid var(--muted);
+                background: var(--bg);
+            }
+
+            .sw.hatch {
+                background: repeating-linear-gradient(45deg, #162838, #162838 3px, #315169 3px, #315169 5px);
+            }
         </style>
     </head>
     <body>
@@ -464,26 +710,188 @@
             <a class="back" href="index.html">&#8592; All visualizations</a>
 
             <header class="hero">
-                <div class="eyebrow">Hybrid attention + recurrent models · reviewed 20 September 2026</div>
-                <h1>Checkpoint size shapes reuse. The engine decides where.</h1>
+                <div class="eyebrow">Hybrid attention + recurrent models · reviewed 21 September 2026</div>
+                <h1>Where a hybrid model can pick up a cached prefix</h1>
                 <p class="lead">
-                    Full-attention KV preserves token history. A recurrent layer keeps a state that is updated in place;
-                    a later state cannot simply be sliced to recover an earlier prefix. Reuse needs a checkpoint at the
-                    chosen boundary, its convolution and other persistent state, and the matching attention history.
+                    An attention layer stores every token, so any prefix of a conversation can be reused. A recurrent
+                    layer, such as Mamba or GDN, keeps a single state that each new token overwrites. It can only resume
+                    where the engine saved a copy of that state. This page shows where vLLM saves those copies, why they
+                    sit hundreds or thousands of tokens apart, and which settings move them.
                 </p>
                 <div class="callout">
-                    <b>Three separate questions.</b>
-                    How large is the engine's allocation block? Which boundaries actually get a checkpoint? How many
-                    bytes does a saved checkpoint occupy? In vLLM's aligned shared-page path, live-state size constrains
-                    the first. Scheduling and retention determine the second. A storage codec can reduce the third
-                    without changing either of the others. This is an implementation trade-off, not a universal minimum
-                    interval imposed by recurrent models.
+                    <b>The short version.</b>
+                    A recurrent layer resumes only from a saved checkpoint. vLLM's
+                    <code>align</code>
+                    mode saves one only where a scheduler step ends exactly on a block boundary. The block size, called
+                    N here, is set by how big one checkpoint is, and for these models it is several hundred to a few
+                    thousand tokens. The token budget per step then decides whether every boundary gets a checkpoint or
+                    only a few.
                 </div>
+                <nav class="toc" aria-label="Sections">
+                    <a href="#why">Why a copy is needed</a>
+                    <a href="#block">Why N is large</a>
+                    <a href="#align">Which boundaries get a checkpoint</a>
+                    <a href="#settings">Settings from N</a>
+                    <a href="#storage">Smaller stored copies</a>
+                    <a href="#models">All four models</a>
+                    <a href="#assumptions">Assumptions</a>
+                    <a href="#sources">Sources</a>
+                </nav>
             </header>
 
             <main>
-                <section class="panel" aria-labelledby="calculator-title">
-                    <h2 id="calculator-title">Explore a concrete sizing scenario</h2>
+                <section class="panel" id="why" aria-labelledby="why-title">
+                    <h2 id="why-title">A recurrent layer can only resume where a copy was saved</h2>
+                    <p class="panel-sub">
+                        Attention keeps a record of every token. A recurrent layer keeps a running summary.
+                    </p>
+                    <figure class="fig">
+                        <div class="fig-scroll">
+                            <svg
+                                viewBox="0 0 940 285"
+                                role="img"
+                                aria-label="An attention layer keeps keys and values for every token, so a five-token prefix is its first five entries. A recurrent layer overwrites one state per token, so only the last state is left and a five-token prefix is usable only from a saved copy of state five."
+                            >
+                                <defs>
+                                    <marker
+                                        id="f1-arrow"
+                                        viewBox="0 0 8 8"
+                                        refX="7"
+                                        refY="4"
+                                        markerWidth="7"
+                                        markerHeight="7"
+                                        orient="auto"
+                                    >
+                                        <path d="M0,0 L8,4 L0,8 z" class="arrowhead" />
+                                    </marker>
+                                </defs>
+                                <text x="16" y="44" class="t-strong">Attention layer</text>
+                                <text x="16" y="60" class="t-muted">keeps every token</text>
+                                <rect x="170" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="209" y="36" class="t" text-anchor="middle">token 1</text>
+                                <rect x="174" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="211" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="190.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="227.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="260" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="299" y="36" class="t" text-anchor="middle">token 2</text>
+                                <rect x="264" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="301" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="280.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="317.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="350" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="389" y="36" class="t" text-anchor="middle">token 3</text>
+                                <rect x="354" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="391" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="370.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="407.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="440" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="479" y="36" class="t" text-anchor="middle">token 4</text>
+                                <rect x="444" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="481" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="460.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="497.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="530" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="569" y="36" class="t" text-anchor="middle">token 5</text>
+                                <rect x="534" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="571" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="550.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="587.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="620" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="659" y="36" class="t" text-anchor="middle">token 6</text>
+                                <rect x="624" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="661" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="640.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="677.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="710" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="749" y="36" class="t" text-anchor="middle">token 7</text>
+                                <rect x="714" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="751" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="730.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="767.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <rect x="800" y="20" width="78" height="24" rx="4" class="tok" />
+                                <text x="839" y="36" class="t" text-anchor="middle">token 8</text>
+                                <rect x="804" y="50" width="33" height="26" rx="3" class="kv-k" />
+                                <rect x="841" y="50" width="33" height="26" rx="3" class="kv-v" />
+                                <text x="820.5" y="67" class="t-dark" text-anchor="middle">K</text>
+                                <text x="857.5" y="67" class="t-dark" text-anchor="middle">V</text>
+                                <path d="M170,84 V92 H608 V84" class="bracket" />
+                                <text x="389" y="110" class="t-green" text-anchor="middle">
+                                    a 5-token prefix is just the first 5 entries
+                                </text>
+                                <text x="16" y="164" class="t-strong">Recurrent layer</text>
+                                <text x="16" y="180" class="t-muted">keeps one state</text>
+                                <rect x="170" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="209" y="156" class="t" text-anchor="middle">token 1</text>
+                                <line x1="209" y1="164" x2="209" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="184" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="209" y="204" class="t-muted" text-anchor="middle">S1</text>
+                                <line x1="234" y1="199" x2="271" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="260" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="299" y="156" class="t" text-anchor="middle">token 2</text>
+                                <line x1="299" y1="164" x2="299" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="274" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="299" y="204" class="t-muted" text-anchor="middle">S2</text>
+                                <line x1="324" y1="199" x2="361" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="350" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="389" y="156" class="t" text-anchor="middle">token 3</text>
+                                <line x1="389" y1="164" x2="389" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="364" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="389" y="204" class="t-muted" text-anchor="middle">S3</text>
+                                <line x1="414" y1="199" x2="451" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="440" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="479" y="156" class="t" text-anchor="middle">token 4</text>
+                                <line x1="479" y1="164" x2="479" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="454" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="479" y="204" class="t-muted" text-anchor="middle">S4</text>
+                                <line x1="504" y1="199" x2="541" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="530" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="569" y="156" class="t" text-anchor="middle">token 5</text>
+                                <line x1="569" y1="164" x2="569" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="544" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="569" y="204" class="t-muted" text-anchor="middle">S5</text>
+                                <line x1="594" y1="199" x2="631" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="620" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="659" y="156" class="t" text-anchor="middle">token 6</text>
+                                <line x1="659" y1="164" x2="659" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="634" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="659" y="204" class="t-muted" text-anchor="middle">S6</text>
+                                <line x1="684" y1="199" x2="721" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="710" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="749" y="156" class="t" text-anchor="middle">token 7</text>
+                                <line x1="749" y1="164" x2="749" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="724" y="182" width="50" height="34" rx="4" class="state-ghost" />
+                                <text x="749" y="204" class="t-muted" text-anchor="middle">S7</text>
+                                <line x1="774" y1="199" x2="811" y2="199" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="800" y="140" width="78" height="24" rx="4" class="tok" />
+                                <text x="839" y="156" class="t" text-anchor="middle">token 8</text>
+                                <line x1="839" y1="164" x2="839" y2="179" class="flow" marker-end="url(#f1-arrow)" />
+                                <rect x="814" y="182" width="50" height="34" rx="4" class="state" />
+                                <text x="839" y="204" class="t-dark" text-anchor="middle">S8</text>
+                                <line x1="569" y1="216" x2="569" y2="240" class="save-line" />
+                                <rect x="529" y="240" width="80" height="30" rx="4" class="ckpt" />
+                                <text x="569" y="260" class="t-green" text-anchor="middle">copy of S5</text>
+                                <text x="619" y="260" class="t-green">saved checkpoint</text>
+                                <text x="299" y="238" class="t-muted" text-anchor="middle">
+                                    each token overwrites the state
+                                </text>
+                                <text x="839" y="238" class="t-muted" text-anchor="middle">only S8 is left</text>
+                            </svg>
+                        </div>
+                        <figcaption>
+                            Top: an attention layer stores keys and values for each token, so a prefix is simply the
+                            first entries. Bottom: a recurrent layer folds each token into one state and replaces the
+                            previous one. After token 8 only S8 exists, and S8 cannot be turned back into S5. A later
+                            request can start after token 5 only because a copy of S5 was saved. A hybrid model needs
+                            both at the same point: the attention entries up to it and a recurrent checkpoint exactly at
+                            it. The saved copy holds the recurrent matrix and the short convolution history each layer
+                            also carries.
+                        </figcaption>
+                    </figure>
+                </section>
+
+                <section class="panel" id="model-panel" aria-labelledby="model-title">
+                    <h2 id="model-title">Pick a model</h2>
                     <p class="panel-sub" id="modelnote"></p>
                     <div class="controls">
                         <div class="ctl">
@@ -498,14 +906,6 @@
                             </select>
                         </div>
                         <div class="ctl">
-                            <label for="fmt">Saved checkpoint format</label>
-                            <select id="fmt">
-                                <option value="native">Same precision as working state</option>
-                                <option value="bf16">BF16 storage projection</option>
-                                <option value="int8">INT8 + FP32 row scales (projection)</option>
-                            </select>
-                        </div>
-                        <div class="ctl">
                             <label for="alignment">Assumed allocation alignment</label>
                             <select id="alignment">
                                 <option value="16">16 tokens</option>
@@ -514,166 +914,246 @@
                                 <option value="256">256 tokens</option>
                             </select>
                         </div>
-                        <div class="ctl">
-                            <label for="every">Illustrative checkpoint retention</label>
-                            <select id="every">
-                                <option value="1">Every allocation block</option>
-                                <option value="2">Every 2 blocks</option>
-                                <option value="4">Every 4 blocks</option>
-                                <option value="8">Every 8 blocks</option>
-                            </select>
-                        </div>
-                        <div class="ctl">
-                            <label for="ctx">Shared prompt length (tokens)</label>
-                            <input id="ctx" type="number" min="1" max="131072" step="1" value="8192" required />
-                        </div>
                     </div>
-                    <label class="check" for="replay">
-                        <input id="replay" type="checkbox" checked />
-                        Reserve the last prompt token for logits, as in the inspected vLLM prefix lookup.
-                    </label>
-                    <p id="input-error" role="alert" hidden>
-                        Enter a whole token count from 1 to 131,072. Results below still show the last valid value.
-                    </p>
-                    <div class="metrics" id="metrics" aria-live="polite" aria-atomic="true"></div>
-                    <p class="note">
-                        These are sizing projections, not benchmark results or a supported launch configuration.
-                        Changing working precision needs backend support and quality validation. Changing only the saved
-                        format leaves the live allocation unchanged. INT8 includes one four-byte scale per last-axis
-                        row; convolution history stays BF16. A real format may have different metadata and padding.
+                    <p class="nread">
+                        Block size N:
+                        <b id="nval"></b>
+                        tokens. Every figure below uses this model and these assumptions.
                     </p>
                     <noscript>
                         <p class="callout">
-                            Enable JavaScript to use the calculator. The explanation, assumptions and sources below
-                            remain readable.
+                            Enable JavaScript to draw the model-specific figures. The first figure, the explanations and
+                            the sources remain readable.
                         </p>
                     </noscript>
                 </section>
 
-                <section class="panel" aria-labelledby="timeline-title">
-                    <h2 id="timeline-title">An allocation boundary is only a candidate</h2>
+                <section class="panel" id="block" aria-labelledby="block-title">
+                    <h2 id="block-title">Why checkpoints are hundreds of tokens apart</h2>
                     <p class="panel-sub">
-                        The lower row is an explicit example of retained checkpoints, not a prediction of vLLM
-                        scheduling. A hit also requires all matching attention blocks and recurrent components to be
-                        present.
+                        vLLM gives every layer the same page size, so one memory pool can serve both kinds of layer.
                     </p>
-                    <div class="timeline">
-                        <div class="tl-title">Allocation boundaries</div>
-                        <div class="tl" id="tl-grid" aria-hidden="true"></div>
-                        <div class="tl-title">Assumed retained checkpoints</div>
-                        <div class="tl" id="tl-stored" aria-hidden="true"></div>
-                        <div class="tl-label">
-                            <span>0 tokens</span>
-                            <span id="tlend"></span>
+                    <figure class="fig">
+                        <div class="fig-scroll">
+                            <svg id="fig-page" viewBox="0 0 940 270" role="img"></svg>
                         </div>
-                    </div>
-                    <div class="legend">
-                        <span>
-                            <i class="sw" style="background: #5de1d1"></i>
-                            allocation boundary
-                        </span>
-                        <span>
-                            <i class="sw" style="background: #79d99a"></i>
-                            retained checkpoint
-                        </span>
-                        <span>
-                            <i class="sw" style="background: #ffb86c"></i>
-                            prompt-end checkpoint excluded by replay
-                        </span>
-                    </div>
-                    <p class="note" id="tlnote"></p>
+                        <figcaption>
+                            A recurrent page has to hold one whole checkpoint, and that size does not change with the
+                            number of tokens. An attention page holds a block of tokens. vLLM raises the attention block
+                            until N tokens of keys and values take at least as many bytes as one checkpoint, then pads
+                            the recurrent page to match. N is also the spacing at which checkpoints can be saved, so a
+                            bigger state means resume points further apart.
+                        </figcaption>
+                    </figure>
                     <p class="note">
-                        In the ordinary
-                        <code>align</code>
-                        path, checkpoints are exported at eligible scheduler-step ends. A step spanning several blocks
-                        need not preserve each intermediate state. Backend-specific checkpoint exports, eviction and
-                        prefix sharing can change the available set. The older
-                        <code>all</code>
-                        mode is deprecated in the inspected vLLM tree; it is not a promise of dense checkpoints on
-                        current backends. A compute kernel's 64-token chunk is a separate quantity.
+                        N follows the size of the live state in GPU memory. Storing a checkpoint in a smaller format on
+                        CPU or disk does not change it; the
+                        <a href="#storage">storage section</a>
+                        shows why.
                     </p>
                 </section>
 
-                <section class="panel" aria-labelledby="pages-title">
-                    <h2 id="pages-title">Live pages and saved bytes are different budgets</h2>
+                <section class="panel" id="align" aria-labelledby="align-title">
+                    <h2 id="align-title">Which boundaries actually get a checkpoint</h2>
                     <p class="panel-sub">
-                        All bars use the same byte scale, per layer. The first two illustrate a shared GPU page size.
-                        The third is a serialized recurrent checkpoint, which expands back into working state on
-                        restore.
+                        The kernel hands back the recurrent state only at the end of a scheduler step. vLLM's
+                        <code>align</code>
+                        mode cuts prefill steps so that they end on block boundaries.
                     </p>
-                    <div class="bars" id="pagebars"></div>
+                    <div class="controls">
+                        <div class="ctl">
+                            <label for="plen">
+                                First prompt length
+                                <span class="val" id="plenv"></span>
+                            </label>
+                            <input id="plen" type="range" min="256" max="16384" step="16" value="6000" />
+                        </div>
+                        <div class="ctl">
+                            <label for="budget">Token budget per step</label>
+                            <select id="budget"></select>
+                        </div>
+                        <div class="ctl">
+                            <label for="share">
+                                Next request shares
+                                <span class="val" id="sharev"></span>
+                            </label>
+                            <input id="share" type="range" min="0" max="6000" step="16" value="4000" />
+                        </div>
+                    </div>
+                    <label class="check" for="exact">
+                        <input id="exact" type="checkbox" />
+                        The next request repeats the first prompt exactly, with nothing new after it.
+                    </label>
+                    <figure class="fig">
+                        <div class="fig-scroll">
+                            <svg id="fig-align" viewBox="0 0 940 284" role="img"></svg>
+                        </div>
+                        <div class="legend">
+                            <span>
+                                <i class="sw" style="background: #c3a0ff"></i>
+                                one scheduler step
+                            </span>
+                            <span>
+                                <i class="sw round" style="background: #79d99a"></i>
+                                checkpoint saved
+                            </span>
+                            <span>
+                                <i class="sw hollow"></i>
+                                boundary inside a step, nothing saved
+                            </span>
+                            <span>
+                                <i class="sw" style="background: #79d99a"></i>
+                                reused
+                            </span>
+                            <span>
+                                <i class="sw" style="background: #ffb86c"></i>
+                                shared but recomputed
+                            </span>
+                            <span>
+                                <i class="sw hatch"></i>
+                                new tokens
+                            </span>
+                        </div>
+                        <p class="summary" id="align-summary" aria-live="polite"></p>
+                        <figcaption>
+                            The top lane shows how the scheduler splits the first request's prefill under the chosen
+                            budget. The middle lane shows which block boundaries got a checkpoint; a boundary that falls
+                            inside a step gets none, because the state there is never written out. The bottom lanes show
+                            what a later request that shares the first tokens can skip. It resumes at the last
+                            checkpoint at or before the shared length, and it also needs the attention entries up to
+                            that point.
+                        </figcaption>
+                    </figure>
+                    <div class="prose">
+                        <p>
+                            The rule comes from vLLM's scheduler. A prefill step that stops short of the prompt end is
+                            rounded down to a whole number of blocks, and no step runs past the prompt's last block
+                            boundary. The prompt's final partial block is left without a checkpoint. With a budget
+                            between N and 2N−1, every step covers exactly one block, so every boundary gets a
+                            checkpoint. A larger budget prefills faster, but each step then covers several blocks and
+                            only its last boundary is saved. The LMCache recipe recommends 2N−1: it keeps every boundary
+                            and leaves N−1 tokens of room so requests that are already decoding can share the step.
+                        </p>
+                        <p>
+                            <code>align</code>
+                            is vLLM's default when prefix caching is on. The older
+                            <code>all</code>
+                            mode saves every boundary regardless of steps, but it is deprecated at the pinned commit and
+                            GDN backends do not support it. The 64-token chunk a GDN or Mamba kernel uses internally is
+                            unrelated to N.
+                        </p>
+                    </div>
+                    <p class="note">
+                        This figure models one request running alone, with no speculative decoding. The pinned scheduler
+                        can add three more stopping points that are left out here: the prompt's last hash boundary when
+                        a finer prefix-match unit is configured, the point where a request was seen to diverge from an
+                        earlier one, and a checkpoint that some backends export from inside the final step.
+                    </p>
+                </section>
+
+                <section class="panel" id="settings" aria-labelledby="settings-title">
+                    <h2 id="settings-title">Settings that follow from N</h2>
+                    <p class="panel-sub">
+                        <a
+                            href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
+                        >
+                            LMCache's multiprocess hybrid recipe
+                        </a>
+                        derives every other setting from N.
+                    </p>
+                    <pre class="cmd" id="settings-cmd"></pre>
+                    <div class="prose">
+                        <p>
+                            The N above is this page's estimate. Read the real value from vLLM's startup log line
+                            <code>Setting attention block size to N tokens</code>
+                            before using these commands. The chunk size must be N or a multiple of N; the LMCache
+                            connector rejects anything else at registration, so a copied default such as 256 fails at
+                            startup rather than silently missing. A budget of exactly N is also valid, but
+                            <a
+                                href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/recipes/qwen3_5.rst"
+                            >
+                                the Qwen recipe
+                            </a>
+                            reports that it runs requests one at a time: once one request is decoding, no other can
+                            start its prefill.
+                        </p>
+                        <p id="settings-note"></p>
+                    </div>
+                </section>
+
+                <section class="panel" id="storage" aria-labelledby="storage-title">
+                    <h2 id="storage-title">Storing a checkpoint smaller does not move N</h2>
+                    <p class="panel-sub">
+                        The GPU page holds the live state the kernel reads. A copy kept on CPU or disk can use a
+                        different format, and it expands back into the live format on restore.
+                    </p>
+                    <div class="controls">
+                        <div class="ctl">
+                            <label for="fmt">Stored checkpoint format</label>
+                            <select id="fmt">
+                                <option value="native">Same precision as working state</option>
+                                <option value="bf16">BF16 storage projection</option>
+                                <option value="int8">INT8 + FP32 row scales (projection)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="metrics four" id="metrics" aria-live="polite" aria-atomic="true"></div>
+                    <div class="bars" id="pagebars" style="margin-top: 18px"></div>
                     <div class="legend">
                         <span>
                             <i class="sw" style="background: #5de1d1"></i>
-                            live recurrent payload
+                            live recurrent state
                         </span>
                         <span>
                             <i class="sw" style="background: #ffb86c"></i>
                             GPU page padding
                         </span>
                         <span>
-                            <i class="sw" style="background: #77a7ff"></i>
-                            attention KV
-                        </span>
-                        <span>
                             <i class="sw" style="background: #79d99a"></i>
-                            saved recurrent payload + scales
+                            stored copy, including scales
                         </span>
                     </div>
                     <p class="note" id="pagenote"></p>
                     <p class="note">
-                        Separate compressed checkpoint pools already exist:
+                        These are sizing projections, not benchmark results. INT8 counts one four-byte scale per
+                        last-axis row, and convolution history stays BF16; a real format may carry different metadata
+                        and padding. Separate compressed checkpoint pools already exist:
                         <a href="https://github.com/sgl-project/sglang/pull/28185">
                             SGLang merged an INT8 checkpoint pool on 18 June 2026
                         </a>
-                        , retaining a BF16 working pool. That is evidence for a storage/working-state split, not for
-                        automatic finer checkpoint spacing or quality equivalence on every model. CPU or NVMe offload
-                        likewise needs the engine to supply a complete state at the advertised boundary; a faster I/O
-                        path cannot recreate a missing checkpoint.
+                        , keeping a BF16 working pool. That supports splitting stored and live formats; it does not show
+                        finer checkpoint spacing or equal quality on every model. CPU or NVMe offload likewise needs the
+                        engine to supply a complete state at the advertised boundary, and a faster I/O path cannot
+                        recreate a checkpoint that was never saved.
                     </p>
                 </section>
 
-                <section class="panel" aria-labelledby="comparison-title">
-                    <h2 id="comparison-title">Compare working-state geometry</h2>
+                <section class="panel" id="models" aria-labelledby="comparison-title">
+                    <h2 id="comparison-title">All four models</h2>
                     <p class="panel-sub">
-                        Estimated allocation block sizes at the selected alignment. Only the last column follows the
-                        saved-format selector. Model counts are branches: Falcon-H1 has both branches in each of 32
-                        decoder blocks.
+                        Estimated block size N at the selected alignment. Only the last column follows the stored-format
+                        selector. Counts are branches: Falcon-H1 has both branches in each of its 32 decoder blocks.
                     </p>
                     <div class="scroll">
                         <table>
                             <caption>
-                                TP=1 sizing estimates; storage figures exclude attention KV and object headers.
+                                TP=1 sizing estimates; storage figures exclude attention entries and object headers.
                             </caption>
                             <thead>
                                 <tr>
                                     <th scope="col">Model</th>
                                     <th scope="col">Recurrent / attention</th>
-                                    <th scope="col">FP32 block (tokens)</th>
-                                    <th scope="col">BF16 block (tokens)</th>
-                                    <th scope="col">Saved recurrent snapshot</th>
+                                    <th scope="col">N with FP32 state (tokens)</th>
+                                    <th scope="col">N with BF16 state (tokens)</th>
+                                    <th scope="col">Stored recurrent snapshot</th>
                                 </tr>
                             </thead>
                             <tbody id="tblb"></tbody>
                         </table>
                     </div>
-                    <p class="note" id="chunknote"></p>
-                    <p class="note">
-                        For
-                        <a
-                            href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
-                        >
-                            the documented LMCache multiprocess hybrid path
-                        </a>
-                        , read the resolved engine block size, enable prefix caching with
-                        <code>align</code>
-                        , and use separate object groups. Derive compatible storage chunks from that geometry. For mixed
-                        group spans, satisfy every relevant group's alignment. The recipe is not a claim that every
-                        model, backend, codec or storage tier is validated.
-                    </p>
                 </section>
 
-                <section class="panel" aria-labelledby="assumptions-title">
+                <section class="panel" id="assumptions" aria-labelledby="assumptions-title">
                     <h2 id="assumptions-title">What this calculation assumes</h2>
                     <p>The simplified aligned-page model is:</p>
                     <pre class="formula">
@@ -683,17 +1163,17 @@ N = A × ceil(S / (A × T))
 P = N × T</pre>
                     <p>
                         <code>S</code>
-                        is live recurrent payload,
+                        is the live recurrent payload,
                         <code>T</code>
                         is attention bytes per token,
                         <code>A</code>
                         is the assumed effective allocation alignment,
                         <code>N</code>
-                        is the allocation block, and
+                        is the block size, and
                         <code>P</code>
                         is the shared page. The selected
                         <code>A</code>
-                        stands in for backend constraints and requested block size; it is not inferred from a GPU.
+                        stands in for backend constraints and a requested block size; it is not inferred from a GPU.
                         Additional groups, MLA layouts, quantized KV, tensor parallelism, speculative scratch state and
                         extra auxiliary state can change this calculation.
                     </p>
@@ -718,11 +1198,12 @@ P = N × T</pre>
                     </p>
                 </section>
 
-                <section class="panel sources" aria-labelledby="sources-title">
+                <section class="panel sources" id="sources" aria-labelledby="sources-title">
                     <h2 id="sources-title">Sources and reproducibility</h2>
                     <p class="panel-sub">
-                        Primary sources checked 20 September 2026. Code references pin development snapshots; they do
-                        not imply support in every release. No GPU benchmark was run for this page.
+                        Primary sources checked 20 September 2026; the scheduler rule and the LMCache recipe were
+                        rechecked 21 September 2026. Code references pin development snapshots; they do not imply
+                        support in every release. No GPU benchmark was run for this page.
                     </p>
                     <ul>
                         <li>
@@ -733,6 +1214,20 @@ P = N × T</pre>
                                 href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/platforms/interface.py"
                             >
                                 hybrid block alignment
+                            </a>
+                            ,
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/v1/core/sched/scheduler.py"
+                            >
+                                align-mode step splitting
+                            </a>
+                            in
+                            <code>_mamba_block_aligned_split</code>
+                            ,
+                            <a
+                                href="https://github.com/vllm-project/vllm/blob/133b71e0beec3c7bcaae5b0839a03e7e88d20bc7/vllm/config/cache.py"
+                            >
+                                cache modes
                             </a>
                             ,
                             <a
@@ -804,6 +1299,12 @@ P = N × T</pre>
                             <a href="https://github.com/sgl-project/sglang/pull/28185">
                                 SGLang's merged INT8 checkpoint pool
                             </a>
+                            ,
+                            <a
+                                href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
+                            >
+                                LMCache's hybrid model guide
+                            </a>
                             and
                             <a
                                 href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/recipes/qwen3_5.rst"
@@ -811,19 +1312,19 @@ P = N × T</pre>
                                 LMCache's Qwen hybrid recipe
                             </a>
                             provide concrete implementations and configuration guidance. Their reported validation is
-                            separate from this calculator.
+                            separate from this page.
                         </li>
                         <li>
                             <a href="https://github.com/mcgrof/kvcache-view/blob/main/hybrid-checkpoints.js">
-                                Calculator source
+                                Calculation and drawing source
                             </a>
                             and
                             <a href="https://github.com/mcgrof/kvcache-view/blob/main/hybrid-checkpoints.test.js">
-                                arithmetic and boundary tests
+                                arithmetic and scheduling tests
                             </a>
                             . Run
                             <code>node --test hybrid-checkpoints.test.js</code>
-                            to reproduce the calculation checks.
+                            to reproduce the checks.
                         </li>
                     </ul>
                 </section>
