@@ -725,13 +725,14 @@
                     mode saves one only where a scheduler step ends exactly on a block boundary. The block size, called
                     N here, is set by how big one checkpoint is, and for these models it is several hundred to a few
                     thousand tokens. The token budget per step then decides whether every boundary gets a checkpoint or
-                    only a few.
+                    only a few. For LMCache's multiprocess hybrid integration, offload chunks must contain a whole
+                    number of these vLLM blocks: N, 2N, 3N, and so on.
                 </div>
                 <nav class="toc" aria-label="Sections">
                     <a href="#why">Why a copy is needed</a>
                     <a href="#block">Why N is large</a>
                     <a href="#align">Which boundaries get a checkpoint</a>
-                    <a href="#settings">Settings from N</a>
+                    <a href="#settings">LMCache chunks follow N</a>
                     <a href="#storage">Smaller stored copies</a>
                     <a href="#models">All four models</a>
                     <a href="#assumptions">Assumptions</a>
@@ -906,7 +907,7 @@
                             </select>
                         </div>
                         <div class="ctl">
-                            <label for="alignment">Assumed allocation alignment</label>
+                            <label for="alignment">Assumed vLLM allocation alignment</label>
                             <select id="alignment">
                                 <option value="16">16 tokens</option>
                                 <option value="64">64 tokens</option>
@@ -916,9 +917,13 @@
                         </div>
                     </div>
                     <p class="nread">
-                        Block size N:
+                        Estimated vLLM hybrid block size N:
                         <b id="nval"></b>
                         tokens. Every figure below uses this model and these assumptions.
+                    </p>
+                    <p class="summary" id="offload-summary" aria-live="polite">
+                        LMCache's offload chunk size must be N or an integer multiple of N for the multiprocess hybrid
+                        integration. Its default of 256 tokens does not set vLLM's block size.
                     </p>
                     <noscript>
                         <p class="callout">
@@ -1052,23 +1057,44 @@
                 </section>
 
                 <section class="panel" id="settings" aria-labelledby="settings-title">
-                    <h2 id="settings-title">Settings that follow from N</h2>
+                    <h2 id="settings-title">vLLM sets N; LMCache offload chunks follow it</h2>
                     <p class="panel-sub">
                         <a
                             href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
                         >
                             LMCache's multiprocess hybrid recipe
                         </a>
-                        derives every other setting from N.
+                        derives the offload chunk size and scheduler budget from vLLM's resolved hybrid block size N.
                     </p>
+                    <div class="prose">
+                        <p>
+                            <b>LMCache's default 256-token chunk is configurable, not a required alignment.</b>
+                            First vLLM sizes its hybrid blocks to fit the live recurrent state and meet its backend's
+                            allocation constraints. Then configure LMCache's token chunk size C as
+                            <code>C = k × N</code>
+                            for a positive integer k.
+                            <code>LMCacheMPConnector</code>
+                            rejects a chunk size that is not a multiple of N at registration. When N is larger than 256,
+                            leaving LMCache at 256 fails this check; LMCache must be configured to use N or a multiple
+                            of N.
+                        </p>
+                        <p>
+                            With the Qwen3.5-4B FP32 recurrent-state scenario, BF16 attention KV and 16-token vLLM
+                            alignment, this page estimates N = 528. If the engine reports that value, use LMCache chunks
+                            of 528, 1056, 1584, … tokens.
+                            <b>A 768-token chunk is invalid when N = 528</b>
+                            even though it is a multiple of 256. Selecting 256-token vLLM alignment instead gives N =
+                            768 in this projection; that is a separate assumption from LMCache's default chunk size.
+                        </p>
+                    </div>
                     <pre class="cmd" id="settings-cmd"></pre>
                     <div class="prose">
                         <p>
                             The N above is this page's estimate. Read the real value from vLLM's startup log line
                             <code>Setting attention block size to N tokens</code>
-                            before using these commands. The chunk size must be N or a multiple of N; the LMCache
-                            connector rejects anything else at registration, so a copied default such as 256 fails at
-                            startup rather than silently missing. A budget of exactly N is also valid, but
+                            before using these commands. The example explicitly sets LMCache's chunk size to N. These
+                            are token counts; SSD I/O byte alignment and transfer splitting are separate storage-backend
+                            requirements. A budget of exactly N is also valid, but
                             <a
                                 href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/recipes/qwen3_5.rst"
                             >

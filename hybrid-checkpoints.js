@@ -338,6 +338,8 @@
     }
 
     function renderSettings({ m, g }) {
+        el('offload-summary').textContent =
+            `If vLLM resolves N to ${num(g.block)} tokens, LMCacheMPConnector requires offload chunks of ${num(g.block)}, ${num(2 * g.block)}, ${num(3 * g.block)}, … tokens. Configure LMCache's chunk size explicitly; its default 256 tokens is incompatible with this N.`
         el('settings-cmd').textContent = [
             `lmcache server --chunk-size ${g.block} --separate-object-groups`,
             '',
