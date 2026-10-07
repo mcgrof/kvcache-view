@@ -51,6 +51,41 @@ class CacheCatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Duplicate model id"):
             analyze_cache({"data": [self.model("a/b", {}), self.model("a/b", {})]})
 
+    def test_dashboard_denominators_exclude_nontext_and_free_ratios(self):
+        def text_model(name, prompt, read=None, modalities=None):
+            pricing = {"prompt": prompt}
+            if read is not None:
+                pricing["input_cache_read"] = read
+            return {"id": name, "pricing": pricing,
+                    "architecture": {"output_modalities": modalities or ["text"]}}
+        models = [
+            text_model("a/paid", "2", "0.2"),
+            text_model("a/multimodal", "2", "1", ["text", "image"]),
+            text_model("a/free", "0", "0"),
+            text_model("a/missing", "2"),
+            text_model("a/image", "2", "0.02", ["image"]),
+        ]
+        dashboard = analyze_cache({"data": models})["dashboard"]
+        self.assertEqual(dashboard["text_variants"], 4)
+        self.assertEqual(dashboard["price_reporting"]["input_cache_read"], 3)
+        self.assertEqual(dashboard["paired_read_prices"], 2)
+        self.assertEqual(dashboard["zero_input_variants"], 1)
+        self.assertEqual(dashboard["median_read_discount_percent"], 70)
+        self.assertEqual(sum(band["count"] for band in dashboard["discount_bands"]), 2)
+
+    def test_dashboard_histogram_boundaries_and_premiums(self):
+        models = []
+        for i, read in enumerate(("2", "1", "0.75", "0.5", "0.25", "0.1", "0")):
+            model = self.model(f"a/{i}", {"prompt": "1", "input_cache_read": read})
+            model["architecture"] = {"output_modalities": ["text"]}
+            models.append(model)
+        dashboard = analyze_cache({"data": models})["dashboard"]
+        self.assertEqual([band["count"] for band in dashboard["discount_bands"]], [1, 1, 1, 1, 1, 2])
+        self.assertEqual(dashboard["median_read_discount_percent"], 50)
+        empty = analyze_cache({"data": []})["dashboard"]
+        self.assertIsNone(empty["median_read_discount_percent"])
+        self.assertEqual(empty["paired_read_prices"], 0)
+
     def test_catalog_footer_uses_catalog_provenance_and_downloads(self):
         analysis = analyze_cache({"data": [], "meta": {
             "as_of": "2026-10-07T14:00:00Z",

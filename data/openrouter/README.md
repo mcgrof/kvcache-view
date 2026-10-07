@@ -123,6 +123,15 @@ zero remains zero. Free input prices do not produce an invented discount ratio.
 Conditional prices are marked and retained. Ratios of listed prices are not
 observed savings; actual provider routing and pricing overrides matter.
 
+The cache dashboard summarizes text-output catalog variants, including models
+that also output other modalities. Price-reporting bars use that full text
+denominator. The read-discount histogram and median use only positive input
+prices paired with a reported cache-read price; they count variants equally,
+not by traffic. Base rates are used even when conditional overrides exist.
+The interactive cost example uses a fixed illustrative 90% read discount and
+an adjustable assumed cached-token fraction, excluding writes and output fees.
+All catalog entries remain available in the expandable, searchable price table.
+
 Some public OpenRouter model webpages show cache-hit rates and effective prices.
 No documented public historical API for those aggregate cache-hit measurements
 was identified. This collector uses the documented catalog API rather than

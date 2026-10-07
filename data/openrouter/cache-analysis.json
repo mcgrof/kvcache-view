@@ -1,4 +1,43 @@
 {
+  "dashboard": {
+    "discount_bands": [
+      {
+        "count": 0,
+        "label": "Read costs more"
+      },
+      {
+        "count": 7,
+        "label": "Same price"
+      },
+      {
+        "count": 12,
+        "label": "Above 0%, below 50% cheaper"
+      },
+      {
+        "count": 36,
+        "label": "50% to below 75% cheaper"
+      },
+      {
+        "count": 82,
+        "label": "75% to below 90% cheaper"
+      },
+      {
+        "count": 163,
+        "label": "90% to 100% cheaper"
+      }
+    ],
+    "median_read_discount_percent": 90.0,
+    "paired_read_prices": 300,
+    "paired_with_overrides": 63,
+    "price_reporting": {
+      "input_cache_read": 300,
+      "input_cache_write": 95,
+      "input_cache_write_1h": 33
+    },
+    "scope": "text_output_catalog_variants_unweighted",
+    "text_variants": 465,
+    "zero_input_variants": 20
+  },
   "limitations": [
     "Catalog entries are model variants, not distinct checkpoints or provider endpoints.",
     "Missing cache prices do not establish absence of prompt caching.",

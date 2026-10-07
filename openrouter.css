@@ -322,6 +322,63 @@ code {
 .compact {
     font-size: 0.9rem;
 }
+.cache-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+    gap: 24px;
+}
+.cache-unknown {
+    font-size: 2rem;
+}
+.cache-definitions {
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+    padding-top: 8px;
+}
+.cache-bars,
+.cache-example-bars {
+    display: grid;
+    gap: 20px;
+    margin: 24px 0;
+}
+.cache-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.cache-bar-label strong {
+    white-space: nowrap;
+}
+.cache-bar-track {
+    height: 14px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #26345a;
+}
+.cache-bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--cyan);
+}
+.cache-bar-fill.purple {
+    background: #c398ff;
+}
+.cache-bar-fill.muted-bar {
+    background: #8999bc;
+}
+.cache-slider {
+    display: block;
+    width: 100%;
+    margin: 18px 0;
+    accent-color: var(--cyan);
+}
+.cache-catalog > summary {
+    padding: 12px 0;
+}
 footer {
     padding: 20px 0 0;
     border-top: 1px solid var(--border);

@@ -7,6 +7,7 @@ remain missing, and an explicit zero is preserved as a reported zero price.
 
 from decimal import Decimal, InvalidOperation
 from html import escape
+from statistics import median
 from urllib.parse import quote
 
 
@@ -116,6 +117,7 @@ def analyze_cache(catalog_payload: dict) -> dict:
         "scope": "public_models_catalog_advertised_prices",
         "metadata": dict(catalog_payload.get("meta") or {}),
         "summary": summary,
+        "dashboard": _dashboard(rows),
         "rows": rows,
         "sources": SOURCES,
         "limitations": [
@@ -128,6 +130,115 @@ def analyze_cache(catalog_payload: dict) -> dict:
             "Request and account cache metrics do not identify HBM, DRAM, NVMe, or network storage tiers.",
         ],
     }
+
+
+def _dashboard(rows):
+    """Use text-capable variants and explicit paired prices for every denominator."""
+    text_rows = [row for row in rows if "text" in row["output_modalities"]]
+    paired = [row for row in text_rows if row["listed_read_discount_percent"] is not None]
+    discounts = [row["listed_read_discount_percent"] for row in paired]
+    bands = [
+        ("Read costs more", lambda x: x < 0),
+        ("Same price", lambda x: x == 0),
+        ("Above 0%, below 50% cheaper", lambda x: 0 < x < 50),
+        ("50% to below 75% cheaper", lambda x: 50 <= x < 75),
+        ("75% to below 90% cheaper", lambda x: 75 <= x < 90),
+        ("90% to 100% cheaper", lambda x: 90 <= x <= 100),
+    ]
+    return {
+        "scope": "text_output_catalog_variants_unweighted",
+        "text_variants": len(text_rows),
+        "paired_read_prices": len(paired),
+        "paired_with_overrides": sum(row["has_overrides"] for row in paired),
+        "zero_input_variants": sum(row["zero_input_price"] for row in text_rows),
+        "median_read_discount_percent": median(discounts) if discounts else None,
+        "price_reporting": {
+            field: sum(row["prices_per_million"][field] is not None for row in text_rows)
+            for field in PRICE_FIELDS[1:]
+        },
+        "discount_bands": [{"label": label, "count": sum(predicate(x) for x in discounts)}
+                           for label, predicate in bands],
+    }
+
+
+def _bar(label, count, total, color="cyan"):
+    percent = count / total * 100 if total else 0
+    return (f'<div class="cache-bar-row"><div class="cache-bar-label"><span>{escape(label)}</span>'
+            f'<strong>{count:,} <span class="muted">/ {total:,}</span></strong></div>'
+            f'<div class="cache-bar-track" aria-hidden="true"><span class="cache-bar-fill {color}" '
+            f'style="width:{percent:.4f}%"></span></div></div>')
+
+
+def _render_dashboard(analysis):
+    stats = analysis["dashboard"]
+    total, pairs = stats["text_variants"], stats["paired_read_prices"]
+    reads = stats["price_reporting"]["input_cache_read"]
+    coverage = f"{100 * reads / total:.1f}%" if total else "Unavailable"
+    discount = stats["median_read_discount_percent"]
+    discount_label = f"{discount:g}%" if discount is not None else "Unavailable"
+    coverage_bars = "".join(_bar(label, stats["price_reporting"][key], total)
+                            for key, label in (("input_cache_read", "Cache read"),
+                                               ("input_cache_write", "Cache write"),
+                                               ("input_cache_write_1h", "One-hour write")))
+    distribution = "".join(_bar(band["label"], band["count"], pairs, "purple")
+                            for band in stats["discount_bands"])
+    return f'''
+    <section class="panel lead-panel">
+      <p class="eyebrow">Start here</p>
+      <h2>Repeated input can be cheaper. How often is it reused?</h2>
+      <p class="finding">OpenRouter lists prices for reading cached input. Those prices show the incentive
+      to reuse a prompt, but this dataset does not measure how often reuse happens or whether it touches NVMe.</p>
+      <div class="grid">
+        <div class="stat"><span class="stat-value">{coverage}</span><strong>List a cache-read price</strong>
+        <p>{reads:,} of {total:,} text-generating variants. Missing prices do not mean caching is unsupported.</p></div>
+        <div class="stat"><span class="stat-value">{discount_label}</span><strong>Median listed read discount</strong>
+        <p>Per cached input token, across {pairs:,} comparable variants. This is not a measured bill reduction.</p></div>
+        <div class="stat"><span class="stat-value cache-unknown">Unknown</span><strong>Cache use and NVMe activity</strong>
+        <p>This catalog supplies neither a cache-hit rate nor a storage tier. Unknown does not mean zero activity.</p></div>
+      </div>
+      <p class="muted">Charts count text-generating catalog variants equally, including variants with other output
+      modalities. They are not weighted by traffic. The full {analysis['summary']['models']:,}-entry catalog is available below.</p>
+      <div class="cache-definitions">
+        <p><strong>Fresh input</strong> is prompt text the provider processes without an eligible cache hit.</p>
+        <p><strong>Cache read</strong> is the price for eligible input tokens reused from a provider's prompt cache.</p>
+        <p><strong>Cache write</strong> is a listed charge associated with storing a prefix. Retention periods and
+        billing rules vary by provider; an absent write price does not establish that writes are free.</p>
+      </div>
+    </section>
+    <div class="cache-chart-grid">
+      <section class="panel">
+        <h2>Which cache prices are reported?</h2>
+        <p>Filled bars count reported prices; the remainder has no usable price in this snapshot.</p>
+        <div class="cache-bars">{coverage_bars}</div>
+        <p class="note">Each bar uses the same {total:,}-variant denominator. A variant can appear in more than one bar.</p>
+      </section>
+      <section class="panel">
+        <h2>How much cheaper is a cache read?</h2>
+        <p>Distribution of the listed discount compared with the same variant's fresh-input price.</p>
+        <div class="cache-bars">{distribution}</div>
+        <p class="note">{pairs:,} positive-input / reported-read pairs. Zero-input and missing-price entries are excluded.
+        {stats['paired_with_overrides']:,} pairs have conditional prices; these bars use base rates only.</p>
+      </section>
+    </div>
+    <section class="panel" id="cache-cost-example">
+      <p class="eyebrow">Illustration, not observed usage</p>
+      <h2>A big read discount does not automatically mean a small bill</h2>
+      <p>Start with <strong>$100 of fresh-input cost</strong>. Assume cached reads cost
+      <strong>10% of fresh input</strong> (a 90% read discount). Change the share of input tokens that gets a cache hit.</p>
+      <label for="cache-hit-share">Assumed cached share: <output id="cache-hit-label" for="cache-hit-share">50%</output></label>
+      <input class="cache-slider" id="cache-hit-share" type="range" min="0" max="100" step="1" value="50">
+      <div class="cache-example-bars">
+        <div class="cache-bar-row"><div class="cache-bar-label"><span>All input at the fresh rate</span><strong>$100.00</strong></div>
+        <div class="cache-bar-track" aria-hidden="true"><span class="cache-bar-fill muted-bar" style="width:100%"></span></div></div>
+        <div class="cache-bar-row"><div class="cache-bar-label"><span>With the assumed cache hits</span><strong id="cache-example-cost">$55.00</strong></div>
+        <div class="cache-bar-track" aria-hidden="true"><span id="cache-example-fill" class="cache-bar-fill cyan" style="width:55%"></span></div></div>
+      </div>
+      <p id="cache-example-result" role="status">At a 50% cached share, input costs $55.00: $50.00 fresh + $5.00 cached reads.</p>
+      <p class="note">Fixed illustrative rates, not a prediction or quote. Formula: $100 × [(1 − cached share) +
+      0.10 × cached share]. Excludes cache writes, output tokens, provider routing, and conditional charges.
+      A prompt-cache hit alone does not identify NVMe activity.</p>
+      <noscript><p>The example starts at a 50% cached share; enable JavaScript to adjust it.</p></noscript>
+    </section>'''
 
 
 def _price(row, key):
@@ -148,22 +259,13 @@ def render_cache(cache_analysis: dict, provenance: dict) -> str:
     source_url = str(meta.get("source_url") or "https://openrouter.ai/api/v1/models?output_modalities=all")
     if not source_url.startswith("https://openrouter.ai/"):
         source_url = "https://openrouter.ai/api/v1/models?output_modalities=all"
-    cards = "".join(
-        '<div class="stat"><strong>' + f"{value:,}" + '</strong><span>' + label + "</span></div>"
-        for value, label in (
-            (summary["models"], "catalog variants"),
-            (summary["cache_read_price_reported"], "report a cache-read price"),
-            (summary["cache_write_price_reported"], "report a cache-write price"),
-            (summary["no_cache_price_reported"], "report no cache price"),
-        )
-    )
     table_rows = []
     for row in cache_analysis["rows"]:
         discount = row["listed_read_discount_percent"]
         if discount is None:
             comparison = "N/A: zero input price" if row["zero_input_price"] else "Not calculable"
         else:
-            comparison = f"{discount:.1f}%" + (" lower" if discount >= 0 else " (read premium)")
+            comparison = f"{abs(discount):.1f}%" + (" lower" if discount > 0 else " higher" if discount < 0 else " (same price)")
         notes = []
         if row["has_overrides"]:
             notes.append("Conditional prices")
@@ -182,17 +284,7 @@ def render_cache(cache_analysis: dict, provenance: dict) -> str:
         for source in SOURCES
     )
     content = f"""
-    <section class="panel">
-      <p class="eyebrow">Measured availability, not inferred storage</p>
-      <h2>What OpenRouter exposes</h2>
-      <p>The public Models API provides advertised cache prices. Some public model pages also display
-      cache-hit rates and effective prices. Neither identifies whether a cache hit came from GPU memory,
-      host memory, NVMe, or remote storage. This page collects the documented catalog API and keeps
-      unavailable usage and offload measurements empty.</p>
-      <div class="grid">{cards}</div>
-      <p class="muted">Catalog fetched: <time>{catalog_date}</time>. Counts describe catalog variants,
-      including free variants and non-text modalities. A listed price is not proof that every route supports caching.</p>
-    </section>
+    {_render_dashboard(cache_analysis)}
     <section class="panel">
       <h2>Cache and offload data availability</h2>
       <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Source and access</th><th>Meaning for storage</th></tr></thead><tbody>
@@ -208,6 +300,7 @@ def render_cache(cache_analysis: dict, provenance: dict) -> str:
     </section>
     <section class="panel">
       <h2>Advertised prices across the complete catalog</h2>
+      <details class="cache-catalog"><summary>Explore all {summary['models']:,} catalog entries and their listed prices</summary>
       <p>USD per million input tokens. <strong>Not reported</strong> is different from <strong>$0</strong>.
       The read comparison is <code>100 × (1 − listed cache-read price / listed input price)</code>.
       A zero input price has no meaningful percentage comparison. These catalog ratios exclude cache-write
@@ -218,11 +311,12 @@ def render_cache(cache_analysis: dict, provenance: dict) -> str:
       <option value="all">All entries</option><option value="yes">Any cache price reported</option>
       <option value="no">No cache price reported</option></select>
       <span id="cache-visible-count" class="muted" role="status">{summary['models']:,} entries</span></p>
-      <div class="table-wrap"><table id="cache-price-table"><thead><tr><th>Model</th><th>Input / M</th>
+      <div class="table-wrap model-table-wrap" tabindex="0" role="region" aria-label="Complete cache-price catalog"><table id="cache-price-table"><thead><tr><th>Model</th><th>Input / M</th>
       <th>Cache read / M</th><th>Cache write / M</th><th>1-hour write / M</th><th>Listed read comparison</th>
       <th>Conditions</th></tr></thead><tbody>{''.join(table_rows)}</tbody></table></div>
       <p class="muted">{summary['models_with_overrides']:,} entries contain conditional pricing overrides.
       Open a model link to compare provider-specific rates and any available public cache statistics.</p>
+      </details>
     </section>
     <section class="panel">
       <h2>Use this alongside offload measurements</h2>
@@ -262,6 +356,19 @@ def render_cache(cache_analysis: dict, provenance: dict) -> str:
       }}
       search.addEventListener('input', update)
       filter.addEventListener('change', update)
+      const slider = document.getElementById('cache-hit-share')
+      slider.addEventListener('input', () => {{
+        const share = Number(slider.value)
+        const fresh = 100 - share
+        const cached = share * 0.10
+        const cost = fresh + cached
+        document.getElementById('cache-hit-label').textContent = share + '%'
+        document.getElementById('cache-example-cost').textContent = '$' + cost.toFixed(2)
+        document.getElementById('cache-example-fill').style.width = cost + '%'
+        document.getElementById('cache-example-result').textContent = 'At a ' + share +
+          '% cached share, input costs $' + cost.toFixed(2) + ': $' + fresh.toFixed(2) +
+          ' fresh + $' + cached.toFixed(2) + ' cached reads.'
+      }})
     }})()
     </script>
     """
