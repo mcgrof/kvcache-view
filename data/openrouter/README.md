@@ -1,15 +1,16 @@
 # OpenRouter snapshots and generated research pages
 
-These files support three public pages:
+These files support four public pages:
 
 | Page | Update target | Data |
 | --- | --- | --- |
 | `hybrid-trends.html` | `make openrouter-hybrid-trends` | Daily text tokens grouped by reviewed sequence-mixer architecture |
+| `attention-trends.html` | `make openrouter-attention-trends` | Attention patterns and hybrids, with separately documented KV representations |
 | `context-demand.html` | `make openrouter-context` | Exact `100K` and `1M` API context buckets, plus overall text traffic |
 | `cache-telemetry.html` | `make openrouter-cache` | Advertised cache-read/write prices and an account of which telemetry is available |
 
-`make openrouter` fetches the data needed by all three targets once and
-generates all three pages. It makes no inference calls and does not read
+`make openrouter` fetches the data needed by all four targets once and
+generates all four pages. It makes no inference calls and does not read
 private account analytics. This is an on-demand update command, not a scheduler.
 
 ## Refresh and reproduce
@@ -78,6 +79,11 @@ Do not commit a key. The catalog request is public and needs no key.
 - `hybrid-trends.json` and `context-demand.json`: derived statistics and full
   inventory. Per-page provenance manifests prevent a separate target run from
   replacing the attribution of another page.
+- `attention-registry.json`: reviewed exact-ID attention patterns and KV
+  representations, with primary evidence and limits. This supplements the
+  broader architecture registry without changing its mixer categories.
+- `attention-trends.json`: finer attention-style aggregation of the same text
+  rankings, with its own `attention-trends-provenance.json` manifest.
 - `cache-analysis.json`: advertised prices, explicit missing values, and
   measurement limits; `cache-provenance.json` identifies the catalog snapshot.
 
@@ -102,6 +108,15 @@ has a verified Mamba or linear recurrent component. Other recurrent/convolution
 hybrids remain separate. Free/batch variants retain distinct source traffic
 rows; architecture lookup never duplicates their counts. Revealed previews
 such as Ox Alpha are classified across their full observed history.
+
+The attention page refines that broad grouping into mutually exclusive primary
+patterns: recurrent hybrids first, then sparse token selection, local/global
+windows, full attention with latent KV, and full attention. A hybrid can still
+use sparse attention in its attention layers; secondary mechanisms remain in
+its evidence notes. MHA/GQA/MQA/MLA describe KV representation, independently
+of the attention mask. FlashAttention is an implementation, not evidence of
+sparse token selection. Confirmed attention without a reviewed finer pattern
+stays `attention_unspecified`, distinct from an unresolved architecture.
 
 The daily top-50 cutoff hides the identities of remaining models in `other`.
 Category token totals are observed minimums, not a census of architecture use.

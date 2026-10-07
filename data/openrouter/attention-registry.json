@@ -1,0 +1,3420 @@
+{
+  "ai21/jamba-1-5-large": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "AI21 Jamba interleaves Mamba and Transformer attention layers; mixture-of-experts is a separate feed-forward design choice.",
+    "sources": [
+      "https://huggingface.co/ai21labs/AI21-Jamba-Large-1.5",
+      "https://arxiv.org/abs/2408.12570"
+    ],
+    "confidence": "verified"
+  },
+  "ai21/jamba-1-5-mini": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "AI21 Jamba interleaves Mamba and Transformer attention layers; mixture-of-experts is a separate feed-forward design choice.",
+    "sources": [
+      "https://huggingface.co/ai21labs/AI21-Jamba-Mini-1.5",
+      "https://arxiv.org/abs/2408.12570"
+    ],
+    "confidence": "verified"
+  },
+  "ai21/jamba-1.6-large": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "AI21 Jamba interleaves Mamba and Transformer attention layers; mixture-of-experts is a separate feed-forward design choice.",
+    "sources": [
+      "https://huggingface.co/ai21labs/AI21-Jamba-Large-1.6",
+      "https://arxiv.org/abs/2403.19887"
+    ],
+    "confidence": "verified"
+  },
+  "ai21/jamba-1.6-mini": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "AI21 Jamba interleaves Mamba and Transformer attention layers; mixture-of-experts is a separate feed-forward design choice.",
+    "sources": [
+      "https://huggingface.co/ai21labs/AI21-Jamba-Mini-1.6",
+      "https://arxiv.org/abs/2403.19887"
+    ],
+    "confidence": "verified"
+  },
+  "ai21/jamba-instruct": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "AI21 Jamba interleaves Mamba and Transformer attention layers; mixture-of-experts is a separate feed-forward design choice.",
+    "sources": [
+      "https://huggingface.co/ai21labs/Jamba-v0.1",
+      "https://arxiv.org/abs/2403.19887"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "aion-labs/aion-rp-llama-3.1-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "anthracite-org/magnum-v4-72b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=qwen2; layer types=[]",
+    "sources": [
+      "https://huggingface.co/anthracite-org/magnum-v4-72b/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "arcee-ai/trinity-large-preview:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "AfmoeForCausalLM config explicitly lists 45 sliding_attention and 15 full_attention layers, 4096 window, 8 KV heads. No recurrent sequence mixer.",
+    "sources": [
+      "https://huggingface.co/arcee-ai/Trinity-Large-Preview/blob/main/config.json",
+      "https://huggingface.co/arcee-ai/Trinity-Large-Preview/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "arcee-ai/trinity-large-thinking": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=afmoe; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/arcee-ai/Trinity-Large-Thinking/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "arcee-ai/trinity-large-thinking:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=afmoe; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/arcee-ai/Trinity-Large-Thinking/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "baidu/ernie-4.5-vl-424b-a47b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ernie4_5_moe_vl; layer types=[]",
+    "sources": [
+      "https://huggingface.co/baidu/ERNIE-4.5-VL-424B-A47B-PT/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "cognitivecomputations/dolphin-mistral-24b-venice-edition": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/cognitivecomputations/Dolphin-Mistral-24B-Venice-Edition/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "cohere/north-mini-code-20260617:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Official model card: decoder-only Transformer sparse MoE; sliding-window attention with RoPE and global attention without positional embeddings (NoPE) interleaved 3:1.",
+    "sources": [
+      "https://huggingface.co/CohereLabs/North-Mini-Code-1.0",
+      "https://huggingface.co/CohereLabs/North-Mini-Code-1.0/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "cohere/north-mini-code:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Official model card: decoder-only Transformer sparse MoE; sliding-window attention with RoPE and global attention without positional embeddings (NoPE) interleaved 3:1.",
+    "sources": [
+      "https://huggingface.co/CohereLabs/North-Mini-Code-1.0",
+      "https://huggingface.co/CohereLabs/North-Mini-Code-1.0/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat-v3": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat-v3-0324": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat-v3-0324:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat-v3.1": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat-v3.1:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-chat-v3:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-r1": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-r1-0528": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-r1-0528-qwen3-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Distillation keeps the student Llama/Qwen attention backbone; this is not the MLA architecture of the teacher.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-r1-0528:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-r1-distill-llama-70b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Distillation keeps the student Llama/Qwen attention backbone; this is not the MLA architecture of the teacher.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-70B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-r1-distill-llama-70b:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Distillation keeps the student Llama/Qwen attention backbone; this is not the MLA architecture of the teacher.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-70B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-r1-distill-llama-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Distillation keeps the student Llama/Qwen attention backbone; this is not the MLA architecture of the teacher.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-r1-distill-qwen-14b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Distillation keeps the student Llama/Qwen attention backbone; this is not the MLA architecture of the teacher.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-14B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-r1-distill-qwen-32b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Distillation keeps the student Llama/Qwen attention backbone; this is not the MLA architecture of the teacher.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-r1-zero:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3 backbone uses MLA; R1-Zero changes training, not the attention backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "deepseek/deepseek-r1:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v3-base:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3 backbone uses MLA; R1-Zero changes training, not the attention backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-R1",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "deepseek/deepseek-v3.1-terminus": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek V3/R1 language backbone uses low-rank MLA with full-context softmax attention; no DSA is assumed for these versions.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v3.2": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek Sparse Attention over MLA; no recurrent linear/Mamba layers.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v3.2-20251201": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek Sparse Attention over MLA; no recurrent linear/Mamba layers.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v3.2-exp": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "DeepSeek Sparse Attention over MLA; no recurrent linear/Mamba layers.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v3.2-speciale-20251201": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "The DeepSeek V3.2 model card explicitly identifies Speciale as sharing the V3.2-Exp model structure, including DeepSeek Sparse Attention.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V3.2"
+    ],
+    "confidence": "verified"
+  },
+  "deepseek/deepseek-v4-flash": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-0731": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-20260423": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-20260423:free": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-20260731": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-20260731:free": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-vision-exp": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-flash-vision-exp-20260821": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-pro": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-pro-0813": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-pro-20260423": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4-pro-20260813": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA/HCA + sliding-window KV",
+    "notes": "V4 attention backbone uses sliding-window and compressed CSA/HCA softmax attention. Post-training/vision variants retain this backbone.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4.1-flash": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA2 + sliding-window KV",
+    "notes": "40-layer causal encoder-decoder Transformer; sliding-window and CSA2 compressed sparse attention, no recurrent linear or Mamba layers.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4.1-flash-20260910": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA2 + sliding-window KV",
+    "notes": "40-layer causal encoder-decoder Transformer; sliding-window and CSA2 compressed sparse attention, no recurrent linear or Mamba layers.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "deepseek/deepseek-v4.1-flash:batch": {
+    "style": "sparse_attention",
+    "kv_representation": "Compressed CSA2 + sliding-window KV",
+    "notes": "40-layer causal encoder-decoder Transformer; sliding-window and CSA2 compressed sparse attention, no recurrent linear or Mamba layers.",
+    "sources": [
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash",
+      "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "dots-studio/dots-3-note-preview-20260813:free": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "Official README: 46 layers consisting of 13 DSA and 33 SWA; attention-only sparse/sliding-window MoE (280B/16B).",
+    "sources": [
+      "https://huggingface.co/dots-studio/dots3-note-prev/raw/main/README.md",
+      "https://huggingface.co/dots-studio/dots3-note-prev/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "dots-studio/dots-3-note-preview:free": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "Official README: 46 layers consisting of 13 DSA and 33 SWA; attention-only sparse/sliding-window MoE (280B/16B).",
+    "sources": [
+      "https://huggingface.co/dots-studio/dots3-note-prev/raw/main/README.md",
+      "https://huggingface.co/dots-studio/dots3-note-prev/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "fireworks/ember-1": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "Post-trained Kimi K3",
+    "sources": [
+      "https://fireworks.ai/blog/ember-1",
+      "https://arxiv.org/html/2607.24653v1"
+    ],
+    "confidence": "direct"
+  },
+  "google/gemma-2-27b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Gemma 2 alternates local sliding-window and global softmax attention.",
+    "sources": [
+      "https://arxiv.org/abs/2408.00118"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "google/gemma-2-9b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Gemma 2 alternates local sliding-window and global softmax attention.",
+    "sources": [
+      "https://arxiv.org/abs/2408.00118"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "google/gemma-3-12b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Gemma 3 language backbone interleaves sliding-window and global softmax attention.",
+    "sources": [
+      "https://arxiv.org/abs/2503.19786"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "google/gemma-3-27b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Gemma 3 language backbone interleaves sliding-window and global softmax attention.",
+    "sources": [
+      "https://arxiv.org/abs/2503.19786"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "google/gemma-3-27b-it:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Gemma 3 language backbone interleaves sliding-window and global softmax attention.",
+    "sources": [
+      "https://arxiv.org/abs/2503.19786"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "google/gemma-3-4b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Gemma 3 language backbone interleaves sliding-window and global softmax attention.",
+    "sources": [
+      "https://arxiv.org/abs/2503.19786"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "google/gemma-4-26b-a4b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-26B-A4B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-26b-a4b-it-20260403": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-26B-A4B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-26b-a4b-it-20260403:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-26B-A4B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-26b-a4b-it:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-26B-A4B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-31b-it": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-31B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-31b-it-20260402": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-31B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-31b-it-20260402:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-31B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "google/gemma-4-31b-it:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=gemma4_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/google/gemma-4-31B-it/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "ibm-granite/granite-4.0-h-micro": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/ibm-granite/granite-4.0-h-micro"
+    ],
+    "confidence": "verified"
+  },
+  "ibm-granite/granite-4.2-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. Dense GQA Transformer, unlike Granite 4.0 H.",
+    "sources": [
+      "https://huggingface.co/ibm-granite/granite-4.2-8b",
+      "https://huggingface.co/ibm-granite/granite-4.2-8b/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "inclusionai/ling-2.6-1t-20260423:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + MLA",
+    "notes": "Primary technical report explicitly states Ling and Ring 2.6 use Lightning Attention + MLA. Flash model card gives MLA:Lightning ratio 1:7.",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-2.6-1T",
+      "https://arxiv.org/abs/2606.15079"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-2.6-flash-20260421": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + MLA",
+    "notes": "Primary technical report explicitly states Ling and Ring 2.6 use Lightning Attention + MLA. Flash model card gives MLA:Lightning ratio 1:7.",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-2.6-flash",
+      "https://arxiv.org/abs/2606.15079"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-2.6-flash-20260421:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + MLA",
+    "notes": "Primary technical report explicitly states Ling and Ring 2.6 use Lightning Attention + MLA. Flash model card gives MLA:Lightning ratio 1:7.",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-2.6-flash",
+      "https://arxiv.org/abs/2606.15079"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-20260723": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-20260723:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-fin": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-fin-20260827:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-sante-20260904:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-sante:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-vl": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash",
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash-VL"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-flash-vl-20260910:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA 5:1; VL/Fin/Sante derived from same base",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash",
+      "https://huggingface.co/inclusionAI/Ling-3.0-flash-VL"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ling-3.0-tiny-20260806:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "Ling/Ring2.6 Lightning+MLA; Ling3.0 KDA+MLA.",
+    "sources": [
+      "https://arxiv.org/abs/2606.15079"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "inclusionai/ring-2.6-1t-20260508": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + MLA",
+    "notes": "Primary technical report explicitly states Ling and Ring 2.6 use Lightning Attention + MLA. Flash model card gives MLA:Lightning ratio 1:7.",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ring-2.6-1T",
+      "https://huggingface.co/inclusionAI/Ring-2.6-1T/blob/main/config.json",
+      "https://arxiv.org/abs/2606.15079"
+    ],
+    "confidence": "direct"
+  },
+  "inclusionai/ring-2.6-1t-20260508:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + MLA",
+    "notes": "Primary technical report explicitly states Ling and Ring 2.6 use Lightning Attention + MLA. Flash model card gives MLA:Lightning ratio 1:7.",
+    "sources": [
+      "https://huggingface.co/inclusionAI/Ring-2.6-1T",
+      "https://huggingface.co/inclusionAI/Ring-2.6-1T/blob/main/config.json",
+      "https://arxiv.org/abs/2606.15079"
+    ],
+    "confidence": "direct"
+  },
+  "liquid/lfm-2.5-2.6b:free": {
+    "style": "other_hybrid",
+    "kv_representation": "Convolution/recurrent state + attention KV",
+    "notes": "Short gated convolutions plus GQA; neither Mamba nor delta-rule linear attention.",
+    "sources": [
+      "https://huggingface.co/LiquidAI/LFM2.5-2.6B"
+    ],
+    "confidence": "verified"
+  },
+  "liquid/lfm-3b": {
+    "style": "other_hybrid",
+    "kv_representation": "Convolution/recurrent state + attention KV",
+    "notes": "Liquid recurrent/convolution family kept separate; not treated as Mamba or delta-rule linear attention.",
+    "sources": [
+      "https://www.liquid.ai/"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "liquid/lfm-40b": {
+    "style": "other_hybrid",
+    "kv_representation": "Convolution/recurrent state + attention KV",
+    "notes": "Liquid recurrent/convolution family kept separate; not treated as Mamba or delta-rule linear attention.",
+    "sources": [
+      "https://www.liquid.ai/"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "liquid/lfm-7b": {
+    "style": "other_hybrid",
+    "kv_representation": "Convolution/recurrent state + attention KV",
+    "notes": "Liquid recurrent/convolution family kept separate; not treated as Mamba or delta-rule linear attention.",
+    "sources": [
+      "https://www.liquid.ai/"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meituan/longcat-2.0": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "LongCat Sparse Attention uses selected historical tokens with MLA, MoE and N-gram embeddings; regular sparse attention.",
+    "sources": [
+      "https://huggingface.co/meituan-longcat/LongCat-2.0",
+      "https://huggingface.co/meituan-longcat/LongCat-2.0/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "meta-llama/llama-3-70b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3-8b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3-8b-instruct:extended": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.1-405b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.1-70b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.1-70b-instruct:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.1-8b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.2-11b-vision-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.2-1b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.2-3b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.2-90b-vision-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.3-70b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.3-70b-instruct:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta-llama/llama-3.3-8b-instruct:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "meta/muse-glimmer-30b": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Inspected official model config; type=muse_glimmer_text; layer types=['full_attention', 'sliding_attention']",
+    "sources": [
+      "https://huggingface.co/meta-models/Muse-Glimmer-30B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "microsoft/phi-4": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=phi3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/microsoft/phi-4/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "minimax/minimax-01": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + softmax KV",
+    "notes": "Lightning Attention + softmax, 7:1 inText01; do NOT classify M2/M3 linear from this",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-Text-01",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M1-80k"
+    ],
+    "confidence": "direct"
+  },
+  "minimax/minimax-m1": {
+    "style": "hybrid_linear",
+    "kv_representation": "Lightning Attention recurrent state + softmax KV",
+    "notes": "Lightning Attention + softmax, 7:1 inText01; do NOT classify M2/M3 linear from this",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-Text-01",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M1-80k"
+    ],
+    "confidence": "direct"
+  },
+  "minimax/minimax-m2": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.1": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.1/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.5": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.5/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.5-20260211": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.5/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.5-20260211:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.5/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.7": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.7/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.7/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.7-20260318": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.7/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.7/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2.7-20260318:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.7/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2.7/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m2:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "MiniMaxM2ForCausalLM; attention type list contains full attention throughout, GQA (8 KV heads), 62 layers. Not M1 Lightning Attention.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2/blob/main/config.json",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m3": {
+    "style": "sparse_attention",
+    "kv_representation": "Attention KV; exact representation not reviewed",
+    "notes": "MiniMax Sparse Attention (MSA), block-sparse softmax attention with MoE; not Mamba3.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M3",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m3-20260531": {
+    "style": "sparse_attention",
+    "kv_representation": "Attention KV; exact representation not reviewed",
+    "notes": "MiniMax Sparse Attention (MSA), block-sparse softmax attention with MoE; not Mamba3.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M3",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "minimax/minimax-m3-20260531:free": {
+    "style": "sparse_attention",
+    "kv_representation": "Attention KV; exact representation not reviewed",
+    "notes": "MiniMax Sparse Attention (MSA), block-sparse softmax attention with MoE; not Mamba3.",
+    "sources": [
+      "https://huggingface.co/MiniMaxAI/MiniMax-M3",
+      "https://huggingface.co/MiniMaxAI/MiniMax-M3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "mistralai/codestral-mamba": {
+    "style": "pure_mamba",
+    "kv_representation": "Mamba2 recurrent state; no attention KV",
+    "notes": "Codestral Mamba uses the Mamba2 sequence backbone, rather than attention layers.",
+    "sources": [
+      "https://huggingface.co/mistralai/Mamba-Codestral-7B-v0.1",
+      "https://mistral.ai/news/codestral-mamba/"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/devstral-2512": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ministral3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Devstral-2-123B-Instruct-2512/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/devstral-2512:free": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ministral3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Devstral-2-123B-Instruct-2512/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/ministral-14b-2512": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ministral3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Ministral-3-14B-Instruct-2512/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/ministral-3b-2512": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ministral3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Ministral-3-3B-Instruct-2512/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/ministral-8b-2512": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ministral3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Ministral-3-8B-Instruct-2512/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/ministral-8b-2512:batch": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=ministral3; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Ministral-3-8B-Instruct-2512/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-nemo": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-24b-instruct-2501": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-24B-Instruct-2501/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-2603": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Inspected official model config; type=mistral4; layer types=[] Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-4-119B-2603/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-2603:batch": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Inspected official model config; type=mistral4; layer types=[] Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-4-119B-2603/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-3.1-24b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-3.1-24b-instruct-2503": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-3.1-24b-instruct-2503:free": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-3.2-24b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mistral-small-3.2-24b-instruct-2506": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/mixtral-8x22b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mixtral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Mixtral-8x22B-Instruct-v0.1/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "mistralai/voxtral-small-24b-2507": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=llama; layer types=[]",
+    "sources": [
+      "https://huggingface.co/mistralai/Voxtral-Small-24B-2507/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "moonshotai/kimi-k2": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2-Instruct/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2-Instruct/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2-0905": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2-thinking": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2-Thinking/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2-Thinking/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2-thinking-20251106": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2-Thinking/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2-Thinking/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.5": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.5/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.5-0127": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.5/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.6": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.6/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.6/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.6-20260420": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.6/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.6/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.6-20260420:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.6/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.6/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.7-code": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.7-Code/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.7-Code/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2.7-code-20260612": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2.7-Code/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2.7-Code/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k2:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Kimi-K2/DeepseekV3ForCausalLM language backbone: MLA attention with kv_lora_rank 512. Not KDA used by later K3. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/moonshotai/Kimi-K2-Instruct/blob/main/config.json",
+      "https://huggingface.co/moonshotai/Kimi-K2-Instruct/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "moonshotai/kimi-k3": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA",
+    "sources": [
+      "https://arxiv.org/html/2607.24653v1"
+    ],
+    "confidence": "direct"
+  },
+  "moonshotai/kimi-k3-20260715": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA",
+    "sources": [
+      "https://arxiv.org/html/2607.24653v1"
+    ],
+    "confidence": "direct"
+  },
+  "moonshotai/kimi-k3:batch": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + MLA",
+    "notes": "KDA + gated MLA",
+    "sources": [
+      "https://arxiv.org/html/2607.24653v1"
+    ],
+    "confidence": "direct"
+  },
+  "neversleep/llama-3-lumimaid-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "neversleep/llama-3-lumimaid-8b:extended": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "nex-agi/deepseek-v3.1-nex-n1:free": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Author model card identifies post-trained DeepSeek-V3.1 with deepseek_v3 architecture, 671B parameters; inherits MLA attention. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/nex-agi/DeepSeek-V3.1-Nex-N1",
+      "https://huggingface.co/nex-agi/DeepSeek-V3.1-Nex-N1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "nex-agi/nex-n2-mini": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Qwen3_5MoeForConditionalGeneration config explicitly lists 30 linear + 10 full attention layers. Qwen3.5 uses Gated DeltaNet linear attention. Config mamba_ssm_dtype is not evidence of a Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/nex-agi/Nex-N2-mini/blob/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "nex-agi/nex-n2-pro:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Qwen3_5MoeForConditionalGeneration config explicitly lists 45 linear + 15 full attention layers. Qwen3.5 uses Gated DeltaNet linear attention. Config mamba_ssm_dtype is not evidence of a Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/nex-agi/Nex-N2-Pro/blob/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "nex-agi/nex-n2.5-mini": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Inspected official model config; type=qwen3_5_moe_text; layer types=['full_attention', 'linear_attention']",
+    "sources": [
+      "https://huggingface.co/nex-agi/Nex-N2.5-mini/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "nex-agi/nex-n2.5-mini-20260908:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Inspected official model config; type=qwen3_5_moe_text; layer types=['full_attention', 'linear_attention']",
+    "sources": [
+      "https://huggingface.co/nex-agi/Nex-N2.5-mini/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "nex-agi/nex-n2.5-pro": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Inspected official model config; type=qwen3_5_moe_text; layer types=['full_attention', 'linear_attention']",
+    "sources": [
+      "https://huggingface.co/nex-agi/Nex-N2.5-Pro/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "nex-agi/nex-n2.5-pro-20260907:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Inspected official model config; type=qwen3_5_moe_text; layer types=['full_attention', 'linear_attention']",
+    "sources": [
+      "https://huggingface.co/nex-agi/Nex-N2.5-Pro/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "nousresearch/hermes-2-pro-llama-3-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "nousresearch/hermes-3-llama-3.1-405b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "nousresearch/hermes-3-llama-3.1-70b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "nvidia/llama-3.1-nemotron-70b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "nvidia/llama-3.1-nemotron-70b-instruct:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "nvidia/nemotron-3-nano-30b-a3b": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-nano-30b-a3b:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-20260428:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-super-120b-a12b": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-super-120b-a12b-20230311": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-super-120b-a12b-20230311:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-super-120b-a12b:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-ultra-550b-a55b": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-ultra-550b-a55b-20260604": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-ultra-550b-a55b-20260604:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3-ultra-550b-a55b:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3.5-content-safety": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Gemma-3-based safety model; not Mamba.",
+    "sources": [
+      "https://huggingface.co/nvidia/Nemotron-3.5-Content-Safety",
+      "https://huggingface.co/nvidia/Nemotron-3.5-Content-Safety/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3.5-content-safety:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Gemma-3-based safety model; not Mamba.",
+    "sources": [
+      "https://huggingface.co/nvidia/Nemotron-3.5-Content-Safety",
+      "https://huggingface.co/nvidia/Nemotron-3.5-Content-Safety/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3.5-lightning": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3.5-lightning-20260807": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3.5-lightning-20260807:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-3.5-lightning:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "nvidia/nemotron-nano-12b-v2-vl:free": {
+    "style": "hybrid_mamba",
+    "kv_representation": "Mamba recurrent state + attention KV",
+    "notes": "Verified Mamba + attention family; variants retain architecture.",
+    "sources": [
+      "https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16"
+    ],
+    "confidence": "verified"
+  },
+  "openai/gpt-oss-120b": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Sliding and full attention MoE Transformer.",
+    "sources": [
+      "https://huggingface.co/openai/gpt-oss-120b/blob/main/config.json",
+      "https://huggingface.co/openai/gpt-oss-120b/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "openai/gpt-oss-120b:batch": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Sliding and full attention MoE Transformer.",
+    "sources": [
+      "https://huggingface.co/openai/gpt-oss-120b/blob/main/config.json",
+      "https://huggingface.co/openai/gpt-oss-120b/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "openai/gpt-oss-120b:free": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Sliding and full attention MoE Transformer.",
+    "sources": [
+      "https://huggingface.co/openai/gpt-oss-120b/blob/main/config.json",
+      "https://huggingface.co/openai/gpt-oss-120b/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "openai/gpt-oss-20b": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Sliding and full attention MoE Transformer.",
+    "sources": [
+      "https://huggingface.co/openai/gpt-oss-120b/blob/main/config.json",
+      "https://huggingface.co/openai/gpt-oss-120b/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "openai/gpt-oss-20b:batch": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Sliding and full attention MoE Transformer.",
+    "sources": [
+      "https://huggingface.co/openai/gpt-oss-120b/blob/main/config.json",
+      "https://huggingface.co/openai/gpt-oss-120b/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "openai/gpt-oss-safeguard-20b": {
+    "style": "local_global_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Sliding and full attention MoE Transformer.",
+    "sources": [
+      "https://huggingface.co/openai/gpt-oss-120b/blob/main/config.json",
+      "https://huggingface.co/openai/gpt-oss-120b/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "openrouter/hunter-alpha": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Catalog identifies the preview as MiMo V2 Pro, whose language backbone interleaves local and global softmax attention.",
+    "sources": [
+      "https://openrouter.ai/openrouter/hunter-alpha",
+      "https://mimo.xiaomi.com/mimo-v2-pro"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "poolside/laguna-m.1-20260312": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Official model card: all 70 layers use global GQA attention (64 Q heads, 8 KV heads), with softplus output gate; 225B/23B MoE.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-M.1",
+      "https://huggingface.co/poolside/Laguna-M.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-m.1-20260312:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Official model card: all 70 layers use global GQA attention (64 Q heads, 8 KV heads), with softplus output gate; 225B/23B MoE.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-M.1",
+      "https://huggingface.co/poolside/Laguna-M.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-s-2.1": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-S-2.1",
+      "https://huggingface.co/poolside/Laguna-S-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-s-2.1-20260720": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-S-2.1",
+      "https://huggingface.co/poolside/Laguna-S-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-s-2.1-20260720:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-S-2.1",
+      "https://huggingface.co/poolside/Laguna-S-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-s-2.1:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-S-2.1",
+      "https://huggingface.co/poolside/Laguna-S-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-xs-2.1": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-XS-2.1",
+      "https://huggingface.co/poolside/Laguna-XS-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-xs-2.1-20260625:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-XS-2.1",
+      "https://huggingface.co/poolside/Laguna-XS-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-xs-2.1:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MoE with 3:1 sliding-window/global softmax attention; S has 48 layers, XS has 40.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-XS-2.1",
+      "https://huggingface.co/poolside/Laguna-XS-2.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-xs.2-20260421": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Official model card: 30 sliding-window attention layers and 10 global attention layers; 512 window, 3:1; 33B/3B MoE.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-XS.2",
+      "https://huggingface.co/poolside/Laguna-XS.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "poolside/laguna-xs.2-20260421:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Official model card: 30 sliding-window attention layers and 10 global attention layers; 512 window, 3:1; 33B/3B MoE.",
+    "sources": [
+      "https://huggingface.co/poolside/Laguna-XS.2",
+      "https://huggingface.co/poolside/Laguna-XS.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "prism-ml/ternary-bonsai-2-27b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Qwen3.8-27B derivative; model card explicitly architecture unchanged, 75%linear25%full",
+    "sources": [
+      "https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen-2-72b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen-2-vl-72b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen-2-vl-7b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen-2.5-72b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen-2.5-72b-instruct:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen-2.5-7b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen-2.5-coder-32b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen2.5-32b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen2.5-vl-32b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen2.5-vl-72b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-14b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-14b-04-28": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b-04-28": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b-04-28:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b-07-25": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b-07-25:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b-2507": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-235b-a22b-thinking-2507": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-30b-a3b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-30b-a3b-04-28": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-30b-a3b-instruct-2507": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-30b-a3b-thinking-2507": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-32b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-32b-04-28": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-32b-04-28:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-8b-04-28": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-coder": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-coder-30b-a3b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-coder-480b-a35b-07-25": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-coder-480b-a35b-07-25:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-coder-next": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + gated full attention, 3:1",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-Coder-Next"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3-coder-next-2025-02-03": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + gated full attention, 3:1",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-Coder-Next"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3-next-80b-a3b-instruct": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + gated full attention, 3:1",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3-next-80b-a3b-instruct-2509": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + gated full attention, 3:1",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3-next-80b-a3b-thinking": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + gated full attention, 3:1",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Thinking"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3-next-80b-a3b-thinking-2509": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + gated full attention, 3:1",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Thinking"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3-vl-235b-a22b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-vl-235b-a22b-thinking": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-vl-30b-a3b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-vl-30b-a3b-thinking": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-vl-32b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-vl-8b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3-vl-8b-thinking": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/Qwen3-235B-A22B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3.5-122b-a10b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-122B-A10B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-122b-a10b-20260224": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-122B-A10B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-27b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-27b-20260224": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-35b-a3b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-35B-A3B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-35b-a3b-20260224": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-35B-A3B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-397b-a17b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-397B-A17B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-397b-a17b-20260216": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-397B-A17B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-9b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-9B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-9b-20260310": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.5-9B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.5-flash-02-23": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.5-flash-20260224": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.5-plus-02-15": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.5-plus-20260216": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.5-plus-20260420": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-27b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.6-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.6-27b-20260422": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.6-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.6-35b-a3b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.6-35B-A3B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.6-35b-a3b-20260415": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.6-35B-A3B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.6-flash": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-max-preview": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-max-preview-20260420": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-plus": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-plus-04-02": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-plus-04-02:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.6-plus-preview:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.7-flash": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.7-flash-20260727": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.7-max": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.7-max-20260520": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.7-plus": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.7-plus-20260602": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.8-2.4t-a95b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-2.4t-a95b-20260812": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-27b": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-27b-20260814": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-27b-20260814:free": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-27B"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-flash": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + sparse QSA",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-flash-20260826": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + sparse QSA",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://huggingface.co/Qwen/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwen3.8-max-0902": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.8-max-20260803": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Verified Qwen Next and 3.5\u20133.8 hybrid GDN family; sparse QSA layers remain part of a linear hybrid.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwen3.8-max-20260902": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.8-max-prime": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + attention KV",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next"
+    ],
+    "confidence": "vendor_family_statement"
+  },
+  "qwen/qwen3.8-omni-flash": {
+    "style": "hybrid_linear",
+    "kv_representation": "Gated DeltaNet recurrent state + sparse QSA",
+    "notes": "Gated DeltaNet + attention; exact per-SKU layer ratio not assumed. Qwen3.8 Flash and Omni Flash use QSA in attention layers.",
+    "sources": [
+      "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+      "https://arxiv.org/html/2609.25611v1"
+    ],
+    "confidence": "direct"
+  },
+  "qwen/qwq-32b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/QwQ-32B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwq-32b-preview": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/QwQ-32B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "qwen/qwq-32b:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Qwen 2/2.5/3 attention backbone. The language backbone uses grouped KV heads; recurrent Next and 3.5+ models are classified separately. Multimodal vision encoders are outside this language-backbone classification.",
+    "sources": [
+      "https://huggingface.co/Qwen/QwQ-32B"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "sao10k/l3-euryale-70b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Reviewed Llama 3 attention backbone or named fine-tune; full-context causal attention with grouped KV heads. Backbones of later Llama generations are not inferred from this entry.",
+    "sources": [
+      "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "sao10k/l3-lunaris-8b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=llama; layer types=[]",
+    "sources": [
+      "https://huggingface.co/Sao10K/L3-8B-Lunaris-v1/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "sao10k/l3.1-euryale-70b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=llama; layer types=[]",
+    "sources": [
+      "https://huggingface.co/Sao10K/L3.1-70B-Euryale-v2.2/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "sao10k/l3.3-euryale-70b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=llama; layer types=[]",
+    "sources": [
+      "https://huggingface.co/Sao10K/L3.3-70B-Euryale-v2.3/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "sao10k/l3.3-euryale-70b-v2.3": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=llama; layer types=[]",
+    "sources": [
+      "https://huggingface.co/Sao10K/L3.3-70B-Euryale-v2.3/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "stealth/ox-alpha": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + sparse MLA",
+    "notes": "GLM 5.3 Flash preview. Its tokens are included once in hybrid-linear totals.",
+    "sources": [
+      "https://openrouter.ai/data"
+    ],
+    "confidence": "verified"
+  },
+  "stepfun/step-3.5-flash": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Step3p5 text backbone; layer_types explicitly full_attention and sliding_attention, 3:1 sliding/full, GQA.",
+    "sources": [
+      "https://huggingface.co/stepfun-ai/Step-3.5-Flash/blob/main/config.json",
+      "https://huggingface.co/stepfun-ai/Step-3.5-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "stepfun/step-3.5-flash:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Step3p5 text backbone; layer_types explicitly full_attention and sliding_attention, 3:1 sliding/full, GQA.",
+    "sources": [
+      "https://huggingface.co/stepfun-ai/Step-3.5-Flash/blob/main/config.json",
+      "https://huggingface.co/stepfun-ai/Step-3.5-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "stepfun/step-3.7-flash": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Step3p5 text backbone; layer_types explicitly full_attention and sliding_attention, 3:1 sliding/full, GQA.",
+    "sources": [
+      "https://huggingface.co/stepfun-ai/Step-3.7-Flash/blob/main/config.json",
+      "https://huggingface.co/stepfun-ai/Step-3.7-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "stepfun/step-3.7-flash-20260528": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Step3p5 text backbone; layer_types explicitly full_attention and sliding_attention, 3:1 sliding/full, GQA.",
+    "sources": [
+      "https://huggingface.co/stepfun-ai/Step-3.7-Flash/blob/main/config.json",
+      "https://huggingface.co/stepfun-ai/Step-3.7-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hunyuan-a13b-instruct": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. GQA attention MoE Transformer, not recurrent linear or Mamba.",
+    "sources": [
+      "https://huggingface.co/tencent/Hunyuan-A13B-Instruct",
+      "https://huggingface.co/tencent/Hunyuan-A13B-Instruct/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy-mt2-1.8b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. HunYuanDenseV1ForCausalLM, 32 GQA layers, 4 KV heads.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy-MT2-1.8B/blob/main/config.json",
+      "https://huggingface.co/tencent/Hy-MT2-1.8B/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy-mt2-30b-a3b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. HYV3ForCausalLM, 48 GQA MoE layers, 4 KV heads.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy-MT2-30B-A3B/blob/main/config.json",
+      "https://huggingface.co/tencent/Hy-MT2-30B-A3B/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy-mt2-7b": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. HunYuanDenseV1ForCausalLM, 32 GQA layers, 8 KV heads.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy-MT2-7B/blob/main/config.json",
+      "https://huggingface.co/tencent/Hy-MT2-7B/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy3": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. MoE Transformer with conventional GQA, 80 layers, 8 KV heads. Preview/model release share family attention design.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy3",
+      "https://huggingface.co/tencent/Hy3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy3-20260706": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. MoE Transformer with conventional GQA, 80 layers, 8 KV heads. Preview/model release share family attention design.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy3",
+      "https://huggingface.co/tencent/Hy3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy3-20260706:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. MoE Transformer with conventional GQA, 80 layers, 8 KV heads. Preview/model release share family attention design.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy3",
+      "https://huggingface.co/tencent/Hy3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy3-preview": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. MoE Transformer with conventional GQA, 80 layers, 8 KV heads. Preview/model release share family attention design.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy3",
+      "https://huggingface.co/tencent/Hy3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy3-preview-20260421": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. MoE Transformer with conventional GQA, 80 layers, 8 KV heads. Preview/model release share family attention design.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy3",
+      "https://huggingface.co/tencent/Hy3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy3-preview-20260421:free": {
+    "style": "full_attention",
+    "kv_representation": "GQA",
+    "notes": "Full-context causal attention in the reviewed language backbone. MoE Transformer with conventional GQA, 80 layers, 8 KV heads. Preview/model release share family attention design.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy3",
+      "https://huggingface.co/tencent/Hy3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy4-preview": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "Gated DeepSeek Sparse Attention with MLA and IndexCache; sparse regular attention.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy4-preview",
+      "https://huggingface.co/tencent/Hy4-preview/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "tencent/hy4-preview-20260827": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "Gated DeepSeek Sparse Attention with MLA and IndexCache; sparse regular attention.",
+    "sources": [
+      "https://huggingface.co/tencent/Hy4-preview",
+      "https://huggingface.co/tencent/Hy4-preview/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "thedrummer/skyfall-36b-v2": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/TheDrummer/Skyfall-36B-v2/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "thedrummer/unslopnemo-12b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=mistral; layer types=[]",
+    "sources": [
+      "https://huggingface.co/TheDrummer/UnslopNemo-12B-v4.1/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "undi95/remm-slerp-l2-13b": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Inspected official model config; type=llama; layer types=[]",
+    "sources": [
+      "https://huggingface.co/Undi95/ReMM-SLERP-L2-13B/raw/main/config.json"
+    ],
+    "confidence": "verified"
+  },
+  "xiaomi/mimo-v2-flash-20251210": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Official model card: interleaved Sliding Window Attention and Global Attention; softmax attention-only hybrid, not hybrid-linear.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2-Flash",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2-flash-20251210:free": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Official model card: interleaved Sliding Window Attention and Global Attention; softmax attention-only hybrid, not hybrid-linear.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2-Flash",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2-pro-20260318": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "MiMo V2 Pro interleaves sliding-window and global softmax attention in its language backbone.",
+    "sources": [
+      "https://mimo.xiaomi.com/mimo-v2-pro"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.5": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Card explicitly lists SWA/global attention: V2.5 39/9 layers; Pro 60/10 layers.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.5-20260422": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Card explicitly lists SWA/global attention: V2.5 39/9 layers; Pro 60/10 layers.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.5-pro": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Card explicitly lists SWA/global attention: V2.5 39/9 layers; Pro 60/10 layers.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.5-pro-20260422": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "Card explicitly lists SWA/global attention: V2.5 39/9 layers; Pro 60/10 layers.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.6-flash": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "48 layers: 39 SWA and 9 global softmax attention layers.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.6-flash-20260921": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "48 layers: 39 SWA and 9 global softmax attention layers.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.6-pro": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "70 layers: 60 SWA and 10 global softmax layers. UltraSpeed catalog explicitly identifies same checkpoint.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.6-pro-20260921": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "70 layers: 60 SWA and 10 global softmax layers. UltraSpeed catalog explicitly identifies same checkpoint.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.6-pro-ultraspeed": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "70 layers: 60 SWA and 10 global softmax layers. UltraSpeed catalog explicitly identifies same checkpoint.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "xiaomi/mimo-v2.6-pro-ultraspeed-20260921": {
+    "style": "local_global_attention",
+    "kv_representation": "GQA",
+    "notes": "70 layers: 60 SWA and 10 global softmax layers. UltraSpeed catalog explicitly identifies same checkpoint.",
+    "sources": [
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL",
+      "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.5": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.5/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.5-air": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.5-Air/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.5-Air/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.5-air:free": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.5-Air/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.5-Air/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.5v": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. GLM4V MoE language backbone uses ordinary KV attention; multimodal vision encoder.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.5V/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.5V/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.6": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.6/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.6/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.6v": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. GLM4V MoE language backbone uses ordinary KV attention; multimodal vision encoder.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.6V/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.6V/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.7": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.7/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.7/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.7-20251222": {
+    "style": "full_attention",
+    "kv_representation": "Attention KV; head sharing not reviewed",
+    "notes": "Full-context causal attention in the reviewed language backbone. Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.7/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.7/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.7-flash": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.7-Flash/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.7-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-4.7-flash-20260119": {
+    "style": "latent_attention",
+    "kv_representation": "MLA",
+    "notes": "Published GLM MoE or GLM4MoE-Lite Transformer configuration with KV attention heads; no recurrent linear/Mamba mixer. Config confirms a low-rank KV representation; no token-sparse attention is documented for this record.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-4.7-Flash/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-4.7-Flash/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5-20260211": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.1": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.1/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.1-20260406": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.1/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.1/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.2": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.2/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.2-20260616": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.2/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.2/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.3": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.3-20260816": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  },
+  "z-ai/glm-5.3-flash": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + sparse MLA",
+    "notes": "KDA + sparse MLA/DSA; FlashX serving variant; Ox Alpha prior anonymous alias",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/config.json"
+    ],
+    "confidence": "direct"
+  },
+  "z-ai/glm-5.3-flash-20260826": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + sparse MLA",
+    "notes": "KDA + sparse MLA/DSA; FlashX serving variant; Ox Alpha prior anonymous alias",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/config.json"
+    ],
+    "confidence": "direct"
+  },
+  "z-ai/glm-5.3-flash:batch": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + sparse MLA",
+    "notes": "KDA + sparse MLA/DSA; FlashX serving variant; Ox Alpha prior anonymous alias",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/config.json"
+    ],
+    "confidence": "direct"
+  },
+  "z-ai/glm-5.3-flashx": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + sparse MLA",
+    "notes": "KDA + sparse MLA/DSA; FlashX serving variant; Ox Alpha prior anonymous alias",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/config.json"
+    ],
+    "confidence": "direct"
+  },
+  "z-ai/glm-5.3-flashx-20260918": {
+    "style": "hybrid_linear",
+    "kv_representation": "KDA recurrent state + sparse MLA",
+    "notes": "KDA + sparse MLA/DSA; FlashX serving variant; Ox Alpha prior anonymous alias",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/config.json"
+    ],
+    "confidence": "direct"
+  },
+  "z-ai/glm-5.3-prime": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "Catalog identifies this as a serving variant of GLM5.3; the underlying published GLM5.3 config uses DSA over latent KV.",
+    "sources": [
+      "https://openrouter.ai/z-ai/glm-5.3-prime",
+      "https://huggingface.co/zai-org/GLM-5.3/raw/main/config.json"
+    ],
+    "confidence": "family_or_backbone"
+  },
+  "z-ai/glm-5.3:batch": {
+    "style": "sparse_attention",
+    "kv_representation": "MLA",
+    "notes": "GlmMoeDsaForCausalLM configuration: DSA/MLA sparse attention, 78 layers, latent KV rank 512.",
+    "sources": [
+      "https://huggingface.co/zai-org/GLM-5.3/blob/main/config.json",
+      "https://huggingface.co/zai-org/GLM-5.3/raw/main/config.json"
+    ],
+    "confidence": "high"
+  }
+}

@@ -1,6 +1,6 @@
 # KV Cache Visualization Makefile
 
-.PHONY: serve run stop clean help check-commits fix-commits format check-format generate-thumbnails test openrouter openrouter-hybrid-trends openrouter-context openrouter-cache openrouter-render test-openrouter
+.PHONY: serve run stop clean help check-commits fix-commits format check-format generate-thumbnails test openrouter openrouter-hybrid-trends openrouter-attention-trends openrouter-attention openrouter-context openrouter-cache openrouter-render test-openrouter
 
 # Default port
 PORT ?= 8000
@@ -20,12 +20,19 @@ PRETTIER ?= npx --no-install prettier
 ## openrouter: Refresh all public OpenRouter data and generate every OpenRouter page
 openrouter:
 	@$(PYTHON) -m scripts.openrouter all $(OPENROUTER_ARGS)
-	@$(PRETTIER) --write hybrid-trends.html context-demand.html cache-telemetry.html
+	@$(PRETTIER) --write hybrid-trends.html attention-trends.html context-demand.html cache-telemetry.html
 
 ## openrouter-hybrid-trends: Update architecture adoption and coverage
 openrouter-hybrid-trends:
 	@$(PYTHON) -m scripts.openrouter trends $(OPENROUTER_ARGS)
 	@$(PRETTIER) --write hybrid-trends.html
+
+## openrouter-attention-trends: Update attention styles, hybrids, and sparse-attention trends
+openrouter-attention-trends:
+	@$(PYTHON) -m scripts.openrouter attention $(OPENROUTER_ARGS)
+	@$(PRETTIER) --write attention-trends.html
+
+openrouter-attention: openrouter-attention-trends
 
 ## openrouter-context: Update context-bucket demand and architecture shares
 openrouter-context:
@@ -211,6 +218,7 @@ help:
 	@echo "OpenRouter data (npm install first; export OPEN_ROUTER_API for rankings):"
 	@echo "  make openrouter                 Refresh and build all OpenRouter pages"
 	@echo "  make openrouter-hybrid-trends    Architecture trends"
+	@echo "  make openrouter-attention-trends Attention styles and sparse attention"
 	@echo "  make openrouter-context          Context-bucket demand"
 	@echo "  make openrouter-cache            Cache prices and telemetry availability"
 	@echo "  make openrouter-render           Offline rebuild from committed snapshots"

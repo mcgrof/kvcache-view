@@ -10,7 +10,9 @@ from __future__ import annotations
 import calendar
 from collections import defaultdict
 from html import escape
+import hashlib
 import math
+from pathlib import Path
 from urllib.parse import urlparse
 
 
@@ -39,6 +41,7 @@ MAIN = ("regular_attention", "hybrid_linear", "hybrid_mamba")
 NAV = (
     ("index.html", "All visualizations"),
     ("hybrid-trends.html", "Architecture trends"),
+    ("attention-trends.html", "Attention styles"),
     ("context-demand.html", "Context demand"),
     ("cache-telemetry.html", "Cache telemetry"),
     ("hybrid-checkpoints.html", "Hybrid checkpoints"),
@@ -89,6 +92,11 @@ def _as_of(provenance, analysis=None):
 
 
 def _page(title, description, content, provenance, analysis=None, active=""):
+    # Generated pages and shared assets can reach CDN/browser caches at different
+    # times. Content versions keep newly rendered charts paired with their CSS/JS.
+    root = Path(__file__).resolve().parents[2]
+    css_version = hashlib.sha256((root / "openrouter.css").read_bytes()).hexdigest()[:12]
+    js_version = hashlib.sha256((root / "openrouter.js").read_bytes()).hexdigest()[:12]
     catalog_only = active == "cache-telemetry.html"
     analysis_url = provenance.get("analysis_url", "data/openrouter/cache-analysis.json" if catalog_only else "data/openrouter/analysis.json")
     provenance_url = provenance.get("provenance_url", "data/openrouter/cache-provenance.json" if catalog_only else "data/openrouter/provenance.json")
@@ -130,8 +138,8 @@ def _page(title, description, content, provenance, analysis=None, active=""):
     <meta name="theme-color" content="#1428a0" />
     <title>{_escape(title)} | KV Cache Visualizations</title>
     <link rel="icon" href="icon-192.png" />
-    <link rel="stylesheet" href="openrouter.css" />
-    <script src="openrouter.js" defer></script>
+    <link rel="stylesheet" href="openrouter.css?v={css_version}" />
+    <script src="openrouter.js?v={js_version}" defer></script>
 </head>
 <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -392,7 +400,8 @@ def render_trends(analysis: dict, provenance: dict) -> str:
     <div class="grid stats">{cards}</div>
     <section class="panel"><h2>Token growth and share</h2><p>All categories use the same denominator: reported text tokens, including unresolved architectures and the unnamed tail.</p>{_comparison_table(analysis)}</section>
     <section class="panel"><h2>Architecture share over the full observed history</h2>
-    <p>Regular attention includes dense, local, sparse, sliding-window and compressed/latent attention. Linear hybrids and Mamba hybrids remain separate.</p>
+    <p>Regular attention includes dense, local, sparse, sliding-window and compressed/latent attention. Linear hybrids and Mamba hybrids remain separate.
+    Open <a href="attention-trends.html">Attention Style Trends</a> for the finer breakdown of attention patterns and their cached state.</p>
     {_chart(monthly, main_categories, "architecture-history", "Monthly identified architecture share")}</section>
     <section class="panel"><h2>How much traffic cannot be assigned?</h2><p>The unresolved named models and the unnamed top-50 tail are different sources of uncertainty.</p>
     {_chart(monthly, ["unknown", "other"], "coverage-history", "Monthly unresolved architecture and unnamed tail shares")}</section>

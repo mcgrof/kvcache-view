@@ -133,6 +133,7 @@ https://[your-username].github.io/kvcache-view/
 The site also includes reproducible, source-attributed views of public demand:
 
 - [Hybrid Architecture Trends](hybrid-trends.html): Mamba hybrids, linear-attention hybrids, and regular attention, including sparse attention.
+- [Attention Style Trends](attention-trends.html): full, sparse, and local attention, linear and Mamba hybrids, and independently described KV representations.
 - [Context Demand](context-demand.html): architecture shares and token growth within OpenRouter's request-context buckets.
 - [Cache Telemetry & Prices](cache-telemetry.html): advertised cache prices and explicit limits on observed cache-hit and NVMe data.
 
@@ -142,7 +143,7 @@ export OPEN_ROUTER_API  # supply the key securely in your environment
 make openrouter        # update all OpenRouter data and pages
 ```
 
-Individual targets are `openrouter-hybrid-trends`, `openrouter-context`, and
+Individual targets are `openrouter-hybrid-trends`, `openrouter-attention-trends`, `openrouter-context`, and
 `openrouter-cache`. To reproduce the committed snapshot without network access:
 
 ```sh

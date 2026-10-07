@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Attention styles: full, sparse, local, and hybrid">
+  <rect width="600" height="600" fill="#0b1026"/>
+  <circle cx="520" cy="80" r="200" fill="#1428a0" opacity=".3"/>
+  <text x="48" y="74" fill="#eaf2ff" font-family="system-ui,sans-serif" font-size="30" font-weight="700">ATTENTION STYLES</text>
+  <g fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M65 185H535 M65 215H535 M65 245H535" stroke="#66b9ff"/>
+    <path d="M65 300H130 M195 300H260 M325 300H390 M455 300H535" stroke="#f7cd70"/>
+    <path d="M65 350H215 M260 350H410 M455 350H535" stroke="#50e3c2"/>
+    <path d="M65 410H185 Q215 375 245 410 T305 410H535" stroke="#c398ff"/>
+  </g>
+  <text x="48" y="523" fill="#c7d4f8" font-family="system-ui,sans-serif" font-size="22">Full · sparse · local · hybrid</text>
+  <text x="48" y="559" fill="#8294be" font-family="system-ui,sans-serif" font-size="17">OpenRouter · kvcache-view</text>
+</svg>
