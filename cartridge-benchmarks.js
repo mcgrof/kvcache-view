@@ -122,7 +122,7 @@ const CARTRIDGE_BENCHMARKS = {
             throughputQps: null,
             qualityMetric: 'LongHealth option-match accuracy (thinking-on, temp 0.6, mean of >=3 runs)',
             qualityBaseline: 0.855,
-            qualityCartridge: 0.50,
+            qualityCartridge: 0.5,
             notes:
                 'CAS (arXiv:2606.04557) reproduction on Qwen3-8B over LongHealth. Baselines reproduce: ' +
                 'no-context 0.39 (paper 0.375), full document in context 0.855 (paper 0.874). Cartridge-path ' +
