@@ -128,6 +128,35 @@ Fork this repo and enable GitHub Pages in settings, then visit:
 https://[your-username].github.io/kvcache-view/
 ```
 
+## OpenRouter data pages
+
+The site also includes reproducible, source-attributed views of public demand:
+
+- [Hybrid Architecture Trends](hybrid-trends.html): Mamba hybrids, linear-attention hybrids, and regular attention, including sparse attention.
+- [Context Demand](context-demand.html): architecture shares and token growth within OpenRouter's request-context buckets.
+- [Cache Telemetry & Prices](cache-telemetry.html): advertised cache prices and explicit limits on observed cache-hit and NVMe data.
+
+```sh
+npm ci
+export OPEN_ROUTER_API  # supply the key securely in your environment
+make openrouter        # update all OpenRouter data and pages
+```
+
+Individual targets are `openrouter-hybrid-trends`, `openrouter-context`, and
+`openrouter-cache`. To reproduce the committed snapshot without network access:
+
+```sh
+make openrouter-render OPENROUTER_END=2026-10-06
+```
+
+Updates default to yesterday in UTC, preserve historical data, and refresh a
+seven-day overlap. Set `OPENROUTER_FULL_REFRESH=1` to refetch old history.
+New models stay unclassified until their architecture evidence is reviewed.
+The collector does not fetch private account analytics or publish API keys.
+Cache prices and token traffic are not measurements of NVMe offloading.
+See [the data methodology and attribution](data/openrouter/README.md) for
+coverage limits, exact commands, source licenses, and the registry workflow.
+
 ## Controls
 
 - **Play/Pause**: Start or stop the animation

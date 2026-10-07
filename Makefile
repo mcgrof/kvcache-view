@@ -1,12 +1,49 @@
 # KV Cache Visualization Makefile
 
-.PHONY: serve run stop clean help check-commits fix-commits format check-format generate-thumbnails test
+.PHONY: serve run stop clean help check-commits fix-commits format check-format generate-thumbnails test openrouter openrouter-hybrid-trends openrouter-context openrouter-cache openrouter-render test-openrouter
 
 # Default port
 PORT ?= 8000
 
 # Python executable
 PYTHON := python3
+
+# OPEN_ROUTER_API stays in the environment, never in a command argument or file.
+# Default cutoff is the latest completed UTC day, calculated by the collector.
+OPENROUTER_START ?= 2025-01-01
+OPENROUTER_END ?=
+OPENROUTER_OFFLINE ?= 0
+OPENROUTER_FULL_REFRESH ?= 0
+OPENROUTER_ARGS = --start '$(OPENROUTER_START)' $(if $(OPENROUTER_END),--end '$(OPENROUTER_END)') $(if $(filter 1,$(OPENROUTER_OFFLINE)),--offline) $(if $(filter 1,$(OPENROUTER_FULL_REFRESH)),--full-refresh)
+PRETTIER ?= npx --no-install prettier
+
+## openrouter: Refresh all public OpenRouter data and generate every OpenRouter page
+openrouter:
+	@$(PYTHON) -m scripts.openrouter all $(OPENROUTER_ARGS)
+	@$(PRETTIER) --write hybrid-trends.html context-demand.html cache-telemetry.html
+
+## openrouter-hybrid-trends: Update architecture adoption and coverage
+openrouter-hybrid-trends:
+	@$(PYTHON) -m scripts.openrouter trends $(OPENROUTER_ARGS)
+	@$(PRETTIER) --write hybrid-trends.html
+
+## openrouter-context: Update context-bucket demand and architecture shares
+openrouter-context:
+	@$(PYTHON) -m scripts.openrouter context $(OPENROUTER_ARGS)
+	@$(PRETTIER) --write context-demand.html
+
+## openrouter-cache: Update advertised cache prices and telemetry availability
+openrouter-cache:
+	@$(PYTHON) -m scripts.openrouter cache $(OPENROUTER_ARGS)
+	@$(PRETTIER) --write cache-telemetry.html
+
+## openrouter-render: Rebuild all OpenRouter pages from saved data without network access
+openrouter-render:
+	@$(MAKE) openrouter OPENROUTER_OFFLINE=1
+
+## test-openrouter: Verify collection, classification and cache-price calculations offline
+test-openrouter:
+	@$(PYTHON) -m unittest discover -s tests -p 'test_openrouter_*.py'
 
 ## serve: Start the web server
 serve: stop
@@ -104,11 +141,11 @@ fix-commits:
 format:
 	@if command -v prettier > /dev/null 2>&1; then \
 		echo "Formatting HTML and JS files with Prettier..."; \
-		prettier --write "*.html" "*.js"; \
+		prettier --write "*.html" "*.js" || exit 1; \
 		echo "✅ Files formatted!"; \
 	elif command -v npx > /dev/null 2>&1; then \
 		echo "Using npx to run Prettier..."; \
-		npx prettier --write "*.html" "*.js"; \
+		npx prettier --write "*.html" "*.js" || exit 1; \
 		echo "✅ Files formatted!"; \
 	else \
 		echo "⚠️  Prettier not found."; \
@@ -125,12 +162,12 @@ check-format:
 	@if command -v prettier > /dev/null 2>&1; then \
 		echo "Checking code formatting..."; \
 		prettier --check "*.html" "*.js" || \
-		(echo "❌ Code formatting issues found. Run 'make format' to fix."; exit 1); \
+		{ echo "❌ Code formatting issues found. Run 'make format' to fix."; exit 1; }; \
 		echo "✅ All files are properly formatted!"; \
 	elif command -v npx > /dev/null 2>&1; then \
 		echo "Using npx to check formatting..."; \
 		npx prettier --check "*.html" "*.js" || \
-		(echo "❌ Code formatting issues found. Run 'make format' to fix."; exit 1); \
+		{ echo "❌ Code formatting issues found. Run 'make format' to fix."; exit 1; }; \
 		echo "✅ All files are properly formatted!"; \
 	else \
 		echo "⚠️  Prettier not found."; \
@@ -147,7 +184,7 @@ generate-thumbnails:
 	@$(PYTHON) generate_viz_images.py
 
 ## test: Run the Node unit tests for the calculation models
-test:
+test: test-openrouter
 	@node --test cartridge-economics.test.js hybrid-checkpoints.test.js
 
 ## help: Show this help message
@@ -170,6 +207,15 @@ help:
 	@echo "  make check-format    Check if HTML/JS files are formatted"
 	@echo ""
 	@echo "  make help         Show this help message"
+	@echo ""
+	@echo "OpenRouter data (npm install first; export OPEN_ROUTER_API for rankings):"
+	@echo "  make openrouter                 Refresh and build all OpenRouter pages"
+	@echo "  make openrouter-hybrid-trends    Architecture trends"
+	@echo "  make openrouter-context          Context-bucket demand"
+	@echo "  make openrouter-cache            Cache prices and telemetry availability"
+	@echo "  make openrouter-render           Offline rebuild from committed snapshots"
+	@echo "  OPENROUTER_END=YYYY-MM-DD         Reproduce a specific UTC cutoff"
+	@echo "  OPENROUTER_FULL_REFRESH=1         Refetch older history as well"
 	@echo ""
 	@echo "Image Generation:"
 	@echo "  make generate-thumbnails  Generate visualization thumbnails (needs OPENAI_API_KEY)"

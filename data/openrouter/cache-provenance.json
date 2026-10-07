@@ -1,0 +1,14 @@
+{
+  "analysis_url": "data/openrouter/cache-analysis.json",
+  "as_of": "2026-10-07T14:23:43.185204Z",
+  "catalog": {
+    "as_of": "2026-10-07T14:23:43.185204Z",
+    "pages": [
+      "https://openrouter.ai/api/v1/models?output_modalities=all"
+    ],
+    "source_url": "https://openrouter.ai/api/v1/models?output_modalities=all"
+  },
+  "kind": "catalog",
+  "provenance_url": "data/openrouter/cache-provenance.json",
+  "source_url": "https://openrouter.ai/api/v1/models?output_modalities=all"
+}

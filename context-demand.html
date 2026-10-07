@@ -1,0 +1,2088 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Track OpenRouter context-bucket traffic and architecture mix as inputs to workload planning, while keeping storage assumptions explicit."
+        />
+        <meta name="theme-color" content="#1428a0" />
+        <title>Context demand | KV Cache Visualizations</title>
+        <link rel="icon" href="icon-192.png" />
+        <link rel="stylesheet" href="openrouter.css" />
+        <script src="openrouter.js" defer></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#main">Skip to content</a>
+        <div class="container">
+            <nav aria-label="Visualization navigation">
+                <a href="index.html">All visualizations</a>
+                <a href="hybrid-trends.html">Architecture trends</a>
+                <a href="context-demand.html" aria-current="page">Context demand</a>
+                <a href="cache-telemetry.html">Cache telemetry</a>
+                <a href="hybrid-checkpoints.html">Hybrid checkpoints</a>
+                <a href="io-projections.html">I/O projections</a>
+            </nav>
+            <header>
+                <p class="eyebrow">OpenRouter observatory · KV Cache Visualizations</p>
+                <h1>Context demand</h1>
+                <p class="lede">
+                    Track OpenRouter context-bucket traffic and architecture mix as inputs to workload planning, while
+                    keeping storage assumptions explicit.
+                </p>
+            </header>
+            <main id="main">
+                <section class="panel lead-panel">
+                    <h2>Context demand is a workload signal</h2>
+                    <p class="finding">
+                        The context filters reveal where token demand is moving. They do not report cache residency,
+                        retained checkpoint count or storage traffic.
+                    </p>
+                    <p>
+                        Labels below are the API's context-bucket labels. Their exact numerical boundaries are not
+                        assumed, and separate bucket totals are not added together as if they formed a verified
+                        partition.
+                    </p>
+                </section>
+                <section class="panel">
+                    <h2>Latest 30-day context totals</h2>
+                    <div class="table-wrap" tabindex="0">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Dataset / API bucket</th>
+                                    <th>Reported tokens</th>
+                                    <th>30-day growth</th>
+                                    <th>Individually named</th>
+                                    <th>Architecture unresolved</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">All text</th>
+                                    <td>605.36T</td>
+                                    <td>+46.6%</td>
+                                    <td>94.2%</td>
+                                    <td>31.4%</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">100K</th>
+                                    <td>197.30T</td>
+                                    <td>+37.4%</td>
+                                    <td>92.6%</td>
+                                    <td>31.1%</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">1M</th>
+                                    <td>364.95T</td>
+                                    <td>+55.9%</td>
+                                    <td>98.3%</td>
+                                    <td>32.5%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note">
+                        Each filtered dataset has its own top 50 and its own unnamed tail. Architecture shares use that
+                        dataset's total, not the unfiltered total. T = trillion tokens.
+                    </p>
+                </section>
+                <section class="panel">
+                    <p class="eyebrow">OpenRouter context filter: 100K</p>
+                    <h2>100K architecture mix and growth</h2>
+                    <div
+                        class="table-wrap"
+                        tabindex="0"
+                        role="region"
+                        aria-label="100K architecture growth comparisons"
+                    >
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Architecture</th>
+                                    <th scope="col">Latest 30-day share</th>
+                                    <th scope="col">90-day token growth</th>
+                                    <th scope="col">30-day token growth</th>
+                                    <th scope="col">7-day token growth</th>
+                                    <th scope="col">30-day share change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Regular attention (including sparse)</th>
+                                    <td>46.11%</td>
+                                    <td>+100.8%</td>
+                                    <td>+14.8%</td>
+                                    <td>+5.3%</td>
+                                    <td>-9.08 pp</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Hybrid linear attention</th>
+                                    <td>13.02%</td>
+                                    <td>+866.6%</td>
+                                    <td>+66.3%</td>
+                                    <td>-0.4%</td>
+                                    <td>+2.27 pp</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Hybrid Mamba</th>
+                                    <td>2.36%</td>
+                                    <td>+138.6%</td>
+                                    <td>-13.7%</td>
+                                    <td>+2.1%</td>
+                                    <td>-1.40 pp</td>
+                                </tr>
+                                <tr class="total">
+                                    <th scope="row">All reported tokens in this dataset</th>
+                                    <td>100%</td>
+                                    <td>+113.3%</td>
+                                    <td>+37.4%</td>
+                                    <td>+8.1%</td>
+                                    <td>—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note">
+                        Growth compares consecutive equal-length windows, not growth since release. A dash means no
+                        defensible comparison: missing dates, no prior observations or an unobserved category. Absent
+                        categories can still have traffic below the top-50 cutoff.
+                    </p>
+                    <details>
+                        <summary>Exact comparison dates</summary>
+                        <ul>
+                            <li>7 days: 2026-09-30–2026-10-06 versus 2026-09-23–2026-09-29</li>
+                            <li>30 days: 2026-09-07–2026-10-06 versus 2026-08-08–2026-09-06</li>
+                            <li>90 days: 2026-07-09–2026-10-06 versus 2026-04-10–2026-07-08</li>
+                        </ul>
+                    </details>
+                    <figure>
+                        <div class="chart-scroll">
+                            <svg
+                                viewBox="0 0 1000 350"
+                                role="img"
+                                aria-labelledby="context-100K-title context-100K-desc"
+                            >
+                                <title id="context-100K-title">100K monthly architecture share</title>
+                                <desc id="context-100K-desc">
+                                    Monthly observations. The data table below provides exact values; missing category
+                                    observations are gaps.
+                                </desc>
+                                <line class="gridline" x1="65" y1="285.00" x2="970" y2="285.00" />
+                                <text class="axis-label" x="55" y="289.00" text-anchor="end">0%</text>
+                                <line class="gridline" x1="65" y1="219.75" x2="970" y2="219.75" />
+                                <text class="axis-label" x="55" y="223.75" text-anchor="end">17.5%</text>
+                                <line class="gridline" x1="65" y1="154.50" x2="970" y2="154.50" />
+                                <text class="axis-label" x="55" y="158.50" text-anchor="end">35%</text>
+                                <line class="gridline" x1="65" y1="89.25" x2="970" y2="89.25" />
+                                <text class="axis-label" x="55" y="93.25" text-anchor="end">52.5%</text>
+                                <line class="gridline" x1="65" y1="24.00" x2="970" y2="24.00" />
+                                <text class="axis-label" x="55" y="28.00" text-anchor="end">70%</text>
+                                <text class="axis-label" x="65.00" y="320" text-anchor="middle">2025-01</text>
+                                <text class="axis-label" x="194.29" y="320" text-anchor="middle">2025-04</text>
+                                <text class="axis-label" x="323.57" y="320" text-anchor="middle">2025-07*</text>
+                                <text class="axis-label" x="452.86" y="320" text-anchor="middle">2025-10</text>
+                                <text class="axis-label" x="582.14" y="320" text-anchor="middle">2026-01</text>
+                                <text class="axis-label" x="711.43" y="320" text-anchor="middle">2026-04</text>
+                                <text class="axis-label" x="840.71" y="320" text-anchor="middle">2026-07</text>
+                                <text class="axis-label" x="970.00" y="320" text-anchor="middle">2026-10*</text>
+                                <polyline
+                                    points="65.00,223.56 108.10,202.34 151.19,183.18 194.29,183.76 237.38,212.25 280.48,190.53 323.57,163.33 366.67,135.82 409.76,199.34 452.86,204.70 495.95,200.48 539.05,174.14 582.14,158.03 625.24,87.19 668.33,93.63 711.43,119.00 754.52,81.62 797.62,52.36 840.71,28.01 883.81,68.83 926.90,108.26 970.00,121.41"
+                                    fill="none"
+                                    stroke="#66b9ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="223.56" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-01: Regular attention (including sparse) 16.48%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="108.10" cy="202.34" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-02: Regular attention (including sparse) 22.17%; 28 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="151.19" cy="183.18" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-03: Regular attention (including sparse) 27.31%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="194.29" cy="183.76" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-04: Regular attention (including sparse) 27.15%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="237.38" cy="212.25" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-05: Regular attention (including sparse) 19.51%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="280.48" cy="190.53" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-06: Regular attention (including sparse) 25.34%; 29 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="323.57" cy="163.33" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-07: Regular attention (including sparse) 32.63%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="366.67" cy="135.82" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-08: Regular attention (including sparse) 40.01%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="409.76" cy="199.34" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-09: Regular attention (including sparse) 22.97%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="452.86" cy="204.70" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-10: Regular attention (including sparse) 21.54%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="495.95" cy="200.48" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-11: Regular attention (including sparse) 22.67%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="539.05" cy="174.14" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-12: Regular attention (including sparse) 29.73%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="582.14" cy="158.03" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-01: Regular attention (including sparse) 34.05%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="625.24" cy="87.19" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-02: Regular attention (including sparse) 53.05%; 28 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="668.33" cy="93.63" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-03: Regular attention (including sparse) 51.33%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="711.43" cy="119.00" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-04: Regular attention (including sparse) 44.52%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="754.52" cy="81.62" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-05: Regular attention (including sparse) 54.55%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="797.62" cy="52.36" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-06: Regular attention (including sparse) 62.39%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="840.71" cy="28.01" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-07: Regular attention (including sparse) 68.92%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="883.81" cy="68.83" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-08: Regular attention (including sparse) 57.98%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="926.90" cy="108.26" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-09: Regular attention (including sparse) 47.40%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="970.00" cy="121.41" r="3.6" fill="#66b9ff">
+                                    <title>2026-10: Regular attention (including sparse) 43.87%; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="65.00,284.01 108.10,284.06 151.19,284.71 194.29,284.82 237.38,284.99"
+                                    fill="none"
+                                    stroke="#50e3c2"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="284.01" r="3.6" fill="#50e3c2">
+                                    <title>2025-01: Hybrid linear attention 0.27%; 31 observed days</title>
+                                </circle>
+                                <circle cx="108.10" cy="284.06" r="3.6" fill="#50e3c2">
+                                    <title>2025-02: Hybrid linear attention 0.25%; 28 observed days</title>
+                                </circle>
+                                <circle cx="151.19" cy="284.71" r="3.6" fill="#50e3c2">
+                                    <title>2025-03: Hybrid linear attention 0.08%; 31 observed days</title>
+                                </circle>
+                                <circle cx="194.29" cy="284.82" r="3.6" fill="#50e3c2">
+                                    <title>2025-04: Hybrid linear attention 0.05%; 30 observed days</title>
+                                </circle>
+                                <circle cx="237.38" cy="284.99" r="3.6" fill="#50e3c2">
+                                    <title>2025-05: Hybrid linear attention 0.00%; 31 observed days</title>
+                                </circle>
+                                <polyline points="323.57,284.97" fill="none" stroke="#50e3c2" stroke-width="3" />
+                                <circle cx="323.57" cy="284.97" r="3.6" fill="#50e3c2">
+                                    <title>2025-07: Hybrid linear attention 0.01%; 30 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="409.76,284.58 452.86,284.50 495.95,284.07 539.05,283.91 582.14,284.25 625.24,282.69 668.33,279.01 711.43,256.89 754.52,274.72 797.62,279.52 840.71,278.41 883.81,251.14 926.90,235.63 970.00,242.63"
+                                    fill="none"
+                                    stroke="#50e3c2"
+                                    stroke-width="3"
+                                />
+                                <circle cx="409.76" cy="284.58" r="3.6" fill="#50e3c2">
+                                    <title>2025-09: Hybrid linear attention 0.11%; 30 observed days</title>
+                                </circle>
+                                <circle cx="452.86" cy="284.50" r="3.6" fill="#50e3c2">
+                                    <title>2025-10: Hybrid linear attention 0.13%; 31 observed days</title>
+                                </circle>
+                                <circle cx="495.95" cy="284.07" r="3.6" fill="#50e3c2">
+                                    <title>2025-11: Hybrid linear attention 0.25%; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="283.91" r="3.6" fill="#50e3c2">
+                                    <title>2025-12: Hybrid linear attention 0.29%; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.25" r="3.6" fill="#50e3c2">
+                                    <title>2026-01: Hybrid linear attention 0.20%; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="282.69" r="3.6" fill="#50e3c2">
+                                    <title>2026-02: Hybrid linear attention 0.62%; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="279.01" r="3.6" fill="#50e3c2">
+                                    <title>2026-03: Hybrid linear attention 1.61%; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="256.89" r="3.6" fill="#50e3c2">
+                                    <title>2026-04: Hybrid linear attention 7.54%; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="274.72" r="3.6" fill="#50e3c2">
+                                    <title>2026-05: Hybrid linear attention 2.76%; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="279.52" r="3.6" fill="#50e3c2">
+                                    <title>2026-06: Hybrid linear attention 1.47%; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="278.41" r="3.6" fill="#50e3c2">
+                                    <title>2026-07: Hybrid linear attention 1.77%; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="251.14" r="3.6" fill="#50e3c2">
+                                    <title>2026-08: Hybrid linear attention 9.08%; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="235.63" r="3.6" fill="#50e3c2">
+                                    <title>2026-09: Hybrid linear attention 13.24%; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="242.63" r="3.6" fill="#50e3c2">
+                                    <title>2026-10: Hybrid linear attention 11.36%; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="539.05,283.93 582.14,284.83 625.24,284.38 668.33,277.60 711.43,272.25 754.52,275.17 797.62,276.99 840.71,274.72 883.81,270.57 926.90,275.81 970.00,276.15"
+                                    fill="none"
+                                    stroke="#c398ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="539.05" cy="283.93" r="3.6" fill="#c398ff">
+                                    <title>2025-12: Hybrid Mamba 0.29%; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.83" r="3.6" fill="#c398ff">
+                                    <title>2026-01: Hybrid Mamba 0.04%; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="284.38" r="3.6" fill="#c398ff">
+                                    <title>2026-02: Hybrid Mamba 0.17%; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="277.60" r="3.6" fill="#c398ff">
+                                    <title>2026-03: Hybrid Mamba 1.98%; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="272.25" r="3.6" fill="#c398ff">
+                                    <title>2026-04: Hybrid Mamba 3.42%; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="275.17" r="3.6" fill="#c398ff">
+                                    <title>2026-05: Hybrid Mamba 2.64%; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="276.99" r="3.6" fill="#c398ff">
+                                    <title>2026-06: Hybrid Mamba 2.15%; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="274.72" r="3.6" fill="#c398ff">
+                                    <title>2026-07: Hybrid Mamba 2.76%; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="270.57" r="3.6" fill="#c398ff">
+                                    <title>2026-08: Hybrid Mamba 3.87%; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="275.81" r="3.6" fill="#c398ff">
+                                    <title>2026-09: Hybrid Mamba 2.46%; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="276.15" r="3.6" fill="#c398ff">
+                                    <title>2026-10: Hybrid Mamba 2.37%; 6 observed days</title>
+                                </circle>
+                            </svg>
+                        </div>
+                        <figcaption>
+                            <ul class="legend">
+                                <li>
+                                    <span class="swatch" style="background: #66b9ff"></span>
+                                    Regular attention (including sparse)
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #50e3c2"></span>
+                                    Hybrid linear attention
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #c398ff"></span>
+                                    Hybrid Mamba
+                                </li>
+                            </ul>
+                            <p class="note">
+                                * An incomplete calendar month, including a month with missing dates. Values use only
+                                observed days. Hover over a point for its value.
+                            </p>
+                        </figcaption>
+                    </figure>
+                    <details>
+                        <summary>Chart data table</summary>
+                        <div class="table-wrap" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Observed days</th>
+                                        <th>Regular attention (including sparse)</th>
+                                        <th>Hybrid linear attention</th>
+                                        <th>Hybrid Mamba</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">2025-01</th>
+                                        <td>31</td>
+                                        <td>16.48%</td>
+                                        <td>0.27%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-02</th>
+                                        <td>28</td>
+                                        <td>22.17%</td>
+                                        <td>0.25%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-03</th>
+                                        <td>31</td>
+                                        <td>27.31%</td>
+                                        <td>0.08%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-04</th>
+                                        <td>30</td>
+                                        <td>27.15%</td>
+                                        <td>0.05%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-05</th>
+                                        <td>31</td>
+                                        <td>19.51%</td>
+                                        <td>0.00%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-06*</th>
+                                        <td>29</td>
+                                        <td>25.34%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-07*</th>
+                                        <td>30</td>
+                                        <td>32.63%</td>
+                                        <td>0.01%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-08</th>
+                                        <td>31</td>
+                                        <td>40.01%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-09</th>
+                                        <td>30</td>
+                                        <td>22.97%</td>
+                                        <td>0.11%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-10</th>
+                                        <td>31</td>
+                                        <td>21.54%</td>
+                                        <td>0.13%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-11</th>
+                                        <td>30</td>
+                                        <td>22.67%</td>
+                                        <td>0.25%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-12</th>
+                                        <td>31</td>
+                                        <td>29.73%</td>
+                                        <td>0.29%</td>
+                                        <td>0.29%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-01</th>
+                                        <td>31</td>
+                                        <td>34.05%</td>
+                                        <td>0.20%</td>
+                                        <td>0.04%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-02</th>
+                                        <td>28</td>
+                                        <td>53.05%</td>
+                                        <td>0.62%</td>
+                                        <td>0.17%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-03</th>
+                                        <td>31</td>
+                                        <td>51.33%</td>
+                                        <td>1.61%</td>
+                                        <td>1.98%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-04</th>
+                                        <td>30</td>
+                                        <td>44.52%</td>
+                                        <td>7.54%</td>
+                                        <td>3.42%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-05</th>
+                                        <td>31</td>
+                                        <td>54.55%</td>
+                                        <td>2.76%</td>
+                                        <td>2.64%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-06</th>
+                                        <td>30</td>
+                                        <td>62.39%</td>
+                                        <td>1.47%</td>
+                                        <td>2.15%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-07</th>
+                                        <td>31</td>
+                                        <td>68.92%</td>
+                                        <td>1.77%</td>
+                                        <td>2.76%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-08</th>
+                                        <td>31</td>
+                                        <td>57.98%</td>
+                                        <td>9.08%</td>
+                                        <td>3.87%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-09</th>
+                                        <td>30</td>
+                                        <td>47.40%</td>
+                                        <td>13.24%</td>
+                                        <td>2.46%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-10*</th>
+                                        <td>6</td>
+                                        <td>43.87%</td>
+                                        <td>11.36%</td>
+                                        <td>2.37%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                    <h3>Observed tokens per day</h3>
+                    <p>
+                        Monthly totals are divided by observed days, so a partial month is not compared with a full
+                        month's raw total.
+                    </p>
+                    <figure>
+                        <div class="chart-scroll">
+                            <svg
+                                viewBox="0 0 1000 350"
+                                role="img"
+                                aria-labelledby="context-volume-100K-title context-volume-100K-desc"
+                            >
+                                <title id="context-volume-100K-title">100K mean daily identified category tokens</title>
+                                <desc id="context-volume-100K-desc">
+                                    Monthly observations. The data table below provides exact values; missing category
+                                    observations are gaps.
+                                </desc>
+                                <line class="gridline" x1="65" y1="285.00" x2="970" y2="285.00" />
+                                <text class="axis-label" x="55" y="289.00" text-anchor="end">0</text>
+                                <line class="gridline" x1="65" y1="219.75" x2="970" y2="219.75" />
+                                <text class="axis-label" x="55" y="223.75" text-anchor="end">849.49B</text>
+                                <line class="gridline" x1="65" y1="154.50" x2="970" y2="154.50" />
+                                <text class="axis-label" x="55" y="158.50" text-anchor="end">1.70T</text>
+                                <line class="gridline" x1="65" y1="89.25" x2="970" y2="89.25" />
+                                <text class="axis-label" x="55" y="93.25" text-anchor="end">2.55T</text>
+                                <line class="gridline" x1="65" y1="24.00" x2="970" y2="24.00" />
+                                <text class="axis-label" x="55" y="28.00" text-anchor="end">3.40T</text>
+                                <text class="axis-label" x="65.00" y="320" text-anchor="middle">2025-01</text>
+                                <text class="axis-label" x="194.29" y="320" text-anchor="middle">2025-04</text>
+                                <text class="axis-label" x="323.57" y="320" text-anchor="middle">2025-07*</text>
+                                <text class="axis-label" x="452.86" y="320" text-anchor="middle">2025-10</text>
+                                <text class="axis-label" x="582.14" y="320" text-anchor="middle">2026-01</text>
+                                <text class="axis-label" x="711.43" y="320" text-anchor="middle">2026-04</text>
+                                <text class="axis-label" x="840.71" y="320" text-anchor="middle">2026-07</text>
+                                <text class="axis-label" x="970.00" y="320" text-anchor="middle">2026-10*</text>
+                                <polyline
+                                    points="65.00,284.73 108.10,284.36 151.19,283.66 194.29,283.05 237.38,283.12 280.48,282.48 323.57,280.76 366.67,278.24 409.76,279.58 452.86,279.52 495.95,277.99 539.05,276.29 582.14,271.55 625.24,248.48 668.33,233.69 711.43,230.66 754.52,198.34 797.62,143.89 840.71,101.71 883.81,95.23 926.90,54.93 970.00,43.33"
+                                    fill="none"
+                                    stroke="#66b9ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="284.73" r="3.6" fill="#66b9ff">
+                                    <title>2025-01: Regular attention (including sparse) 3.49B; 31 observed days</title>
+                                </circle>
+                                <circle cx="108.10" cy="284.36" r="3.6" fill="#66b9ff">
+                                    <title>2025-02: Regular attention (including sparse) 8.31B; 28 observed days</title>
+                                </circle>
+                                <circle cx="151.19" cy="283.66" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-03: Regular attention (including sparse) 17.38B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="194.29" cy="283.05" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-04: Regular attention (including sparse) 25.42B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="237.38" cy="283.12" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-05: Regular attention (including sparse) 24.45B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="280.48" cy="282.48" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-06: Regular attention (including sparse) 32.76B; 29 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="323.57" cy="280.76" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-07: Regular attention (including sparse) 55.25B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="366.67" cy="278.24" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-08: Regular attention (including sparse) 88.00B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="409.76" cy="279.58" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-09: Regular attention (including sparse) 70.55B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="452.86" cy="279.52" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-10: Regular attention (including sparse) 71.30B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="495.95" cy="277.99" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-11: Regular attention (including sparse) 91.21B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="539.05" cy="276.29" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-12: Regular attention (including sparse) 113.34B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="582.14" cy="271.55" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-01: Regular attention (including sparse) 175.15B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="625.24" cy="248.48" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-02: Regular attention (including sparse) 475.49B; 28 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="668.33" cy="233.69" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-03: Regular attention (including sparse) 668.06B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="711.43" cy="230.66" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-04: Regular attention (including sparse) 707.50B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="754.52" cy="198.34" r="3.6" fill="#66b9ff">
+                                    <title>2026-05: Regular attention (including sparse) 1.13T; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="143.89" r="3.6" fill="#66b9ff">
+                                    <title>2026-06: Regular attention (including sparse) 1.84T; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="101.71" r="3.6" fill="#66b9ff">
+                                    <title>2026-07: Regular attention (including sparse) 2.39T; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="95.23" r="3.6" fill="#66b9ff">
+                                    <title>2026-08: Regular attention (including sparse) 2.47T; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="54.93" r="3.6" fill="#66b9ff">
+                                    <title>2026-09: Regular attention (including sparse) 3.00T; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="43.33" r="3.6" fill="#66b9ff">
+                                    <title>2026-10: Regular attention (including sparse) 3.15T; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="65.00,285.00 108.10,284.99 151.19,285.00 194.29,285.00 237.38,285.00"
+                                    fill="none"
+                                    stroke="#50e3c2"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-01: Hybrid linear attention 56.28M; 31 observed days</title>
+                                </circle>
+                                <circle cx="108.10" cy="284.99" r="3.6" fill="#50e3c2">
+                                    <title>2025-02: Hybrid linear attention 94.09M; 28 observed days</title>
+                                </circle>
+                                <circle cx="151.19" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-03: Hybrid linear attention 49.31M; 31 observed days</title>
+                                </circle>
+                                <circle cx="194.29" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-04: Hybrid linear attention 45.72M; 30 observed days</title>
+                                </circle>
+                                <circle cx="237.38" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-05: Hybrid linear attention 3.24M; 31 observed days</title>
+                                </circle>
+                                <polyline points="323.57,285.00" fill="none" stroke="#50e3c2" stroke-width="3" />
+                                <circle cx="323.57" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-07: Hybrid linear attention 11.62M; 30 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="409.76,284.97 452.86,284.97 495.95,284.92 539.05,284.91 582.14,284.92 625.24,284.57 668.33,283.39 711.43,275.80 754.52,280.62 797.62,281.68 840.71,280.30 883.81,255.27 926.90,220.73 970.00,222.41"
+                                    fill="none"
+                                    stroke="#50e3c2"
+                                    stroke-width="3"
+                                />
+                                <circle cx="409.76" cy="284.97" r="3.6" fill="#50e3c2">
+                                    <title>2025-09: Hybrid linear attention 345.96M; 30 observed days</title>
+                                </circle>
+                                <circle cx="452.86" cy="284.97" r="3.6" fill="#50e3c2">
+                                    <title>2025-10: Hybrid linear attention 440.96M; 31 observed days</title>
+                                </circle>
+                                <circle cx="495.95" cy="284.92" r="3.6" fill="#50e3c2">
+                                    <title>2025-11: Hybrid linear attention 1.01B; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="284.91" r="3.6" fill="#50e3c2">
+                                    <title>2025-12: Hybrid linear attention 1.12B; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.92" r="3.6" fill="#50e3c2">
+                                    <title>2026-01: Hybrid linear attention 1.03B; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="284.57" r="3.6" fill="#50e3c2">
+                                    <title>2026-02: Hybrid linear attention 5.55B; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="283.39" r="3.6" fill="#50e3c2">
+                                    <title>2026-03: Hybrid linear attention 20.91B; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="275.80" r="3.6" fill="#50e3c2">
+                                    <title>2026-04: Hybrid linear attention 119.81B; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="280.62" r="3.6" fill="#50e3c2">
+                                    <title>2026-05: Hybrid linear attention 57.02B; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="281.68" r="3.6" fill="#50e3c2">
+                                    <title>2026-06: Hybrid linear attention 43.25B; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="280.30" r="3.6" fill="#50e3c2">
+                                    <title>2026-07: Hybrid linear attention 61.15B; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="255.27" r="3.6" fill="#50e3c2">
+                                    <title>2026-08: Hybrid linear attention 387.00B; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="220.73" r="3.6" fill="#50e3c2">
+                                    <title>2026-09: Hybrid linear attention 836.70B; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="222.41" r="3.6" fill="#50e3c2">
+                                    <title>2026-10: Hybrid linear attention 814.87B; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="539.05,284.92 582.14,284.98 625.24,284.89 668.33,283.02 711.43,280.83 754.52,280.81 797.62,280.14 840.71,277.67 883.81,272.33 926.90,273.04 970.00,271.92"
+                                    fill="none"
+                                    stroke="#c398ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="539.05" cy="284.92" r="3.6" fill="#c398ff">
+                                    <title>2025-12: Hybrid Mamba 1.09B; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.98" r="3.6" fill="#c398ff">
+                                    <title>2026-01: Hybrid Mamba 230.28M; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="284.89" r="3.6" fill="#c398ff">
+                                    <title>2026-02: Hybrid Mamba 1.50B; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="283.02" r="3.6" fill="#c398ff">
+                                    <title>2026-03: Hybrid Mamba 25.83B; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="280.83" r="3.6" fill="#c398ff">
+                                    <title>2026-04: Hybrid Mamba 54.34B; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="280.81" r="3.6" fill="#c398ff">
+                                    <title>2026-05: Hybrid Mamba 54.50B; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="280.14" r="3.6" fill="#c398ff">
+                                    <title>2026-06: Hybrid Mamba 63.25B; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="277.67" r="3.6" fill="#c398ff">
+                                    <title>2026-07: Hybrid Mamba 95.47B; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="272.33" r="3.6" fill="#c398ff">
+                                    <title>2026-08: Hybrid Mamba 164.97B; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="273.04" r="3.6" fill="#c398ff">
+                                    <title>2026-09: Hybrid Mamba 155.69B; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="271.92" r="3.6" fill="#c398ff">
+                                    <title>2026-10: Hybrid Mamba 170.25B; 6 observed days</title>
+                                </circle>
+                            </svg>
+                        </div>
+                        <figcaption>
+                            <ul class="legend">
+                                <li>
+                                    <span class="swatch" style="background: #66b9ff"></span>
+                                    Regular attention (including sparse)
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #50e3c2"></span>
+                                    Hybrid linear attention
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #c398ff"></span>
+                                    Hybrid Mamba
+                                </li>
+                            </ul>
+                            <p class="note">
+                                * An incomplete calendar month, including a month with missing dates. Values use only
+                                observed days. Hover over a point for its value.
+                            </p>
+                        </figcaption>
+                    </figure>
+                    <details>
+                        <summary>Chart data table</summary>
+                        <div class="table-wrap" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Observed days</th>
+                                        <th>Regular attention (including sparse)</th>
+                                        <th>Hybrid linear attention</th>
+                                        <th>Hybrid Mamba</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">2025-01</th>
+                                        <td>31</td>
+                                        <td>3.49B</td>
+                                        <td>56.28M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-02</th>
+                                        <td>28</td>
+                                        <td>8.31B</td>
+                                        <td>94.09M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-03</th>
+                                        <td>31</td>
+                                        <td>17.38B</td>
+                                        <td>49.31M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-04</th>
+                                        <td>30</td>
+                                        <td>25.42B</td>
+                                        <td>45.72M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-05</th>
+                                        <td>31</td>
+                                        <td>24.45B</td>
+                                        <td>3.24M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-06*</th>
+                                        <td>29</td>
+                                        <td>32.76B</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-07*</th>
+                                        <td>30</td>
+                                        <td>55.25B</td>
+                                        <td>11.62M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-08</th>
+                                        <td>31</td>
+                                        <td>88.00B</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-09</th>
+                                        <td>30</td>
+                                        <td>70.55B</td>
+                                        <td>345.96M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-10</th>
+                                        <td>31</td>
+                                        <td>71.30B</td>
+                                        <td>440.96M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-11</th>
+                                        <td>30</td>
+                                        <td>91.21B</td>
+                                        <td>1.01B</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-12</th>
+                                        <td>31</td>
+                                        <td>113.34B</td>
+                                        <td>1.12B</td>
+                                        <td>1.09B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-01</th>
+                                        <td>31</td>
+                                        <td>175.15B</td>
+                                        <td>1.03B</td>
+                                        <td>230.28M</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-02</th>
+                                        <td>28</td>
+                                        <td>475.49B</td>
+                                        <td>5.55B</td>
+                                        <td>1.50B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-03</th>
+                                        <td>31</td>
+                                        <td>668.06B</td>
+                                        <td>20.91B</td>
+                                        <td>25.83B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-04</th>
+                                        <td>30</td>
+                                        <td>707.50B</td>
+                                        <td>119.81B</td>
+                                        <td>54.34B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-05</th>
+                                        <td>31</td>
+                                        <td>1.13T</td>
+                                        <td>57.02B</td>
+                                        <td>54.50B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-06</th>
+                                        <td>30</td>
+                                        <td>1.84T</td>
+                                        <td>43.25B</td>
+                                        <td>63.25B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-07</th>
+                                        <td>31</td>
+                                        <td>2.39T</td>
+                                        <td>61.15B</td>
+                                        <td>95.47B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-08</th>
+                                        <td>31</td>
+                                        <td>2.47T</td>
+                                        <td>387.00B</td>
+                                        <td>164.97B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-09</th>
+                                        <td>30</td>
+                                        <td>3.00T</td>
+                                        <td>836.70B</td>
+                                        <td>155.69B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-10*</th>
+                                        <td>6</td>
+                                        <td>3.15T</td>
+                                        <td>814.87B</td>
+                                        <td>170.25B</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </section>
+                <section class="panel">
+                    <p class="eyebrow">OpenRouter context filter: 1M</p>
+                    <h2>1M architecture mix and growth</h2>
+                    <div class="table-wrap" tabindex="0" role="region" aria-label="1M architecture growth comparisons">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Architecture</th>
+                                    <th scope="col">Latest 30-day share</th>
+                                    <th scope="col">90-day token growth</th>
+                                    <th scope="col">30-day token growth</th>
+                                    <th scope="col">7-day token growth</th>
+                                    <th scope="col">30-day share change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Regular attention (including sparse)</th>
+                                    <td>47.73%</td>
+                                    <td>+365.6%</td>
+                                    <td>+43.6%</td>
+                                    <td>+8.8%</td>
+                                    <td>-4.09 pp</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Hybrid linear attention</th>
+                                    <td>12.43%</td>
+                                    <td>+2,087.9%</td>
+                                    <td>+16.6%</td>
+                                    <td>-22.1%</td>
+                                    <td>-4.19 pp</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Hybrid Mamba</th>
+                                    <td>5.60%</td>
+                                    <td>+795.2%</td>
+                                    <td>+25.8%</td>
+                                    <td>+1.2%</td>
+                                    <td>-1.34 pp</td>
+                                </tr>
+                                <tr class="total">
+                                    <th scope="row">All reported tokens in this dataset</th>
+                                    <td>100%</td>
+                                    <td>+370.9%</td>
+                                    <td>+55.9%</td>
+                                    <td>+7.0%</td>
+                                    <td>—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note">
+                        Growth compares consecutive equal-length windows, not growth since release. A dash means no
+                        defensible comparison: missing dates, no prior observations or an unobserved category. Absent
+                        categories can still have traffic below the top-50 cutoff.
+                    </p>
+                    <details>
+                        <summary>Exact comparison dates</summary>
+                        <ul>
+                            <li>7 days: 2026-09-30–2026-10-06 versus 2026-09-23–2026-09-29</li>
+                            <li>30 days: 2026-09-07–2026-10-06 versus 2026-08-08–2026-09-06</li>
+                            <li>90 days: 2026-07-09–2026-10-06 versus 2026-04-10–2026-07-08</li>
+                        </ul>
+                    </details>
+                    <figure>
+                        <div class="chart-scroll">
+                            <svg viewBox="0 0 1000 350" role="img" aria-labelledby="context-1M-title context-1M-desc">
+                                <title id="context-1M-title">1M monthly architecture share</title>
+                                <desc id="context-1M-desc">
+                                    Monthly observations. The data table below provides exact values; missing category
+                                    observations are gaps.
+                                </desc>
+                                <line class="gridline" x1="65" y1="285.00" x2="970" y2="285.00" />
+                                <text class="axis-label" x="55" y="289.00" text-anchor="end">0%</text>
+                                <line class="gridline" x1="65" y1="219.75" x2="970" y2="219.75" />
+                                <text class="axis-label" x="55" y="223.75" text-anchor="end">16.25%</text>
+                                <line class="gridline" x1="65" y1="154.50" x2="970" y2="154.50" />
+                                <text class="axis-label" x="55" y="158.50" text-anchor="end">32.5%</text>
+                                <line class="gridline" x1="65" y1="89.25" x2="970" y2="89.25" />
+                                <text class="axis-label" x="55" y="93.25" text-anchor="end">48.75%</text>
+                                <line class="gridline" x1="65" y1="24.00" x2="970" y2="24.00" />
+                                <text class="axis-label" x="55" y="28.00" text-anchor="end">65%</text>
+                                <text class="axis-label" x="65.00" y="320" text-anchor="middle">2025-01</text>
+                                <text class="axis-label" x="194.29" y="320" text-anchor="middle">2025-04</text>
+                                <text class="axis-label" x="323.57" y="320" text-anchor="middle">2025-07*</text>
+                                <text class="axis-label" x="452.86" y="320" text-anchor="middle">2025-10</text>
+                                <text class="axis-label" x="582.14" y="320" text-anchor="middle">2026-01</text>
+                                <text class="axis-label" x="711.43" y="320" text-anchor="middle">2026-04</text>
+                                <text class="axis-label" x="840.71" y="320" text-anchor="middle">2026-07</text>
+                                <text class="axis-label" x="970.00" y="320" text-anchor="middle">2026-10*</text>
+                                <polyline
+                                    points="65.00,281.10 108.10,277.05 151.19,280.30 194.29,273.14 237.38,273.07 280.48,273.33 323.57,225.37 366.67,208.62 409.76,267.65 452.86,265.81 495.95,254.32 539.05,243.64 582.14,206.15 625.24,88.71 668.33,91.91 711.43,151.84 754.52,100.16 797.62,62.65 840.71,27.47 883.81,71.31 926.90,86.61 970.00,108.28"
+                                    fill="none"
+                                    stroke="#66b9ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="281.10" r="3.6" fill="#66b9ff">
+                                    <title>2025-01: Regular attention (including sparse) 0.97%; 31 observed days</title>
+                                </circle>
+                                <circle cx="108.10" cy="277.05" r="3.6" fill="#66b9ff">
+                                    <title>2025-02: Regular attention (including sparse) 1.98%; 28 observed days</title>
+                                </circle>
+                                <circle cx="151.19" cy="280.30" r="3.6" fill="#66b9ff">
+                                    <title>2025-03: Regular attention (including sparse) 1.17%; 31 observed days</title>
+                                </circle>
+                                <circle cx="194.29" cy="273.14" r="3.6" fill="#66b9ff">
+                                    <title>2025-04: Regular attention (including sparse) 2.95%; 30 observed days</title>
+                                </circle>
+                                <circle cx="237.38" cy="273.07" r="3.6" fill="#66b9ff">
+                                    <title>2025-05: Regular attention (including sparse) 2.97%; 31 observed days</title>
+                                </circle>
+                                <circle cx="280.48" cy="273.33" r="3.6" fill="#66b9ff">
+                                    <title>2025-06: Regular attention (including sparse) 2.91%; 29 observed days</title>
+                                </circle>
+                                <circle cx="323.57" cy="225.37" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-07: Regular attention (including sparse) 14.85%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="366.67" cy="208.62" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-08: Regular attention (including sparse) 19.02%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="409.76" cy="267.65" r="3.6" fill="#66b9ff">
+                                    <title>2025-09: Regular attention (including sparse) 4.32%; 30 observed days</title>
+                                </circle>
+                                <circle cx="452.86" cy="265.81" r="3.6" fill="#66b9ff">
+                                    <title>2025-10: Regular attention (including sparse) 4.78%; 31 observed days</title>
+                                </circle>
+                                <circle cx="495.95" cy="254.32" r="3.6" fill="#66b9ff">
+                                    <title>2025-11: Regular attention (including sparse) 7.64%; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="243.64" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-12: Regular attention (including sparse) 10.30%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="582.14" cy="206.15" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-01: Regular attention (including sparse) 19.64%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="625.24" cy="88.71" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-02: Regular attention (including sparse) 48.88%; 28 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="668.33" cy="91.91" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-03: Regular attention (including sparse) 48.09%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="711.43" cy="151.84" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-04: Regular attention (including sparse) 33.16%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="754.52" cy="100.16" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-05: Regular attention (including sparse) 46.03%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="797.62" cy="62.65" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-06: Regular attention (including sparse) 55.37%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="840.71" cy="27.47" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-07: Regular attention (including sparse) 64.13%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="883.81" cy="71.31" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-08: Regular attention (including sparse) 53.22%; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="926.90" cy="86.61" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-09: Regular attention (including sparse) 49.41%; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="970.00" cy="108.28" r="3.6" fill="#66b9ff">
+                                    <title>2026-10: Regular attention (including sparse) 44.01%; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="65.00,284.75 108.10,284.84 151.19,284.91 194.29,284.62 237.38,284.98 280.48,284.66 323.57,283.80 366.67,284.91 409.76,284.58 452.86,284.43 495.95,279.31 539.05,283.71 582.14,283.05 625.24,282.56 668.33,276.22 711.43,203.79 754.52,269.57 797.62,276.94 840.71,272.08 883.81,223.72 926.90,228.27 970.00,255.59"
+                                    fill="none"
+                                    stroke="#50e3c2"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="284.75" r="3.6" fill="#50e3c2">
+                                    <title>2025-01: Hybrid linear attention 0.06%; 31 observed days</title>
+                                </circle>
+                                <circle cx="108.10" cy="284.84" r="3.6" fill="#50e3c2">
+                                    <title>2025-02: Hybrid linear attention 0.04%; 28 observed days</title>
+                                </circle>
+                                <circle cx="151.19" cy="284.91" r="3.6" fill="#50e3c2">
+                                    <title>2025-03: Hybrid linear attention 0.02%; 31 observed days</title>
+                                </circle>
+                                <circle cx="194.29" cy="284.62" r="3.6" fill="#50e3c2">
+                                    <title>2025-04: Hybrid linear attention 0.10%; 30 observed days</title>
+                                </circle>
+                                <circle cx="237.38" cy="284.98" r="3.6" fill="#50e3c2">
+                                    <title>2025-05: Hybrid linear attention 0.00%; 31 observed days</title>
+                                </circle>
+                                <circle cx="280.48" cy="284.66" r="3.6" fill="#50e3c2">
+                                    <title>2025-06: Hybrid linear attention 0.08%; 29 observed days</title>
+                                </circle>
+                                <circle cx="323.57" cy="283.80" r="3.6" fill="#50e3c2">
+                                    <title>2025-07: Hybrid linear attention 0.30%; 30 observed days</title>
+                                </circle>
+                                <circle cx="366.67" cy="284.91" r="3.6" fill="#50e3c2">
+                                    <title>2025-08: Hybrid linear attention 0.02%; 31 observed days</title>
+                                </circle>
+                                <circle cx="409.76" cy="284.58" r="3.6" fill="#50e3c2">
+                                    <title>2025-09: Hybrid linear attention 0.11%; 30 observed days</title>
+                                </circle>
+                                <circle cx="452.86" cy="284.43" r="3.6" fill="#50e3c2">
+                                    <title>2025-10: Hybrid linear attention 0.14%; 31 observed days</title>
+                                </circle>
+                                <circle cx="495.95" cy="279.31" r="3.6" fill="#50e3c2">
+                                    <title>2025-11: Hybrid linear attention 1.42%; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="283.71" r="3.6" fill="#50e3c2">
+                                    <title>2025-12: Hybrid linear attention 0.32%; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="283.05" r="3.6" fill="#50e3c2">
+                                    <title>2026-01: Hybrid linear attention 0.48%; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="282.56" r="3.6" fill="#50e3c2">
+                                    <title>2026-02: Hybrid linear attention 0.61%; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="276.22" r="3.6" fill="#50e3c2">
+                                    <title>2026-03: Hybrid linear attention 2.19%; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="203.79" r="3.6" fill="#50e3c2">
+                                    <title>2026-04: Hybrid linear attention 20.23%; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="269.57" r="3.6" fill="#50e3c2">
+                                    <title>2026-05: Hybrid linear attention 3.84%; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="276.94" r="3.6" fill="#50e3c2">
+                                    <title>2026-06: Hybrid linear attention 2.01%; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="272.08" r="3.6" fill="#50e3c2">
+                                    <title>2026-07: Hybrid linear attention 3.22%; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="223.72" r="3.6" fill="#50e3c2">
+                                    <title>2026-08: Hybrid linear attention 15.26%; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="228.27" r="3.6" fill="#50e3c2">
+                                    <title>2026-09: Hybrid linear attention 14.13%; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="255.59" r="3.6" fill="#50e3c2">
+                                    <title>2026-10: Hybrid linear attention 7.32%; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="495.95,284.95 539.05,283.62 582.14,284.56 625.24,284.26 668.33,273.91 711.43,272.48 754.52,274.40 797.62,271.03 840.71,253.91 883.81,256.58 926.90,262.60 970.00,261.85"
+                                    fill="none"
+                                    stroke="#c398ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="495.95" cy="284.95" r="3.6" fill="#c398ff">
+                                    <title>2025-11: Hybrid Mamba 0.01%; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="283.62" r="3.6" fill="#c398ff">
+                                    <title>2025-12: Hybrid Mamba 0.34%; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.56" r="3.6" fill="#c398ff">
+                                    <title>2026-01: Hybrid Mamba 0.11%; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="284.26" r="3.6" fill="#c398ff">
+                                    <title>2026-02: Hybrid Mamba 0.18%; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="273.91" r="3.6" fill="#c398ff">
+                                    <title>2026-03: Hybrid Mamba 2.76%; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="272.48" r="3.6" fill="#c398ff">
+                                    <title>2026-04: Hybrid Mamba 3.12%; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="274.40" r="3.6" fill="#c398ff">
+                                    <title>2026-05: Hybrid Mamba 2.64%; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="271.03" r="3.6" fill="#c398ff">
+                                    <title>2026-06: Hybrid Mamba 3.48%; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="253.91" r="3.6" fill="#c398ff">
+                                    <title>2026-07: Hybrid Mamba 7.74%; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="256.58" r="3.6" fill="#c398ff">
+                                    <title>2026-08: Hybrid Mamba 7.08%; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="262.60" r="3.6" fill="#c398ff">
+                                    <title>2026-09: Hybrid Mamba 5.58%; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="261.85" r="3.6" fill="#c398ff">
+                                    <title>2026-10: Hybrid Mamba 5.76%; 6 observed days</title>
+                                </circle>
+                            </svg>
+                        </div>
+                        <figcaption>
+                            <ul class="legend">
+                                <li>
+                                    <span class="swatch" style="background: #66b9ff"></span>
+                                    Regular attention (including sparse)
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #50e3c2"></span>
+                                    Hybrid linear attention
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #c398ff"></span>
+                                    Hybrid Mamba
+                                </li>
+                            </ul>
+                            <p class="note">
+                                * An incomplete calendar month, including a month with missing dates. Values use only
+                                observed days. Hover over a point for its value.
+                            </p>
+                        </figcaption>
+                    </figure>
+                    <details>
+                        <summary>Chart data table</summary>
+                        <div class="table-wrap" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Observed days</th>
+                                        <th>Regular attention (including sparse)</th>
+                                        <th>Hybrid linear attention</th>
+                                        <th>Hybrid Mamba</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">2025-01</th>
+                                        <td>31</td>
+                                        <td>0.97%</td>
+                                        <td>0.06%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-02</th>
+                                        <td>28</td>
+                                        <td>1.98%</td>
+                                        <td>0.04%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-03</th>
+                                        <td>31</td>
+                                        <td>1.17%</td>
+                                        <td>0.02%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-04</th>
+                                        <td>30</td>
+                                        <td>2.95%</td>
+                                        <td>0.10%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-05</th>
+                                        <td>31</td>
+                                        <td>2.97%</td>
+                                        <td>0.00%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-06*</th>
+                                        <td>29</td>
+                                        <td>2.91%</td>
+                                        <td>0.08%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-07*</th>
+                                        <td>30</td>
+                                        <td>14.85%</td>
+                                        <td>0.30%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-08</th>
+                                        <td>31</td>
+                                        <td>19.02%</td>
+                                        <td>0.02%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-09</th>
+                                        <td>30</td>
+                                        <td>4.32%</td>
+                                        <td>0.11%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-10</th>
+                                        <td>31</td>
+                                        <td>4.78%</td>
+                                        <td>0.14%</td>
+                                        <td>
+                                            <span class="muted" title="Insufficient comparable observations">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-11</th>
+                                        <td>30</td>
+                                        <td>7.64%</td>
+                                        <td>1.42%</td>
+                                        <td>0.01%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-12</th>
+                                        <td>31</td>
+                                        <td>10.30%</td>
+                                        <td>0.32%</td>
+                                        <td>0.34%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-01</th>
+                                        <td>31</td>
+                                        <td>19.64%</td>
+                                        <td>0.48%</td>
+                                        <td>0.11%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-02</th>
+                                        <td>28</td>
+                                        <td>48.88%</td>
+                                        <td>0.61%</td>
+                                        <td>0.18%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-03</th>
+                                        <td>31</td>
+                                        <td>48.09%</td>
+                                        <td>2.19%</td>
+                                        <td>2.76%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-04</th>
+                                        <td>30</td>
+                                        <td>33.16%</td>
+                                        <td>20.23%</td>
+                                        <td>3.12%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-05</th>
+                                        <td>31</td>
+                                        <td>46.03%</td>
+                                        <td>3.84%</td>
+                                        <td>2.64%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-06</th>
+                                        <td>30</td>
+                                        <td>55.37%</td>
+                                        <td>2.01%</td>
+                                        <td>3.48%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-07</th>
+                                        <td>31</td>
+                                        <td>64.13%</td>
+                                        <td>3.22%</td>
+                                        <td>7.74%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-08</th>
+                                        <td>31</td>
+                                        <td>53.22%</td>
+                                        <td>15.26%</td>
+                                        <td>7.08%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-09</th>
+                                        <td>30</td>
+                                        <td>49.41%</td>
+                                        <td>14.13%</td>
+                                        <td>5.58%</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-10*</th>
+                                        <td>6</td>
+                                        <td>44.01%</td>
+                                        <td>7.32%</td>
+                                        <td>5.76%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                    <h3>Observed tokens per day</h3>
+                    <p>
+                        Monthly totals are divided by observed days, so a partial month is not compared with a full
+                        month's raw total.
+                    </p>
+                    <figure>
+                        <div class="chart-scroll">
+                            <svg
+                                viewBox="0 0 1000 350"
+                                role="img"
+                                aria-labelledby="context-volume-1M-title context-volume-1M-desc"
+                            >
+                                <title id="context-volume-1M-title">1M mean daily identified category tokens</title>
+                                <desc id="context-volume-1M-desc">
+                                    Monthly observations. The data table below provides exact values; missing category
+                                    observations are gaps.
+                                </desc>
+                                <line class="gridline" x1="65" y1="285.00" x2="970" y2="285.00" />
+                                <text class="axis-label" x="55" y="289.00" text-anchor="end">0</text>
+                                <line class="gridline" x1="65" y1="219.75" x2="970" y2="219.75" />
+                                <text class="axis-label" x="55" y="223.75" text-anchor="end">1.68T</text>
+                                <line class="gridline" x1="65" y1="154.50" x2="970" y2="154.50" />
+                                <text class="axis-label" x="55" y="158.50" text-anchor="end">3.36T</text>
+                                <line class="gridline" x1="65" y1="89.25" x2="970" y2="89.25" />
+                                <text class="axis-label" x="55" y="93.25" text-anchor="end">5.04T</text>
+                                <line class="gridline" x1="65" y1="24.00" x2="970" y2="24.00" />
+                                <text class="axis-label" x="55" y="28.00" text-anchor="end">6.72T</text>
+                                <text class="axis-label" x="65.00" y="320" text-anchor="middle">2025-01</text>
+                                <text class="axis-label" x="194.29" y="320" text-anchor="middle">2025-04</text>
+                                <text class="axis-label" x="323.57" y="320" text-anchor="middle">2025-07*</text>
+                                <text class="axis-label" x="452.86" y="320" text-anchor="middle">2025-10</text>
+                                <text class="axis-label" x="582.14" y="320" text-anchor="middle">2026-01</text>
+                                <text class="axis-label" x="711.43" y="320" text-anchor="middle">2026-04</text>
+                                <text class="axis-label" x="840.71" y="320" text-anchor="middle">2026-07</text>
+                                <text class="axis-label" x="970.00" y="320" text-anchor="middle">2026-10*</text>
+                                <polyline
+                                    points="65.00,284.99 108.10,284.98 151.19,284.98 194.29,284.92 237.38,284.95 280.48,284.96 323.57,284.74 366.67,284.33 409.76,284.70 452.86,284.69 495.95,284.43 539.05,284.42 582.14,283.67 625.24,275.93 668.33,268.55 711.43,271.53 754.52,263.88 797.62,231.60 840.71,196.14 883.81,144.60 926.90,69.01 970.00,43.33"
+                                    fill="none"
+                                    stroke="#66b9ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="284.99" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-01: Regular attention (including sparse) 194.24M; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="108.10" cy="284.98" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-02: Regular attention (including sparse) 621.11M; 28 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="151.19" cy="284.98" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-03: Regular attention (including sparse) 519.71M; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="194.29" cy="284.92" r="3.6" fill="#66b9ff">
+                                    <title>2025-04: Regular attention (including sparse) 2.14B; 30 observed days</title>
+                                </circle>
+                                <circle cx="237.38" cy="284.95" r="3.6" fill="#66b9ff">
+                                    <title>2025-05: Regular attention (including sparse) 1.21B; 31 observed days</title>
+                                </circle>
+                                <circle cx="280.48" cy="284.96" r="3.6" fill="#66b9ff">
+                                    <title>2025-06: Regular attention (including sparse) 1.01B; 29 observed days</title>
+                                </circle>
+                                <circle cx="323.57" cy="284.74" r="3.6" fill="#66b9ff">
+                                    <title>2025-07: Regular attention (including sparse) 6.80B; 30 observed days</title>
+                                </circle>
+                                <circle cx="366.67" cy="284.33" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-08: Regular attention (including sparse) 17.34B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="409.76" cy="284.70" r="3.6" fill="#66b9ff">
+                                    <title>2025-09: Regular attention (including sparse) 7.81B; 30 observed days</title>
+                                </circle>
+                                <circle cx="452.86" cy="284.69" r="3.6" fill="#66b9ff">
+                                    <title>2025-10: Regular attention (including sparse) 7.99B; 31 observed days</title>
+                                </circle>
+                                <circle cx="495.95" cy="284.43" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-11: Regular attention (including sparse) 14.76B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="539.05" cy="284.42" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2025-12: Regular attention (including sparse) 14.90B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="582.14" cy="283.67" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-01: Regular attention (including sparse) 34.33B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="625.24" cy="275.93" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-02: Regular attention (including sparse) 233.54B; 28 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="668.33" cy="268.55" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-03: Regular attention (including sparse) 423.59B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="711.43" cy="271.53" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-04: Regular attention (including sparse) 346.96B; 30 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="754.52" cy="263.88" r="3.6" fill="#66b9ff">
+                                    <title>
+                                        2026-05: Regular attention (including sparse) 543.82B; 31 observed days
+                                    </title>
+                                </circle>
+                                <circle cx="797.62" cy="231.60" r="3.6" fill="#66b9ff">
+                                    <title>2026-06: Regular attention (including sparse) 1.38T; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="196.14" r="3.6" fill="#66b9ff">
+                                    <title>2026-07: Regular attention (including sparse) 2.29T; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="144.60" r="3.6" fill="#66b9ff">
+                                    <title>2026-08: Regular attention (including sparse) 3.62T; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="69.01" r="3.6" fill="#66b9ff">
+                                    <title>2026-09: Regular attention (including sparse) 5.56T; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="43.33" r="3.6" fill="#66b9ff">
+                                    <title>2026-10: Regular attention (including sparse) 6.22T; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="65.00,285.00 108.10,285.00 151.19,285.00 194.29,285.00 237.38,285.00 280.48,285.00 323.57,284.99 366.67,285.00 409.76,284.99 452.86,284.99 495.95,284.89 539.05,284.98 582.14,284.97 625.24,284.89 668.33,284.25 711.43,276.78 754.52,283.24 797.62,283.06 840.71,280.54 883.81,244.74 926.90,223.24 970.00,244.79"
+                                    fill="none"
+                                    stroke="#50e3c2"
+                                    stroke-width="3"
+                                />
+                                <circle cx="65.00" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-01: Hybrid linear attention 12.56M; 31 observed days</title>
+                                </circle>
+                                <circle cx="108.10" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-02: Hybrid linear attention 12.58M; 28 observed days</title>
+                                </circle>
+                                <circle cx="151.19" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-03: Hybrid linear attention 9.50M; 31 observed days</title>
+                                </circle>
+                                <circle cx="194.29" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-04: Hybrid linear attention 69.10M; 30 observed days</title>
+                                </circle>
+                                <circle cx="237.38" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-05: Hybrid linear attention 1.86M; 31 observed days</title>
+                                </circle>
+                                <circle cx="280.48" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-06: Hybrid linear attention 29.18M; 29 observed days</title>
+                                </circle>
+                                <circle cx="323.57" cy="284.99" r="3.6" fill="#50e3c2">
+                                    <title>2025-07: Hybrid linear attention 136.91M; 30 observed days</title>
+                                </circle>
+                                <circle cx="366.67" cy="285.00" r="3.6" fill="#50e3c2">
+                                    <title>2025-08: Hybrid linear attention 20.60M; 31 observed days</title>
+                                </circle>
+                                <circle cx="409.76" cy="284.99" r="3.6" fill="#50e3c2">
+                                    <title>2025-09: Hybrid linear attention 189.95M; 30 observed days</title>
+                                </circle>
+                                <circle cx="452.86" cy="284.99" r="3.6" fill="#50e3c2">
+                                    <title>2025-10: Hybrid linear attention 236.38M; 31 observed days</title>
+                                </circle>
+                                <circle cx="495.95" cy="284.89" r="3.6" fill="#50e3c2">
+                                    <title>2025-11: Hybrid linear attention 2.74B; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="284.98" r="3.6" fill="#50e3c2">
+                                    <title>2025-12: Hybrid linear attention 463.52M; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.97" r="3.6" fill="#50e3c2">
+                                    <title>2026-01: Hybrid linear attention 847.04M; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="284.89" r="3.6" fill="#50e3c2">
+                                    <title>2026-02: Hybrid linear attention 2.90B; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="284.25" r="3.6" fill="#50e3c2">
+                                    <title>2026-03: Hybrid linear attention 19.25B; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="276.78" r="3.6" fill="#50e3c2">
+                                    <title>2026-04: Hybrid linear attention 211.61B; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="283.24" r="3.6" fill="#50e3c2">
+                                    <title>2026-05: Hybrid linear attention 45.41B; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="283.06" r="3.6" fill="#50e3c2">
+                                    <title>2026-06: Hybrid linear attention 49.85B; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="280.54" r="3.6" fill="#50e3c2">
+                                    <title>2026-07: Hybrid linear attention 114.77B; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="244.74" r="3.6" fill="#50e3c2">
+                                    <title>2026-08: Hybrid linear attention 1.04T; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="223.24" r="3.6" fill="#50e3c2">
+                                    <title>2026-09: Hybrid linear attention 1.59T; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="244.79" r="3.6" fill="#50e3c2">
+                                    <title>2026-10: Hybrid linear attention 1.04T; 6 observed days</title>
+                                </circle>
+                                <polyline
+                                    points="495.95,285.00 539.05,284.98 582.14,284.99 625.24,284.97 668.33,284.06 711.43,283.73 754.52,283.79 797.62,281.65 840.71,274.27 883.81,266.33 926.90,260.62 970.00,253.35"
+                                    fill="none"
+                                    stroke="#c398ff"
+                                    stroke-width="3"
+                                />
+                                <circle cx="495.95" cy="285.00" r="3.6" fill="#c398ff">
+                                    <title>2025-11: Hybrid Mamba 26.44M; 30 observed days</title>
+                                </circle>
+                                <circle cx="539.05" cy="284.98" r="3.6" fill="#c398ff">
+                                    <title>2025-12: Hybrid Mamba 497.00M; 31 observed days</title>
+                                </circle>
+                                <circle cx="582.14" cy="284.99" r="3.6" fill="#c398ff">
+                                    <title>2026-01: Hybrid Mamba 193.57M; 31 observed days</title>
+                                </circle>
+                                <circle cx="625.24" cy="284.97" r="3.6" fill="#c398ff">
+                                    <title>2026-02: Hybrid Mamba 879.52M; 28 observed days</title>
+                                </circle>
+                                <circle cx="668.33" cy="284.06" r="3.6" fill="#c398ff">
+                                    <title>2026-03: Hybrid Mamba 24.33B; 31 observed days</title>
+                                </circle>
+                                <circle cx="711.43" cy="283.73" r="3.6" fill="#c398ff">
+                                    <title>2026-04: Hybrid Mamba 32.62B; 30 observed days</title>
+                                </circle>
+                                <circle cx="754.52" cy="283.79" r="3.6" fill="#c398ff">
+                                    <title>2026-05: Hybrid Mamba 31.18B; 31 observed days</title>
+                                </circle>
+                                <circle cx="797.62" cy="281.65" r="3.6" fill="#c398ff">
+                                    <title>2026-06: Hybrid Mamba 86.36B; 30 observed days</title>
+                                </circle>
+                                <circle cx="840.71" cy="274.27" r="3.6" fill="#c398ff">
+                                    <title>2026-07: Hybrid Mamba 276.27B; 31 observed days</title>
+                                </circle>
+                                <circle cx="883.81" cy="266.33" r="3.6" fill="#c398ff">
+                                    <title>2026-08: Hybrid Mamba 480.78B; 31 observed days</title>
+                                </circle>
+                                <circle cx="926.90" cy="260.62" r="3.6" fill="#c398ff">
+                                    <title>2026-09: Hybrid Mamba 627.87B; 30 observed days</title>
+                                </circle>
+                                <circle cx="970.00" cy="253.35" r="3.6" fill="#c398ff">
+                                    <title>2026-10: Hybrid Mamba 815.06B; 6 observed days</title>
+                                </circle>
+                            </svg>
+                        </div>
+                        <figcaption>
+                            <ul class="legend">
+                                <li>
+                                    <span class="swatch" style="background: #66b9ff"></span>
+                                    Regular attention (including sparse)
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #50e3c2"></span>
+                                    Hybrid linear attention
+                                </li>
+                                <li>
+                                    <span class="swatch" style="background: #c398ff"></span>
+                                    Hybrid Mamba
+                                </li>
+                            </ul>
+                            <p class="note">
+                                * An incomplete calendar month, including a month with missing dates. Values use only
+                                observed days. Hover over a point for its value.
+                            </p>
+                        </figcaption>
+                    </figure>
+                    <details>
+                        <summary>Chart data table</summary>
+                        <div class="table-wrap" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Observed days</th>
+                                        <th>Regular attention (including sparse)</th>
+                                        <th>Hybrid linear attention</th>
+                                        <th>Hybrid Mamba</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">2025-01</th>
+                                        <td>31</td>
+                                        <td>194.24M</td>
+                                        <td>12.56M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-02</th>
+                                        <td>28</td>
+                                        <td>621.11M</td>
+                                        <td>12.58M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-03</th>
+                                        <td>31</td>
+                                        <td>519.71M</td>
+                                        <td>9.50M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-04</th>
+                                        <td>30</td>
+                                        <td>2.14B</td>
+                                        <td>69.10M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-05</th>
+                                        <td>31</td>
+                                        <td>1.21B</td>
+                                        <td>1.86M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-06*</th>
+                                        <td>29</td>
+                                        <td>1.01B</td>
+                                        <td>29.18M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-07*</th>
+                                        <td>30</td>
+                                        <td>6.80B</td>
+                                        <td>136.91M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-08</th>
+                                        <td>31</td>
+                                        <td>17.34B</td>
+                                        <td>20.60M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-09</th>
+                                        <td>30</td>
+                                        <td>7.81B</td>
+                                        <td>189.95M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-10</th>
+                                        <td>31</td>
+                                        <td>7.99B</td>
+                                        <td>236.38M</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-11</th>
+                                        <td>30</td>
+                                        <td>14.76B</td>
+                                        <td>2.74B</td>
+                                        <td>26.44M</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2025-12</th>
+                                        <td>31</td>
+                                        <td>14.90B</td>
+                                        <td>463.52M</td>
+                                        <td>497.00M</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-01</th>
+                                        <td>31</td>
+                                        <td>34.33B</td>
+                                        <td>847.04M</td>
+                                        <td>193.57M</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-02</th>
+                                        <td>28</td>
+                                        <td>233.54B</td>
+                                        <td>2.90B</td>
+                                        <td>879.52M</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-03</th>
+                                        <td>31</td>
+                                        <td>423.59B</td>
+                                        <td>19.25B</td>
+                                        <td>24.33B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-04</th>
+                                        <td>30</td>
+                                        <td>346.96B</td>
+                                        <td>211.61B</td>
+                                        <td>32.62B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-05</th>
+                                        <td>31</td>
+                                        <td>543.82B</td>
+                                        <td>45.41B</td>
+                                        <td>31.18B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-06</th>
+                                        <td>30</td>
+                                        <td>1.38T</td>
+                                        <td>49.85B</td>
+                                        <td>86.36B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-07</th>
+                                        <td>31</td>
+                                        <td>2.29T</td>
+                                        <td>114.77B</td>
+                                        <td>276.27B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-08</th>
+                                        <td>31</td>
+                                        <td>3.62T</td>
+                                        <td>1.04T</td>
+                                        <td>480.78B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-09</th>
+                                        <td>30</td>
+                                        <td>5.56T</td>
+                                        <td>1.59T</td>
+                                        <td>627.87B</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2026-10*</th>
+                                        <td>6</td>
+                                        <td>6.22T</td>
+                                        <td>1.04T</td>
+                                        <td>815.06B</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </section>
+                <section class="panel">
+                    <h2>Connecting demand to an NVMe model</h2>
+                    <p>
+                        The next step needs measurements of reusable-prefix frequency, per-model state bytes, checkpoint
+                        spacing and retention, restoration count and bytes per restore. The context filter supplies none
+                        of these.
+                    </p>
+                    <p>
+                        Use the
+                        <a href="hybrid-checkpoints.html">hybrid checkpoint model</a>
+                        to examine retained recurrent states and attention KV, then the
+                        <a href="io-projections.html">I/O projections</a>
+                        to vary storage assumptions. Keep those scenarios separate from measured OpenRouter traffic.
+                    </p>
+                    <p class="note">
+                        A smaller live recurrent state does not establish a smaller retained checkpoint corpus.
+                        Conversely, growing long-context token usage does not by itself establish growing NVMe offload.
+                    </p>
+                </section>
+            </main>
+            <footer>
+                <p>
+                    Source: OpenRouter (
+                    <a href="https://openrouter.ai/rankings">openrouter.ai/rankings</a>
+                    ), as of 2026-10-07T14:24:13.993Z. Licensed under
+                    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+                    . Architecture classification, calculations and visualizations are modifications by kvcache-view;
+                    they are not OpenRouter's architectural classifications or an endorsement.
+                </p>
+                <p class="source-time">
+                    <strong>Latest source as_of (per-response timestamps in the manifest):</strong>
+                    2026-10-07T14:24:13.993Z.
+                </p>
+                <p>
+                    <a href="data/openrouter/context-demand.json" download>Download analysis</a>
+                    ·
+                    <a href="data/openrouter/architecture-registry.json" download>Architecture registry</a>
+                    ·
+                    <a href="data/openrouter/context-demand-provenance.json" download>Source manifest</a>
+                    ·
+                    <a
+                        href="https://openrouter.ai/docs/api/api-reference/datasets/daily-token-totals-for-top-50-models"
+                    >
+                        Dataset API documentation
+                    </a>
+                </p>
+                <p class="muted">
+                    Refresh all OpenRouter pages with
+                    <code>make openrouter</code>
+                    . This is a static snapshot; refreshing this page does not fetch new data.
+                </p>
+            </footer>
+        </div>
+    </body>
+</html>

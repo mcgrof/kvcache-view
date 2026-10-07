@@ -1,7 +1,15 @@
-const CACHE_NAME = 'kvcache-view-v5'
+const CACHE_NAME = 'kvcache-view-v6'
 const urlsToCache = [
     './',
     './index.html',
+    './hybrid-trends.html',
+    './context-demand.html',
+    './cache-telemetry.html',
+    './openrouter.css',
+    './openrouter.js',
+    './thumbnails/hybrid-trends.svg',
+    './thumbnails/context-demand.svg',
+    './thumbnails/cache-telemetry.svg',
     './inference.html',
     './train.html',
     './visualization.js',
