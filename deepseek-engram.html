@@ -393,6 +393,90 @@
                 color: var(--light-blue);
             }
 
+            /* Capacity-aware I/O scenarios */
+            #io-projection {
+                line-height: 1.6;
+            }
+            #io-projection a {
+                color: var(--accent-cyan);
+            }
+            #io-projection .controls-panel {
+                margin-top: 1.5rem;
+            }
+            #io-projection input,
+            #io-projection select {
+                width: 100%;
+                padding: 0.65rem;
+                border: 1px solid #555;
+                border-radius: 4px;
+                background: #15151f;
+                color: var(--text-primary);
+                font: inherit;
+                font-size: 0.85rem;
+            }
+            #io-projection input:disabled {
+                opacity: 0.45;
+            }
+            #io-projection .control-hint {
+                color: #aaa;
+            }
+            #io-projection .io-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+                gap: 1rem;
+            }
+            #io-projection .io-stats strong {
+                display: block;
+                color: var(--accent-cyan);
+                font-size: 1.2rem;
+            }
+            #io-projection .io-stats p {
+                color: #aaa;
+                font-size: 0.8rem;
+            }
+            #io-projection .io-table-wrap {
+                overflow-x: auto;
+                margin: 1rem 0;
+            }
+            #io-projection table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 0.85rem;
+            }
+            #io-projection th,
+            #io-projection td {
+                text-align: left;
+                border-bottom: 1px solid #444;
+                padding: 0.8rem;
+            }
+            #io-projection code {
+                color: var(--accent-cyan);
+                overflow-wrap: anywhere;
+            }
+            #io-capacity-bar {
+                display: flex;
+                height: 22px;
+                border-radius: 4px;
+                overflow: hidden;
+                margin: 1rem 0 0.5rem;
+            }
+            #io-capacity-legend {
+                font-size: 0.8rem;
+                margin-bottom: 1.5rem;
+                color: #bbb;
+            }
+            #io-projection details {
+                margin-top: 1.5rem;
+            }
+            #io-projection summary {
+                cursor: pointer;
+                color: var(--accent-cyan);
+                margin-bottom: 1rem;
+            }
+            [hidden] {
+                display: none !important;
+            }
+
             /* Responsive */
             @media (max-width: 900px) {
                 body {
@@ -437,9 +521,10 @@
                 <button class="tab-btn" data-tab="loglog">Log-Log Plot</button>
                 <button class="tab-btn" data-tab="tiers">Cache Hierarchy</button>
                 <button class="tab-btn" data-tab="engram">Engram Architecture</button>
+                <button class="tab-btn" data-tab="io-projection">I/O Projection</button>
             </div>
 
-            <div class="controls-panel">
+            <div class="controls-panel" id="zipf-controls">
                 <div class="control-group">
                     <label style="color: var(--accent-cyan)">
                         Zipf Exponent (s):
@@ -454,14 +539,15 @@
 
                 <div class="control-group">
                     <label style="color: var(--accent-cyan)">
-                        N-gram Vocabulary:
+                        Illustrative rank population:
                         <span id="vocabValue">2.3</span>
                         M entries
                     </label>
                     <input type="range" id="vocabSlider" min="1000000" max="10000000" step="100000" value="2300000" />
                     <p class="control-hint">
-                        <span class="from-paper">From paper:</span>
-                        Engram-27B = 5.7B params &divide; 2.5KB &asymp; 2.3M entries
+                        <span class="estimate">Illustration:</span>
+                        A simplified 2.5 KiB record population, not actual hash-table rows or total model capacity. Use
+                        I/O Projection for capacity accounting.
                     </p>
                 </div>
 
@@ -585,7 +671,7 @@
                                     <br />
                                     On
                                     <strong>SSD</strong>
-                                    : 16 parallel io_uring submissions per layer
+                                    : up to 16 per-row reads per token/layer if every lookup misses memory (projection)
                                     <br />
                                     On
                                     <strong>tiered storage</strong>
@@ -634,6 +720,15 @@
                 <!-- Cache Hierarchy Tab -->
                 <div id="tiers" class="tab-panel">
                     <h2>Multi-Level Cache Hierarchy</h2>
+                    <div class="info-box yellow">
+                        <p>
+                            This illustration assigns tier percentages; it does not establish that a table exceeds host
+                            DRAM or predict when SSD offload becomes necessary. N-gram Zipf frequency is not a measured
+                            hash-row or SSD cache-miss distribution. See the
+                            <a href="#io-projection" style="color: var(--accent-cyan)">I/O Projection tab</a>
+                            for explicit memory budgets and independent access assumptions.
+                        </p>
+                    </div>
 
                     <div class="info-box purple" style="margin-bottom: 1.5rem; font-size: 0.9rem">
                         <p>
@@ -720,13 +815,13 @@
                                     layers.
                                 </p>
                                 <p style="margin-top: 0.5rem; font-size: 0.85rem">
-                                    Even pessimistically assuming every lookup triggers a full 4 KB random read: ~98k
-                                    IOPS per layer, ~196k IOPS for two. Enterprise SSDs like the Micron 9550 (3.3M 4K
-                                    random-read IOPS) or Kioxia FL6 (1.5M IOPS, 29 &micro;s latency) handle this with
-                                    headroom — but the
-                                    <strong>software path</strong>
-                                    (batching, coalescing, avoiding CPU bounce buffers) remains the real engineering
-                                    challenge.
+                                    At that illustrative rate, all-miss demand would be ~98k reads/s per layer or ~196k
+                                    for two. The measured 100B experiment uses one Engram layer and host DRAM; these SSD
+                                    rates are not measured results. Peak SSD IOPS do not establish acceptable tail
+                                    latency or GPU stall time. If the tables fit assigned memory, steady-state
+                                    capacity-driven SSD reads can be zero. See
+                                    <a href="#io-projection" style="color: var(--accent-cyan)">I/O Projection</a>
+                                    .
                                 </p>
                             </div>
                         </div>
@@ -761,6 +856,239 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="content tab-panel" id="io-projection">
+                <h2>I/O Projection: first establish a need for SSD</h2>
+                <div class="info-box cyan">
+                    <h4>Small lookups do not imply SSD traffic</h4>
+                    <p>
+                        At BF16, the published 5.7B and 18.5B Engram memories occupy about 11.4 GB and 37 GB. The
+                        100B-parameter offload experiment uses about 200 GB, entirely in host DRAM. All three fit a 256
+                        GiB budget reserved for Engram. The paper provides no dated growth forecast showing when NVMe
+                        becomes necessary. The 1T option below is a scenario, not a roadmap.
+                    </p>
+                </div>
+                <p>
+                    Set the memory available to these tables, then choose an access assumption. Capacity outside memory
+                    and the fraction of lookups going to SSD are different quantities. This calculator is independent of
+                    the illustrative Zipf sliders.
+                </p>
+
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label for="io-preset">Table configuration</label>
+                        <select id="io-preset">
+                            <option value="27b">Engram-27B: 5.7B memory parameters</option>
+                            <option value="40b">Engram-40B: 18.5B memory parameters</option>
+                            <option value="100b">100B memory: host-DRAM experiment</option>
+                            <option value="1t">1T memory: hypothetical</option>
+                            <option value="custom">Custom scenario</option>
+                        </select>
+                        <p class="control-hint">
+                            Presets set total parameters, layers and BF16. Memory budgets and rate remain your
+                            assumptions.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-params">Total Engram parameters (billions)</label>
+                        <input id="io-params" type="number" min="0.001" max="1000000" step="any" value="5.7" />
+                        <p class="control-hint">
+                            Across all Engram layers in one serving memory domain. Excludes backbone weights.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-dtype">Stored values</label>
+                        <select id="io-dtype">
+                            <option value="2">BF16 / FP16: 2 bytes</option>
+                            <option value="4">FP32: 4 bytes</option>
+                            <option value="1">8-bit: hypothetical, metadata excluded</option>
+                        </select>
+                        <p class="control-hint">
+                            Capacity is embedding payload only. Reserve metadata and allocator space separately.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-layers">Engram layers per token</label>
+                        <input id="io-layers" type="number" min="1" max="128" step="1" value="2" />
+                        <p class="control-hint">
+                            16 lookups/layer. Changes traffic, not the total parameter budget above.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-dram">Available host DRAM (GiB)</label>
+                        <input id="io-dram" type="number" min="0" max="1000000" step="any" value="256" />
+                        <p class="control-hint">
+                            After OS, other models, KV caches, metadata and safety margin. Not installed RAM.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-hbm">Additional unique HBM capacity (GiB)</label>
+                        <input id="io-hbm" type="number" min="0" max="1000000" step="any" value="0" />
+                        <p class="control-hint">
+                            Only rows not already counted in DRAM. Set 0 if HBM is a duplicate cache of host rows.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-rate">Aggregate token positions/s</label>
+                        <input id="io-rate" type="number" min="0" max="1000000000" step="any" value="10000" />
+                        <p class="control-hint">
+                            Assumed rate across all active sequences, including prefill positions if applicable. Do not
+                            multiply by batch again.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-read">SSD read unit</label>
+                        <select id="io-read">
+                            <option value="4096">4 KiB</option>
+                            <option value="512">512 B</option>
+                        </select>
+                        <p class="control-hint">
+                            One aligned read per missed row; assumes no straddling, deduplication or shared-page hits.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-access">Access assumption when memory is insufficient</label>
+                        <select id="io-access">
+                            <option value="uniform">Uniform row access (scenario)</option>
+                            <option value="supplied">Supply combined HBM + DRAM hit rate</option>
+                        </select>
+                        <p class="control-hint">
+                            Uniform access is not a worst-case bound. Hashed Zipf locality needs a measured trace.
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label for="io-hit">Resident hit rate (%)</label>
+                        <input id="io-hit" type="number" min="0" max="100" step="any" value="95" disabled />
+                        <p class="control-hint">
+                            User-supplied scenario or measurement for this budget. A capacity percentage is not a hit
+                            rate.
+                        </p>
+                    </div>
+                </div>
+                <p id="io-error" role="alert" hidden>Enter valid values in all fields to calculate a scenario.</p>
+                <div id="io-results" aria-live="polite">
+                    <div class="info-box green" id="io-verdict">
+                        <h4 id="io-verdict-title"></h4>
+                        <p id="io-verdict-text"></p>
+                    </div>
+                    <div class="io-stats">
+                        <div class="tier-card">
+                            Total table payload
+                            <strong id="io-table"></strong>
+                            <p id="io-payload"></p>
+                        </div>
+                        <div class="tier-card">
+                            Payload outside memory
+                            <strong id="io-spill"></strong>
+                            <p>Capacity deficit, not access frequency</p>
+                        </div>
+                        <div class="tier-card">
+                            Projected SSD reads/s
+                            <strong id="io-iops"></strong>
+                            <p id="io-miss"></p>
+                        </div>
+                        <div class="tier-card">
+                            Projected device read bandwidth
+                            <strong id="io-bandwidth"></strong>
+                            <p id="io-useful"></p>
+                        </div>
+                    </div>
+                    <div id="io-capacity-bar" aria-hidden="true"></div>
+                    <p id="io-capacity-legend"></p>
+                    <p>
+                        At these budgets and precision, capacity spill begins above
+                        <strong id="io-threshold"></strong>
+                        . Read amplification:
+                        <strong id="io-amplification"></strong>
+                        .
+                    </p>
+                    <div class="info-box yellow" id="io-quantization" hidden>
+                        <p>
+                            8-bit storage is an unvalidated scenario. Scale metadata, dequantization costs and quality
+                            effects are excluded; this is not a claim that Engram preserves quality at 8 bits.
+                        </p>
+                    </div>
+                    <h3 style="margin-top: 1.5rem">Do published sizes cross this memory budget?</h3>
+                    <p>Same selected precision and memory budgets for each row; rounded parameter counts.</p>
+                    <div class="io-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Configuration</th>
+                                    <th scope="col">Table payload</th>
+                                    <th scope="col">Capacity result</th>
+                                    <th scope="col">Evidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="io-reference-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="grid-2-equal" style="margin-top: 1.5rem">
+                    <div class="info-box purple">
+                        <h4>What would make SSD relevant?</h4>
+                        <p>
+                            Larger tables, several distinct models sharing a constrained host, or deliberately buying
+                            less DRAM can create a capacity or cost case. A large total table still produces little SSD
+                            traffic if its active rows fit memory. Longer context and larger batches increase lookup
+                            demand, not the size of this static table. Only count memory reachable by this serving
+                            implementation; cross-host capacity needs an actual sharding and transport design.
+                        </p>
+                    </div>
+                    <div class="info-box yellow">
+                        <h4>What remains unproven?</h4>
+                        <p>
+                            Neither the earlier tier illustration nor this calculator establishes a near-term SSD
+                            requirement. The paper measures host-DRAM offload, not NVMe. Meeting average IOPS or
+                            bandwidth does not prove that reads finish before the layer needs them. Measure cache
+                            misses, request sizes, prefetch lead time, queue depth, tail latency and GPU stalls before
+                            claiming a viable SSD path.
+                        </p>
+                    </div>
+                </div>
+                <details>
+                    <summary>Equations, source boundaries and I/O assumptions</summary>
+                    <p>
+                        <code>table bytes = total parameters × bytes/value</code>
+                        <br />
+                        <code>spill bytes = max(0, table bytes − unique HBM bytes − available DRAM bytes)</code>
+                        <br />
+                        <code>reads/s = aggregate token positions/s × 16 × layers × miss fraction</code>
+                        <br />
+                        <code>device bytes/s = reads/s × SSD read unit</code>
+                    </p>
+                    <p>
+                        For a fully resident, warmed table, misses are forced to zero. With no resident capacity, they
+                        are forced to 100%. Otherwise use uniform row access (spill/table) or a supplied resident hit
+                        rate. Shared pages, request deduplication and temporal reuse can reduce reads; boundary
+                        crossings and an inefficient I/O path can increase them. Batching submissions does not make
+                        random source addresses contiguous.
+                    </p>
+                    <p>
+                        The paper configuration has 1280 concatenated values across 16 rows per layer: 80 values/row, or
+                        160 B at BF16. That is 2560 B/token/layer, not one contiguous read. Its public demo has
+                        different defaults. The 100B system experiment uses one inserted layer; this preset uses the
+                        paper row geometry as a projection, not a measured 100B SSD request trace. The trained 27B/40B
+                        models use two layers. There is no batch multiplier on static table capacity, and the total
+                        parameter count already includes all layers.
+                    </p>
+                    <p>
+                        Sources:
+                        <a href="https://arxiv.org/html/2601.07372v1#S2.SS2">Engram retrieval, Eq. 2</a>
+                        ,
+                        <a href="https://arxiv.org/html/2601.07372v1#A1">Table 5: model configuration</a>
+                        ,
+                        <a href="https://arxiv.org/html/2601.07372v1#S6.SS4">Section 6.4: host-DRAM experiment</a>
+                        , and
+                        <a href="https://github.com/deepseek-ai/Engram/blob/main/engram_demo_v1.py">
+                            official demonstration code
+                        </a>
+                        . Scenarios are not extrapolated from the separate
+                        <a href="projections.html">KV-cache growth envelope</a>
+                        : static Engram parameters and per-request attention KV state scale differently.
+                    </p>
+                </details>
             </div>
 
             <div class="footer">
@@ -899,22 +1227,28 @@
                 }
             }
 
-            // Tab switching
+            // Tab switching, including direct links to the I/O projection.
+            function activateTab(tabId) {
+                if (!document.getElementById(tabId)?.classList.contains('tab-panel')) return
+                document.querySelectorAll('.tab-btn').forEach((button) => {
+                    const active = button.dataset.tab === tabId
+                    button.classList.toggle('active', active)
+                    button.setAttribute('aria-pressed', String(active))
+                })
+                document
+                    .querySelectorAll('.tab-panel')
+                    .forEach((panel) => panel.classList.toggle('active', panel.id === tabId))
+                document.getElementById('zipf-controls').hidden = tabId === 'io-projection'
+                document.getElementById('distribution').parentElement.hidden = tabId === 'io-projection'
+            }
             document.querySelectorAll('.tab-btn').forEach((btn) => {
                 btn.addEventListener('click', () => {
-                    const tabId = btn.dataset.tab
-
-                    document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'))
-                    btn.classList.add('active')
-
-                    document.querySelectorAll('.tab-panel').forEach((panel) => {
-                        panel.classList.remove('active')
-                        if (panel.id === tabId) {
-                            panel.classList.add('active')
-                        }
-                    })
+                    activateTab(btn.dataset.tab)
+                    history.replaceState(null, '', `#${btn.dataset.tab}`)
                 })
             })
+            window.addEventListener('hashchange', () => activateTab(location.hash.slice(1)))
+            activateTab(location.hash.slice(1) || 'distribution')
 
             // Slider event listeners
             zipfSlider.addEventListener('input', (e) => {
@@ -1416,5 +1750,6 @@
             renderTierStats()
             renderAccessPatternDiagram()
         </script>
+        <script src="engram-io.js"></script>
     </body>
 </html>
