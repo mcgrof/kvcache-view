@@ -192,7 +192,7 @@ generate-thumbnails:
 
 ## test: Run the Node unit tests for the calculation models
 test: test-openrouter
-	@node --test cartridge-economics.test.js hybrid-checkpoints.test.js
+	@node --test cartridge-economics.test.js hybrid-checkpoints.test.js engram-io.test.js
 
 ## help: Show this help message
 help:
