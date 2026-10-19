@@ -31,7 +31,7 @@ def paper_section():
 def memory_section():
     return f'''<section class="study-panel" id="memory">
     {heading('03', 'A smaller state changes the curve', 'Illustrative accounting · equal attention dimensions · no quality or throughput equivalence implied')}
-    <p>Full-attention layers still accumulate KV in a hybrid. A local window caps its own KV; a recurrent layer keeps a fixed state. Optional historical memories, prefix snapshots, and speculative branches add separate terms.</p>
+    <p>Full-attention layers still accumulate KV in a hybrid. A sliding-window layer caps its own KV; a recurrent layer keeps a fixed state. Optional historical memories, prefix snapshots, and speculative branches add separate terms.</p>
     <div class="memory-controls" hidden>
       <label>Context tokens<select id="memory-context"><option value="16384">16,384 · 16K</option><option value="131072" selected>131,072 · 128K</option><option value="1048576">1,048,576 · 1M</option></select></label>
       <label>Retained window, including sinks<select id="memory-window"><option value="64">64</option><option value="512" selected>512</option><option value="4096">4,096</option></select></label>
@@ -44,15 +44,15 @@ def memory_section():
     <tr><th>Full attention</th><td>16 GiB</td><td>All 32 layers’ KV</td></tr>
     <tr><th>All-layer SWA</th><td>64 MiB</td><td>Nothing beyond the 512-token window</td></tr>
     <tr><th>All-layer recurrence</th><td>32 MiB</td><td>Nothing in the assumed fixed state</td></tr>
-    <tr><th>Local / full hybrid</th><td>4.047 GiB</td><td>8 full layers’ KV</td></tr>
+    <tr><th>SWA + full attention</th><td>4.047 GiB</td><td>8 full layers’ KV</td></tr>
     <tr><th>Recurrent / full hybrid</th><td>4.023 GiB</td><td>8 full layers’ KV</td></tr>
     </tbody></table></div>
     <p class="note">Default: 32 layers; 8 KV heads × 128 dimensions; 2 bytes per scalar; 512 retained tokens; 1 MiB recurrent state per layer; 8 full layers in each hybrid. These are hypothetical dimensions, not a named model’s configuration. K/M ticks below use powers of two.</p>
     <details class="study-details"><summary>Equations and exclusions</summary>
     <p>Per-layer KV bytes per retained token: <code>k = 2 × KV_heads × head_dimension × scalar_bytes = 4,096</code>. With context <code>N</code>, layers <code>L</code>, full layers <code>F</code>, window <code>w</code>, recurrent bytes per layer <code>R</code>, and sequences <code>B</code>:</p>
-    <ul><li>Full: <code>B × L × k × N</code></li><li>SWA: <code>B × L × k × min(N,w)</code></li><li>Recurrent: <code>B × L × R</code></li><li>Local/full hybrid: <code>B × [F × k × N + (L−F) × k × min(N,w)]</code></li><li>Recurrent/full hybrid: <code>B × [F × k × N + (L−F) × R]</code></li></ul>
+    <ul><li>Full: <code>B × L × k × N</code></li><li>SWA: <code>B × L × k × min(N,w)</code></li><li>Recurrent: <code>B × L × R</code></li><li>SWA + full attention: <code>B × [F × k × N + (L−F) × k × min(N,w)]</code></li><li>Recurrent/full hybrid: <code>B × [F × k × N + (L−F) × R]</code></li></ul>
     <p>R must include all persistent recurrent and convolution state in a real deployment. Excludes weights, activations, workspace, allocator slack, multimodal encoders, extra history, prefix snapshots and speculative branches. Active state alone is not total GPU memory. No bandwidth or storage-demand estimate is inferred.</p></details>
-    <div class="memory-examples"><p><strong>Real local/global example.</strong> <a href="https://arxiv.org/abs/2503.19786">Gemma 3</a> mixes local and global softmax attention. Its global layers keep a context-dependent cache.</p><p><strong>Real recurrent/global example.</strong> <a href="https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct">Qwen3-Next</a> uses three Gated DeltaNet layers per gated attention layer. It retains recurrent state and attention KV. Its dimensions differ from this illustration.</p></div>
+    <div class="memory-examples"><p><strong>Real SWA + full-attention example.</strong> <a href="https://arxiv.org/abs/2503.19786">Gemma 3</a> mixes sliding-window and full softmax attention. Its global layers keep a context-dependent cache.</p><p><strong>Real recurrent/global example.</strong> <a href="https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct">Qwen3-Next</a> uses three Gated DeltaNet layers per gated attention layer. It retains recurrent state and attention KV. Its dimensions differ from this illustration.</p></div>
     </section>'''
 
 

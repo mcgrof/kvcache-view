@@ -6,9 +6,9 @@ const MEMORY_DESIGNS = [
     { key: 'recurrent', label: 'All-layer recurrence', color: '#8be6c8', growth: 'Fixed recurrent state' },
     {
         key: 'localHybrid',
-        label: 'Local / full hybrid',
+        label: 'SWA + full attention',
         color: '#e9c687',
-        growth: 'Full layers’ KV + bounded local KV',
+        growth: 'Full layers’ KV + bounded SWA KV',
     },
     {
         key: 'recurrentHybrid',
