@@ -85,8 +85,8 @@ def comparison_table(study):
         rows.append(f'<tr><th scope="row"><span class="chart-key" style="--series:{PALETTE[d["bucket"]]}"></span>{label}</th>'
                     f'<td>{_tokens(a.get("mean_daily_tokens"))}</td><td>{_tokens(b.get("mean_daily_tokens"))}</td>'
                     f'<td>{multiple(c.get("daily_growth_multiple"))}</td>'
-                    f'<td>{_metric(a.get("share_of_text_percent"), "%")}</td><td>{_metric(b.get("share_of_text_percent"), "%")}</td>'
-                    f'<td>{_metric(c.get("share_of_text_change_pp"), " pp", signed=True)}</td></tr>')
+                    f'<td>{_metric(a.get("share_of_text_percent"), "%", digits=2)}</td><td>{_metric(b.get("share_of_text_percent"), "%", digits=2)}</td>'
+                    f'<td>{_metric(c.get("share_of_text_change_pp"), " pp", signed=True, digits=2)}</td></tr>')
     return '<div class="table-wrap study-table" tabindex="0" role="region" aria-label="January and September comparison"><table><thead><tr><th scope="col">API dataset</th><th scope="col">Jan tokens/day</th><th scope="col">Sep tokens/day</th><th scope="col">Daily volume</th><th scope="col">Jan / all text</th><th scope="col">Sep / all text</th><th scope="col">Ratio change</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>'
 
 
@@ -101,7 +101,8 @@ def bucket_cards(study):
         for label, month in (("Jan", a), ("Sep", b)):
             share = month.get("share_of_text_percent")
             width = min(100, max(0, share)) if _number(share) else 0
-            bars.append(f'<div class="month-row"><span class="month-name">{label}</span><span class="month-track"><span style="width:{width:.3f}%;background:{PALETTE[bucket]}"></span></span><span class="month-value">{_metric(share, "%")}</span></div>')
+            digits = 2 if _number(share) and share < 1 else 1
+            bars.append(f'<div class="month-row"><span class="month-name">{label}</span><span class="month-track"><span style="width:{width:.3f}%;background:{PALETTE[bucket]}"></span></span><span class="month-value">{_metric(share, "%", digits=digits)}</span></div>')
         cards.append(f'<article class="bucket-card" style="--series:{PALETTE[bucket]}"><p class="eyebrow">{bucket} bucket</p><div class="bucket-value">{multiple(c.get("daily_growth_multiple"))}</div><p class="bucket-sub">September daily volume / January</p><div class="month-pair">{"".join(bars)}</div><p class="note">Bucket tokens / all text tokens</p></article>')
     return '<div class="bucket-cards">' + ''.join(cards) + '</div>'
 
