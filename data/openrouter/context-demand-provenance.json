@@ -1,14 +1,14 @@
 {
   "analysis_url": "data/openrouter/context-demand.json",
-  "as_of": "2026-10-07T14:24:13.993Z",
+  "as_of": "2026-10-19T00:49:33.958Z",
   "catalog": {
-    "as_of": "2026-10-07T14:23:43.185204Z",
+    "as_of": "2026-10-19T00:48:29.666906Z",
     "pages": [
       "https://openrouter.ai/api/v1/models?output_modalities=all"
     ],
     "source_url": "https://openrouter.ai/api/v1/models?output_modalities=all"
   },
-  "generated_for_end_date": "2026-10-06",
+  "generated_for_end_date": "2026-10-18",
   "license": "CC BY 4.0",
   "license_url": "https://creativecommons.org/licenses/by/4.0/",
   "provenance_url": "data/openrouter/context-demand-provenance.json",
@@ -16,10 +16,11 @@
     {
       "dataset": "text",
       "meta": {
-        "as_of": "2026-10-07T13:33:37.225Z",
+        "as_of": "2026-10-19T00:48:33.071Z",
         "end_date": "2025-12-31",
         "filters": {
-          "modality": "text"
+          "modality": "text",
+          "period": "day"
         },
         "snapshots": [
           {
@@ -31,9 +32,15 @@
             "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily",
             "start_date": "2025-01-01",
             "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:48:33.071Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text",
+            "start_date": "2025-01-01",
+            "version": "v1"
           }
         ],
-        "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily",
         "start_date": "2025-01-01",
         "version": "v1"
       },
@@ -42,8 +49,8 @@
     {
       "dataset": "text",
       "meta": {
-        "as_of": "2026-10-07T14:23:53.236Z",
-        "end_date": "2026-10-06",
+        "as_of": "2026-10-19T00:48:39.806Z",
+        "end_date": "2026-10-18",
         "filters": {
           "modality": "text",
           "period": "day"
@@ -72,6 +79,13 @@
             "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-09-30&end_date=2026-10-06&period=day&modality=text",
             "start_date": "2026-09-30",
             "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:48:39.806Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text",
+            "start_date": "2026-01-01",
+            "version": "v1"
           }
         ],
         "start_date": "2026-01-01",
@@ -80,9 +94,105 @@
       "path": "data/openrouter/rankings/text/2026.json.gz"
     },
     {
+      "dataset": "1K",
+      "meta": {
+        "as_of": "2026-10-19T00:48:45.410Z",
+        "end_date": "2025-12-31",
+        "filters": {
+          "context_bucket": "1K",
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-19T00:48:45.410Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=1K",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2025-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/1K/2025.json.gz"
+    },
+    {
+      "dataset": "1K",
+      "meta": {
+        "as_of": "2026-10-19T00:48:52.074Z",
+        "end_date": "2026-10-18",
+        "filters": {
+          "context_bucket": "1K",
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-19T00:48:52.074Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text&context_bucket=1K",
+            "start_date": "2026-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2026-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/1K/2026.json.gz"
+    },
+    {
+      "dataset": "10K",
+      "meta": {
+        "as_of": "2026-10-19T00:48:57.093Z",
+        "end_date": "2025-12-31",
+        "filters": {
+          "context_bucket": "10K",
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-19T00:48:57.093Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=10K",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2025-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/10K/2025.json.gz"
+    },
+    {
+      "dataset": "10K",
+      "meta": {
+        "as_of": "2026-10-19T00:49:02.268Z",
+        "end_date": "2026-10-18",
+        "filters": {
+          "context_bucket": "10K",
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-19T00:49:02.268Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text&context_bucket=10K",
+            "start_date": "2026-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2026-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/10K/2026.json.gz"
+    },
+    {
       "dataset": "100K",
       "meta": {
-        "as_of": "2026-10-07T14:14:29.172Z",
+        "as_of": "2026-10-19T00:49:08.956Z",
         "end_date": "2025-12-31",
         "filters": {
           "context_bucket": "100K",
@@ -92,6 +202,13 @@
         "snapshots": [
           {
             "as_of": "2026-10-07T14:14:29.172Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=100K",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:49:08.956Z",
             "end_date": "2025-12-31",
             "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=100K",
             "start_date": "2025-01-01",
@@ -106,8 +223,8 @@
     {
       "dataset": "100K",
       "meta": {
-        "as_of": "2026-10-07T14:24:04.083Z",
-        "end_date": "2026-10-06",
+        "as_of": "2026-10-19T00:49:13.794Z",
+        "end_date": "2026-10-18",
         "filters": {
           "context_bucket": "100K",
           "modality": "text",
@@ -138,6 +255,13 @@
             "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-09-30&end_date=2026-10-06&period=day&modality=text&context_bucket=100K",
             "start_date": "2026-09-30",
             "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:49:13.794Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text&context_bucket=100K",
+            "start_date": "2026-01-01",
+            "version": "v1"
           }
         ],
         "start_date": "2026-01-01",
@@ -148,7 +272,7 @@
     {
       "dataset": "1M",
       "meta": {
-        "as_of": "2026-10-07T14:14:49.526Z",
+        "as_of": "2026-10-19T00:49:20.430Z",
         "end_date": "2025-12-31",
         "filters": {
           "context_bucket": "1M",
@@ -158,6 +282,13 @@
         "snapshots": [
           {
             "as_of": "2026-10-07T14:14:49.526Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=1M",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:49:20.430Z",
             "end_date": "2025-12-31",
             "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=1M",
             "start_date": "2025-01-01",
@@ -172,8 +303,8 @@
     {
       "dataset": "1M",
       "meta": {
-        "as_of": "2026-10-07T14:24:13.993Z",
-        "end_date": "2026-10-06",
+        "as_of": "2026-10-19T00:49:25.465Z",
+        "end_date": "2026-10-18",
         "filters": {
           "context_bucket": "1M",
           "modality": "text",
@@ -204,12 +335,67 @@
             "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-09-30&end_date=2026-10-06&period=day&modality=text&context_bucket=1M",
             "start_date": "2026-09-30",
             "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:49:25.465Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text&context_bucket=1M",
+            "start_date": "2026-01-01",
+            "version": "v1"
           }
         ],
         "start_date": "2026-01-01",
         "version": "v1"
       },
       "path": "data/openrouter/rankings/1M/2026.json.gz"
+    },
+    {
+      "dataset": "10M",
+      "meta": {
+        "as_of": "2026-10-19T00:49:30.462Z",
+        "end_date": "2025-12-31",
+        "filters": {
+          "context_bucket": "10M",
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-19T00:49:30.462Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text&context_bucket=10M",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2025-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/10M/2025.json.gz"
+    },
+    {
+      "dataset": "10M",
+      "meta": {
+        "as_of": "2026-10-19T00:49:33.958Z",
+        "end_date": "2026-10-18",
+        "filters": {
+          "context_bucket": "10M",
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-19T00:49:33.958Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text&context_bucket=10M",
+            "start_date": "2026-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2026-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/10M/2026.json.gz"
     }
   ],
   "source_url": "https://openrouter.ai/rankings"

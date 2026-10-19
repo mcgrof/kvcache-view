@@ -97,6 +97,15 @@ def _page(title, description, content, provenance, analysis=None, active=""):
     root = Path(__file__).resolve().parents[2]
     css_version = hashlib.sha256((root / "openrouter.css").read_bytes()).hexdigest()[:12]
     js_version = hashlib.sha256((root / "openrouter.js").read_bytes()).hexdigest()[:12]
+    context_assets = ""
+    body_class = ""
+    if active == "context-demand.html":
+        body_class = ' class="context-page"'
+        for filename, tag in (("context-demand.css", "css"), ("context-demand.js", "js")):
+            asset = root / filename
+            if asset.exists():
+                version = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
+                context_assets += (f'<link rel="stylesheet" href="{filename}?v={version}" />' if tag == "css" else f'<script src="{filename}?v={version}" defer></script>')
     catalog_only = active == "cache-telemetry.html"
     analysis_url = provenance.get("analysis_url", "data/openrouter/cache-analysis.json" if catalog_only else "data/openrouter/analysis.json")
     provenance_url = provenance.get("provenance_url", "data/openrouter/cache-provenance.json" if catalog_only else "data/openrouter/provenance.json")
@@ -140,8 +149,9 @@ def _page(title, description, content, provenance, analysis=None, active=""):
     <link rel="icon" href="icon-192.png" />
     <link rel="stylesheet" href="openrouter.css?v={css_version}" />
     <script src="openrouter.js?v={js_version}" defer></script>
+    {context_assets}
 </head>
-<body>
+<body{body_class}>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="container">
         <nav aria-label="Visualization navigation">{nav}</nav>
@@ -419,30 +429,5 @@ def render_trends(analysis: dict, provenance: dict) -> str:
 
 
 def render_context(analysis: dict, provenance: dict) -> str:
-    available = [key for key in analysis.get("windows", {}) if key not in ("all", "text")]
-    available.sort(key=lambda key: (key != "100K", key != "1M", key))
-    rows = []
-    for dataset in ["text"] + available:
-        period = _period(analysis, dataset)
-        current = period.get("current", {})
-        observed = 100 - current.get("shares", {}).get("other", 0) if current else None
-        rows.append(f'<tr><th scope="row">{_escape("All text" if dataset == "text" else dataset)}</th><td>{_tokens(current.get("total"))}</td>'
-                    f'<td>{_metric(period.get("platform_growth_percent"), "%", True)}</td><td>{_metric(observed, "%")}</td>'
-                    f'<td>{_metric(current.get("shares", {}).get("unknown"), "%")}</td></tr>')
-    content = '''<section class="panel lead-panel"><h2>Context demand is a workload signal</h2><p class="finding">The context filters reveal where token demand is moving. They do not report cache residency, retained checkpoint count or storage traffic.</p>
-    <p>Labels below are the API's context-bucket labels. Their exact numerical boundaries are not assumed, and separate bucket totals are not added together as if they formed a verified partition.</p></section>'''
-    content += '<section class="panel"><h2>Latest 30-day context totals</h2><div class="table-wrap" tabindex="0"><table><thead><tr><th>Dataset / API bucket</th><th>Reported tokens</th><th>30-day growth</th><th>Individually named</th><th>Architecture unresolved</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div><p class="note">Each filtered dataset has its own top 50 and its own unnamed tail. Architecture shares use that dataset\'s total, not the unfiltered total. T = trillion tokens.</p></section>'
-    if not available:
-        content += '<section class="panel"><p>No context-filtered datasets have been downloaded.</p></section>'
-    for dataset in available:
-        monthly = _monthly_for(analysis, dataset)
-        safe_id = ''.join(ch if ch.isalnum() else '-' for ch in dataset)
-        content += f'''<section class="panel"><p class="eyebrow">OpenRouter context filter: {_escape(dataset)}</p><h2>{_escape(dataset)} architecture mix and growth</h2>
-        {_comparison_table(analysis, dataset, all_categories=False)}
-        {_chart(monthly, list(MAIN), "context-"+safe_id, dataset+" monthly architecture share")}
-        <h3>Observed tokens per day</h3><p>Monthly totals are divided by observed days, so a partial month is not compared with a full month's raw total.</p>
-        {_chart(monthly, list(MAIN), "context-volume-"+safe_id, dataset+" mean daily identified category tokens", "mean_daily_tokens", "tokens")}</section>'''
-    content += '''<section class="panel"><h2>Connecting demand to an NVMe model</h2><p>The next step needs measurements of reusable-prefix frequency, per-model state bytes, checkpoint spacing and retention, restoration count and bytes per restore. The context filter supplies none of these.</p>
-    <p>Use the <a href="hybrid-checkpoints.html">hybrid checkpoint model</a> to examine retained recurrent states and attention KV, then the <a href="io-projections.html">I/O projections</a> to vary storage assumptions. Keep those scenarios separate from measured OpenRouter traffic.</p>
-    <p class="note">A smaller live recurrent state does not establish a smaller retained checkpoint corpus. Conversely, growing long-context token usage does not by itself establish growing NVMe offload.</p></section>'''
-    return _page("Context demand", "Track OpenRouter context-bucket traffic and architecture mix as inputs to workload planning, while keeping storage assumptions explicit.", content, provenance, analysis, "context-demand.html")
+    from .context_page import render_context_page
+    return render_context_page(analysis, provenance)

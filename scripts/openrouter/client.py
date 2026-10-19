@@ -14,7 +14,7 @@ import urllib.request
 
 API = "https://openrouter.ai/api/v1"
 FLOOR = dt.date(2025, 1, 1)
-BUCKETS = ("text", "100K", "1M")
+BUCKETS = ("text", "1K", "10K", "100K", "1M", "10M")
 
 
 class DataError(RuntimeError):

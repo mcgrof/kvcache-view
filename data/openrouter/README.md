@@ -6,7 +6,7 @@ These files support four public pages:
 | --- | --- | --- |
 | `hybrid-trends.html` | `make openrouter-hybrid-trends` | Daily text tokens grouped by reviewed sequence-mixer architecture |
 | `attention-trends.html` | `make openrouter-attention-trends` | Attention patterns and hybrids, with separately documented KV representations |
-| `context-demand.html` | `make openrouter-context` | Exact `100K` and `1M` API context buckets, plus overall text traffic |
+| `context-demand.html` | `make openrouter-context` | All five API request-context buckets, overall text traffic, and a January–September 2026 study |
 | `cache-telemetry.html` | `make openrouter-cache` | Advertised cache-read/write prices and an account of which telemetry is available |
 
 `make openrouter` fetches the data needed by all four targets once and
@@ -68,7 +68,7 @@ Do not commit a key. The catalog request is public and needs no key.
 
 ## Files and interpretation
 
-- `rankings/{text,100K,1M}/YYYY.json.gz`: source rows and update provenance.
+- `rankings/{text,1K,10K,100K,1M,10M}/YYYY.json.gz`: source rows and update provenance.
   Counts retain their original integer/string values. gzip output has a fixed
   metadata timestamp to avoid unrelated binary changes on rebuild.
 - `catalog.json`: complete public Models API snapshot, using
@@ -129,6 +129,52 @@ output. These are traffic proxies, not requests, compute, revenue, or cached byt
 Context labels are API buckets for request context length. Their exact numeric
 boundaries are not assumed. They are not model maximum-context capabilities.
 No cache or storage volume is inferred from them.
+
+## January–September 2026 context study
+
+The context page adds an independent supplemental analysis to OpenRouter's
+[Cache is Crucial](https://openrouter.ai/data/newsletter/cache-is-crucial)
+newsletter (8 October 2026). The newsletter's cache figures retain their own
+source and population; they are not inferred from, or multiplied by, our
+context-bucket totals. No OpenRouter endorsement is implied.
+
+`context-demand.json` contains `context_study`, calculated by
+`scripts/openrouter/context_study.py`. The fixed study compares January 1–31
+against September 1–30, 2026, in UTC, and provides all nine monthly observations.
+The headline multiplier is `(September tokens / 30) / (January tokens / 31)`.
+Both named models and the unnamed `other` row count toward each dataset total.
+Monthly totals, average daily tokens, January indices, bucket-to-all-text
+ratios, architecture shares, and coverage are retained for reproducibility.
+Missing days suppress calendar-month metrics rather than being zero-filled.
+
+Bucket-to-all-text ratios compare independently filtered token totals. They
+are not shares of requests or proof that the buckets form a disjoint,
+exhaustive partition. The API does not document numerical bucket intervals or
+whether its context classification uses input alone. Numerical reconciliation
+is included as a diagnostic, with daily and monthly residuals preserved.
+Provider tokenizers differ; all token totals combine input and output.
+
+Architecture comparisons keep unclassified named traffic and the unnamed tail
+visible. A changing model mix, alias visibility, or daily top-50 cutoff can
+change an observed category's share. Do not interpret category growth as a
+controlled comparison of architecture quality. In particular, January's much
+larger unresolved fraction makes confident architecture adoption claims unsafe.
+
+The source refresh through 18 October 2026 has full January and September
+coverage for all six datasets. Daily text traffic grows 18.69×; the `1M` bucket
+grows 64.39×, and its ratio to text traffic rises from 17.24% to 59.37%.
+These are token-traffic measurements, not growth in average context length.
+The rolling-window section below the study continues to update independently.
+
+Reproduce this context snapshot with:
+
+```sh
+python3 -m scripts.openrouter context --offline --end 2026-10-18
+npx prettier --write context-demand.html
+```
+
+The page is rendered as accessible HTML/SVG with optional local JavaScript
+controls. No API key or authenticated browser request is needed by visitors.
 
 ## Cache and offloading boundaries
 

@@ -11,7 +11,7 @@ from pathlib import Path
 import sys
 import tempfile
 
-from .client import (Client, DataError, FLOOR, atomic_write, completed_day,
+from .client import (BUCKETS, Client, DataError, FLOOR, atomic_write, completed_day,
                      fetch_catalog, load_rankings, read_json, update_rankings,
                      write_json)
 
@@ -37,7 +37,7 @@ def main(argv=None):
 
 def run(args, data_dir):
     client = Client(None if args.offline else os.environ.get("OPEN_ROUTER_API"))
-    buckets = ("text", "100K", "1M") if args.target in ("all", "context") else (("text",) if args.target in ("trends", "attention") else ())
+    buckets = BUCKETS if args.target in ("all", "context") else (("text",) if args.target in ("trends", "attention") else ())
     catalog_path = data_dir / "catalog.json"
     # Fail before modifying anything when an authenticated refresh has no key.
     if not args.offline and buckets and not client.key:
@@ -70,6 +70,9 @@ def run(args, data_dir):
         registry = read_json(data_dir / "architecture-registry.json")
         analysis = analyze(datasets, registry, catalog["data"], str(args.end))
         analysis["provenance"] = provenance
+        if args.target in ("all", "context"):
+            from .context_study import analyze_context_study
+            analysis["context_study"] = analyze_context_study(analysis)
         serialized = json.dumps(analysis, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
         if args.target in ("all", "trends"):
             page_provenance = dict(provenance, analysis_url="data/openrouter/hybrid-trends.json", provenance_url="data/openrouter/hybrid-trends-provenance.json")

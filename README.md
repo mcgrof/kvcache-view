@@ -134,7 +134,7 @@ The site also includes reproducible, source-attributed views of public demand:
 
 - [Hybrid Architecture Trends](hybrid-trends.html): Mamba hybrids, linear-attention hybrids, and regular attention, including sparse attention.
 - [Attention Style Trends](attention-trends.html): full, sparse, and local attention, linear and Mamba hybrids, and independently described KV representations.
-- [Context Demand](context-demand.html): architecture shares and token growth within OpenRouter's request-context buckets.
+- [Context Demand](context-demand.html): all five request-context buckets, a focused January–September 2026 comparison, and architecture shares, alongside OpenRouter's cache findings.
 - [Cache Telemetry & Prices](cache-telemetry.html): advertised cache prices and explicit limits on observed cache-hit and NVMe data.
 
 ```sh
