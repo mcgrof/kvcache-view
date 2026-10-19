@@ -1,16 +1,17 @@
 # OpenRouter snapshots and generated research pages
 
-These files support four public pages:
+These files support five public pages:
 
 | Page | Update target | Data |
 | --- | --- | --- |
 | `hybrid-trends.html` | `make openrouter-hybrid-trends` | Daily text tokens grouped by reviewed sequence-mixer architecture |
 | `attention-trends.html` | `make openrouter-attention-trends` | Attention patterns and hybrids, with separately documented KV representations |
 | `context-demand.html` | `make openrouter-context` | All five API request-context buckets, overall text traffic, and a January–September 2026 study |
+| `architecture-comparison.html` | `make openrouter-comparison` | Matched paper evidence, January–September attention-style demand, and hypothetical state accounting |
 | `cache-telemetry.html` | `make openrouter-cache` | Advertised cache-read/write prices and an account of which telemetry is available |
 
-`make openrouter` fetches the data needed by all four targets once and
-generates all four pages. It makes no inference calls and does not read
+`make openrouter` fetches the data needed by all five targets once and
+generates all five pages. It makes no inference calls and does not read
 private account analytics. This is an on-demand update command, not a scheduler.
 
 ## Refresh and reproduce
@@ -24,8 +25,8 @@ npm ci
 export OPEN_ROUTER_API  # set its value securely in your shell environment
 make openrouter
 
-# Rebuild the committed snapshot without an API key or network requests:
-make openrouter-render OPENROUTER_END=2026-10-06
+# Rebuild the comparison snapshot without an API key or network requests:
+make openrouter-comparison OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-10-18
 
 # Inspect a different historical cutoff from the same saved data:
 make openrouter-render OPENROUTER_END=2026-09-30
@@ -229,3 +230,30 @@ Primary documentation:
 - [Models API](https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties)
 - [Usage accounting](https://openrouter.ai/docs/cookbook/administration/usage-accounting)
 - [Account analytics](https://openrouter.ai/docs/cookbook/administration/analytics-cost-control)
+
+## Sliding windows and recurrent memory comparison
+
+`architecture-comparison.json` recomputes all six datasets from the archived raw
+rows using the reviewed attention registry. The fixed study covers January through
+September 2026; `snapshot_end_date` records the broader archive cutoff. Complete
+calendar months are mandatory, and daily growth accounts for January's 31 days
+versus September's 30. Missing categories are censored observations, not zero.
+September contributors use the same exact dated rows, never inventory rolling totals.
+Local/global models can retain full-attention layers. Linear hybrids include GDN,
+KDA and other recurrent operators. Neither class identifies runtime eviction policy.
+
+The paper panel pins arXiv 2608.28444v2, Tables 3 and 6, to a single base checkpoint.
+Its SWA windows include four sinks. It excludes full-attention hybrids; the
+approximately 100M-token GDN retrofit is not a native hybrid-pretraining result.
+Do not join its BABILong QA1–5 table to the QA1–20 table as one context curve.
+The selected benchmarks are reported scores, not our reproductions or an exhaustive
+quality ranking. The paper's synthetic throughput experiment is not plotted as
+production serving performance.
+
+The active-state calculator is an explicit hypothetical accounting model, separate
+from both observed token demand and benchmark quality. It excludes weights,
+workspace and optional histories. No token-to-HBM/DRAM/NAND conversion is inferred.
+Verify the calculator with `node --test architecture-memory.test.js` and the full
+OpenRouter pipeline with `make test-openrouter`. Existing attention/hybrid rolling
+pages retain their own dated manifests; the comparison regenerates the fixed
+study directly, rather than combining those pages' different snapshots.

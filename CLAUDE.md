@@ -65,6 +65,13 @@ You should *think* hard about your commit log, always.
 
 ## Project-Specific Guidelines for kvcache-view
 
+### Public-site framing
+
+This is an independent open-source analysis and projection project. Do not frame
+the site as an employer initiative or import internal team goals into public copy.
+Company names belong only where needed for factual model, product, or source
+attribution.
+
 ### Visual Consistency
 When modifying the visualization:
 - Maintain consistent color schemes (purple for weights, colors for sequences, red for saved memory)

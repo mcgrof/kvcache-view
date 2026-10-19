@@ -1,0 +1,519 @@
+/* SPDX-License-Identifier: MIT */
+.architecture-page {
+    --architecture-coral: #f9a08a;
+    --architecture-mint: #8be6c8;
+    --architecture-violet: #b8a5ed;
+}
+
+.architecture-page .architecture-hero {
+    margin-bottom: 18px;
+    border-color: #38615d;
+    background: linear-gradient(112deg, #153238 0%, #132732 50%, #1b2334 100%);
+}
+
+.architecture-page .architecture-hero h2 {
+    font-size: clamp(2.5rem, 5.2vw, 4.35rem);
+}
+
+.architecture-page .architecture-mechanisms {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.architecture-page .architecture-mechanism {
+    --mechanism-color: var(--architecture-coral);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 25px;
+    border: 1px solid #9bb5cc26;
+    border-top: 2px solid var(--mechanism-color);
+    border-radius: 10px;
+    background: #101d2d;
+}
+
+.architecture-page .architecture-recurrent {
+    --mechanism-color: var(--architecture-mint);
+}
+
+.architecture-page .architecture-hybrid {
+    --mechanism-color: var(--architecture-violet);
+}
+
+.architecture-page .architecture-mechanism .eyebrow {
+    margin: 0 0 23px;
+    color: var(--mechanism-color);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+}
+
+.architecture-page .architecture-mechanism h3 {
+    margin: 20px 0 9px;
+    color: #e1ebf5;
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+.architecture-page .architecture-mechanism p:not(.eyebrow) {
+    margin-bottom: 20px;
+    color: #a6b8cb;
+    font-size: 0.78rem;
+    line-height: 1.8;
+}
+
+.architecture-page .architecture-tag {
+    display: block;
+    margin-top: auto;
+    color: var(--mechanism-color);
+    font-size: 0.66rem;
+    font-weight: 550;
+}
+
+.architecture-page .architecture-token-strip,
+.architecture-page .architecture-state-flow,
+.architecture-page .architecture-hybrid-stack {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 42px;
+}
+
+.architecture-page .architecture-token-strip i {
+    flex: 1 1 0;
+    height: 29px;
+    border: 1px solid #f9a08a55;
+    border-radius: 4px;
+    background: #f9a08a44;
+}
+
+.architecture-page .architecture-token-strip i:nth-child(-n + 5) {
+    border-style: dashed;
+    border-color: #7891a233;
+    background: #7891a209;
+}
+
+.architecture-page .architecture-token-strip i:first-child {
+    border-style: solid;
+    border-color: #f9a08a66;
+    background: #f9a08a33;
+}
+
+.architecture-page .architecture-state-flow {
+    justify-content: space-between;
+}
+
+.architecture-page .architecture-state-flow span {
+    display: block;
+    width: 48px;
+    height: 38px;
+    border: 1px solid #8be6c85c;
+    border-radius: 6px;
+    background-color: #8be6c822;
+    background-image:
+        linear-gradient(#8be6c822 1px, transparent 1px), linear-gradient(90deg, #8be6c822 1px, transparent 1px);
+    background-size: 12px 12px;
+}
+
+.architecture-page .architecture-state-flow span:first-child {
+    opacity: 0.35;
+}
+
+.architecture-page .architecture-state-flow span:nth-of-type(2) {
+    opacity: 0.65;
+}
+
+.architecture-page .architecture-state-flow b {
+    color: #8be6c888;
+    font-weight: 400;
+}
+
+.architecture-page .architecture-hybrid-stack i {
+    flex: 1 1 0;
+    height: 27px;
+    border: 1px solid #8be6c855;
+    border-radius: 4px;
+    background: #8be6c822;
+}
+
+.architecture-page .architecture-hybrid-stack i:nth-child(3n) {
+    height: 39px;
+    border-color: #b8a5ed88;
+    background: #b8a5ed44;
+}
+
+.architecture-page .architecture-signals {
+    display: grid;
+    grid-template-columns: 0.8fr 0.8fr 1.4fr;
+    gap: 26px;
+    padding: 26px 0 22px;
+    border-top: 1px solid #9bb5cc26;
+    border-bottom: 1px solid #9bb5cc26;
+}
+
+.architecture-page .architecture-signal-card {
+    min-width: 0;
+    padding-left: 25px;
+    border-left: 1px solid #9bb5cc26;
+}
+
+.architecture-page .architecture-signal-card:first-child {
+    padding-left: 0;
+    border-left: 0;
+}
+
+.architecture-page .architecture-signal-card p {
+    margin: 0 0 9px;
+    color: #bacada;
+    font-size: 0.72rem;
+}
+
+.architecture-page .architecture-signal-card strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #e8eff7;
+    font-size: clamp(1.65rem, 3.1vw, 2.6rem);
+    font-weight: 550;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.045em;
+    line-height: 1.2;
+}
+
+.architecture-page .architecture-signal-card:nth-child(2) strong {
+    color: var(--architecture-mint);
+}
+
+.architecture-page .architecture-signal-card span,
+.architecture-page .architecture-signal-source {
+    color: #92a8bd;
+    font-size: 0.68rem;
+    line-height: 1.7;
+}
+
+.architecture-page .architecture-signal-source {
+    margin: 12px 0 36px;
+}
+
+.architecture-page .architecture-market-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px 24px;
+    margin-bottom: 22px;
+}
+
+.architecture-page .architecture-market-controls .architecture-select,
+.architecture-page .architecture-market-controls .study-controls {
+    margin: 0;
+}
+
+.architecture-page .architecture-market-controls .architecture-select select {
+    width: 240px;
+}
+
+.architecture-page select:focus-visible {
+    outline: 2px solid var(--architecture-mint);
+    outline-offset: 4px;
+}
+
+.architecture-page .architecture-scope-note,
+.architecture-page .architecture-small-base {
+    margin: 0 0 26px;
+    padding: 15px 18px;
+    border: 1px solid #7795b12b;
+    border-radius: 7px;
+    color: #a7bbcd;
+    background: #0b172580;
+    font-size: 0.76rem;
+    line-height: 1.8;
+}
+
+.architecture-page .architecture-scope-note strong,
+.architecture-page .architecture-small-base strong {
+    color: #d3e0eb;
+    font-weight: 600;
+}
+
+.architecture-page .architecture-small-base {
+    margin: 26px 0 17px;
+    border-color: #efd48d35;
+}
+
+.architecture-page .architecture-dataset-title {
+    margin: 26px 0 15px;
+    color: #d8e6f0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.architecture-page .architecture-market-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.architecture-page .architecture-market-card {
+    min-width: 0;
+    padding: 19px;
+    border: 1px solid #9bb5cc26;
+    border-radius: 8px;
+    background: #0c1827;
+}
+
+.architecture-page .architecture-market-card .eyebrow {
+    margin: 0 0 16px;
+    color: var(--series);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+}
+
+.architecture-page .architecture-share-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 9px;
+    margin: 0 0 10px;
+    color: #90a4b9;
+    font-size: clamp(1rem, 1.85vw, 1.45rem);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+}
+
+.architecture-page .architecture-share-pair > span:nth-child(2) {
+    color: #607b91;
+    font-size: 0.9rem;
+}
+
+.architecture-page .architecture-share-pair strong {
+    color: var(--series);
+    font-size: 1.25em;
+    font-weight: 600;
+}
+
+.architecture-page .architecture-market-card > .note {
+    margin: 0;
+    font-size: 0.61rem;
+}
+
+.architecture-page .architecture-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 17px;
+    padding-top: 12px;
+    border-top: 1px solid #9bb5cc21;
+    color: #b7c8d9;
+    font-size: 0.67rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.architecture-page .architecture-visibility {
+    margin: 12px 0 22px;
+    padding: 21px;
+    border: 1px solid #9bb5cc21;
+    border-radius: 9px;
+    background: #0a1624;
+}
+
+.architecture-page .architecture-visibility h4 {
+    margin: 0 0 18px;
+    color: #c5d6e4;
+    font-size: 0.78rem;
+    font-weight: 550;
+}
+
+.architecture-page .architecture-coverage-row {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr) 148px;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    color: #a7bdcf;
+    font-size: 0.67rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.architecture-page .architecture-coverage-row > span:last-child {
+    text-align: right;
+}
+
+.architecture-page .architecture-coverage-track {
+    display: flex;
+    height: 12px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #1e2e3d;
+}
+
+.architecture-page .architecture-coverage-track span {
+    height: 100%;
+    flex: 0 0 auto;
+}
+
+.architecture-page .architecture-visibility > .note {
+    margin: 17px 0 0;
+    font-size: 0.65rem;
+}
+
+.architecture-page .architecture-contributors {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 20px 0 0;
+}
+
+.architecture-page .architecture-contributor-card {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid #9bb5cc26;
+    border-radius: 8px;
+    background: #0a1624;
+}
+
+.architecture-page .architecture-contributor-card h4 {
+    margin: 0 0 5px;
+    color: #d8e7f2;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.architecture-page .architecture-contributor-card ol {
+    margin: 19px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.architecture-page .architecture-contributor-card li {
+    padding: 14px 0;
+    border-top: 1px solid #9bb5cc26;
+}
+
+.architecture-page .architecture-model-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    color: #c7d9e7;
+    font-size: 0.73rem;
+    line-height: 1.65;
+}
+
+.architecture-page .architecture-model-top strong {
+    overflow-wrap: anywhere;
+    font-weight: 550;
+}
+
+.architecture-page .architecture-model-top > span {
+    color: var(--architecture-mint);
+    white-space: nowrap;
+}
+
+.architecture-page .architecture-contributor-card li p {
+    margin: 5px 0;
+    color: #93abc0;
+    font-size: 0.66rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.architecture-page .architecture-contributor-card details {
+    margin-top: 8px;
+}
+
+.architecture-page .architecture-contributor-card summary {
+    color: #a2bed1;
+    font-size: 0.64rem;
+    cursor: pointer;
+}
+
+.architecture-page .architecture-downloads {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 25px;
+    margin: 27px 0 21px;
+    padding: 21px 0;
+    border-top: 1px solid #9bb5cc26;
+    border-bottom: 1px solid #9bb5cc26;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 1000px) {
+    .architecture-page .architecture-mechanism,
+    .architecture-page .architecture-market-card {
+        padding: 20px;
+    }
+
+    .architecture-page .architecture-contributors {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .architecture-page .architecture-mechanisms,
+    .architecture-page .architecture-market-cards,
+    .architecture-page .architecture-contributors {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .architecture-page .architecture-mechanism {
+        padding: 23px;
+    }
+
+    .architecture-page .architecture-mechanism .eyebrow {
+        margin-bottom: 17px;
+    }
+
+    .architecture-page .architecture-token-strip,
+    .architecture-page .architecture-state-flow,
+    .architecture-page .architecture-hybrid-stack {
+        max-width: 290px;
+    }
+
+    .architecture-page .architecture-signals {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .architecture-page .architecture-signal-card:last-child {
+        grid-column: 1 / -1;
+        padding: 21px 0 0;
+        border-top: 1px solid #9bb5cc26;
+        border-left: 0;
+    }
+
+    .architecture-page .architecture-share-pair {
+        font-size: 1.5rem;
+    }
+
+    .architecture-page .architecture-market-controls {
+        display: grid;
+        align-items: start;
+    }
+
+    .architecture-page .architecture-coverage-row {
+        grid-template-columns: 68px minmax(0, 1fr);
+        gap: 8px 12px;
+        margin-bottom: 18px;
+    }
+
+    .architecture-page .architecture-coverage-row > span:last-child {
+        grid-column: 2;
+    }
+
+    .architecture-page .architecture-visibility {
+        padding: 17px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .architecture-page * {
+        scroll-behavior: auto;
+        transition: none !important;
+    }
+}

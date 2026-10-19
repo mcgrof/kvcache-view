@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("target", choices=["all", "trends", "attention", "context", "cache"], default="all", nargs="?")
+    parser.add_argument("target", choices=["all", "trends", "attention", "context", "comparison", "cache"], default="all", nargs="?")
     parser.add_argument("--start", type=dt.date.fromisoformat, default=FLOOR)
     parser.add_argument("--end", type=dt.date.fromisoformat, default=completed_day())
     parser.add_argument("--offline", action="store_true", help="Render saved snapshots; never access the network")
@@ -37,7 +37,7 @@ def main(argv=None):
 
 def run(args, data_dir):
     client = Client(None if args.offline else os.environ.get("OPEN_ROUTER_API"))
-    buckets = BUCKETS if args.target in ("all", "context") else (("text",) if args.target in ("trends", "attention") else ())
+    buckets = BUCKETS if args.target in ("all", "context", "comparison") else (("text",) if args.target in ("trends", "attention") else ())
     catalog_path = data_dir / "catalog.json"
     # Fail before modifying anything when an authenticated refresh has no key.
     if not args.offline and buckets and not client.key:
@@ -84,15 +84,25 @@ def run(args, data_dir):
             outputs[data_dir / "context-demand.json"] = serialized
             outputs[data_dir / "context-demand-provenance.json"] = json.dumps(page_provenance, sort_keys=True, indent=2) + "\n"
             outputs[ROOT / "context-demand.html"] = render_context(analysis, page_provenance)
-        if args.target in ("all", "attention"):
+        if args.target in ("all", "attention", "comparison"):
             from .attention import analyze_attention, render_attention
             attention_registry = read_json(data_dir / "attention-registry.json")
             attention = analyze_attention(datasets, registry, catalog["data"], str(args.end), attention_registry)
-            page_provenance = dict(provenance, analysis_url="data/openrouter/attention-trends.json", provenance_url="data/openrouter/attention-trends-provenance.json")
-            attention["provenance"] = page_provenance
-            outputs[data_dir / "attention-trends.json"] = json.dumps(attention, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
-            outputs[data_dir / "attention-trends-provenance.json"] = json.dumps(page_provenance, sort_keys=True, indent=2) + "\n"
-            outputs[ROOT / "attention-trends.html"] = render_attention(attention, page_provenance)
+            if args.target in ("all", "attention"):
+                page_provenance = dict(provenance, analysis_url="data/openrouter/attention-trends.json", provenance_url="data/openrouter/attention-trends-provenance.json")
+                attention["provenance"] = page_provenance
+                outputs[data_dir / "attention-trends.json"] = json.dumps(attention, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+                outputs[data_dir / "attention-trends-provenance.json"] = json.dumps(page_provenance, sort_keys=True, indent=2) + "\n"
+                outputs[ROOT / "attention-trends.html"] = render_attention(attention, page_provenance)
+            if args.target in ("all", "comparison"):
+                from .architecture_study import analyze_architecture_study
+                from .architecture_page import render_architecture_page
+                study = analyze_architecture_study(attention, datasets)
+                page_provenance = dict(provenance, analysis_url="data/openrouter/architecture-comparison.json", provenance_url="data/openrouter/architecture-comparison-provenance.json")
+                study["provenance"] = page_provenance
+                outputs[data_dir / "architecture-comparison.json"] = json.dumps(study, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+                outputs[data_dir / "architecture-comparison-provenance.json"] = json.dumps(page_provenance, sort_keys=True, indent=2) + "\n"
+                outputs[ROOT / "architecture-comparison.html"] = render_architecture_page(study, page_provenance)
     if args.target in ("all", "cache"):
         from .cache import analyze_cache, render_cache
         cache = analyze_cache(catalog)

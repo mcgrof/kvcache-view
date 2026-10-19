@@ -135,6 +135,7 @@ The site also includes reproducible, source-attributed views of public demand:
 - [Hybrid Architecture Trends](hybrid-trends.html): Mamba hybrids, linear-attention hybrids, and regular attention, including sparse attention.
 - [Attention Style Trends](attention-trends.html): full, sparse, and local attention, linear and Mamba hybrids, and independently described KV representations.
 - [Context Demand](context-demand.html): all five request-context buckets, a focused January–September 2026 comparison, and architecture shares, alongside OpenRouter's cache findings.
+- [Sliding Windows & Recurrent Memory](architecture-comparison.html): matched paper results, aligned January–September usage, and an interactive active-state memory comparison.
 - [Cache Telemetry & Prices](cache-telemetry.html): advertised cache prices and explicit limits on observed cache-hit and NVMe data.
 
 ```sh
@@ -143,11 +144,11 @@ export OPEN_ROUTER_API  # supply the key securely in your environment
 make openrouter        # update all OpenRouter data and pages
 ```
 
-Individual targets are `openrouter-hybrid-trends`, `openrouter-attention-trends`, `openrouter-context`, and
-`openrouter-cache`. To reproduce the committed snapshot without network access:
+Individual targets are `openrouter-hybrid-trends`, `openrouter-attention-trends`, `openrouter-context`,
+`openrouter-comparison`, and `openrouter-cache`. To reproduce the committed snapshot without network access:
 
 ```sh
-make openrouter-render OPENROUTER_END=2026-10-06
+make openrouter-comparison OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-10-18
 ```
 
 Updates default to yesterday in UTC, preserve historical data, and refresh a

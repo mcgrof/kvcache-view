@@ -20,7 +20,7 @@ PRETTIER ?= npx --no-install prettier
 ## openrouter: Refresh all public OpenRouter data and generate every OpenRouter page
 openrouter:
 	@$(PYTHON) -m scripts.openrouter all $(OPENROUTER_ARGS)
-	@$(PRETTIER) --write hybrid-trends.html attention-trends.html context-demand.html cache-telemetry.html
+	@$(PRETTIER) --write hybrid-trends.html attention-trends.html context-demand.html architecture-comparison.html cache-telemetry.html
 
 ## openrouter-hybrid-trends: Update architecture adoption and coverage
 openrouter-hybrid-trends:
@@ -33,6 +33,12 @@ openrouter-attention-trends:
 	@$(PRETTIER) --write attention-trends.html
 
 openrouter-attention: openrouter-attention-trends
+
+.PHONY: openrouter-comparison
+## openrouter-comparison: Compare sliding windows, recurrence, and deployed hybrids
+openrouter-comparison:
+	@$(PYTHON) -m scripts.openrouter comparison $(OPENROUTER_ARGS)
+	@$(PRETTIER) --write architecture-comparison.html
 
 ## openrouter-context: Update context-bucket demand and architecture shares
 openrouter-context:

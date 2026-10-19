@@ -43,6 +43,7 @@ NAV = (
     ("hybrid-trends.html", "Architecture trends"),
     ("attention-trends.html", "Attention styles"),
     ("context-demand.html", "Context demand"),
+    ("architecture-comparison.html", "SWA vs recurrence"),
     ("cache-telemetry.html", "Cache telemetry"),
     ("hybrid-checkpoints.html", "Hybrid checkpoints"),
     ("io-projections.html", "I/O projections"),
@@ -99,9 +100,13 @@ def _page(title, description, content, provenance, analysis=None, active=""):
     js_version = hashlib.sha256((root / "openrouter.js").read_bytes()).hexdigest()[:12]
     context_assets = ""
     body_class = ""
-    if active == "context-demand.html":
-        body_class = ' class="context-page"'
-        for filename, tag in (("context-demand.css", "css"), ("context-demand.js", "js")):
+    if active in ("context-demand.html", "architecture-comparison.html"):
+        body_class = ' class="context-page"' if active == "context-demand.html" else ' class="context-page architecture-page"'
+        assets = (("context-demand.css", "css"), ("context-demand.js", "js")) if active == "context-demand.html" else (
+            ("context-demand.css", "css"), ("architecture-comparison.css", "css"),
+            ("architecture-evidence.css", "css"), ("architecture-comparison.js", "js"),
+            ("architecture-memory.js", "js"))
+        for filename, tag in assets:
             asset = root / filename
             if asset.exists():
                 version = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]

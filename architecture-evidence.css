@@ -1,0 +1,142 @@
+/* SPDX-License-Identifier: MIT */
+.architecture-page .paper-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 26px 0 20px;
+}
+.architecture-page .paper-mini {
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #0c1726;
+}
+.architecture-page .paper-mini h3 {
+    margin: 0 0 16px;
+    font-size: 1rem;
+}
+.architecture-page .paper-bar-row {
+    display: grid;
+    grid-template-columns: 140px minmax(20px, 1fr) 36px;
+    align-items: center;
+    gap: 9px;
+    margin: 11px 0;
+    font-size: 0.73rem;
+}
+.architecture-page .paper-bar-row strong {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.architecture-page .paper-bar-track {
+    height: 8px;
+    border-radius: 2px;
+    background: #1b2b3d;
+}
+.architecture-page .paper-bar-track i {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+}
+.architecture-page .memory-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 24px 0;
+}
+.architecture-page .memory-controls label {
+    flex: 1 1 160px;
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+.architecture-page .memory-controls select {
+    width: 100%;
+    margin-top: 7px;
+    padding: 10px 12px;
+    border: 1px solid #3c526a;
+    border-radius: 7px;
+    background: #0c1726;
+    color: var(--text);
+    font: inherit;
+}
+.architecture-page select:focus-visible {
+    outline: 2px solid #8be6c8;
+    outline-offset: 4px;
+}
+.architecture-page .memory-examples {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin: 22px 0;
+}
+.architecture-page .memory-examples p {
+    color: var(--muted);
+    font-size: 0.86rem;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+    margin: 0;
+}
+.architecture-page .memory-examples strong {
+    display: block;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+.architecture-page #memory-chart svg {
+    width: 100%;
+    display: block;
+    height: auto;
+}
+.architecture-page .memory-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 12px 0 22px;
+}
+.architecture-page .memory-legend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 50%;
+}
+.architecture-page .research-table td {
+    min-width: 240px;
+    vertical-align: top;
+}
+.architecture-page .research-table th {
+    min-width: 128px;
+    vertical-align: top;
+}
+.architecture-page .study-details code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+    .architecture-page .paper-grid,
+    .architecture-page .memory-examples {
+        grid-template-columns: 1fr;
+    }
+    .architecture-page .paper-mini {
+        padding: 15px;
+    }
+    .architecture-page .paper-bar-row {
+        grid-template-columns: 126px minmax(20px, 1fr) 32px;
+        font-size: 0.7rem;
+    }
+}
+@media print {
+    .architecture-page .paper-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .architecture-page .paper-mini {
+        break-inside: avoid;
+    }
+}
+
+.architecture-page #memory-chart {
+    overflow-x: auto;
+}
+.architecture-page #memory-chart svg {
+    min-width: 680px;
+}
