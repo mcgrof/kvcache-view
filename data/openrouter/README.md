@@ -131,6 +131,27 @@ Context labels are API buckets for request context length. Their exact numeric
 boundaries are not assumed. They are not model maximum-context capabilities.
 No cache or storage volume is inferred from them.
 
+Each individual API request contributes its full input plus newly generated
+output to its assigned context bucket. A follow-up includes any earlier history
+sent again, not just the newest message. The API returns sums across requests;
+it does not group them into session totals or isolate first requests. One session
+can contribute repeatedly and to different buckets as its context changes.
+
+For example, a 1,000-token input with 200 output tokens contributes 1,200 traffic
+tokens. Keeping that history and adding a 100-token follow-up gives a 1,300-token
+input; another 200-token output contributes 1,500 more traffic tokens. The two
+calls contribute 2,700 traffic tokens, but the final context contains 1,500 tokens
+(ignoring formatting overhead). Retained full-attention KV state would track
+those roughly 1,500 positions, not the 2,700 cumulative traffic tokens. Actual
+cache reuse, residency and truncation/compaction are not exposed here.
+
+The public rankings API supplies only combined `total_tokens`, with no separate
+input/output fields or filter to select one, and no session IDs, turn numbers or
+first-request lengths. Its bucket-assignment rule (input alone versus input plus
+output) is also undocumented. Per-account usage can expose separate counts for
+that customer's requests, but cannot provide a platform-wide split. Do not
+estimate one from the combined totals or apply the newsletter's cache ratios.
+
 ## January–September 2026 context study
 
 The context page adds an independent supplemental analysis to OpenRouter's

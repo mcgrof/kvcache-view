@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
-            content="January–September 2026: how OpenRouter request-context traffic changed, and what it means for memory systems."
+            content="January–September 2026: input + output token traffic, grouped by the context size of individual API requests."
         />
         <meta name="theme-color" content="#1428a0" />
         <title>Context demand | KV Cache Visualizations</title>
@@ -32,23 +32,23 @@
                 <p class="eyebrow">OpenRouter observatory · KV Cache Visualizations</p>
                 <h1>Context demand</h1>
                 <p class="lede">
-                    January–September 2026: how OpenRouter request-context traffic changed, and what it means for memory
-                    systems.
+                    January–September 2026: input + output token traffic, grouped by the context size of individual API
+                    requests.
                 </p>
             </header>
             <main id="main">
                 <section class="study-hero" aria-labelledby="study-title">
                     <p class="study-kicker">Focused study / January → September 2026</p>
                     <h2 id="study-title">
-                        The context mix
+                        Traffic is shifting toward
                         <br />
-                        is changing.
+                        larger request contexts.
                     </h2>
                     <p class="study-deck">
                         The
                         <strong>1M request-context bucket</strong>
-                        grew 64.4× in daily token volume. Overall text traffic grew 18.7×. Its ratio to all text traffic
-                        moved from 17.2% to 59.4%.
+                        grew 64.4× in daily input + output token volume. Overall text traffic grew 18.7×. Its ratio to
+                        all text traffic moved from 17.2% to 59.4%.
                     </p>
                     <div class="study-meta">
                         <span>Five request-context buckets</span>
@@ -56,6 +56,7 @@
                         <span>Input + output tokens</span>
                     </div>
                     <div class="study-jump">
+                        <a href="#what-counts">What exactly is counted? ↓</a>
                         <a href="#context-trends">Explore the data ↓</a>
                         <a href="architecture-comparison.html">Compare memory architectures ↗</a>
                         <a href="https://openrouter.ai/data/newsletter/cache-is-crucial">
@@ -81,23 +82,127 @@
                     </article>
                 </div>
                 <p class="study-boundary">
-                    These multipliers describe
-                    <strong>token traffic</strong>
-                    , not average prompt length. The labels 1K–10M are OpenRouter’s request-context buckets; their exact
-                    numeric boundaries are not documented.
+                    <strong>Each API request contributes its input + output tokens.</strong>
+                    We sum that traffic across requests in each context bucket. These are not first-prompt sizes,
+                    session totals, or average context lengths. A follow-up counts again, including any history sent
+                    with it.
                 </p>
+                <section class="study-panel" id="what-counts" aria-labelledby="what-counts-title">
+                    <h2 id="what-counts-title">What exactly is counted?</h2>
+                    <p>
+                        <strong>
+                            The question this graph answers: how much input + output token traffic comes from requests
+                            in each context-size bucket?
+                        </strong>
+                        One request means one model call, including a follow-up or an agent’s next call after a tool
+                        result. It is not a whole conversation.
+                    </p>
+                    <div class="method-grid">
+                        <article class="method-item">
+                            <h3>1. Group individual requests</h3>
+                            <p>
+                                OpenRouter assigns requests to context buckets labeled 1K, 10K, 100K, 1M and 10M. These
+                                describe request context, not the model’s maximum supported window. The exact boundaries
+                                and whether assignment uses input alone or input + output are not documented.
+                            </p>
+                        </article>
+                        <article class="method-item">
+                            <h3>2. Add input and output traffic</h3>
+                            <p>
+                                Each request contributes its full input plus its newly generated output. Input includes
+                                whatever system instructions, tool definitions, documents and conversation history the
+                                application sends, as well as the latest user message. A short “continue” can accompany
+                                a large input.
+                            </p>
+                        </article>
+                        <article class="method-item">
+                            <h3>3. Sum across requests</h3>
+                            <p>
+                                The API returns aggregate totals, not individual request records. Follow-ups contribute
+                                again, including repeated history. One session can contribute many times and move
+                                between buckets as its context changes. The graph neither groups traffic by session nor
+                                isolates first requests.
+                            </p>
+                        </article>
+                    </div>
+                    <details class="study-details">
+                        <summary>Example: two calls, 2,700 traffic tokens, 1,500 tokens of final context</summary>
+                        <p>
+                            Illustration only: assume a text conversation keeps all history, with no compaction, and
+                            ignore message-format overhead.
+                        </p>
+                        <div
+                            class="table-wrap"
+                            tabindex="0"
+                            role="region"
+                            aria-label="Two-request token accounting example"
+                        >
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Model call</th>
+                                        <th scope="col">Full input</th>
+                                        <th scope="col">New output</th>
+                                        <th scope="col">Traffic contributed</th>
+                                        <th scope="col">Context after reply</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">First request</th>
+                                        <td>1,000</td>
+                                        <td>200</td>
+                                        <td>1,200</td>
+                                        <td>1,200</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Follow-up adding 100 tokens</th>
+                                        <td>1,300</td>
+                                        <td>200</td>
+                                        <td>1,500</td>
+                                        <td>1,500</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>
+                            The second input contains the earlier 1,200 tokens plus 100 new tokens. Together the calls
+                            contribute
+                            <strong>2,700 traffic tokens</strong>
+                            , while the final context is
+                            <strong>1,500 tokens</strong>
+                            . Each call contributes to its own assigned bucket; no specific bucket is assumed in this
+                            example.
+                        </p>
+                        <p>
+                            For a conventional full-attention model, a retained cache covering that final context would
+                            represent roughly 1,500 token positions, not 2,700. Reusing the earlier prefix can avoid
+                            rebuilding its KV state. These traffic totals do not reveal whether such reuse actually
+                            happened. Truncation or compaction can also shrink the next request’s input.
+                        </p>
+                    </details>
+                    <p class="note">
+                        <strong>Can we split input from output, or show first-prompt sizes?</strong>
+                        Not from this public dataset: it exposes only their combined total and no first-turn or session
+                        metadata. Separate counts for a customer’s own requests do not supply a platform-wide split. We
+                        would need additional aggregate data from OpenRouter.
+                    </p>
+                </section>
                 <section class="study-panel" id="context-trends">
                     <div class="section-heading">
                         <span class="section-number">01</span>
                         <div>
-                            <h2>Growth and composition</h2>
-                            <p>Follow all nine months. Compare each context bucket with overall text traffic.</p>
+                            <h2>Input + output token traffic by request-context bucket</h2>
+                            <p>
+                                Follow all nine months. Each series sums traffic from individual requests across
+                                sessions; it does not track a session’s accumulated length.
+                            </p>
                         </div>
                     </div>
                     <div class="study-controls" hidden aria-label="Chart measure">
                         <button type="button" data-view="ratio" aria-pressed="true">Traffic ratio</button>
                         <button type="button" data-view="growth" aria-pressed="false">Growth since January</button>
-                        <button type="button" data-view="volume" aria-pressed="false">Tokens per day</button>
+                        <button type="button" data-view="volume" aria-pressed="false">Input + output per day</button>
                     </div>
                     <div class="study-legend">
                         <span data-series-legend="text">
@@ -1601,9 +1706,9 @@
                                 aria-labelledby="trend-volume-title"
                             >
                                 <title id="trend-volume-title">
-                                    Average reported tokens per day, January to September 2026
+                                    Average input + output tokens per day, January to September 2026
                                 </title>
-                                <text x="85" y="17" class="axis-label">Tokens per day</text>
+                                <text x="85" y="17" class="axis-label">Input + output tokens per day</text>
                                 <line class="gridline" x1="85" y1="334.0" x2="992" y2="334.0" />
                                 <text class="axis-label" x="70" y="339.0" text-anchor="end">0</text>
                                 <line class="gridline" x1="85" y1="259.5" x2="992" y2="259.5" />
@@ -1641,10 +1746,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jan 2026 · All text · 1.01T tokens/day"
-                                        aria-label="Jan 2026 · All text · 1.01T tokens/day"
+                                        data-chart-point="Jan 2026 · All text · 1.01T input + output tokens/day"
+                                        aria-label="Jan 2026 · All text · 1.01T input + output tokens/day"
                                     >
-                                        <title>Jan 2026 · All text · 1.01T tokens/day</title>
+                                        <title>Jan 2026 · All text · 1.01T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="198.4"
@@ -1654,10 +1759,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Feb 2026 · All text · 1.77T tokens/day"
-                                        aria-label="Feb 2026 · All text · 1.77T tokens/day"
+                                        data-chart-point="Feb 2026 · All text · 1.77T input + output tokens/day"
+                                        aria-label="Feb 2026 · All text · 1.77T input + output tokens/day"
                                     >
-                                        <title>Feb 2026 · All text · 1.77T tokens/day</title>
+                                        <title>Feb 2026 · All text · 1.77T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="311.8"
@@ -1667,10 +1772,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Mar 2026 · All text · 2.69T tokens/day"
-                                        aria-label="Mar 2026 · All text · 2.69T tokens/day"
+                                        data-chart-point="Mar 2026 · All text · 2.69T input + output tokens/day"
+                                        aria-label="Mar 2026 · All text · 2.69T input + output tokens/day"
                                     >
-                                        <title>Mar 2026 · All text · 2.69T tokens/day</title>
+                                        <title>Mar 2026 · All text · 2.69T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="425.1"
@@ -1680,10 +1785,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Apr 2026 · All text · 3.21T tokens/day"
-                                        aria-label="Apr 2026 · All text · 3.21T tokens/day"
+                                        data-chart-point="Apr 2026 · All text · 3.21T input + output tokens/day"
+                                        aria-label="Apr 2026 · All text · 3.21T input + output tokens/day"
                                     >
-                                        <title>Apr 2026 · All text · 3.21T tokens/day</title>
+                                        <title>Apr 2026 · All text · 3.21T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="538.5"
@@ -1693,10 +1798,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="May 2026 · All text · 3.93T tokens/day"
-                                        aria-label="May 2026 · All text · 3.93T tokens/day"
+                                        data-chart-point="May 2026 · All text · 3.93T input + output tokens/day"
+                                        aria-label="May 2026 · All text · 3.93T input + output tokens/day"
                                     >
-                                        <title>May 2026 · All text · 3.93T tokens/day</title>
+                                        <title>May 2026 · All text · 3.93T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="651.9"
@@ -1706,10 +1811,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jun 2026 · All text · 6.23T tokens/day"
-                                        aria-label="Jun 2026 · All text · 6.23T tokens/day"
+                                        data-chart-point="Jun 2026 · All text · 6.23T input + output tokens/day"
+                                        aria-label="Jun 2026 · All text · 6.23T input + output tokens/day"
                                     >
-                                        <title>Jun 2026 · All text · 6.23T tokens/day</title>
+                                        <title>Jun 2026 · All text · 6.23T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="765.2"
@@ -1719,10 +1824,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jul 2026 · All text · 7.94T tokens/day"
-                                        aria-label="Jul 2026 · All text · 7.94T tokens/day"
+                                        data-chart-point="Jul 2026 · All text · 7.94T input + output tokens/day"
+                                        aria-label="Jul 2026 · All text · 7.94T input + output tokens/day"
                                     >
-                                        <title>Jul 2026 · All text · 7.94T tokens/day</title>
+                                        <title>Jul 2026 · All text · 7.94T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="878.6"
@@ -1732,10 +1837,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Aug 2026 · All text · 12.17T tokens/day"
-                                        aria-label="Aug 2026 · All text · 12.17T tokens/day"
+                                        data-chart-point="Aug 2026 · All text · 12.17T input + output tokens/day"
+                                        aria-label="Aug 2026 · All text · 12.17T input + output tokens/day"
                                     >
-                                        <title>Aug 2026 · All text · 12.17T tokens/day</title>
+                                        <title>Aug 2026 · All text · 12.17T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="992.0"
@@ -1745,10 +1850,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Sep 2026 · All text · 18.96T tokens/day"
-                                        aria-label="Sep 2026 · All text · 18.96T tokens/day"
+                                        data-chart-point="Sep 2026 · All text · 18.96T input + output tokens/day"
+                                        aria-label="Sep 2026 · All text · 18.96T input + output tokens/day"
                                     >
-                                        <title>Sep 2026 · All text · 18.96T tokens/day</title>
+                                        <title>Sep 2026 · All text · 18.96T input + output tokens/day</title>
                                     </circle>
                                 </g>
                                 <g data-chart-series="1K">
@@ -1768,10 +1873,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jan 2026 · 1K · 35.47B tokens/day"
-                                        aria-label="Jan 2026 · 1K · 35.47B tokens/day"
+                                        data-chart-point="Jan 2026 · 1K · 35.47B input + output tokens/day"
+                                        aria-label="Jan 2026 · 1K · 35.47B input + output tokens/day"
                                     >
-                                        <title>Jan 2026 · 1K · 35.47B tokens/day</title>
+                                        <title>Jan 2026 · 1K · 35.47B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="198.4"
@@ -1781,10 +1886,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Feb 2026 · 1K · 40.61B tokens/day"
-                                        aria-label="Feb 2026 · 1K · 40.61B tokens/day"
+                                        data-chart-point="Feb 2026 · 1K · 40.61B input + output tokens/day"
+                                        aria-label="Feb 2026 · 1K · 40.61B input + output tokens/day"
                                     >
-                                        <title>Feb 2026 · 1K · 40.61B tokens/day</title>
+                                        <title>Feb 2026 · 1K · 40.61B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="311.8"
@@ -1794,10 +1899,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Mar 2026 · 1K · 42.05B tokens/day"
-                                        aria-label="Mar 2026 · 1K · 42.05B tokens/day"
+                                        data-chart-point="Mar 2026 · 1K · 42.05B input + output tokens/day"
+                                        aria-label="Mar 2026 · 1K · 42.05B input + output tokens/day"
                                     >
-                                        <title>Mar 2026 · 1K · 42.05B tokens/day</title>
+                                        <title>Mar 2026 · 1K · 42.05B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="425.1"
@@ -1807,10 +1912,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Apr 2026 · 1K · 49.22B tokens/day"
-                                        aria-label="Apr 2026 · 1K · 49.22B tokens/day"
+                                        data-chart-point="Apr 2026 · 1K · 49.22B input + output tokens/day"
+                                        aria-label="Apr 2026 · 1K · 49.22B input + output tokens/day"
                                     >
-                                        <title>Apr 2026 · 1K · 49.22B tokens/day</title>
+                                        <title>Apr 2026 · 1K · 49.22B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="538.5"
@@ -1820,10 +1925,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="May 2026 · 1K · 54.26B tokens/day"
-                                        aria-label="May 2026 · 1K · 54.26B tokens/day"
+                                        data-chart-point="May 2026 · 1K · 54.26B input + output tokens/day"
+                                        aria-label="May 2026 · 1K · 54.26B input + output tokens/day"
                                     >
-                                        <title>May 2026 · 1K · 54.26B tokens/day</title>
+                                        <title>May 2026 · 1K · 54.26B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="651.9"
@@ -1833,10 +1938,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jun 2026 · 1K · 61.06B tokens/day"
-                                        aria-label="Jun 2026 · 1K · 61.06B tokens/day"
+                                        data-chart-point="Jun 2026 · 1K · 61.06B input + output tokens/day"
+                                        aria-label="Jun 2026 · 1K · 61.06B input + output tokens/day"
                                     >
-                                        <title>Jun 2026 · 1K · 61.06B tokens/day</title>
+                                        <title>Jun 2026 · 1K · 61.06B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="765.2"
@@ -1846,10 +1951,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jul 2026 · 1K · 64.90B tokens/day"
-                                        aria-label="Jul 2026 · 1K · 64.90B tokens/day"
+                                        data-chart-point="Jul 2026 · 1K · 64.90B input + output tokens/day"
+                                        aria-label="Jul 2026 · 1K · 64.90B input + output tokens/day"
                                     >
-                                        <title>Jul 2026 · 1K · 64.90B tokens/day</title>
+                                        <title>Jul 2026 · 1K · 64.90B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="878.6"
@@ -1859,10 +1964,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Aug 2026 · 1K · 70.20B tokens/day"
-                                        aria-label="Aug 2026 · 1K · 70.20B tokens/day"
+                                        data-chart-point="Aug 2026 · 1K · 70.20B input + output tokens/day"
+                                        aria-label="Aug 2026 · 1K · 70.20B input + output tokens/day"
                                     >
-                                        <title>Aug 2026 · 1K · 70.20B tokens/day</title>
+                                        <title>Aug 2026 · 1K · 70.20B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="992.0"
@@ -1872,10 +1977,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Sep 2026 · 1K · 88.04B tokens/day"
-                                        aria-label="Sep 2026 · 1K · 88.04B tokens/day"
+                                        data-chart-point="Sep 2026 · 1K · 88.04B input + output tokens/day"
+                                        aria-label="Sep 2026 · 1K · 88.04B input + output tokens/day"
                                     >
-                                        <title>Sep 2026 · 1K · 88.04B tokens/day</title>
+                                        <title>Sep 2026 · 1K · 88.04B input + output tokens/day</title>
                                     </circle>
                                 </g>
                                 <g data-chart-series="10K">
@@ -1895,10 +2000,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jan 2026 · 10K · 289.08B tokens/day"
-                                        aria-label="Jan 2026 · 10K · 289.08B tokens/day"
+                                        data-chart-point="Jan 2026 · 10K · 289.08B input + output tokens/day"
+                                        aria-label="Jan 2026 · 10K · 289.08B input + output tokens/day"
                                     >
-                                        <title>Jan 2026 · 10K · 289.08B tokens/day</title>
+                                        <title>Jan 2026 · 10K · 289.08B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="198.4"
@@ -1908,10 +2013,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Feb 2026 · 10K · 349.84B tokens/day"
-                                        aria-label="Feb 2026 · 10K · 349.84B tokens/day"
+                                        data-chart-point="Feb 2026 · 10K · 349.84B input + output tokens/day"
+                                        aria-label="Feb 2026 · 10K · 349.84B input + output tokens/day"
                                     >
-                                        <title>Feb 2026 · 10K · 349.84B tokens/day</title>
+                                        <title>Feb 2026 · 10K · 349.84B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="311.8"
@@ -1921,10 +2026,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Mar 2026 · 10K · 459.49B tokens/day"
-                                        aria-label="Mar 2026 · 10K · 459.49B tokens/day"
+                                        data-chart-point="Mar 2026 · 10K · 459.49B input + output tokens/day"
+                                        aria-label="Mar 2026 · 10K · 459.49B input + output tokens/day"
                                     >
-                                        <title>Mar 2026 · 10K · 459.49B tokens/day</title>
+                                        <title>Mar 2026 · 10K · 459.49B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="425.1"
@@ -1934,10 +2039,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Apr 2026 · 10K · 527.90B tokens/day"
-                                        aria-label="Apr 2026 · 10K · 527.90B tokens/day"
+                                        data-chart-point="Apr 2026 · 10K · 527.90B input + output tokens/day"
+                                        aria-label="Apr 2026 · 10K · 527.90B input + output tokens/day"
                                     >
-                                        <title>Apr 2026 · 10K · 527.90B tokens/day</title>
+                                        <title>Apr 2026 · 10K · 527.90B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="538.5"
@@ -1947,10 +2052,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="May 2026 · 10K · 628.87B tokens/day"
-                                        aria-label="May 2026 · 10K · 628.87B tokens/day"
+                                        data-chart-point="May 2026 · 10K · 628.87B input + output tokens/day"
+                                        aria-label="May 2026 · 10K · 628.87B input + output tokens/day"
                                     >
-                                        <title>May 2026 · 10K · 628.87B tokens/day</title>
+                                        <title>May 2026 · 10K · 628.87B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="651.9"
@@ -1960,10 +2065,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jun 2026 · 10K · 737.69B tokens/day"
-                                        aria-label="Jun 2026 · 10K · 737.69B tokens/day"
+                                        data-chart-point="Jun 2026 · 10K · 737.69B input + output tokens/day"
+                                        aria-label="Jun 2026 · 10K · 737.69B input + output tokens/day"
                                     >
-                                        <title>Jun 2026 · 10K · 737.69B tokens/day</title>
+                                        <title>Jun 2026 · 10K · 737.69B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="765.2"
@@ -1973,10 +2078,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jul 2026 · 10K · 837.54B tokens/day"
-                                        aria-label="Jul 2026 · 10K · 837.54B tokens/day"
+                                        data-chart-point="Jul 2026 · 10K · 837.54B input + output tokens/day"
+                                        aria-label="Jul 2026 · 10K · 837.54B input + output tokens/day"
                                     >
-                                        <title>Jul 2026 · 10K · 837.54B tokens/day</title>
+                                        <title>Jul 2026 · 10K · 837.54B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="878.6"
@@ -1986,10 +2091,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Aug 2026 · 10K · 1.03T tokens/day"
-                                        aria-label="Aug 2026 · 10K · 1.03T tokens/day"
+                                        data-chart-point="Aug 2026 · 10K · 1.03T input + output tokens/day"
+                                        aria-label="Aug 2026 · 10K · 1.03T input + output tokens/day"
                                     >
-                                        <title>Aug 2026 · 10K · 1.03T tokens/day</title>
+                                        <title>Aug 2026 · 10K · 1.03T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="992.0"
@@ -1999,10 +2104,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Sep 2026 · 10K · 1.28T tokens/day"
-                                        aria-label="Sep 2026 · 10K · 1.28T tokens/day"
+                                        data-chart-point="Sep 2026 · 10K · 1.28T input + output tokens/day"
+                                        aria-label="Sep 2026 · 10K · 1.28T input + output tokens/day"
                                     >
-                                        <title>Sep 2026 · 10K · 1.28T tokens/day</title>
+                                        <title>Sep 2026 · 10K · 1.28T input + output tokens/day</title>
                                     </circle>
                                 </g>
                                 <g data-chart-series="100K">
@@ -2022,10 +2127,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jan 2026 · 100K · 514.33B tokens/day"
-                                        aria-label="Jan 2026 · 100K · 514.33B tokens/day"
+                                        data-chart-point="Jan 2026 · 100K · 514.33B input + output tokens/day"
+                                        aria-label="Jan 2026 · 100K · 514.33B input + output tokens/day"
                                     >
-                                        <title>Jan 2026 · 100K · 514.33B tokens/day</title>
+                                        <title>Jan 2026 · 100K · 514.33B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="198.4"
@@ -2035,10 +2140,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Feb 2026 · 100K · 896.27B tokens/day"
-                                        aria-label="Feb 2026 · 100K · 896.27B tokens/day"
+                                        data-chart-point="Feb 2026 · 100K · 896.27B input + output tokens/day"
+                                        aria-label="Feb 2026 · 100K · 896.27B input + output tokens/day"
                                     >
-                                        <title>Feb 2026 · 100K · 896.27B tokens/day</title>
+                                        <title>Feb 2026 · 100K · 896.27B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="311.8"
@@ -2048,10 +2153,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Mar 2026 · 100K · 1.30T tokens/day"
-                                        aria-label="Mar 2026 · 100K · 1.30T tokens/day"
+                                        data-chart-point="Mar 2026 · 100K · 1.30T input + output tokens/day"
+                                        aria-label="Mar 2026 · 100K · 1.30T input + output tokens/day"
                                     >
-                                        <title>Mar 2026 · 100K · 1.30T tokens/day</title>
+                                        <title>Mar 2026 · 100K · 1.30T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="425.1"
@@ -2061,10 +2166,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Apr 2026 · 100K · 1.59T tokens/day"
-                                        aria-label="Apr 2026 · 100K · 1.59T tokens/day"
+                                        data-chart-point="Apr 2026 · 100K · 1.59T input + output tokens/day"
+                                        aria-label="Apr 2026 · 100K · 1.59T input + output tokens/day"
                                     >
-                                        <title>Apr 2026 · 100K · 1.59T tokens/day</title>
+                                        <title>Apr 2026 · 100K · 1.59T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="538.5"
@@ -2074,10 +2179,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="May 2026 · 100K · 2.07T tokens/day"
-                                        aria-label="May 2026 · 100K · 2.07T tokens/day"
+                                        data-chart-point="May 2026 · 100K · 2.07T input + output tokens/day"
+                                        aria-label="May 2026 · 100K · 2.07T input + output tokens/day"
                                     >
-                                        <title>May 2026 · 100K · 2.07T tokens/day</title>
+                                        <title>May 2026 · 100K · 2.07T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="651.9"
@@ -2087,10 +2192,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jun 2026 · 100K · 2.94T tokens/day"
-                                        aria-label="Jun 2026 · 100K · 2.94T tokens/day"
+                                        data-chart-point="Jun 2026 · 100K · 2.94T input + output tokens/day"
+                                        aria-label="Jun 2026 · 100K · 2.94T input + output tokens/day"
                                     >
-                                        <title>Jun 2026 · 100K · 2.94T tokens/day</title>
+                                        <title>Jun 2026 · 100K · 2.94T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="765.2"
@@ -2100,10 +2205,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jul 2026 · 100K · 3.46T tokens/day"
-                                        aria-label="Jul 2026 · 100K · 3.46T tokens/day"
+                                        data-chart-point="Jul 2026 · 100K · 3.46T input + output tokens/day"
+                                        aria-label="Jul 2026 · 100K · 3.46T input + output tokens/day"
                                     >
-                                        <title>Jul 2026 · 100K · 3.46T tokens/day</title>
+                                        <title>Jul 2026 · 100K · 3.46T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="878.6"
@@ -2113,10 +2218,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Aug 2026 · 100K · 4.26T tokens/day"
-                                        aria-label="Aug 2026 · 100K · 4.26T tokens/day"
+                                        data-chart-point="Aug 2026 · 100K · 4.26T input + output tokens/day"
+                                        aria-label="Aug 2026 · 100K · 4.26T input + output tokens/day"
                                     >
-                                        <title>Aug 2026 · 100K · 4.26T tokens/day</title>
+                                        <title>Aug 2026 · 100K · 4.26T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="992.0"
@@ -2126,10 +2231,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Sep 2026 · 100K · 6.32T tokens/day"
-                                        aria-label="Sep 2026 · 100K · 6.32T tokens/day"
+                                        data-chart-point="Sep 2026 · 100K · 6.32T input + output tokens/day"
+                                        aria-label="Sep 2026 · 100K · 6.32T input + output tokens/day"
                                     >
-                                        <title>Sep 2026 · 100K · 6.32T tokens/day</title>
+                                        <title>Sep 2026 · 100K · 6.32T input + output tokens/day</title>
                                     </circle>
                                 </g>
                                 <g data-chart-series="1M">
@@ -2149,10 +2254,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jan 2026 · 1M · 174.84B tokens/day"
-                                        aria-label="Jan 2026 · 1M · 174.84B tokens/day"
+                                        data-chart-point="Jan 2026 · 1M · 174.84B input + output tokens/day"
+                                        aria-label="Jan 2026 · 1M · 174.84B input + output tokens/day"
                                     >
-                                        <title>Jan 2026 · 1M · 174.84B tokens/day</title>
+                                        <title>Jan 2026 · 1M · 174.84B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="198.4"
@@ -2162,10 +2267,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Feb 2026 · 1M · 477.74B tokens/day"
-                                        aria-label="Feb 2026 · 1M · 477.74B tokens/day"
+                                        data-chart-point="Feb 2026 · 1M · 477.74B input + output tokens/day"
+                                        aria-label="Feb 2026 · 1M · 477.74B input + output tokens/day"
                                     >
-                                        <title>Feb 2026 · 1M · 477.74B tokens/day</title>
+                                        <title>Feb 2026 · 1M · 477.74B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="311.8"
@@ -2175,10 +2280,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Mar 2026 · 1M · 880.87B tokens/day"
-                                        aria-label="Mar 2026 · 1M · 880.87B tokens/day"
+                                        data-chart-point="Mar 2026 · 1M · 880.87B input + output tokens/day"
+                                        aria-label="Mar 2026 · 1M · 880.87B input + output tokens/day"
                                     >
-                                        <title>Mar 2026 · 1M · 880.87B tokens/day</title>
+                                        <title>Mar 2026 · 1M · 880.87B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="425.1"
@@ -2188,10 +2293,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Apr 2026 · 1M · 1.05T tokens/day"
-                                        aria-label="Apr 2026 · 1M · 1.05T tokens/day"
+                                        data-chart-point="Apr 2026 · 1M · 1.05T input + output tokens/day"
+                                        aria-label="Apr 2026 · 1M · 1.05T input + output tokens/day"
                                     >
-                                        <title>Apr 2026 · 1M · 1.05T tokens/day</title>
+                                        <title>Apr 2026 · 1M · 1.05T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="538.5"
@@ -2201,10 +2306,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="May 2026 · 1M · 1.18T tokens/day"
-                                        aria-label="May 2026 · 1M · 1.18T tokens/day"
+                                        data-chart-point="May 2026 · 1M · 1.18T input + output tokens/day"
+                                        aria-label="May 2026 · 1M · 1.18T input + output tokens/day"
                                     >
-                                        <title>May 2026 · 1M · 1.18T tokens/day</title>
+                                        <title>May 2026 · 1M · 1.18T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="651.9"
@@ -2214,10 +2319,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jun 2026 · 1M · 2.48T tokens/day"
-                                        aria-label="Jun 2026 · 1M · 2.48T tokens/day"
+                                        data-chart-point="Jun 2026 · 1M · 2.48T input + output tokens/day"
+                                        aria-label="Jun 2026 · 1M · 2.48T input + output tokens/day"
                                     >
-                                        <title>Jun 2026 · 1M · 2.48T tokens/day</title>
+                                        <title>Jun 2026 · 1M · 2.48T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="765.2"
@@ -2227,10 +2332,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jul 2026 · 1M · 3.57T tokens/day"
-                                        aria-label="Jul 2026 · 1M · 3.57T tokens/day"
+                                        data-chart-point="Jul 2026 · 1M · 3.57T input + output tokens/day"
+                                        aria-label="Jul 2026 · 1M · 3.57T input + output tokens/day"
                                     >
-                                        <title>Jul 2026 · 1M · 3.57T tokens/day</title>
+                                        <title>Jul 2026 · 1M · 3.57T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="878.6"
@@ -2240,10 +2345,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Aug 2026 · 1M · 6.79T tokens/day"
-                                        aria-label="Aug 2026 · 1M · 6.79T tokens/day"
+                                        data-chart-point="Aug 2026 · 1M · 6.79T input + output tokens/day"
+                                        aria-label="Aug 2026 · 1M · 6.79T input + output tokens/day"
                                     >
-                                        <title>Aug 2026 · 1M · 6.79T tokens/day</title>
+                                        <title>Aug 2026 · 1M · 6.79T input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="992.0"
@@ -2253,10 +2358,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Sep 2026 · 1M · 11.26T tokens/day"
-                                        aria-label="Sep 2026 · 1M · 11.26T tokens/day"
+                                        data-chart-point="Sep 2026 · 1M · 11.26T input + output tokens/day"
+                                        aria-label="Sep 2026 · 1M · 11.26T input + output tokens/day"
                                     >
-                                        <title>Sep 2026 · 1M · 11.26T tokens/day</title>
+                                        <title>Sep 2026 · 1M · 11.26T input + output tokens/day</title>
                                     </circle>
                                 </g>
                                 <g data-chart-series="10M">
@@ -2276,10 +2381,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jan 2026 · 10M · 623.67M tokens/day"
-                                        aria-label="Jan 2026 · 10M · 623.67M tokens/day"
+                                        data-chart-point="Jan 2026 · 10M · 623.67M input + output tokens/day"
+                                        aria-label="Jan 2026 · 10M · 623.67M input + output tokens/day"
                                     >
-                                        <title>Jan 2026 · 10M · 623.67M tokens/day</title>
+                                        <title>Jan 2026 · 10M · 623.67M input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="198.4"
@@ -2289,10 +2394,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Feb 2026 · 10M · 979.52M tokens/day"
-                                        aria-label="Feb 2026 · 10M · 979.52M tokens/day"
+                                        data-chart-point="Feb 2026 · 10M · 979.52M input + output tokens/day"
+                                        aria-label="Feb 2026 · 10M · 979.52M input + output tokens/day"
                                     >
-                                        <title>Feb 2026 · 10M · 979.52M tokens/day</title>
+                                        <title>Feb 2026 · 10M · 979.52M input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="311.8"
@@ -2302,10 +2407,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Mar 2026 · 10M · 1.38B tokens/day"
-                                        aria-label="Mar 2026 · 10M · 1.38B tokens/day"
+                                        data-chart-point="Mar 2026 · 10M · 1.38B input + output tokens/day"
+                                        aria-label="Mar 2026 · 10M · 1.38B input + output tokens/day"
                                     >
-                                        <title>Mar 2026 · 10M · 1.38B tokens/day</title>
+                                        <title>Mar 2026 · 10M · 1.38B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="425.1"
@@ -2315,10 +2420,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Apr 2026 · 10M · 848.70M tokens/day"
-                                        aria-label="Apr 2026 · 10M · 848.70M tokens/day"
+                                        data-chart-point="Apr 2026 · 10M · 848.70M input + output tokens/day"
+                                        aria-label="Apr 2026 · 10M · 848.70M input + output tokens/day"
                                     >
-                                        <title>Apr 2026 · 10M · 848.70M tokens/day</title>
+                                        <title>Apr 2026 · 10M · 848.70M input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="538.5"
@@ -2328,10 +2433,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="May 2026 · 10M · 952.86M tokens/day"
-                                        aria-label="May 2026 · 10M · 952.86M tokens/day"
+                                        data-chart-point="May 2026 · 10M · 952.86M input + output tokens/day"
+                                        aria-label="May 2026 · 10M · 952.86M input + output tokens/day"
                                     >
-                                        <title>May 2026 · 10M · 952.86M tokens/day</title>
+                                        <title>May 2026 · 10M · 952.86M input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="651.9"
@@ -2341,10 +2446,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jun 2026 · 10M · 2.04B tokens/day"
-                                        aria-label="Jun 2026 · 10M · 2.04B tokens/day"
+                                        data-chart-point="Jun 2026 · 10M · 2.04B input + output tokens/day"
+                                        aria-label="Jun 2026 · 10M · 2.04B input + output tokens/day"
                                     >
-                                        <title>Jun 2026 · 10M · 2.04B tokens/day</title>
+                                        <title>Jun 2026 · 10M · 2.04B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="765.2"
@@ -2354,10 +2459,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Jul 2026 · 10M · 3.83B tokens/day"
-                                        aria-label="Jul 2026 · 10M · 3.83B tokens/day"
+                                        data-chart-point="Jul 2026 · 10M · 3.83B input + output tokens/day"
+                                        aria-label="Jul 2026 · 10M · 3.83B input + output tokens/day"
                                     >
-                                        <title>Jul 2026 · 10M · 3.83B tokens/day</title>
+                                        <title>Jul 2026 · 10M · 3.83B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="878.6"
@@ -2367,10 +2472,10 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Aug 2026 · 10M · 13.35B tokens/day"
-                                        aria-label="Aug 2026 · 10M · 13.35B tokens/day"
+                                        data-chart-point="Aug 2026 · 10M · 13.35B input + output tokens/day"
+                                        aria-label="Aug 2026 · 10M · 13.35B input + output tokens/day"
                                     >
-                                        <title>Aug 2026 · 10M · 13.35B tokens/day</title>
+                                        <title>Aug 2026 · 10M · 13.35B input + output tokens/day</title>
                                     </circle>
                                     <circle
                                         cx="992.0"
@@ -2380,19 +2485,20 @@
                                         stroke="#0b1327"
                                         stroke-width="2"
                                         tabindex="0"
-                                        data-chart-point="Sep 2026 · 10M · 16.62B tokens/day"
-                                        aria-label="Sep 2026 · 10M · 16.62B tokens/day"
+                                        data-chart-point="Sep 2026 · 10M · 16.62B input + output tokens/day"
+                                        aria-label="Sep 2026 · 10M · 16.62B input + output tokens/day"
                                     >
-                                        <title>Sep 2026 · 10M · 16.62B tokens/day</title>
+                                        <title>Sep 2026 · 10M · 16.62B input + output tokens/day</title>
                                     </circle>
                                 </g>
                             </svg>
                         </div>
                     </div>
                     <p class="note">
-                        Traffic ratio = bucket tokens / all text tokens. Buckets are plotted independently; this is not
-                        a verified partition or a distribution of request counts. Growth uses January = 1×. Incomplete
-                        months leave a gap. Point values are available on hover or keyboard focus.
+                        Traffic ratio = (input + output tokens in the bucket) / (input + output tokens across all text
+                        requests). Buckets are plotted independently; this is not a verified partition or a distribution
+                        of request counts. Growth uses January = 1×. Incomplete months leave a gap. Point values are
+                        available on hover or keyboard focus.
                     </p>
                     <div class="chart-tooltip" role="status" hidden></div>
                 </section>
@@ -2614,9 +2720,9 @@
                         </table>
                     </div>
                     <p class="note">
-                        Daily volume = complete monthly total / calendar days: 31 for January, 30 for September. K =
-                        thousand, M = million, B = billion, T = trillion; pp = percentage points. A dash means the
-                        evidence is insufficient. Exact totals and coverage are in the
+                        Daily volume = monthly input + output token total / calendar days: 31 for January, 30 for
+                        September. K = thousand, M = million, B = billion, T = trillion; pp = percentage points. A dash
+                        means the evidence is insufficient. Exact totals and coverage are in the
                         <a href="data/openrouter/context-demand.json" download>downloadable analysis</a>
                         .
                     </p>
@@ -2627,8 +2733,8 @@
                         <div>
                             <h2>Where linear hybrids fit</h2>
                             <p>
-                                Architecture shares within each request-context dataset. The denominator includes
-                                unresolved models and the unnamed tail.
+                                Shares of input + output token traffic within each request-context dataset. The
+                                denominator includes unresolved models and the unnamed tail.
                             </p>
                         </div>
                     </div>
@@ -3022,15 +3128,19 @@
                         <article class="method-item">
                             <h3>Measure state reuse</h3>
                             <p>
-                                Repeated prefixes and session history can make retained state valuable. Measure bytes
-                                per state, concurrent sessions, idle gaps and the cost of rebuilding that state.
+                                A follow-up may reuse KV state for an earlier prefix, even though that history
+                                contributes to token traffic again. This dataset does not reveal which prefixes were
+                                reused or how many distinct session caches existed. Measure bytes per state, concurrent
+                                sessions, idle gaps and rebuild cost.
                             </p>
                         </article>
                         <article class="method-item">
                             <h3>Establish the storage case</h3>
                             <p>
-                                HBM, DRAM and NVMe requirements depend on retention, placement and restore latency.
-                                Token traffic alone cannot determine offload capacity or bandwidth.
+                                For full attention, retained KV state scales with the token positions kept for a request
+                                and the model’s KV layout. Sliding windows and recurrent hybrids retain state
+                                differently. Summed token traffic is not resident cache size: capacity and offload
+                                bandwidth also depend on sharing, concurrency, retention and placement.
                             </p>
                             <p>
                                 <a href="hybrid-checkpoints.html">Hybrid checkpoints ↗</a>
@@ -3060,10 +3170,11 @@
                         <div class="method-item">
                             <h3>What remains unknown</h3>
                             <p>
-                                The API does not specify exact context-bucket boundaries or whether context
-                                classification uses input alone. It does not provide request counts, prompt-length
-                                percentiles, cache split, unique stored bytes or offload activity. Provider tokenizers
-                                differ.
+                                The public rankings API supplies combined total_tokens, with no separate input/output
+                                fields or filter to select one. It exposes no first-turn lengths, session IDs, turn
+                                numbers, request counts, prompt-length percentiles, cache split or offload activity.
+                                Exact bucket boundaries and whether assignment uses input alone or input + output are
+                                undocumented. Provider tokenizers differ.
                             </p>
                         </div>
                         <div class="method-item">
