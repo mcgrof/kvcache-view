@@ -162,7 +162,7 @@
     })
 
     const BUDGETS = [
-        ['2n1', (n) => 2 * n - 1, (n) => `2N−1 = ${num(2 * n - 1)} (LMCache recipe)`],
+        ['2n1', (n) => 2 * n - 1, (n) => `2N−1 = ${num(2 * n - 1)} (dense checkpoints)`],
         ['n', (n) => n, (n) => `N = ${num(n)}`],
         ['2048', () => 2048, () => '2,048'],
         ['8192', () => 8192, () => '8,192'],
@@ -222,19 +222,27 @@
         s += text(
             X0,
             226,
-            `${num(stripes)} stripes of ${alignment} tokens · ${kib(g.attnPerToken)} of keys and values per token · ${mib(g.page)}`,
+            `${num(stripes)} stripes of ${alignment} tokens · ${kib(
+                g.attnPerToken,
+            )} of keys and values per token · ${mib(g.page)}`,
         )
         s += text(
             16,
             258,
-            `N = ${alignment} × ceil(${num(g.recPage)} bytes ÷ (${alignment} × ${num(g.attnPerToken)} bytes)) = ${num(g.block)} tokens`,
+            `N = ${alignment} × ceil(${num(g.recPage)} bytes ÷ (${alignment} × ${num(g.attnPerToken)} bytes)) = ${num(
+                g.block,
+            )} tokens`,
             't-formula',
         )
         const svg = el('fig-page')
         svg.innerHTML = s
         svg.setAttribute(
             'aria-label',
-            `For ${m.name}, one recurrent checkpoint is ${mib(g.recPage)} per layer, so an attention page must hold ${num(g.block)} tokens to be as large. N is ${num(g.block)} tokens.`,
+            `For ${m.name}, one recurrent checkpoint is ${mib(
+                g.recPage,
+            )} per layer, so an attention page must hold ${num(g.block)} tokens to be as large. N is ${num(
+                g.block,
+            )} tokens.`,
         )
     }
 
@@ -328,7 +336,9 @@
             summary += `An exact repeat must recompute its last token, so it can resume no later than ${num(r.limit)}. `
         summary +=
             r.hybrid === 0
-                ? `The next request finds no checkpoint at or before token ${num(r.limit)}, so it recomputes all ${num(shared)} shared tokens.`
+                ? `The next request finds no checkpoint at or before token ${num(r.limit)}, so it recomputes all ${num(
+                      shared,
+                  )} shared tokens.`
                 : `The next request resumes at token ${num(r.hybrid)} and recomputes ${num(r.recompute)} shared tokens.`
         if (r.attention > r.hybrid) {
             summary += ` Attention alone could have resumed at ${num(r.attention)}; the recurrent layers hold it back.`
@@ -338,19 +348,28 @@
     }
 
     function renderSettings({ m, g }) {
-        el('offload-summary').textContent =
-            `If vLLM resolves N to ${num(g.block)} tokens, LMCacheMPConnector requires offload chunks of ${num(g.block)}, ${num(2 * g.block)}, ${num(3 * g.block)}, … tokens. Configure LMCache's chunk size explicitly; its default 256 tokens is incompatible with this N.`
+        const negotiated = Math.ceil(256 / g.block) * g.block
+        el('offload-summary').textContent = `If vLLM resolves N to ${num(
+            g.block,
+        )} tokens, compatible final offload chunks are ${num(g.block)}, ${num(2 * g.block)}, ${num(
+            3 * g.block,
+        )}, … tokens. For this single-N setup, current LMCache negotiates the default minimum of 256 to ${num(
+            negotiated,
+        )} tokens. Older connectors require an explicitly compatible size.`
         el('settings-cmd').textContent = [
-            `lmcache server --chunk-size ${g.block} --separate-object-groups`,
+            '# Current LMCache: negotiate upward from this minimum.',
+            'lmcache server --chunk-size 256 --separate-object-groups',
             '',
+            '# Optional dense-checkpoint budget: 2N - 1, using the estimate below.',
+            '# Replace the budget with one based on the actual engine block size.',
             `vllm serve ${m.repo} \\`,
             '    --enable-prefix-caching --mamba-cache-mode align \\',
             `    --max-num-batched-tokens ${2 * g.block - 1} \\`,
             `    --kv-transfer-config '{"kv_connector":"LMCacheMPConnector","kv_role":"kv_both"}'`,
         ].join('\n')
         el('settings-note').textContent = m.recipe
-            ? `LMCache publishes this recipe for GDN hybrids such as Qwen. Its example models list their own N values; the one above is this page's estimate for ${m.name}.`
-            : `LMCache's published recipes cover GDN and Kimi linear-attention hybrids. A ${m.family} model such as ${m.name} is not among them, so treat these values as what the rule gives, not as a tested setup.`
+            ? `LMCache validates selected Qwen GDN hybrids. ${m.name} is a sizing example here, not one of the exact model IDs listed in the pinned validation recipe; its estimated N and commands still need deployment verification.`
+            : `The pinned LMCache recipes validate selected GDN and Kimi linear-attention hybrids, not this ${m.family} example (${m.name}). These commands illustrate the configuration rules; they are not an end-to-end support claim. See “What support means” below.`
     }
 
     function renderStorage({ m, liveBytes, g }) {
@@ -375,19 +394,32 @@
             )
             .join('')
         const bar = (label, payload, color, detail, padding = false) =>
-            `<div class="barrow"><div>${label}</div><div class="track" aria-hidden="true"><div class="seg ${color}" style="width:${(100 * payload) / g.page}%"></div>${padding ? `<div class="seg pad" style="width:${(100 * (g.page - payload)) / g.page}%"></div>` : ''}</div><div>${detail}</div></div>`
+            `<div class="barrow"><div>${label}</div><div class="track" aria-hidden="true"><div class="seg ${color}" style="width:${
+                (100 * payload) / g.page
+            }%"></div>${
+                padding ? `<div class="seg pad" style="width:${(100 * (g.page - payload)) / g.page}%"></div>` : ''
+            }</div><div>${detail}</div></div>`
         el('pagebars').innerHTML =
             bar('Live recurrent page', g.recPage, 'rec', mib(g.page), true) +
             bar('Stored checkpoint', s.bytes, 'stored', mib(s.bytes))
-        el('pagenote').textContent =
-            `Per recurrent layer: ${num(m.ssm)} matrix values plus ${num(m.conv)} BF16 convolution values. The stored projection includes ${num(s.scaleBytes)} scale bytes and leaves out allocator padding and object headers. The GPU page, and therefore N, is sized from the live state, so N stays ${num(g.block)} tokens whichever stored format you pick.`
+        el('pagenote').textContent = `Per recurrent layer: ${num(m.ssm)} matrix values plus ${num(
+            m.conv,
+        )} BF16 convolution values. The stored projection includes ${num(
+            s.scaleBytes,
+        )} scale bytes and leaves out allocator padding and object headers. The GPU page, and therefore N, is sized from the live state, so N stays ${num(
+            g.block,
+        )} tokens whichever stored format you pick.`
     }
 
     function renderTable({ m, liveBytes, alignment }) {
         const format = el('fmt').value
         el('tblb').innerHTML = MODELS.map(
             (x) =>
-                `<tr${x === m ? ' class="sel"' : ''}><th scope="row">${x.name}</th><td class="num">${x.rec} / ${x.attn}</td><td class="num">${num(geometry(x, 4, alignment).block)}</td><td class="num">${num(geometry(x, 2, alignment).block)}</td><td class="num">${mib(storedCheckpoint(x, liveBytes, format).bytes * x.rec)}</td></tr>`,
+                `<tr${x === m ? ' class="sel"' : ''}><th scope="row">${x.name}</th><td class="num">${x.rec} / ${
+                    x.attn
+                }</td><td class="num">${num(geometry(x, 4, alignment).block)}</td><td class="num">${num(
+                    geometry(x, 2, alignment).block,
+                )}</td><td class="num">${mib(storedCheckpoint(x, liveBytes, format).bytes * x.rec)}</td></tr>`,
         ).join('')
     }
 
