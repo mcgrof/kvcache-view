@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
-            content="Compare pure Mamba, Mamba-attention hybrids and GDN: what a reusable checkpoint contains, which vLLM alignment rules apply, and how LMCache stores and restores the state"
+            content="See where a hybrid attention and recurrent model can resume a cached prefix, why vLLM places those points hundreds of tokens apart, and how the token budget decides which ones exist"
         />
-        <title>Mamba and Hybrid Model Checkpoints</title>
+        <title>Hybrid Model Checkpoint Spacing</title>
         <style>
             :root {
                 color-scheme: dark;
@@ -771,132 +771,38 @@
             <a class="back" href="index.html">&#8592; All visualizations</a>
 
             <header class="hero">
-                <div class="eyebrow">Mamba, GDN and attention hybrids · clarified 27 October 2026</div>
-                <h1>Where Mamba and hybrid models can resume a cached prefix</h1>
+                <div class="eyebrow">Hybrid attention + recurrent models · reviewed 27 October 2026</div>
+                <h1>Where a hybrid model can pick up a cached prefix</h1>
                 <p class="lead">
-                    Full attention retains keys and values for earlier tokens. A recurrent layer, such as Mamba or Gated
-                    DeltaNet (GDN), updates a fixed-size state as it reads them. Reusing a prefix requires a saved state
-                    at the resume point. That rule applies to both pure Mamba and attention hybrids; the large block
-                    sizes calculated below come from vLLM's hybrid memory allocation.
+                    An attention layer stores every token, so any prefix of a conversation can be reused. A recurrent
+                    layer, such as Mamba or GDN, keeps a single state that each new token overwrites. It can only resume
+                    where the engine saved a copy of that state. This page shows where vLLM saves those copies, why they
+                    sit hundreds or thousands of tokens apart, and which settings move them.
                 </p>
                 <div class="callout">
                     <b>The short version.</b>
-                    Pure Mamba needs a complete recurrent-state checkpoint. A Mamba–attention hybrid also needs the
-                    attention KV through that same token. In the vLLM hybrid allocation modeled here, fitting both kinds
-                    of state into equal-sized pages sets a token block size N. The scheduler decides which boundaries
-                    actually get checkpoints, and LMCache's final offload chunks must align with the engine's cache
-                    groups. Pure Mamba has no attention pages to match, so this hybrid formula does not determine its
-                    checkpoint spacing.
+                    A recurrent layer resumes only from a saved checkpoint. In the simplified vLLM
+                    <code>align</code>
+                    schedule shown below, a copy is saved where a scheduler step ends exactly on a block boundary. The
+                    block size, called N here, is set by how big one checkpoint is, and for these models it is several
+                    hundred to a few thousand tokens. The token budget per step then decides whether every boundary gets
+                    a checkpoint or only a few. For LMCache's multiprocess hybrid integration, offload chunks must
+                    contain a whole number of these vLLM blocks: N, 2N, 3N, and so on.
                 </div>
                 <nav class="toc" aria-label="Sections">
-                    <a href="#mamba">Pure Mamba or hybrid?</a>
                     <a href="#why">Why a copy is needed</a>
                     <a href="#block">Why N is large</a>
+                    <a href="#mamba">Pure models and hybrids</a>
                     <a href="#align">Which boundaries get a checkpoint</a>
                     <a href="#settings">LMCache chunks follow N</a>
-                    <a href="#support">What support means</a>
                     <a href="#storage">Smaller stored copies</a>
-                    <a href="#models">Four hybrid examples</a>
+                    <a href="#models">All four models</a>
                     <a href="#assumptions">Assumptions</a>
                     <a href="#sources">Sources</a>
                 </nav>
             </header>
 
             <main>
-                <section class="panel" id="mamba" aria-labelledby="mamba-title">
-                    <h2 id="mamba-title">Pure Mamba, Mamba hybrids and GDN share a checkpoint rule</h2>
-                    <p class="panel-sub">
-                        A checkpoint here is saved inference state for a token prefix, not model weights or a training
-                        checkpoint.
-                    </p>
-                    <div class="scroll" role="region" aria-label="Model architecture comparison" tabindex="0">
-                        <table class="architecture-table">
-                            <caption>What must be available to resume after token t</caption>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Model architecture</th>
-                                    <th scope="col">Required cached state</th>
-                                    <th scope="col">Does the hybrid sizing formula below apply?</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">
-                                        Pure Mamba-1 or Mamba-2
-                                        <br />
-                                        No attention layers
-                                    </th>
-                                    <td data-label="Required cached state">
-                                        SSM state and convolution history at t, for every recurrent layer.
-                                    </td>
-                                    <td data-label="Does the hybrid sizing formula apply?">
-                                        No. There is no attention KV page to match. The engine and kernels still
-                                        constrain checkpoint export and alignment.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">
-                                        Mamba-2 + attention
-                                        <br />
-                                        Nemotron-H, Granite hybrid, Falcon-H1
-                                    </th>
-                                    <td data-label="Required cached state">
-                                        Every recurrent layer's SSM state and convolution history at t, plus the
-                                        full-attention layers' KV through t.
-                                    </td>
-                                    <td data-label="Does the hybrid sizing formula apply?">
-                                        Yes, for the vLLM allocation scheme modeled here. State dimensions, precision
-                                        and backend alignment determine N.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">
-                                        GDN + attention
-                                        <br />
-                                        Qwen3.5
-                                    </th>
-                                    <td data-label="Required cached state">
-                                        Every recurrent layer's GDN state and convolution history at t, plus the
-                                        full-attention layers' KV through t.
-                                    </td>
-                                    <td data-label="Does the hybrid sizing formula apply?">
-                                        Yes, under that same allocation scheme. GDN shares cache machinery with Mamba,
-                                        but uses a different recurrence.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="prose">
-                        <p>
-                            <b>Mamba and GDN are different model architectures.</b>
-                            Mamba uses a selective state-space model (SSM); Qwen3.5 uses Gated DeltaNet linear
-                            attention. vLLM's
-                            <code>mamba</code>
-                            cache names cover several recurrent backends. A shared flag or storage interface does not
-                            make their state tensors, kernels or numerical behavior interchangeable. Mamba-1 and Mamba-2
-                            also have different state layouts; use the engine's complete state specification.
-                        </p>
-                        <p>
-                            <b>One pure-Mamba snapshot stays the same size as the prefix grows.</b>
-                            A snapshot after 32,000 tokens has the same tensor dimensions as one after 2,000 tokens for
-                            the same model and runtime. Keeping many possible resume points still requires many
-                            snapshots. A hybrid additionally retains attention KV that grows with prefix length. This
-                            changes restore traffic: pure Mamba needs one complete model-state snapshot, while a hybrid
-                            also needs the attention history that is not already resident.
-                        </p>
-                    </div>
-                    <p class="note">
-                        The checkpoint principle applies to all three rows. The model selector, page-size estimates and
-                        scheduler figures below cover attention hybrids only. They do not establish a minimum checkpoint
-                        interval for pure Mamba or prove LMCache support for a particular model. See
-                        <a href="#support">what support means</a>
-                        and the
-                        <a href="#sources">implementation sources</a>
-                        .
-                    </p>
-                </section>
-
                 <section class="panel" id="why" aria-labelledby="why-title">
                     <h2 id="why-title">A recurrent layer can only resume where a copy was saved</h2>
                     <p class="panel-sub">
@@ -1038,19 +944,17 @@
                         <figcaption>
                             Top: an attention layer stores keys and values for each token, so a prefix is simply the
                             first entries. Bottom: a recurrent layer folds each token into one state and replaces the
-                            previous one. After token 8 only S8 exists; it cannot be sliced to recover S5. A later
+                            previous one. After token 8 only S8 exists, and S8 cannot be turned back into S5. A later
                             request can start after token 5 only because a copy of S5 was saved. A hybrid model needs
                             both at the same point: the attention entries up to it and a recurrent checkpoint exactly at
-                            it. For Mamba-1 and Mamba-2, a complete checkpoint holds both the SSM state and the short
-                            convolution history for every recurrent layer. Pure Mamba needs those states without an
-                            attention KV history. If the required checkpoint is missing, resume from an earlier one and
-                            recompute the intervening tokens, or recompute from the start.
+                            it. The saved copy holds the recurrent matrix and the short convolution history each layer
+                            also carries.
                         </figcaption>
                     </figure>
                 </section>
 
                 <section class="panel" id="model-panel" aria-labelledby="model-title">
-                    <h2 id="model-title">Pick an attention hybrid</h2>
+                    <h2 id="model-title">Pick a model</h2>
                     <p class="panel-sub" id="modelnote"></p>
                     <div class="controls">
                         <div class="ctl">
@@ -1093,10 +997,9 @@
                 </section>
 
                 <section class="panel" id="block" aria-labelledby="block-title">
-                    <h2 id="block-title">Why these hybrids have large checkpoint blocks</h2>
+                    <h2 id="block-title">Why checkpoints are hundreds of tokens apart</h2>
                     <p class="panel-sub">
-                        In the hybrid allocation scheme modeled here, vLLM uses equal-sized pages for attention and
-                        recurrent layers. Pure Mamba has no attention pages to reconcile.
+                        vLLM gives every layer the same page size, so one memory pool can serve both kinds of layer.
                     </p>
                     <figure class="fig">
                         <div class="fig-scroll">
@@ -1108,7 +1011,7 @@
                             until N tokens of keys and values take at least as many bytes as one checkpoint, then pads
                             the recurrent page to match. N sets the ordinary checkpoint grid in this model; the
                             scheduler may save only some of those boundaries. A larger live state can therefore make
-                            that grid coarser. This is an engine allocation choice, not an inherent Mamba requirement.
+                            that grid coarser.
                         </figcaption>
                     </figure>
                     <p class="note">
@@ -1117,6 +1020,74 @@
                         <a href="#storage">storage section</a>
                         shows why.
                     </p>
+                </section>
+
+                <section class="panel" id="mamba" aria-labelledby="mamba-title">
+                    <h2 id="mamba-title">Pure recurrent models and attention hybrids</h2>
+                    <p class="panel-sub">
+                        The shared-page constraint above applies to both Mamba–attention and linear-attention hybrids.
+                        Removing the full-attention layers changes what must be cached and how checkpoint spacing is
+                        chosen.
+                    </p>
+                    <div class="prose">
+                        <p>
+                            Mamba and recurrent linear attention use different state-update rules, but both can carry a
+                            fixed-size summary from one token to the next. Here, linear attention means recurrent
+                            architectures such as Gated DeltaNet (GDN); sliding-window and sparse attention still retain
+                            token KV entries and have different caching rules.
+                        </p>
+                    </div>
+                    <div class="scroll" role="region" aria-label="Pure and hybrid model comparison" tabindex="0">
+                        <table class="architecture-table">
+                            <caption>State needed to resume after token t, across all layers</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Recurrent architecture</th>
+                                    <th scope="col">Pure model</th>
+                                    <th scope="col">Hybrid with full attention</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Mamba</th>
+                                    <td data-label="Pure model">
+                                        SSM state and convolution history at t. Both Mamba-1 and Mamba-2 require these
+                                        components.
+                                    </td>
+                                    <td data-label="Hybrid with full attention">
+                                        The same recurrent checkpoint, plus attention KV through t. Examples here:
+                                        Nemotron-H, Granite and Falcon-H1.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Recurrent linear attention</th>
+                                    <td data-label="Pure model">
+                                        Linear-attention state at t, including any auxiliary state the layer uses, such
+                                        as convolution history or a normalizer.
+                                    </td>
+                                    <td data-label="Hybrid with full attention">
+                                        The same recurrent checkpoint, plus attention KV through t. Qwen3.5 combines GDN
+                                        with full attention.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="prose">
+                        <p>
+                            For either pure model, one complete checkpoint has the same tensor size regardless of prefix
+                            length. Keeping more resume points still costs more snapshots. A later state cannot be
+                            sliced to recover an earlier prefix; a missing checkpoint means replaying tokens from an
+                            earlier saved state or from the beginning.
+                        </p>
+                        <p>
+                            In either hybrid, the attention KV grows with the prefix and must reach the same token as
+                            the recurrent checkpoint. vLLM's shared page pool then ties N to both state sizes, as shown
+                            above. Pure models have no attention pages to match, so this formula does not set their
+                            checkpoint interval. Their engines can still impose checkpoint boundaries and transfer
+                            alignment. LMCache can store and restore only the state the engine makes available.
+                        </p>
+                    </div>
                 </section>
 
                 <section class="panel" id="align" aria-labelledby="align-title">
@@ -1223,99 +1194,51 @@
                 <section class="panel" id="settings" aria-labelledby="settings-title">
                     <h2 id="settings-title">vLLM sets N; LMCache offload chunks follow it</h2>
                     <p class="panel-sub">
-                        <a
-                            href="https://github.com/LMCache/LMCache/blob/6993f46c91f182def4e73b7882177e8881671301/docs/source/mp/chunk_size_negotiation.rst"
-                        >
-                            LMCache's current multiprocess connector
-                        </a>
-                        negotiates a final chunk size from the engine's resolved cache groups. The alignment remains;
-                        how you configure it has changed since the September recipe.
+                        LMCache's multiprocess connector uses the engine's cache groups to choose a compatible offload
+                        chunk size.
                     </p>
                     <div class="prose">
                         <p>
-                            <b>
-                                In the current connector,
-                                <code>--chunk-size</code>
-                                is a minimum.
-                            </b>
-                            The connector finds the least common multiple of the cacheable groups' effective token spans
-                            and rounds the configured minimum up to a multiple of it. For the simple hybrid setup here,
-                            that alignment is N, so the final size is
-                            <code>C = k × N</code>
-                            . The default minimum of 256 can therefore resolve to a much larger final chunk.
-                        </p>
-                        <p>
-                            With the Qwen3.5-4B FP32 recurrent-state scenario, BF16 attention KV and 16-token vLLM
-                            alignment, this page estimates N = 528. If the engine reports that value, a configured
-                            minimum of 256 resolves to 528; a minimum of 768 resolves to 1056. A final size of 768 would
-                            still be incompatible with N = 528. Selecting 256-token vLLM allocation alignment instead
-                            estimates N = 768; that control changes the engine-sizing assumption, not LMCache's
-                            configured minimum.
-                        </p>
-                        <p>
-                            <b>Version boundary:</b>
-                            the
+                            <code>--chunk-size</code>
+                            sets a minimum in the
                             <a
-                                href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
+                                href="https://github.com/LMCache/LMCache/blob/6993f46c91f182def4e73b7882177e8881671301/docs/source/mp/chunk_size_negotiation.rst"
                             >
-                                September snapshot
+                                current connector
                             </a>
-                            required an explicitly compatible chunk size and rejected mismatches. With that older
-                            connector, set N or a multiple of N yourself. With the newer connector, verify the
-                            negotiated size. Once an MP server's final size is fixed, another client must be compatible
-                            with it; negotiation does not resize an active server for a different model.
+                            . For the hybrid setup shown here, LMCache rounds it up to N or an integer multiple of N.
+                            Its default minimum of 256 tokens does not set vLLM's block size.
+                        </p>
+                        <p>
+                            With Qwen3.5-4B, FP32 recurrent state, BF16 attention KV and 16-token allocation alignment,
+                            this page estimates N = 528. If the engine reports that value, a minimum of 256 resolves to
+                            528 tokens; a minimum of 768 resolves to 1056. A final chunk of 768 tokens would not align.
+                            Choosing 256-token allocation alignment in the calculator instead estimates N = 768; that
+                            changes the vLLM page calculation, not LMCache's minimum.
                         </p>
                     </div>
                     <pre class="cmd" id="settings-cmd"></pre>
                     <div class="prose">
                         <p>
-                            The N above is this page's estimate. Read the real value from vLLM's startup log line
+                            Read the actual N from vLLM's startup log:
                             <code>Setting attention block size to N tokens</code>
-                            before using these commands. The server command uses current chunk negotiation. The token
-                            budget illustrates dense checkpoint placement; replace it with a value derived from the
-                            actual N, or tune a larger budget for your workload. These are token counts; SSD I/O byte
-                            alignment and transfer splitting are separate storage-backend requirements. More complex
-                            group layouts or decode context parallelism require the connector's full alignment
-                            calculation, not just this single-N example.
+                            . The example's budget of 2N−1 keeps every ordinary checkpoint boundary in the scheduler
+                            figure. Larger budgets are also valid. These are token counts; SSD byte alignment and
+                            transfer splitting are separate storage requirements.
                         </p>
                         <p id="settings-note"></p>
                     </div>
-                </section>
-
-                <section class="panel" id="support" aria-labelledby="support-title">
-                    <h2 id="support-title">What LMCache support does—and does not—establish</h2>
-                    <div class="prose">
-                        <p>
-                            <b>The engine creates a checkpoint; LMCache stores and restores it.</b>
-                            The multiprocess integration transfers recurrent states as opaque pages, using the engine's
-                            layout. Its hybrid recipe requires
-                            <code>--separate-object-groups</code>
-                            so recurrent and full-attention layers have separate cache objects. A cache hit is usable
-                            only when all required groups are available at a consistent resume point. Restoring
-                            attention KV alone does not let a hybrid skip its recurrent prefix computation.
-                        </p>
-                        <p>
-                            <b>Pure-Mamba engine support is not an end-to-end LMCache test.</b>
-                            At the October vLLM source revision linked below, both the Mamba-1 and Mamba-2 model classes
-                            declare prefix-cache support. The LMCache recipes reviewed here validate selected GDN and
-                            Kimi linear-attention hybrids; they do not provide a pure-Mamba restore recipe or validate
-                            every Mamba hybrid in this calculator. That is an evidence gap, not a finding that those
-                            models cannot work. The sample commands for them are configuration projections.
-                        </p>
-                        <p>
-                            <b>Verify a real external restore for the exact model and runtime.</b>
-                            Clear or evict the engine's local prefix cache while preserving the external cache, then
-                            confirm that recurrent state and convolution history are loaded and used. For hybrids, check
-                            the matching attention KV too. Compare a fresh run with a restored run, including changed
-                            suffixes, missing components and repeated reuse. Use a numerical or quality check
-                            appropriate to the backend; GDN's documented validation compares task scores because cached
-                            and fresh runs need not produce bit-identical output.
-                        </p>
-                    </div>
                     <p class="note">
-                        Shared cache infrastructure does not make checkpoints portable across models, state layouts,
-                        precisions or engine backends. The opaque-page hybrid path does not by itself provide CacheBlend
-                        or CacheGen support. The compressed sizes below remain projections, not tested Mamba codecs.
+                        Older connectors, including the
+                        <a
+                            href="https://github.com/LMCache/LMCache/blob/dd35168c801fec49889b34b083a12204d3c02a2a/docs/source/mp/hybrid_models.rst"
+                        >
+                            September snapshot
+                        </a>
+                        , require an explicitly compatible chunk size. Current versions align to the least common
+                        multiple of all cacheable groups' effective token spans; additional groups or decode context
+                        parallelism can change that alignment. A server's negotiated size remains fixed while it is in
+                        use.
                     </p>
                 </section>
 
@@ -1367,7 +1290,7 @@
                 </section>
 
                 <section class="panel" id="models" aria-labelledby="comparison-title">
-                    <h2 id="comparison-title">Four attention-hybrid examples</h2>
+                    <h2 id="comparison-title">All four models</h2>
                     <p class="panel-sub">
                         Estimated block size N at the selected alignment. Only the last column follows the stored-format
                         selector. Counts are branches: Falcon-H1 has both branches in each of its 32 decoder blocks.
@@ -1413,9 +1336,7 @@ P = N × T</pre>
                         <code>A</code>
                         stands in for backend constraints and a requested block size; it is not inferred from a GPU.
                         Additional groups, MLA layouts, quantized KV, tensor parallelism, speculative scratch state and
-                        extra auxiliary state can change this calculation. Pure Mamba has no attention bytes per token
-                        T: this formula is inapplicable, not a reason to assign it an infinite or zero checkpoint
-                        interval.
+                        extra auxiliary state can change this calculation.
                     </p>
                     <p>
                         Model configuration describes dimensions; the engine resolves state dtype and layout. FP32 is an
@@ -1441,12 +1362,19 @@ P = N × T</pre>
                 <section class="panel sources" id="sources" aria-labelledby="sources-title">
                     <h2 id="sources-title">Sources and reproducibility</h2>
                     <p class="panel-sub">
-                        Architecture scope, pure-Mamba engine declarations and current LMCache guidance checked 27
-                        October 2026. The allocation and scheduler figures retain their September vLLM source revision
-                        and simplified assumptions. Code references pin development snapshots; they do not imply support
-                        in every release. No GPU benchmark was run for this page.
+                        The figures use vLLM
+                        <code>133b71e0</code>
+                        . Architecture notes and LMCache configuration were reviewed 27 October 2026. Source revisions
+                        identify the implementations used here, not support in every release. No GPU benchmark was run
+                        for this page.
                     </p>
                     <ul>
+                        <li>
+                            <a href="https://arxiv.org/abs/2006.16236v3">Transformers are RNNs</a>
+                            describes recurrent linear attention;
+                            <a href="https://arxiv.org/abs/2412.06464v3">Gated Delta Networks</a>
+                            develops GDN's state update and compares pure and hybrid architectures.
+                        </li>
                         <li>
                             Mamba reference implementation
                             <code>e9594ce1</code>
@@ -1468,27 +1396,6 @@ P = N × T</pre>
                                 Qwen3.5 architecture documentation
                             </a>
                             identifies its Gated DeltaNet and full-attention layers.
-                        </li>
-                        <li>
-                            vLLM
-                            <code>274a5e19</code>
-                            :
-                            <a
-                                href="https://github.com/vllm-project/vllm/blob/274a5e19a18460ed41d47117398494b721e3df16/vllm/model_executor/models/mamba.py"
-                            >
-                                Mamba-1 model class
-                            </a>
-                            and
-                            <a
-                                href="https://github.com/vllm-project/vllm/blob/274a5e19a18460ed41d47117398494b721e3df16/vllm/model_executor/models/mamba2.py"
-                            >
-                                Mamba-2 model class
-                            </a>
-                            declare
-                            <code>IsAttentionFree</code>
-                            and
-                            <code>SupportsMambaPrefixCaching</code>
-                            . These declarations establish engine interfaces, not LMCache end-to-end validation.
                         </li>
                         <li>
                             vLLM
@@ -1613,8 +1520,7 @@ P = N × T</pre>
                             >
                                 validate_mamba_step_alignment
                             </a>
-                            accepts budgets above 2N and requires at least N. This updates the September configuration
-                            guidance without changing the figures' checkpoint scheduling model.
+                            accepts budgets above 2N and requires at least N.
                         </li>
                         <li>
                             <a href="https://github.com/mcgrof/kvcache-view/blob/main/hybrid-checkpoints.js">

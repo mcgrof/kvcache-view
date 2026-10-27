@@ -349,27 +349,20 @@
 
     function renderSettings({ m, g }) {
         const negotiated = Math.ceil(256 / g.block) * g.block
-        el('offload-summary').textContent = `If vLLM resolves N to ${num(
-            g.block,
-        )} tokens, compatible final offload chunks are ${num(g.block)}, ${num(2 * g.block)}, ${num(
-            3 * g.block,
-        )}, … tokens. For this single-N setup, current LMCache negotiates the default minimum of 256 to ${num(
-            negotiated,
-        )} tokens. Older connectors require an explicitly compatible size.`
+        el('offload-summary').textContent =
+            `For N = ${num(g.block)}, final LMCache chunks must be ${num(g.block)}, ${num(2 * g.block)}, ${num(3 * g.block)}, … tokens. Current LMCache negotiates a configured minimum of 256 to ${num(negotiated)} tokens for these cache groups.`
         el('settings-cmd').textContent = [
-            '# Current LMCache: negotiate upward from this minimum.',
             'lmcache server --chunk-size 256 --separate-object-groups',
             '',
-            '# Optional dense-checkpoint budget: 2N - 1, using the estimate below.',
-            '# Replace the budget with one based on the actual engine block size.',
+            '# 2N - 1 keeps every boundary; use the N reported by vLLM.',
             `vllm serve ${m.repo} \\`,
             '    --enable-prefix-caching --mamba-cache-mode align \\',
             `    --max-num-batched-tokens ${2 * g.block - 1} \\`,
             `    --kv-transfer-config '{"kv_connector":"LMCacheMPConnector","kv_role":"kv_both"}'`,
         ].join('\n')
         el('settings-note').textContent = m.recipe
-            ? `LMCache validates selected Qwen GDN hybrids. ${m.name} is a sizing example here, not one of the exact model IDs listed in the pinned validation recipe; its estimated N and commands still need deployment verification.`
-            : `The pinned LMCache recipes validate selected GDN and Kimi linear-attention hybrids, not this ${m.family} example (${m.name}). These commands illustrate the configuration rules; they are not an end-to-end support claim. See “What support means” below.`
+            ? `The linked LMCache recipe validates other Qwen sizes; ${m.name} and its N above are sizing projections.`
+            : `${m.name} uses ${m.family}. The linked LMCache recipes do not include a restore test for this model; its N above is a sizing projection.`
     }
 
     function renderStorage({ m, liveBytes, g }) {
