@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content="Explore when KV restore remains faster than recomputation as GPU compute, storage bandwidth, and model architectures change. Explicit, editable scenarios with research provenance."
+        />
+        <meta name="theme-color" content="#0b1026" />
+        <title>Will faster GPUs make KV reuse obsolete? · KV Cache</title>
+        <link rel="icon" href="icon.svg" />
+        <link rel="stylesheet" href="kv-offload.css" />
+        <style>
+            .projection-legend {
+                display: flex;
+                gap: 10px 20px;
+                flex-wrap: wrap;
+                margin: 12px 0;
+                color: #b8c8dd;
+                font-size: 0.85rem;
+            }
+            .projection-legend i {
+                display: inline-block;
+                width: 24px;
+                border-top: 3px solid;
+                vertical-align: middle;
+                margin-right: 7px;
+            }
+            .projection-legend .dashed {
+                border-top-style: dashed;
+            }
+            .chart svg {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+            .projection-status {
+                font-size: 1rem;
+                line-height: 1.5;
+                min-height: 3em;
+            }
+            .projection-controls input,
+            .projection-controls select {
+                width: 100%;
+            }
+            .projection-advanced {
+                margin-top: 18px;
+            }
+            .projection-advanced summary {
+                cursor: pointer;
+            }
+            .projection-tools {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 15px;
+            }
+            .projection-number {
+                font-variant-numeric: tabular-nums;
+            }
+            .projection-timeline {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 12px;
+            }
+            .projection-timeline article {
+                padding: 16px;
+                border: 1px solid #2b3b56;
+                border-top: 3px solid #b49aff;
+                border-radius: 8px;
+                background: #111c30;
+            }
+            .projection-timeline h3 {
+                font-size: 1rem;
+                margin: 8px 0;
+            }
+            .projection-timeline p {
+                font-size: 0.86rem;
+                line-height: 1.55;
+                color: #b8c8dd;
+            }
+            .projection-era {
+                font-size: 0.78rem;
+                color: #7fdfef;
+                letter-spacing: 0.07em;
+            }
+            .projection-equation {
+                font:
+                    clamp(0.85rem, 2vw, 1.1rem)/1.7 ui-monospace,
+                    monospace;
+                padding: 15px 18px;
+                background: #0b1425;
+                border: 1px solid #2b3b56;
+                border-radius: 8px;
+                overflow-wrap: anywhere;
+            }
+            .projection-error {
+                color: #ffb5aa;
+            }
+            .projection-value-cyan {
+                color: #59d9e9;
+            }
+            .projection-value-amber {
+                color: #ffbd71;
+            }
+            .projection-value-violet {
+                color: #c0a6ff;
+            }
+            .projection-table td,
+            .projection-table th {
+                font-variant-numeric: tabular-nums;
+            }
+            .projection-table caption {
+                text-align: left;
+                padding: 10px 0;
+                color: #b8c8dd;
+            }
+            .projection-table .positive {
+                color: #7fe2cd;
+            }
+            .projection-table .negative {
+                color: #ffbd71;
+            }
+            .projection-source-note {
+                font-size: 0.87rem;
+                color: #b8c8dd;
+            }
+            .projection-notice {
+                border-left: 3px solid #ffbd71;
+                padding: 12px 16px;
+                background: #211d21;
+            }
+            .projection-sensitivity td {
+                min-width: 110px;
+            }
+            .projection-sensitivity td small {
+                display: block;
+                color: #9eafc8;
+            }
+            .projection-note-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .projection-note-grid h3 {
+                margin: 0 0 9px;
+            }
+            .projection-note-grid p {
+                color: #b8c8dd;
+                line-height: 1.6;
+            }
+            .projection-inline-link {
+                white-space: normal;
+            }
+            @media (max-width: 900px) {
+                .projection-timeline {
+                    grid-template-columns: 1fr 1fr;
+                }
+                .projection-timeline article:last-child {
+                    grid-column: 1/-1;
+                }
+            }
+            @media (max-width: 600px) {
+                .projection-timeline,
+                .projection-note-grid {
+                    grid-template-columns: 1fr;
+                }
+                .projection-timeline article:last-child {
+                    grid-column: auto;
+                }
+                .projection-legend {
+                    font-size: 0.76rem;
+                }
+                .chart {
+                    overflow-x: auto;
+                }
+                .chart svg {
+                    min-width: 580px;
+                }
+                .projection-tools button {
+                    flex: 1;
+                }
+            }
+        </style>
+        <script src="kv-offload-math.js" defer></script>
+        <script src="kv-offload-data.js" defer></script>
+        <script src="cache-reuse-projections.js" defer></script>
+    </head>
+    <body>
+        <main class="wrap">
+            <nav class="nav" aria-label="Related views">
+                <a href="index.html">← All views</a>
+                <a href="agentic-kv-economics.html">Agentic offloading economics</a>
+                <a href="architecture-comparison.html">Architecture evidence</a>
+                <a href="hybrid-checkpoints.html">Hybrid checkpoints</a>
+            </nav>
+            <header>
+                <p class="eyebrow">PROJECTION 02 · COMPUTE, I/O &amp; ARCHITECTURE · REVIEWED NOV 17, 2026</p>
+                <h1>Will faster GPUs make KV reuse obsolete?</h1>
+                <p class="lead">
+                    A faster prefill makes recomputation cheaper. A smaller saved state makes reuse faster. Put both
+                    effects on the same clock, first with the architecture held fixed, then with explicit architecture
+                    changes.
+                </p>
+                <p class="notice projection-notice">
+                    <strong>This is a sensitivity model, not a forecast.</strong>
+                    The default starts from the supplied V4.1 Flash scenario: 80,000 tokens, 890 B/token and a 26 ms
+                    recompute on eight Rubin GPUs. The 26 ms is an input to inspect, not a validated benchmark. Future
+                    annual rates are editable assumptions.
+                </p>
+            </header>
+
+            <section class="panel" aria-labelledby="projection-input-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">SET THE STARTING POINT</p>
+                        <h2 id="projection-input-title">One context, one restore path, 2026–2035</h2>
+                    </div>
+                    <span class="pill">Decimal MB and GB</span>
+                </div>
+                <form id="projection-form" class="projection-controls">
+                    <div class="controls">
+                        <label class="control">
+                            Model baseline
+                            <select id="projection-model">
+                                <option value="dsv41">DeepSeek V4.1 Flash · supplied scenario</option>
+                                <option value="glm53f">GLM 5.3 Flash · structural estimate</option>
+                                <option value="hy4">Hy4 preview · structural estimate</option>
+                                <option value="mmx31">MiniMax M3.1 Flash · payload lower bound</option>
+                                <option value="custom">Custom baseline</option>
+                            </select>
+                        </label>
+                        <label class="control">
+                            Reusable context (tokens)
+                            <input
+                                id="projection-tokens"
+                                type="number"
+                                min="4096"
+                                max="1000000"
+                                step="any"
+                                value="80000"
+                            />
+                            <span class="subtle">Recomputes the preset; manual baseline edits select Custom</span>
+                        </label>
+                    </div>
+                    <p class="notice" id="projection-baseline-note">
+                        DeepSeek V4.1 Flash: 26 ms is the supplied Rubin scenario. Persistent global state excludes
+                        local state; bounded replay is approximate and its time must be supplied. Default replay = 0 is
+                        a lower bound.
+                    </p>
+                    <div class="controls">
+                        <label class="control">
+                            Saved state in 2026 (MB)
+                            <input
+                                id="projection-bytes"
+                                type="number"
+                                min="0.001"
+                                max="10000000"
+                                step="any"
+                                value="71.2"
+                                required
+                            />
+                            <span class="subtle">80,000 × 890 B = 71.2 MB</span>
+                        </label>
+                        <label class="control">
+                            Recompute in 2026 (ms)
+                            <input
+                                id="projection-recompute"
+                                type="number"
+                                min="0.001"
+                                max="10000000"
+                                step="any"
+                                value="26"
+                                required
+                            />
+                            <span class="subtle">Matched full-prefix prefill baseline</span>
+                        </label>
+                        <label class="control">
+                            Effective restore bandwidth (GB/s)
+                            <input
+                                id="projection-bandwidth"
+                                type="number"
+                                min="0.001"
+                                max="100000"
+                                step="any"
+                                value="36.96"
+                                required
+                            />
+                            <span class="subtle">End to end, after bottlenecks</span>
+                        </label>
+                        <label class="control">
+                            Fixed restore overhead (ms)
+                            <input
+                                id="projection-fixed"
+                                type="number"
+                                min="0"
+                                max="100000"
+                                step="any"
+                                value="1"
+                                required
+                            />
+                            <span class="subtle">Scheduling, lookup and setup floor</span>
+                        </label>
+                        <label class="control">
+                            Effective compute growth (%/year)
+                            <input
+                                id="projection-compute-growth"
+                                type="number"
+                                min="0"
+                                max="200"
+                                step="any"
+                                value="50"
+                                required
+                            />
+                            <span class="subtle">Prefill throughput, not peak marketing FLOPS</span>
+                        </label>
+                        <label class="control">
+                            Restore bandwidth growth (%/year)
+                            <input
+                                id="projection-bandwidth-growth"
+                                type="number"
+                                min="0"
+                                max="200"
+                                step="any"
+                                value="20"
+                                required
+                            />
+                            <span class="subtle">Includes the shared PCIe/network path</span>
+                        </label>
+                    </div>
+                    <details class="projection-advanced">
+                        <summary>Replay, fixed state and context growth</summary>
+                        <div class="controls">
+                            <label class="control">
+                                Replay / reconstruction (ms)
+                                <input
+                                    id="projection-replay"
+                                    type="number"
+                                    min="0"
+                                    max="100000"
+                                    step="any"
+                                    value="0"
+                                    required
+                                />
+                                <span class="subtle">Additional hit-path work; held fixed here</span>
+                            </label>
+                            <label class="control">
+                                Fixed state within total (MB)
+                                <input
+                                    id="projection-fixed-bytes"
+                                    type="number"
+                                    min="0"
+                                    max="10000000"
+                                    step="any"
+                                    value="0"
+                                    required
+                                />
+                                <span class="subtle">For recurrent checkpoints; does not shrink here</span>
+                            </label>
+                            <label class="control">
+                                Context growth (%/year)
+                                <input
+                                    id="projection-context-growth"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="any"
+                                    value="0"
+                                    required
+                                />
+                                <span class="subtle">Default 0 isolates the hardware/architecture race</span>
+                            </label>
+                            <label class="control">
+                                Quadratic share of baseline work (%)
+                                <input
+                                    id="projection-quadratic"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="any"
+                                    value="0"
+                                    required
+                                />
+                                <span class="subtle">Only affects optional context growth</span>
+                            </label>
+                        </div>
+                        <p class="subtle">
+                            The naive curve freezes per-token state and model work. With context growth above zero, both
+                            curves include the same demand growth. The evolving curve then applies the architecture
+                            reductions below. Fixed/replay milliseconds remain a floor; future software improvements to
+                            that floor are not assumed.
+                        </p>
+                    </details>
+                    <div class="projection-tools">
+                        <button class="button" type="button" id="projection-reset">Reset scenario</button>
+                        <button class="button" type="button" id="projection-csv">Download annual values</button>
+                    </div>
+                    <p id="projection-error" class="projection-error" role="alert" hidden></p>
+                </form>
+                <p class="projection-source-note">
+                    The default transfer path is an assumption: 4 × 14 GB/s drives at 66% sustained efficiency = 36.96
+                    GB/s, below a 63 GB/s host-link cap at the same efficiency. It does not claim Rubin requires that
+                    layout. Replace this with measured storage-to-GPU throughput. The 1 ms fixed overhead is also an
+                    assumption; the original idealized draft omitted it.
+                </p>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-architecture-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">ADD ARCHITECTURE EVOLUTION</p>
+                        <h2 id="projection-architecture-title">Which shrinks faster: the cache or the work?</h2>
+                    </div>
+                </div>
+                <div class="controls projection-controls">
+                    <label class="control">
+                        Illustrative architecture path
+                        <select id="projection-scenario">
+                            <option value="kv">KV shrinks faster</option>
+                            <option value="compute">Prefill work shrinks faster</option>
+                            <option value="frozen">No architecture change</option>
+                            <option value="custom">Custom reductions</option>
+                        </select>
+                    </label>
+                    <label class="control">
+                        Variable state reduction (%/year)
+                        <input
+                            id="projection-byte-decline"
+                            type="number"
+                            min="0"
+                            max="95"
+                            step="any"
+                            value="30"
+                            required
+                        />
+                        <span class="subtle">KV bytes per token; excludes fixed state</span>
+                    </label>
+                    <label class="control">
+                        Prefill work reduction (%/year)
+                        <input
+                            id="projection-work-decline"
+                            type="number"
+                            min="0"
+                            max="95"
+                            step="any"
+                            value="10"
+                            required
+                        />
+                        <span class="subtle">At the same context length</span>
+                    </label>
+                </div>
+                <p class="subtle">
+                    These paths bracket mechanisms found in the research below. Their percentages are deliberately
+                    hypothetical, not fitted to a collection of models of different sizes or quality. An architecture
+                    change starts a new model with its own cache format; existing KV is not portable between model
+                    versions.
+                </p>
+            </section>
+
+            <section aria-labelledby="projection-results-title">
+                <h2 id="projection-results-title">The same starting point, two futures</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="subtle">2026 restore advantage</div>
+                        <div class="value projection-value-cyan" id="projection-base-ratio">—</div>
+                        <p class="projection-status" id="projection-base-detail">—</p>
+                    </div>
+                    <div class="stat">
+                        <div class="subtle">Frozen architecture: recompute becomes faster</div>
+                        <div class="value projection-value-amber" id="projection-naive-year">—</div>
+                        <p class="projection-status" id="projection-naive-detail">—</p>
+                    </div>
+                    <div class="stat">
+                        <div class="subtle">Evolving architecture: recompute becomes faster</div>
+                        <div class="value projection-value-violet" id="projection-evolving-year">—</div>
+                        <p class="projection-status" id="projection-evolving-detail">—</p>
+                    </div>
+                </div>
+                <p id="projection-verdict" class="notice" aria-live="polite"></p>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-latency-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">THE ACTUAL LATENCY RACE</p>
+                        <h2 id="projection-latency-title">Recompute time versus time to usable state</h2>
+                    </div>
+                    <span class="pill">Y axis: milliseconds · log scale</span>
+                </div>
+                <div class="projection-legend">
+                    <span>
+                        <i style="border-color: #ffbd71"></i>
+                        Frozen recompute
+                    </span>
+                    <span>
+                        <i style="border-color: #59d9e9"></i>
+                        Frozen restore
+                    </span>
+                    <span>
+                        <i class="dashed" style="border-color: #ffbd71"></i>
+                        Evolving recompute
+                    </span>
+                    <span>
+                        <i class="dashed" style="border-color: #c0a6ff"></i>
+                        Evolving restore
+                    </span>
+                </div>
+                <div class="chart" id="projection-latency-chart"></div>
+                <p class="subtle">
+                    Restore includes payload transfer + fixed overhead + replay. Recompute is the baseline prefill
+                    divided by effective compute growth, adjusted for work and optional context changes. This compares
+                    one cache hit with one recompute; it is not an end-to-end TTFT or serving-throughput benchmark.
+                </p>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-ratio-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">ABOVE THE LINE: REUSE IS FASTER</p>
+                        <h2 id="projection-ratio-title">Recompute time ÷ restore time</h2>
+                    </div>
+                    <span class="pill">1× = equal latency</span>
+                </div>
+                <div class="projection-legend">
+                    <span>
+                        <i style="border-color: #59d9e9"></i>
+                        Frozen architecture
+                    </span>
+                    <span>
+                        <i class="dashed" style="border-color: #c0a6ff"></i>
+                        Evolving architecture
+                    </span>
+                </div>
+                <div class="chart" id="projection-ratio-chart"></div>
+                <div class="table-wrap">
+                    <table class="projection-table">
+                        <caption>Annual modeled values. Reuse advantage above 1× means restore is faster.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Year</th>
+                                <th scope="col">Frozen prefill</th>
+                                <th scope="col">Frozen restore</th>
+                                <th scope="col">Frozen advantage</th>
+                                <th scope="col">Evolving prefill</th>
+                                <th scope="col">Evolving restore</th>
+                                <th scope="col">Evolving advantage</th>
+                                <th scope="col">Evolving state</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projection-annual-values"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-sensitivity-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">DOES THE ANSWER SURVIVE A DIFFERENT GROWTH RATE?</p>
+                        <h2 id="projection-sensitivity-title">Frozen-architecture sensitivity</h2>
+                    </div>
+                </div>
+                <p class="subtle">
+                    Each cell gives the first modeled latency crossover, using your starting state, prefill time,
+                    overhead and optional context growth. Annual compute and I/O rates vary independently. “Beyond 2035”
+                    means no crossover within this display, not perpetual reuse.
+                </p>
+                <div class="table-wrap">
+                    <table class="projection-table projection-sensitivity">
+                        <thead>
+                            <tr>
+                                <th scope="col">Effective compute growth</th>
+                                <th scope="col">I/O +10%/year</th>
+                                <th scope="col">I/O +20%/year</th>
+                                <th scope="col">I/O +30%/year</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projection-sensitivity-values"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-history-title">
+                <p class="eyebrow">WHAT ACTUALLY CHANGED IN MODEL DESIGN</p>
+                <h2 id="projection-history-title">Architecture changes both sides of the ratio</h2>
+                <p class="lead">
+                    This history identifies mechanisms, not a quality-matched benchmark series. Fewer stored bytes,
+                    fewer prefill operations and a bounded reconstruction step can arrive together.
+                </p>
+                <div class="table-wrap">
+                    <table class="projection-table">
+                        <caption>
+                            Current model examples at 80,000 tokens. These are different models, not successive
+                            equal-quality replacements. Bytes exclude serialization overhead unless stated.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Model</th>
+                                <th scope="col">State per token</th>
+                                <th scope="col">Fixed state</th>
+                                <th scope="col">80K payload</th>
+                                <th scope="col">Evidence boundary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projection-model-values"></tbody>
+                    </table>
+                </div>
+                <div class="projection-timeline">
+                    <article>
+                        <div class="projection-era">2023 · GQA</div>
+                        <h3>Share KV heads</h3>
+                        <p>
+                            Grouped-query attention stores fewer K/V heads than multi-head attention. This lowers KV
+                            transfer volume without proportionally removing all prefill work.
+                        </p>
+                        <a href="https://arxiv.org/abs/2305.13245" target="_blank" rel="noopener noreferrer">
+                            GQA paper ↗
+                        </a>
+                    </article>
+                    <article>
+                        <div class="projection-era">2024 · MLA</div>
+                        <h3>Store a latent</h3>
+                        <p>
+                            DeepSeek-V2 compresses K/V into a latent representation. Persistent state depends on the
+                            latent, positional components and precision, rather than a full expanded head cache.
+                        </p>
+                        <a href="https://arxiv.org/abs/2405.04434" target="_blank" rel="noopener noreferrer">
+                            DeepSeek-V2 ↗
+                        </a>
+                    </article>
+                    <article>
+                        <div class="projection-era">2024–2025 · RECURRENCE</div>
+                        <h3>Keep a state checkpoint</h3>
+                        <p>
+                            Gated DeltaNet and hybrids such as Qwen3-Next replace many attention layers with recurrence.
+                            Remaining attention still grows with context, while recurrent state adds a fixed checkpoint
+                            and resume constraints.
+                        </p>
+                        <a href="https://arxiv.org/abs/2412.06464" target="_blank" rel="noopener noreferrer">
+                            Gated DeltaNet ↗
+                        </a>
+                        <br />
+                        <a
+                            href="https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Qwen3-Next card ↗
+                        </a>
+                    </article>
+                    <article>
+                        <div class="projection-era">2025–2026 · SPARSE ATTENTION</div>
+                        <h3>Read fewer entries</h3>
+                        <p>
+                            Query selection reduces attention work and the active GPU working set. It does not by itself
+                            discard the full persistent KV: indexer state and future query access still matter.
+                        </p>
+                        <a
+                            href="https://huggingface.co/deepseek-ai/DeepSeek-V3.2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            DeepSeek-V3.2 card ↗
+                        </a>
+                    </article>
+                    <article>
+                        <div class="projection-era">2026 · V4.1 FLASH</div>
+                        <h3>Compress, split and replay</h3>
+                        <p>
+                            The report gives 890 B/token of persistent global state. Its encoder/decoder split changes
+                            prefill work; bounded replay reconstructs local state approximately. Smaller cache and
+                            faster recompute pull in opposite directions.
+                        </p>
+                        <a href="https://arxiv.org/html/2609.19969v1" target="_blank" rel="noopener noreferrer">
+                            V4.1 report ↗
+                        </a>
+                    </article>
+                </div>
+                <p class="projection-source-note">
+                    A recurrent model can still benefit from restoring its state instead of replaying its history. A
+                    fully bounded-state architecture can make long-term storage capacity much less important while
+                    leaving state placement and exact checkpoint availability important. See
+                    <a href="hybrid-checkpoints.html">hybrid checkpoint spacing</a>
+                    and
+                    <a href="architecture-comparison.html">the architecture comparison</a>
+                    for the distinction.
+                </p>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-hardware-title">
+                <p class="eyebrow">HARDWARE ANCHORS · NOT A FITTED EXPONENTIAL LAW</p>
+                <h2 id="projection-hardware-title">Compare the same arithmetic precision</h2>
+                <div class="table-wrap">
+                    <table class="projection-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Hardware anchor</th>
+                                <th scope="col">Dense FP8 per GPU</th>
+                                <th scope="col">Published specification boundary</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">H100 SXM · 2023 anchor</th>
+                                <td>1.979 PFLOP/s</td>
+                                <td>
+                                    <a
+                                        href="https://resources.nvidia.com/en-us-gpu/h100-datasheet-24306"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        3.958 PFLOP/s sparse ÷ 2
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">B200 · 2025 anchor</th>
+                                <td>4.5 PFLOP/s</td>
+                                <td>
+                                    <a
+                                        href="https://dam-cdn.nvd.orangelogic.com/AssetLink/01dyp27s6aj4e0483cs5goo15354m438.pdf"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        9 PFLOP/s sparse ÷ 2; HGX specification
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Rubin · 2026 anchor</th>
+                                <td>17.5 PFLOP/s</td>
+                                <td>
+                                    <a
+                                        href="https://www.nvidia.com/en-us/data-center/hgx/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Dense FP8; announced specification
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="subtle">
+                    These are nominal peak rates, not measured agentic prefill throughput. Kernel efficiency, precision,
+                    tensor/expert parallel communication, weight traffic, batching and availability can change the
+                    realized gain. Dates are the hardware anchors used here, not a claim that every product shipped on
+                    January 1. Neither a faster GPU nor a wider PCIe specification guarantees a proportional end-to-end
+                    speedup.
+                </p>
+            </section>
+
+            <section class="panel" aria-labelledby="projection-method-title">
+                <p class="eyebrow">HOW TO READ THE PROJECTION</p>
+                <h2 id="projection-method-title">The useful question is the work-to-state ratio</h2>
+                <p class="projection-equation">
+                    Without a fixed floor: reuse advantage ≈ (prefill FLOPs ÷ saved bytes) × (restore bytes/s ÷
+                    effective FLOPs/s)
+                </p>
+                <div class="projection-note-grid">
+                    <div>
+                        <h3>What extends cache reuse?</h3>
+                        <p>
+                            State compression that outpaces compute reduction, faster storage-to-GPU paths, larger
+                            reusable prefixes and predictable prefetch can keep reuse useful. Prefetch changes visible
+                            latency; it still consumes bandwidth and capacity.
+                        </p>
+                    </div>
+                    <div>
+                        <h3>What weakens it?</h3>
+                        <p>
+                            Cheaper prefill, smaller reused prefixes, slow shared links, lookup/reconstruction overhead
+                            and low reuse probability. A latency crossover is specific to those assumptions. It does not
+                            mean all KV caching becomes irrelevant.
+                        </p>
+                    </div>
+                    <div>
+                        <h3>What the future curves assume</h3>
+                        <p>
+                            Each year multiplies effective compute and bandwidth by their growth factors. Variable bytes
+                            shrink by their architecture factor; work shrinks independently. Optional context growth
+                            scales variable bytes linearly, and prefill by the selected mixture of linear and quadratic
+                            work. A fixed checkpoint does not shrink.
+                        </p>
+                    </div>
+                    <div>
+                        <h3>What to measure next</h3>
+                        <p>
+                            Match the model revision, cache format, prompt, precision and serving load. Measure full
+                            recompute and time from cache lookup to usable GPU state, including replay. Repeat under
+                            concurrent reads and writes. Use those baseline values before interpreting any projected
+                            year.
+                        </p>
+                    </div>
+                </div>
+                <p class="notice">
+                    Latency is only one condition. Retaining a context also needs enough expected return value,
+                    compatible state and available capacity. The
+                    <a href="agentic-kv-economics.html">agentic economics view</a>
+                    assesses those conditions separately, including the cost of holding one context idle.
+                </p>
+            </section>
+            <footer class="sources">
+                <p>
+                    Independent analysis · Source review: November 17, 2026 · Scenario values are not benchmarks ·
+                    <a href="https://github.com/mcgrof/kvcache-view" target="_blank" rel="noopener noreferrer">
+                        Source code
+                    </a>
+                </p>
+            </footer>
+            <noscript>
+                <p class="notice">
+                    Enable JavaScript for the interactive projection. The architecture history, hardware sources and
+                    methodology above remain available.
+                </p>
+            </noscript>
+        </main>
+    </body>
+</html>

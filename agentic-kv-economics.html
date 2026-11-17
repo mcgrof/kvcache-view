@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content="Per-context economics of agentic KV cache retention, with a transparent storage ledger, restore latency, trace limitations, and current research."
+        />
+        <meta name="theme-color" content="#080e1b" />
+        <title>Agentic KV cache: what does an idle context cost?</title>
+        <link rel="icon" href="icon.svg" />
+        <link rel="stylesheet" href="kv-offload.css" />
+    </head>
+    <body>
+        <main class="wrap">
+            <nav class="nav" aria-label="Main navigation">
+                <a href="index.html">← All views</a>
+                <a href="cache-reuse-projections.html">Compute vs cache projections →</a>
+                <a href="hybrid-checkpoints.html">Hybrid checkpoints</a>
+                <a href="#research">Research &amp; assumptions</a>
+            </nav>
+            <header>
+                <div class="eyebrow">Agentic KV offloading · research snapshot 17 November 2026</div>
+                <h1>What does one idle context cost?</h1>
+                <p class="lead">
+                    A context waits while an agent runs a tool or a person thinks. Compare the cost of that context’s
+                    storage space with computing it again once. Then check the separate questions: how fast can it
+                    return, will it be reused, and how much capacity does the fleet need?
+                </p>
+            </header>
+            <div class="panel controls primary-controls" aria-label="Primary scenario controls">
+                <label class="control">
+                    Model architecture
+                    <select id="model"></select>
+                </label>
+                <label class="control">
+                    Context tokens
+                    <input id="tokens" type="number" value="80000" min="128" max="4000000" step="1000" />
+                </label>
+                <label class="control">
+                    Eight-GPU node
+                    <select id="node"></select>
+                </label>
+                <label class="control">
+                    Recompute estimate
+                    <select id="computeMode">
+                        <option value="example">Supplied 26 ms Rubin example</option>
+                        <option value="flops">Architecture FLOP estimate</option>
+                        <option value="manual">Enter a measured / assumed time</option>
+                    </select>
+                </label>
+                <label class="control">
+                    Recompute latency (ms)
+                    <input id="recomputeMs" type="number" value="26" min="0.001" max="1000000" step="1" />
+                </label>
+                <label class="control">
+                    Price ($ per GPU-hour)
+                    <input id="gpuPrice" type="number" value="8" min="0" max="1000" step="0.5" />
+                </label>
+            </div>
+            <p class="notice" id="scenarioNote"></p>
+            <p class="subtle" id="modelNotes"></p>
+            <p id="inputError" class="error" role="alert"></p>
+            <section class="panel hero" aria-labelledby="storage-heading">
+                <span class="pill">One context · one successful future reuse</span>
+                <h2 id="storage-heading" style="margin-top: 14px">Storage days that cost the same as one recompute</h2>
+                <div class="big" id="storageDays">—</div>
+                <p id="headlineExplanation"></p>
+                <p class="subtle">
+                    This allocates a fraction of an existing drive’s purchase cost over its service life. It is not a
+                    drive purchase payback period, an optimal retention time, or a claim that a session will return.
+                </p>
+            </section>
+            <div class="stats" aria-live="polite">
+                <div class="stat">
+                    <span class="label">Persisted context</span>
+                    <span class="value" id="contextSize">—</span>
+                    <span class="subtle" id="contextDescription"></span>
+                </div>
+                <div class="stat">
+                    <span class="label">Storage space / day</span>
+                    <span class="value" id="costDay">—</span>
+                    <span class="subtle">Amortized capacity, plus optional operating allocation</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Recompute once</span>
+                    <span class="value" id="costRecompute">—</span>
+                    <span class="subtle" id="computeDescription"></span>
+                </div>
+            </div>
+            <section class="panel">
+                <h2>Follow the money for this one context</h2>
+                <ol class="ledger" id="ledger"></ol>
+                <p class="subtle">
+                    Decimal units throughout: 1 GB = 10⁹ bytes. 80,000 × 890 B is exactly 71.2 MB; “72 MB” is a rounded
+                    example. Five years uses 365 days/year. GPU-seconds × price assumes exclusive use of all eight GPUs;
+                    continuous batching needs measured marginal GPU time or billed cost per completed request.
+                </p>
+            </section>
+            <details class="panel">
+                <summary>Storage, transfer, and compute assumptions</summary>
+                <div class="controls">
+                    <label class="control">
+                        NAND purchase ($/GB)
+                        <input id="nandPrice" type="number" value="0.10" min="0" max="100" step="0.01" />
+                    </label>
+                    <label class="control">
+                        Service life (years)
+                        <input id="years" type="number" value="5" min="0.1" max="20" step="0.5" />
+                    </label>
+                    <label class="control">
+                        Extra storage overhead ($/GB-month)
+                        <input id="storageOverhead" type="number" value="0" min="0" max="100" step="0.01" />
+                    </label>
+                    <label class="control">
+                        DRAM purchase ($/GB)
+                        <input id="dramPrice" type="number" value="5" min="0" max="1000" step="0.5" />
+                    </label>
+                    <label class="control">
+                        Sequential read per drive (GB/s)
+                        <input id="driveGBps" type="number" value="14" min="0.01" max="1000" step="1" />
+                    </label>
+                    <label class="control">
+                        Parallel drives
+                        <input id="drives" type="number" value="4" min="1" max="128" step="1" />
+                    </label>
+                    <label class="control">
+                        Path efficiency (0–1)
+                        <input id="ioEfficiency" type="number" value="0.66" min="0.01" max="1" step="0.01" />
+                    </label>
+                    <label class="control">
+                        Shared path cap, before efficiency (GB/s)
+                        <input id="linkGBps" type="number" value="63" min="0.01" max="10000" step="1" />
+                    </label>
+                    <label class="control">
+                        Fixed restore overhead (ms)
+                        <input id="fixedMs" type="number" value="1" min="0" max="100000" step="0.1" />
+                    </label>
+                    <label class="control">
+                        Replay / reconstruction (ms)
+                        <input id="replayMs" type="number" value="0" min="0" max="100000" step="1" />
+                    </label>
+                    <label class="control">
+                        Compute utilization (MFU)
+                        <input id="mfu" type="number" value="0.44" min="0.01" max="1" step="0.01" />
+                    </label>
+                    <label class="control">
+                        Write policy
+                        <select id="writePolicy">
+                            <option value="full">Cold store: full context</option>
+                            <option value="append">Warm prefix: append + new checkpoint</option>
+                        </select>
+                    </label>
+                    <label class="control">
+                        New tokens in a warm append
+                        <input id="appendTokens" type="number" value="4000" min="0" max="4000000" step="500" />
+                    </label>
+                    <label class="control">
+                        Drive endurance (DWPD)
+                        <input id="dwpd" type="number" value="1" min="0.01" max="100" step="0.5" />
+                    </label>
+                </div>
+                <p>
+                    <label>
+                        <input type="checkbox" id="includeWear" />
+                        Include an additional write-wear allocation in net savings
+                    </label>
+                </p>
+                <p class="subtle">
+                    Wear is off by default: adding full endurance amortization to full time depreciation can count drive
+                    capital twice. Its separate sensitivity is price × bytes written ÷ (DWPD × lifetime days). It
+                    excludes write-path GPU time, serialization, network fees, replication, and redundancy; enter
+                    measured overheads where available. Drive rates, prices, MFU, and fixed/replay time are editable
+                    scenarios, not matched benchmarks. Effective transfer bandwidth is capped by the shared path.
+                    Queueing and competing requests can lower it further.
+                </p>
+            </details>
+            <section class="panel">
+                <h2>Cheap to keep is only half the decision</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="label">Restore to reusable state</span>
+                        <span class="value" id="restoreTime">—</span>
+                        <span class="subtle" id="restoreDetail"></span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Restore vs recompute</span>
+                        <span class="value" id="speedup">—</span>
+                        <span class="subtle" id="latencyVerdict"></span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Storage allowance after restore + optional wear</span>
+                        <span class="value" id="netDays">—</span>
+                        <span class="subtle">
+                            One guaranteed valid return; GPU blocked during restore is charged at full node rate
+                        </span>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <caption>What would keeping this context cost relative to one full recompute?</caption>
+                        <thead>
+                            <tr>
+                                <th>Tier / allocation</th>
+                                <th>5 minutes</th>
+                                <th>1 hour</th>
+                                <th>24 hours</th>
+                                <th>72 hours</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tierRows"></tbody>
+                    </table>
+                </div>
+                <p class="subtle" id="tierNote"></p>
+                <p id="decisionText"></p>
+            </section>
+            <section class="panel">
+                <h2>How often do the contexts come back?</h2>
+                <p>
+                    The published Copilot weekday table contains
+                    <b>167,864 observed same-model returns</b>
+                    idle for 10 seconds to 24 hours. It does not tell us what fraction of all idle contexts never
+                    return. The following is a workload scenario using those return-time proportions, a fixed context
+                    size, and explicit assumptions.
+                </p>
+                <div class="controls">
+                    <label class="control">
+                        Keep for at most
+                        <select id="retention">
+                            <option value="300">5 minutes</option>
+                            <option value="1800">30 minutes</option>
+                            <option value="3600" selected>1 hour</option>
+                            <option value="86400">24 hours</option>
+                            <option value="259200">72 hours (tail unobserved)</option>
+                        </select>
+                    </label>
+                    <label class="control">
+                        Probability of return in observed range (%)
+                        <input id="returnPct" type="number" value="80" min="0" max="100" step="1" />
+                    </label>
+                    <label class="control">
+                        Reusable prefix validity (%)
+                        <input id="validPct" type="number" value="100" min="0" max="100" step="1" />
+                    </label>
+                    <label class="control">
+                        Idle-context arrivals / day
+                        <input id="arrivals" type="number" value="100000" min="0" max="1000000000" step="1000" />
+                    </label>
+                    <label class="control">
+                        Comparison baseline
+                        <select id="baseline">
+                            <option value="uncached">Recompute all returned contexts</option>
+                            <option value="observed">Published post-5-minute cache fractions</option>
+                        </select>
+                    </label>
+                    <label class="control">
+                        Available NVMe capacity (TB)
+                        <input id="capacityTB" type="number" value="30.72" min="0.001" max="100000" step="1" />
+                    </label>
+                </div>
+                <p class="subtle">
+                    The 80% return probability and 100,000 arrivals/day are illustrative inputs. Contexts outside the
+                    observed return mixture occupy the whole retention window and earn no reuse credit. The
+                    provider-cache comparison credits only the 5-minute–24-hour bins, using their mean uncached-token
+                    fractions as a linear compute proxy; it is not a measured GPU-time saving.
+                </p>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="label">Expected net saving / idle arrival</span>
+                        <span class="value" id="expectedValue">—</span>
+                        <span class="subtle" id="expectedDetail"></span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Average parked capacity</span>
+                        <span class="value" id="parkedSize">—</span>
+                        <span class="subtle" id="parkedDetail"></span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Avoided full-prefill equivalents / day</span>
+                        <span class="value" id="avoided">—</span>
+                        <span class="subtle">Expected valid reuse, adjusted for the selected baseline</span>
+                    </div>
+                </div>
+                <div id="capacityWarning" class="notice"></div>
+                <figure>
+                    <div id="gapChart"></div>
+                    <figcaption>
+                        Counts are observed returns in the selected day. Within each bucket, interpolation assumes
+                        log-uniform gaps. The table ends at 24 hours; later returns and terminal sessions are not
+                        measured by these displayed buckets.
+                    </figcaption>
+                </figure>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Idle gap</th>
+                                <th>Observed returns</th>
+                                <th>Share</th>
+                                <th>Mean cached-token fraction</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gapRows"></tbody>
+                    </table>
+                </div>
+                <p class="subtle">
+                    80K / 164K tokens and 274 / 2,592 seconds are p50 / p90 for a different subset: same-model,
+                    noncompacted long-prompt resumes. They are useful context-size presets, not the joint distribution
+                    of these bins. No global 92% validity multiplier is applied: switches are already excluded,
+                    compaction may preserve part of a prefix, and those rates can overlap.
+                </p>
+            </section>
+            <section class="panel" id="research">
+                <h2>What the research changes</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Evidence</th>
+                                <th>Implication for this analysis</th>
+                                <th>Boundary</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://arxiv.org/pdf/2610.22863">KV Residency, October 2026</a></td>
+                                <td>
+                                    In a Deep Research replay, a one-hour idle cap reduces peak retention demand 3.6×
+                                    while recomputing calls rise from 4.07% to 4.53%. Placement adds another loss of
+                                    reuse.
+                                </td>
+                                <td>
+                                    121M+ production calls; memory uses a public Llama-2-70B proxy. Quantized-retention
+                                    simulations omit quality and transfer costs.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://arxiv.org/pdf/2602.21548">DualPath, 2026</a></td>
+                                <td>
+                                    Storage-facing links can bottleneck cross-turn reuse. Model the whole storage-to-GPU
+                                    route and concurrent demand.
+                                </td>
+                                <td>
+                                    Four drives’ summed sequential speeds do not establish end-to-end restore
+                                    throughput.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="https://www.usenix.org/system/files/osdi26-liu-guangda.pdf">
+                                        ECHO, OSDI 2026
+                                    </a>
+                                </td>
+                                <td>Sparse attention permits a DRAM-backed MLA cache and a smaller GPU working set.</td>
+                                <td>
+                                    Indexer keys remain GPU-resident. This is active decode offloading on 8×H20, not an
+                                    NVMe resume benchmark.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://arxiv.org/pdf/2608.14624">CacheScout, 2026</a></td>
+                                <td>
+                                    Agent-transition prediction can improve eviction decisions and warm likely next
+                                    contexts.
+                                </td>
+                                <td>Its proactive warmup is recomputation, not proof of SSD prefetch speed.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://arxiv.org/pdf/2609.14872">AgentKV, 2026</a></td>
+                                <td>
+                                    Think, act, and tool phases attend differently; phase-aware eviction can preserve
+                                    more useful state.
+                                </td>
+                                <td>
+                                    Lossy retention requires task-quality validation. Benchmark gains are not applied as
+                                    multipliers here.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://arxiv.org/html/2609.19969v1">DeepSeek V4.1 Flash, 2026</a></td>
+                                <td>890 B/token global KV and bounded SWA replay sharply reduce persistent state.</td>
+                                <td>
+                                    Bounded replay is approximate and takes compute. A smaller persistent image is not
+                                    the entire live HBM working set.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    <a href="cache-reuse-projections.html">Next: hold the architecture fixed, then let it evolve →</a>
+                </p>
+            </section>
+            <details class="panel">
+                <summary>Equations, provenance, and corrections to the draft</summary>
+                <pre>
+context bytes = tokens × persisted bytes/token + fixed checkpoint bytes
+capacity cost/day = bytes/1e9 × $/GB ÷ (365 × service years)
+days equal to one recompute = recompute cost ÷ capacity cost/day
+restore seconds = bytes / effective bytes/second + fixed overhead + replay
+expected net = P(valid credited return) × (recompute cost − restore cost)
+               − optional write allocation − daily holding cost × E[held days]
+average parked bytes = arrivals/day × E[held days] × bytes/context</pre>
+                <p>
+                    No return means holding through expiration. The cache-cohort calculation scales compute credit with
+                    uncached-token fractions, which is only a rough proxy when attention is nonlinear. Exact-prefix
+                    identity must include model/checkpoint, adapters, tokenizer, positions, and cache representation;
+                    compaction or model changes can invalidate a stored image. Sharing, deduplication, replication,
+                    write-path time, and peak occupancy need separate measurements.
+                </p>
+                <p>
+                    The original draft mixed cohorts, assumed a universal five-minute miss, double-discounted switches,
+                    treated a truncated histogram as a complete lifetime distribution, assumed infinite free bandwidth,
+                    and called long storage allowances “indefinite.” These are corrected here. The unverified 2.9 s H100
+                    calibration is not used as a measured universal MFU. FLOP estimates are sensitivity tools and omit
+                    communication, non-matmul kernels, scheduling, padding, and precision-specific bottlenecks.
+                </p>
+                <p>
+                    <a href="research/audit-agentic-kv-2026-11-17.md">Read the audit and evidence notes</a>
+                    ·
+                    <a href="https://knlp.io/kmesh-workloads.html">KMesh workload analysis</a>
+                    ·
+                    <a href="https://github.com/mcgrof/knlp/blob/main/tools/reproduce/kmesh_traces/README.md">
+                        Trace reproduction / dataset versions
+                    </a>
+                    ·
+                    <a href="https://arxiv.org/pdf/2608.00101">Agentic Coding in the Wild</a>
+                </p>
+                <div id="modelSources" class="sources"></div>
+            </details>
+            <div class="actions">
+                <button id="reset">Reset to the 80K / 26 ms example</button>
+                <button id="download">Download current scenario (JSON)</button>
+            </div>
+            <noscript>
+                <p class="notice">
+                    Enable JavaScript to calculate scenarios. The equations and research discussion remain readable
+                    above.
+                </p>
+            </noscript>
+            <footer class="foot">
+                Independent open-source analysis ·
+                <a href="https://github.com/mcgrof/kvcache-view">Source</a>
+                · Assumptions are editable; projections are not observed deployment performance.
+            </footer>
+        </main>
+        <script src="kv-offload-math.js"></script>
+        <script src="kv-offload-data.js"></script>
+        <script src="agentic-kv-economics.js"></script>
+    </body>
+</html>

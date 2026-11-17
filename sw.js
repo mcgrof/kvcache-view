@@ -1,7 +1,16 @@
-const CACHE_NAME = 'kvcache-view-v7'
+const CACHE_NAME = 'kvcache-view-v8'
 const urlsToCache = [
     './',
     './index.html',
+    './agentic-kv-economics.html',
+    './cache-reuse-projections.html',
+    './kv-offload.css',
+    './kv-offload-math.js',
+    './kv-offload-data.js',
+    './agentic-kv-economics.js',
+    './cache-reuse-projections.js',
+    './thumbnails/agentic-kv-economics.svg',
+    './thumbnails/cache-reuse-projections.svg',
     './hybrid-trends.html',
     './attention-trends.html',
     './context-demand.html',
@@ -35,15 +44,19 @@ self.addEventListener('install', (event) => {
 })
 
 // Network-first for navigations/HTML so renamed or replaced pages don't get
-// shadowed by a stale cache entry. Generated OpenRouter pages also need fresh
+// shadowed by a stale cache entry. Interactive analysis pages also need fresh
 // shared styles/scripts when their charts change. Cache-first for other assets.
 self.addEventListener('fetch', (event) => {
     const req = event.request
     const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')
     const url = new URL(req.url)
-    const isOpenRouterAsset = url.origin === self.location.origin && /\/openrouter\.(css|js)$/.test(url.pathname)
+    const isAnalysisAsset =
+        url.origin === self.location.origin &&
+        /\/(openrouter|kv-offload(?:-math|-data)?|agentic-kv-economics|cache-reuse-projections)\.(css|js)$/.test(
+            url.pathname,
+        )
 
-    if (isHTML || isOpenRouterAsset) {
+    if (isHTML || isAnalysisAsset) {
         event.respondWith(
             fetch(req)
                 .then((response) => {
@@ -52,7 +65,7 @@ self.addEventListener('fetch', (event) => {
                     return response
                 })
                 .catch(() =>
-                    caches.match(req).then((r) => r || caches.match(isOpenRouterAsset ? url.pathname : './index.html')),
+                    caches.match(req).then((r) => r || caches.match(isAnalysisAsset ? url.pathname : './index.html')),
                 ),
         )
         return

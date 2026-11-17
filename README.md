@@ -159,6 +159,28 @@ Cache prices and token traffic are not measurements of NVMe offloading.
 See [the data methodology and attribution](data/openrouter/README.md) for
 coverage limits, exact commands, source licenses, and the registry workflow.
 
+## Agentic KV retention and compute projections
+
+[Agentic KV Retention Economics](https://kvcache.io/agentic-kv-economics.html)
+explains the marginal cost of storing one context and separates capacity allocation,
+restore latency, valid return probability, and fleet occupancy. The exact 80K-token,
+890-byte/token, 26 ms Rubin scenario yields 71.2 MB and 118.48 days of storage for
+one recompute's cost. The 26 ms is a supplied scenario, not a measured result.
+
+[Compute vs Cache: 2026–2035](https://kvcache.io/cache-reuse-projections.html)
+first freezes the architecture, then separately varies persisted bytes, recompute
+work, context growth, bandwidth, and fixed restore/replay overhead. Its growth
+rates are sensitivities, not a fitted hardware or architecture forecast. Published
+architectural mechanisms and four model presets provide evidence and context,
+not an equal-quality model replacement sequence.
+
+Both buildless pages share `kv-offload-math.js` and `kv-offload-data.js`.
+The numerical tests run with `npm test`; scenario exports preserve the inputs.
+See [the source audit](research/audit-agentic-kv-2026-11-17.md) for trace cohorts,
+conditional return assumptions, prior-draft corrections, research references,
+and boundaries on cost, throughput, and quality claims. These views are linked
+from the homepage and published through the repository's existing GitHub Pages route.
+
 ## Controls
 
 - **Play/Pause**: Start or stop the animation
