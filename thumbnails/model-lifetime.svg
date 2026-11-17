@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-labelledby="title desc">
+<title id="title">Lifetime of a model</title><desc id="desc">A conceptual declining model-popularity curve above an accumulating inference-demand curve. Observed history and future scenarios are separated by a dotted line.</desc>
+<defs><linearGradient id="bg" x1="0" x2="1" y2="1"><stop stop-color="#172748"/><stop offset="1" stop-color="#080f25"/></linearGradient><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#69d9e8" stop-opacity=".24"/><stop offset="1" stop-color="#69d9e8" stop-opacity="0"/></linearGradient></defs>
+<rect width="640" height="640" fill="url(#bg)"/><circle cx="540" cy="80" r="150" fill="#6f3cc3" opacity=".08"/>
+<text x="50" y="65" fill="#bd9bff" font-family="system-ui,sans-serif" font-size="14" font-weight="700" letter-spacing="2">OPENROUTER · MODEL LIFETIME</text>
+<text x="48" y="124" fill="#eaf2ff" font-family="system-ui,sans-serif" font-size="39" font-weight="700">How long does</text><text x="48" y="173" fill="#69d9e8" font-family="system-ui,sans-serif" font-size="39" font-weight="700">popular last?</text>
+<path d="M65 230V414H574 M65 505H574" fill="none" stroke="#31445e" stroke-width="2"/>
+<path d="M65 380C105 370 122 268 174 252S265 278 313 313S356 342 392 356L392 414H65Z" fill="url(#fill)"/>
+<path d="M65 380C105 370 122 268 174 252S265 278 313 313S356 342 392 356" fill="none" stroke="#69d9e8" stroke-width="5"/>
+<path d="M392 356C460 385 503 393 574 399" fill="none" stroke="#ffc17b" stroke-width="4" stroke-dasharray="9 7"/>
+<path d="M65 500C150 498 198 472 260 459S340 441 392 438" fill="none" stroke="#bd9bff" stroke-width="5"/>
+<path d="M392 438C450 432 508 426 574 422" fill="none" stroke="#ffc17b" stroke-width="4" stroke-dasharray="9 7"/>
+<path d="M392 220V517" stroke="#8593ac" stroke-width="2" stroke-dasharray="3 7"/>
+<text x="76" y="221" fill="#aebed6" font-family="system-ui,sans-serif" font-size="16">Popularity</text><text x="76" y="448" fill="#aebed6" font-family="system-ui,sans-serif" font-size="16">Accumulated demand</text>
+<text x="176" y="548" fill="#69d9e8" font-family="system-ui,sans-serif" font-size="17" text-anchor="middle">Observed history</text><text x="490" y="548" fill="#ffc17b" font-family="system-ui,sans-serif" font-size="17" text-anchor="middle">Future scenario</text>
+<text x="48" y="600" fill="#aebed6" font-family="system-ui,sans-serif" font-size="15">Ranked lifetime ≠ all deployment lifetime</text>
+</svg>

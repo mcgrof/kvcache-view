@@ -50,6 +50,11 @@ openrouter-cache:
 	@$(PYTHON) -m scripts.openrouter cache $(OPENROUTER_ARGS)
 	@$(PRETTIER) --write cache-telemetry.html
 
+.PHONY: openrouter-lifetime
+## openrouter-lifetime: Refresh popularity lifetimes and inference-demand projections
+openrouter-lifetime:
+	@$(PYTHON) -m scripts.openrouter lifetime $(OPENROUTER_ARGS)
+
 ## openrouter-render: Rebuild all OpenRouter pages from saved data without network access
 openrouter-render:
 	@$(MAKE) openrouter OPENROUTER_OFFLINE=1
@@ -227,6 +232,7 @@ help:
 	@echo "  make openrouter-attention-trends Attention styles and sparse attention"
 	@echo "  make openrouter-context          Context-bucket demand"
 	@echo "  make openrouter-cache            Cache prices and telemetry availability"
+	@echo "  make openrouter-lifetime         Model lifetimes and inference demand"
 	@echo "  make openrouter-render           Offline rebuild from committed snapshots"
 	@echo "  OPENROUTER_END=YYYY-MM-DD         Reproduce a specific UTC cutoff"
 	@echo "  OPENROUTER_FULL_REFRESH=1         Refetch older history as well"

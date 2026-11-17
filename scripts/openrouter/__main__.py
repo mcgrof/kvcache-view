@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("target", choices=["all", "trends", "attention", "context", "comparison", "cache"], default="all", nargs="?")
+    parser.add_argument("target", choices=["all", "trends", "attention", "context", "comparison", "cache", "lifetime"], default="all", nargs="?")
     parser.add_argument("--start", type=dt.date.fromisoformat, default=FLOOR)
     parser.add_argument("--end", type=dt.date.fromisoformat, default=completed_day())
     parser.add_argument("--offline", action="store_true", help="Render saved snapshots; never access the network")
@@ -37,8 +37,8 @@ def main(argv=None):
 
 def run(args, data_dir):
     client = Client(None if args.offline else os.environ.get("OPEN_ROUTER_API"))
-    buckets = BUCKETS if args.target in ("all", "context", "comparison") else (("text",) if args.target in ("trends", "attention") else ())
-    catalog_path = data_dir / "catalog.json"
+    buckets = BUCKETS if args.target in ("all", "context", "comparison") else (("text",) if args.target in ("trends", "attention", "lifetime") else ())
+    catalog_path = data_dir / ("lifetime-catalog.json" if args.target == "lifetime" else "catalog.json")
     # Fail before modifying anything when an authenticated refresh has no key.
     if not args.offline and buckets and not client.key:
         raise DataError("Set OPEN_ROUTER_API, or rebuild existing data with OPENROUTER_OFFLINE=1")
@@ -46,6 +46,8 @@ def run(args, data_dir):
         print("Refreshing public OpenRouter catalog")
         catalog = fetch_catalog(client)
         write_json(catalog_path, catalog)
+        if args.target == "all":
+            write_json(data_dir / "lifetime-catalog.json", catalog)
         for bucket in buckets:
             print(f"Refreshing {bucket} rankings through {args.end}")
             update_rankings(client, data_dir, bucket, args.start, args.end, args.full_refresh)
@@ -64,7 +66,7 @@ def run(args, data_dir):
     provenance["as_of"] = max(stamps) if stamps else catalog["meta"]["as_of"]
     # Prepare all outputs before publishing any generated page.
     outputs = {}
-    if buckets:
+    if buckets and args.target != "lifetime":
         from .analysis import analyze
         from .render import render_context, render_trends
         registry = read_json(data_dir / "architecture-registry.json")
@@ -103,6 +105,22 @@ def run(args, data_dir):
                 outputs[data_dir / "architecture-comparison.json"] = json.dumps(study, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
                 outputs[data_dir / "architecture-comparison-provenance.json"] = json.dumps(page_provenance, sort_keys=True, indent=2) + "\n"
                 outputs[ROOT / "architecture-comparison.html"] = render_architecture_page(study, page_provenance)
+    if args.target in ("all", "lifetime"):
+        from .lifetime import analyze_lifetime
+        registry_path = data_dir / "lifetime-registry.json"
+        lifetime = analyze_lifetime(datasets["text"], read_json(registry_path), catalog, str(args.end))
+        lifetime_provenance = dict(provenance,
+            analysis_url="data/openrouter/model-lifetime.json",
+            provenance_url="data/openrouter/model-lifetime-provenance.json",
+            snapshots=[s for s in provenance["snapshots"] if s["dataset"] == "text"],
+            requested_start_date=str(args.start),
+            modifications="Exact-ID open-weight classification, rank episodes, censored survival estimates, and token-demand scenarios.")
+        lifetime_provenance["as_of"] = max(s["meta"]["as_of"] for s in lifetime_provenance["snapshots"])
+        source_paths = [ROOT / s["path"] for s in lifetime_provenance["snapshots"]] + [registry_path, catalog_path]
+        lifetime_provenance["sha256"] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
+        lifetime["provenance"] = lifetime_provenance
+        outputs[data_dir / "model-lifetime.json"] = json.dumps(lifetime, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+        outputs[data_dir / "model-lifetime-provenance.json"] = json.dumps(lifetime_provenance, sort_keys=True, indent=2) + "\n"
     if args.target in ("all", "cache"):
         from .cache import analyze_cache, render_cache
         cache = analyze_cache(catalog)

@@ -1,0 +1,120 @@
+{
+  "analysis_url": "data/openrouter/model-lifetime.json",
+  "as_of": "2026-11-17T16:38:36.551Z",
+  "catalog": {
+    "as_of": "2026-11-17T16:38:41.743203Z",
+    "pages": [
+      "https://openrouter.ai/api/v1/models?output_modalities=all"
+    ],
+    "source_url": "https://openrouter.ai/api/v1/models?output_modalities=all"
+  },
+  "generated_for_end_date": "2026-11-16",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "modifications": "Exact-ID open-weight classification, rank episodes, censored survival estimates, and token-demand scenarios.",
+  "provenance_url": "data/openrouter/model-lifetime-provenance.json",
+  "requested_start_date": "2025-01-01",
+  "sha256": {
+    "data/openrouter/lifetime-catalog.json": "34cee79926b9e33b01dc0120d2845719255dc9bfca33db41b511bb2be2b26faa",
+    "data/openrouter/lifetime-registry.json": "a694111cf8b0f8b9521204ee0a247d334761c62c61a95fca1fdc6099ab9a60db",
+    "data/openrouter/rankings/text/2025.json.gz": "b3896e973de4a75f74e1ab9d572192f54a54a31ef100b019b7bb1e3a8948cfed",
+    "data/openrouter/rankings/text/2026.json.gz": "594511de67a67bf3837e8bd7574033573f0c982738ca315b49abe6fd22c73c42"
+  },
+  "snapshots": [
+    {
+      "dataset": "text",
+      "meta": {
+        "as_of": "2026-11-17T16:38:27.901Z",
+        "end_date": "2025-12-31",
+        "filters": {
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-07T13:33:37.225Z",
+            "end_date": "2025-12-31",
+            "filters": {
+              "modality": "text"
+            },
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:48:33.071Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-11-17T16:38:27.901Z",
+            "end_date": "2025-12-31",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2025-01-01&end_date=2025-12-31&period=day&modality=text",
+            "start_date": "2025-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2025-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/text/2025.json.gz"
+    },
+    {
+      "dataset": "text",
+      "meta": {
+        "as_of": "2026-11-17T16:38:36.551Z",
+        "end_date": "2026-11-16",
+        "filters": {
+          "modality": "text",
+          "period": "day"
+        },
+        "snapshots": [
+          {
+            "as_of": "2026-10-07T13:33:38.217Z",
+            "end_date": "2026-10-06",
+            "filters": {
+              "modality": "text"
+            },
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily",
+            "start_date": "2026-01-01",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-10-07T14:14:18.643Z",
+            "end_date": "2026-10-06",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-09-30&end_date=2026-10-06&period=day&modality=text",
+            "start_date": "2026-09-30",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-10-07T14:23:53.236Z",
+            "end_date": "2026-10-06",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-09-30&end_date=2026-10-06&period=day&modality=text",
+            "start_date": "2026-09-30",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-10-19T00:48:39.806Z",
+            "end_date": "2026-10-18",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-10-18&period=day&modality=text",
+            "start_date": "2026-01-01",
+            "version": "v1"
+          },
+          {
+            "as_of": "2026-11-17T16:38:36.551Z",
+            "end_date": "2026-11-16",
+            "source_url": "https://openrouter.ai/api/v1/datasets/rankings-daily?start_date=2026-01-01&end_date=2026-11-16&period=day&modality=text",
+            "start_date": "2026-01-01",
+            "version": "v1"
+          }
+        ],
+        "start_date": "2026-01-01",
+        "version": "v1"
+      },
+      "path": "data/openrouter/rankings/text/2026.json.gz"
+    }
+  ],
+  "source_url": "https://openrouter.ai/rankings"
+}

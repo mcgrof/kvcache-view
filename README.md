@@ -132,6 +132,8 @@ https://[your-username].github.io/kvcache-view/
 
 The site also includes reproducible, source-attributed views of public demand:
 
+- [Lifetime of a Model](model-lifetime.html): open-weight popularity lifetimes,
+  historical exits, and inference-demand scenarios for the latest reviewed top ten.
 - [Hybrid Architecture Trends](hybrid-trends.html): Mamba hybrids, linear-attention hybrids, and regular attention, including sparse attention.
 - [Attention Style Trends](attention-trends.html): full, sparse, and local attention, linear and Mamba hybrids, and independently described KV representations.
 - [Context Demand](context-demand.html): all five request-context buckets, a focused January–September 2026 comparison, and architecture shares, alongside OpenRouter's cache findings.
@@ -145,10 +147,11 @@ make openrouter        # update all OpenRouter data and pages
 ```
 
 Individual targets are `openrouter-hybrid-trends`, `openrouter-attention-trends`, `openrouter-context`,
-`openrouter-comparison`, and `openrouter-cache`. To reproduce the committed snapshot without network access:
+`openrouter-comparison`, `openrouter-cache`, and `openrouter-lifetime`. To reproduce the committed snapshot without network access:
 
 ```sh
 make openrouter-comparison OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-10-18
+make openrouter-lifetime OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-11-16
 ```
 
 Updates default to yesterday in UTC, preserve historical data, and refresh a
@@ -158,6 +161,15 @@ The collector does not fetch private account analytics or publish API keys.
 Cache prices and token traffic are not measurements of NVMe offloading.
 See [the data methodology and attribution](data/openrouter/README.md) for
 coverage limits, exact commands, source licenses, and the registry workflow.
+
+The lifetime projection treats the public daily top-50 cutoff as censored demand,
+keeps dated and free API variants separate, and compares entry cohorts over a
+matched 180-day horizon. Remaining-life estimates use historical peers; request
+counts and `2 × active parameters × tokens` compute are adjustable scenarios.
+The [research notes](research/model-lifetime-sources.md) connect these measurements
+to Sardana et al.'s lifetime inference demand and related lifecycle studies.
+The [November 17 snapshot](research/model-lifetime-analysis-2026-11-17.md)
+records the findings, current ten projections and explicit demand scenarios.
 
 ## Agentic KV retention and compute projections
 

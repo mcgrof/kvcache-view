@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#0b1026" />
+        <meta
+            name="description"
+            content="How long do popular open-weight models stay prominent? OpenRouter ranking histories, censored lifetimes, and explicit lifetime inference-demand scenarios."
+        />
+        <title>Lifetime of a model · OpenRouter projections · KV Cache</title>
+        <link rel="icon" href="icon.svg" />
+        <link rel="stylesheet" href="model-lifetime.css" />
+        <script src="model-lifetime-math.js" defer></script>
+        <script src="model-lifetime.js" defer></script>
+    </head>
+    <body>
+        <a class="skip" href="#main">Skip to content</a>
+        <main class="wrap" id="main">
+            <nav class="nav" aria-label="Related views">
+                <a href="index.html">← All projections</a>
+                <a href="context-demand.html">Context demand</a>
+                <a href="agentic-kv-economics.html">Agentic KV retention</a>
+                <a href="#method">Method &amp; sources</a>
+            </nav>
+            <header>
+                <p class="eyebrow">MODEL LIFETIME · OPENROUTER PUBLIC TEXT TRAFFIC</p>
+                <h1>
+                    How long does a
+                    <br />
+                    <span>popular model last?</span>
+                </h1>
+                <p class="lead">
+                    A model can lose its place in the rankings while inference demand keeps growing. Follow open-weight
+                    models from first appearance to sustained exit, then put their remaining demand into tokens, request
+                    equivalents, and compute.
+                </p>
+                <div class="snapshot">
+                    <span class="dot"></span>
+                    <span id="snapshot-date">Loading the dated snapshot…</span>
+                    <a href="data/openrouter/model-lifetime.json" download>Download analysis JSON ↗</a>
+                </div>
+                <p class="notice">
+                    <strong>“Lifetime” here means ranking prominence on OpenRouter.</strong>
+                    The source names the daily top 50 and pools everything else into
+                    <code>other</code>
+                    . Leaving the rankings does not mean a model stopped being used. Request counts and future demand
+                    below are estimates with visible assumptions.
+                </p>
+            </header>
+            <p id="load-error" class="error" role="alert" hidden></p>
+            <noscript>
+                <p class="notice">
+                    Enable JavaScript to explore the saved data, or
+                    <a href="data/openrouter/model-lifetime.json">download the analysis</a>
+                    . The method and sources below remain available.
+                </p>
+            </noscript>
+
+            <section class="panel" aria-labelledby="trend-title">
+                <p class="eyebrow">01 / HAS THE POPULARITY WINDOW CHANGED?</p>
+                <h2 id="trend-title">Compare equally observed entry cohorts</h2>
+                <p id="cohort-conclusion" class="section-lead">
+                    The comparison uses a common 180-day horizon, including models still active at the end. It does not
+                    average only the models that have already left.
+                </p>
+                <div class="metrics" id="cohort-metrics"></div>
+                <div class="demand-finding" id="cohort-demand"></div>
+                <div class="chart-box">
+                    <div class="chart-heading">
+                        <h3>Still in the first prominence episode</h3>
+                        <span class="muted">Survival probability · 180-day horizon</span>
+                    </div>
+                    <div id="survival-chart" class="chart" aria-live="polite"></div>
+                    <div id="cohort-legend" class="legend"></div>
+                </div>
+                <p class="small">
+                    An exit requires 28 consecutive calendar days outside the overall top 50 with complete source
+                    coverage. Brief dips stay in the same episode; returns after a confirmed exit start a new episode.
+                    Cohort values are restricted mean survival times, not release-to-retirement ages.
+                </p>
+                <details>
+                    <summary>Show cohort estimates and uncertainty</summary>
+                    <div class="table-scroll">
+                        <table>
+                            <caption>
+                                Bootstrap intervals reflect cohort sampling variability; they do not remove selection
+                                bias from OpenRouter’s audience.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th>Cohort</th>
+                                    <th>Models</th>
+                                    <th>Exits by 180d</th>
+                                    <th>Right-censored</th>
+                                    <th>Mean within 180 days</th>
+                                    <th>95% interval</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cohort-table"></tbody>
+                        </table>
+                    </div>
+                </details>
+            </section>
+
+            <section class="panel" aria-labelledby="top-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">02 / TODAY’S LEADING OPEN-WEIGHT MODELS</p>
+                        <h2 id="top-title">How much time might remain?</h2>
+                    </div>
+                    <span class="pill" id="top-date">Latest completed day</span>
+                </div>
+                <p class="section-lead">
+                    The ten highest-ranked confirmed open-weight
+                    <strong>model IDs</strong>
+                    on the latest completed day. Forecasts estimate time until a sustained exit from the
+                    <strong>overall top 50</strong>
+                    , using earlier top-ten open-weight observations at a similar episode age (±14 days).
+                </p>
+                <p class="small">
+                    Exact dated versions and free variants remain separate. These are conditional historical baselines,
+                    not calibrated individual expiry dates. The middle 50% describes variation among historical
+                    analogues, not a confidence interval. A missing median means the observed survival curve never
+                    reaches that median with enough support. Pending weight releases are excluded even when OpenRouter
+                    lists a Hugging Face ID.
+                </p>
+                <div
+                    class="table-scroll"
+                    tabindex="0"
+                    aria-label="Current top ten models; scroll horizontally on narrow screens"
+                >
+                    <table class="top-table">
+                        <caption>Select a model to explore its history and inference-demand scenario below.</caption>
+                        <thead>
+                            <tr>
+                                <th>Open / overall rank</th>
+                                <th>Model ID</th>
+                                <th>Tokens on latest day</th>
+                                <th>Current episode age</th>
+                                <th>Estimated remaining top-50 time</th>
+                                <th>Observed tokens to date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-models"></tbody>
+                    </table>
+                </div>
+                <p id="classification-note" class="small"></p>
+            </section>
+
+            <section class="panel emphasis" aria-labelledby="demand-title">
+                <p class="eyebrow">03 / FROM POPULARITY TO LIFETIME INFERENCE DEMAND</p>
+                <h2 id="demand-title">Count the tokens, then state the assumptions</h2>
+                <p class="section-lead">
+                    The observed sum is a minimum for the saved window. Add an explicit future scenario to that minimum.
+                    Unreported historical demand and traffic before the archive began remain unknown.
+                </p>
+                <label class="model-picker" for="model-select">
+                    Explore a model
+                    <select id="model-select" disabled>
+                        <option>Loading models…</option>
+                    </select>
+                </label>
+                <div class="chart-box">
+                    <div class="chart-heading">
+                        <h3 id="history-title">Observed daily traffic</h3>
+                        <div class="toggle" role="group" aria-label="History chart measure">
+                            <button type="button" class="active" data-history="tokens" aria-pressed="true">
+                                Tokens
+                            </button>
+                            <button type="button" data-history="share" aria-pressed="false">Platform share</button>
+                        </div>
+                    </div>
+                    <div id="history-chart" class="chart"></div>
+                    <p class="small">
+                        Dots are observed ranking days. Gaps are unknown individual traffic, not zero. Share uses each
+                        day’s total including
+                        <code>other</code>
+                        . Tokenizers differ across providers.
+                    </p>
+                </div>
+                <p id="model-observation" class="notice"></p>
+                <div class="controls">
+                    <label for="horizon-days">
+                        Remaining prominence scenario
+                        <span>days from snapshot</span>
+                        <input id="horizon-days" type="number" min="0" max="730" step="1" value="90" />
+                    </label>
+                    <label for="weekly-growth">
+                        Future weekly token change
+                        <span>%, held constant during prominence</span>
+                        <input id="weekly-growth" type="number" min="-90" max="30" step="1" value="0" />
+                    </label>
+                    <label for="tail-days">
+                        Additional demand after prominence
+                        <span>assumed tail duration, days</span>
+                        <input id="tail-days" type="number" min="0" max="1095" step="1" value="180" />
+                    </label>
+                    <label for="tail-percent">
+                        Tail daily traffic
+                        <span>% of daily rate at prominence exit</span>
+                        <input id="tail-percent" type="number" min="0" max="100" step="1" value="10" />
+                    </label>
+                </div>
+                <div class="tools">
+                    <button type="button" id="empirical-horizon" disabled>Use historical median</button>
+                    <button type="button" data-horizon="30">30 days</button>
+                    <button type="button" data-horizon="90">90 days</button>
+                    <button type="button" data-horizon="180">180 days</button>
+                    <span id="horizon-note" class="small"></span>
+                </div>
+                <p class="small">
+                    The starting rate is the last seven calendar days’ observed token sum ÷ 7. Missing or unranked days
+                    make it a lower-bound rate. The future growth rate, prominence duration, and flat post-exit tail are
+                    assumptions; they are not fit to a few recent points.
+                </p>
+                <div class="controls secondary">
+                    <label for="input-tokens">
+                        Average input per request
+                        <span>tokens, assumed</span>
+                        <input id="input-tokens" type="number" min="0" max="10000000" step="1" value="4000" />
+                    </label>
+                    <label for="output-tokens">
+                        Average output per request
+                        <span>tokens, assumed</span>
+                        <input id="output-tokens" type="number" min="0" max="1000000" step="1" value="1000" />
+                    </label>
+                    <label for="active-parameters">
+                        Active prefill parameters
+                        <span>billions; source or assumption below</span>
+                        <input id="active-parameters" type="number" min="0.001" max="10000" step="0.1" value="30" />
+                    </label>
+                    <label for="output-active-parameters">
+                        Active decode parameters
+                        <span>billions; source or assumption below</span>
+                        <input
+                            id="output-active-parameters"
+                            type="number"
+                            min="0.001"
+                            max="10000"
+                            step="0.1"
+                            value="30"
+                        />
+                    </label>
+                    <div class="preset">
+                        <span>Request-length presets</span>
+                        <button type="button" data-preset="paper">Paper: 70 + 215</button>
+                        <button type="button" data-preset="medium">4K + 1K</button>
+                        <button type="button" data-preset="agent">64K + 4K</button>
+                    </div>
+                </div>
+                <p class="small" id="parameter-note"></p>
+                <p id="scenario-error" class="error" role="alert" hidden></p>
+                <div class="metrics demand-metrics" id="demand-metrics" aria-live="polite"></div>
+                <div class="chart-box">
+                    <h3>Where this scenario’s demand comes from</h3>
+                    <div id="demand-bars"></div>
+                    <p id="request-description" class="small"></p>
+                </div>
+                <div class="formula">
+                    Requests ≈ tokens ÷ (mean input + mean output)
+                    <br />
+                    Inference FLOPs ≈ 2 × (N
+                    <sub>input</sub>
+                    D
+                    <sub>input</sub>
+                    + N
+                    <sub>output</sub>
+                    D
+                    <sub>output</sub>
+                    )
+                </div>
+                <p class="small">
+                    The token split is inferred from your assumed input/output lengths. With the same active parameter
+                    count for both phases, this reduces to 2ND. FLOPs are a rough, uncached parameter-matmul proxy, not
+                    GPU hours or actual cost. Attention, routing, speculative decoding, cache reuse, precision,
+                    batching, and input/output utilization can change serving work and cost substantially. For MoE,
+                    active and total parameters serve different roles.
+                </p>
+                <div class="tools">
+                    <button type="button" id="export-scenario" disabled>Export this scenario</button>
+                    <a href="https://raw.githubusercontent.com/mlresearch/v235/main/assets/sardana24a/sardana24a.pdf">
+                        Sardana et al. · ICML 2024 paper ↗
+                    </a>
+                </div>
+                <details>
+                    <summary>Compare demand scenarios for all ten current models</summary>
+                    <p>
+                        The same chosen prominence horizon, weekly change, tail, and request lengths apply to every row.
+                        The starting daily rate and observed token minimum are model-specific. These are shared
+                        sensitivity assumptions, not each model’s historical median forecast. Unknown historical demand
+                        remains excluded.
+                    </p>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Model ID</th>
+                                    <th>Observed token minimum</th>
+                                    <th>Observed minimum + future tokens</th>
+                                    <th>Request equivalents</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-demand-models"></tbody>
+                        </table>
+                    </div>
+                </details>
+                <details>
+                    <summary>Why “1 billion requests” is not a fixed amount of compute</summary>
+                    <p>
+                        Sardana et al. study training choices under a model’s total future inference demand. Their
+                        simple accounting uses training FLOPs ≈ 6ND and inference FLOPs ≈ 2ND
+                        <sub>inf</sub>
+                        , where inference tokens include input and output. The request workload in Figure 6 has 70 input
+                        and 215 output tokens:
+                        <strong>1 billion such requests means 285 billion tokens</strong>
+                        . A scenario with 64,000 input and 4,000 output tokens needs 68 trillion tokens for the same
+                        number of requests.
+                    </p>
+                    <p>
+                        The public model-ranking dataset provides combined tokens, not model-level request counts or an
+                        input/output split. Changing the request-length preset changes request equivalents; it does not
+                        change the already observed token volume. The paper’s hardware utilization and monetary cost
+                        assumptions are separate from this token-based projection.
+                    </p>
+                </details>
+            </section>
+
+            <section class="panel" aria-labelledby="exit-title">
+                <p class="eyebrow">04 / FORMER LEADERS</p>
+                <h2 id="exit-title">Popular models that have left the top 50</h2>
+                <p class="section-lead">
+                    Ranked by cumulative
+                    <strong>observed</strong>
+                    tokens in the archive. These models have been absent for at least 28 consecutive fully covered days
+                    at the snapshot. They may still serve substantial demand below the cutoff.
+                </p>
+                <label class="search" for="exit-search">
+                    Find a former model
+                    <input id="exit-search" type="search" placeholder="Qwen2.5, Llama, DeepSeek…" />
+                </label>
+                <div
+                    class="table-scroll"
+                    tabindex="0"
+                    aria-label="Former popular models; scroll horizontally on narrow screens"
+                >
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model ID</th>
+                                <th>Last reported</th>
+                                <th>Best overall rank</th>
+                                <th>Ranked days</th>
+                                <th>First-to-last span</th>
+                                <th>Observed tokens</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exited-models"></tbody>
+                    </table>
+                </div>
+                <p class="small" id="exits-count"></p>
+                <p class="small">
+                    “Ranked days” need not be consecutive; the span includes gaps. Neither is time from the model’s
+                    release. The original
+                    <a href="https://knlp.io/qwen2.5-use-openrouter.html">Qwen2.5 usage study</a>
+                    reports a roughly 14-month family release-to-final-appearance span: 7B last appeared on November 9,
+                    2025 and 72B on November 19. That clock starts at release; the ranked-day counts here start with the
+                    available archive and measure a different quantity.
+                </p>
+            </section>
+
+            <section class="panel" aria-labelledby="platform-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">05 / A GROWING PLATFORM CHANGES THE INTERPRETATION</p>
+                        <h2 id="platform-title">Shorter prominence can coexist with more demand</h2>
+                    </div>
+                    <label class="compact" for="platform-measure">
+                        View
+                        <select id="platform-measure">
+                            <option value="mean_daily_tokens">All public text tokens/day</option>
+                            <option value="open_observed_tokens">Named open-weight tokens/month</option>
+                            <option value="mean_top50_cutoff_tokens">Top-50 cutoff tokens/day</option>
+                            <option value="open_observed_share_percent">Named open-weight share</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="platform-chart" class="chart"></div>
+                <p id="platform-note" class="small"></p>
+                <p class="small">
+                    Open-weight totals include only individually named, classified rows. The unnamed tail and unresolved
+                    IDs stay separate. This is a confined OpenRouter trend, not the total inference market or a constant
+                    sample of users. Missing calendar days suppress full-month comparisons; partial months are excluded
+                    from the chart.
+                </p>
+            </section>
+
+            <section class="panel" id="method" aria-labelledby="method-title">
+                <p class="eyebrow">06 / WHAT THIS STUDY CAN AND CANNOT TELL US</p>
+                <h2 id="method-title">Definitions, reproducibility, and related work</h2>
+                <div class="method-grid">
+                    <article>
+                        <h3>Popularity is not retirement</h3>
+                        <p>
+                            Ranks measure token traffic among public OpenRouter text models. A sustained top-50 exit is
+                            our observable event. Model availability, quality, capability leadership, user retention,
+                            and use outside OpenRouter are different outcomes.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Censoring is part of the result</h3>
+                        <p>
+                            Models present at the archive’s beginning have unknown earlier history. Models still active
+                            at the cutoff have unknown future lifetime. Cohort survival estimates account for right
+                            censoring and exclude boundary entries; completed-only means would favor short-lived models.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Exact identities matter</h3>
+                        <p>
+                            Dated checkpoints and serving variants remain separate. “Open-weight” means publicly
+                            downloadable weights under some license, not necessarily OSI open source. The reviewed
+                            status is not a claim that every checkpoint was open throughout its earlier traffic history.
+                        </p>
+                    </article>
+                    <article>
+                        <h3>Demand has two unknowns</h3>
+                        <p>
+                            Unreported individual tokens can be bounded within covered dates using the rank-50 cutoff
+                            and aggregate tail, but pre-archive and missing-date demand remain unknown. Future demand
+                            and average tokens per request are assumptions. No account analytics or private prompts are
+                            used.
+                        </p>
+                    </article>
+                </div>
+                <details>
+                    <summary>Coverage and reproducible analysis</summary>
+                    <p id="coverage-note"></p>
+                    <p id="provenance-note"></p>
+                    <p>
+                        <a href="data/openrouter/model-lifetime.json">Derived analysis JSON</a>
+                        ·
+                        <a href="data/openrouter/lifetime-registry.json">Reviewed open-weight registry</a>
+                        ·
+                        <a href="research/model-lifetime-sources.md">Research notes and equations</a>
+                        ·
+                        <a href="https://github.com/mcgrof/kvcache-view">Source code</a>
+                    </p>
+                    <pre><code>make openrouter-lifetime OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-11-16</code></pre>
+                </details>
+                <div class="related">
+                    <h3>Similar efforts—and what they contribute</h3>
+                    <ul>
+                        <li>
+                            <a href="https://openrouter.ai/data/newsletter/model-half-life">
+                                OpenRouter: Model Half-Life
+                            </a>
+                            compares lab-user retention and model launches. It motivates cohort comparisons, but its
+                            retention measure is not top-50 residence.
+                        </li>
+                        <li>
+                            <a href="https://vercel.com/blog/ai-gateway-production-index-november-2026">
+                                Vercel AI Gateway Production Index, November 2026
+                            </a>
+                            follows production adoption and migration. It is an external comparison with a different
+                            customer population, not extra observations for this survival fit.
+                        </li>
+                        <li>
+                            <a
+                                href="https://www.ifo.de/en/cesifo/publications/2026/working-paper/birth-life-and-death-ai-models"
+                            >
+                                Birth, Life, and Death of AI Models
+                            </a>
+                            distinguishes technical from usage obsolescence. A threshold-based useful life depends on
+                            how obsolescence is defined.
+                        </li>
+                        <li>
+                            <a href="https://www.aeaweb.org/articles?id=10.1257%2Fjep.20261506">
+                                The Emerging Market for Intelligence
+                            </a>
+                            studies the market for model APIs. Workload differences and routing matter when interpreting
+                            aggregate demand.
+                        </li>
+                        <li>
+                            <a href="https://github.com/IAPS-AI/OpenRouter-OS-Rankings">
+                                IAPS OpenRouter Open-Source Rankings
+                            </a>
+                            provides a related open-weight usage dashboard. This study retains exact dated IDs and
+                            explicit censored demand to avoid merging successive releases into one lifetime.
+                        </li>
+                        <li>
+                            <a href="https://note.com/yukio__takagi/n/ncb9b3126d2c5?hl=en">
+                                Yukio Takagi: model usage lifespan analysis
+                            </a>
+                            tracks post-peak usage retention. We show absolute tokens beside platform share because the
+                            two can move in opposite directions.
+                        </li>
+                    </ul>
+                </div>
+                <p class="attribution" id="attribution">
+                    Source:
+                    <a href="https://openrouter.ai/rankings">OpenRouter (openrouter.ai/rankings)</a>
+                    , as of the preserved source timestamps. Licensed under
+                    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+                    . Classification, survival analysis, and scenario projections are independent modifications by this
+                    project.
+                </p>
+                <p class="small">
+                    <a href="https://openrouter.ai/docs/cookbook/administration/data-api">
+                        OpenRouter Data API scope and attribution
+                    </a>
+                    ·
+                    <a
+                        href="https://openrouter.ai/docs/api/api-reference/datasets/daily-token-totals-for-top-50-models"
+                    >
+                        Rankings schema
+                    </a>
+                </p>
+            </section>
+            <footer>
+                <a href="index.html">KV Cache · Open research, measured claims</a>
+                <span>Observed history in cyan and violet · explicit scenarios in amber</span>
+            </footer>
+        </main>
+    </body>
+</html>

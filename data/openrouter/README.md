@@ -1,17 +1,18 @@
 # OpenRouter snapshots and generated research pages
 
-These files support five public pages:
+These files support six public pages:
 
 | Page | Update target | Data |
 | --- | --- | --- |
+| `model-lifetime.html` | `make openrouter-lifetime` | Exact open-weight API identities, ranking episodes, matched cohorts, historical-peer survival, and demand scenarios |
 | `hybrid-trends.html` | `make openrouter-hybrid-trends` | Daily text tokens grouped by reviewed sequence-mixer architecture |
 | `attention-trends.html` | `make openrouter-attention-trends` | Attention patterns and hybrids, with separately documented KV representations |
 | `context-demand.html` | `make openrouter-context` | All five API request-context buckets, overall text traffic, and a January–September 2026 study |
 | `architecture-comparison.html` | `make openrouter-comparison` | Matched paper evidence, January–September attention-style demand, and hypothetical state accounting |
 | `cache-telemetry.html` | `make openrouter-cache` | Advertised cache-read/write prices and an account of which telemetry is available |
 
-`make openrouter` fetches the data needed by all five targets once and
-generates all five pages. It makes no inference calls and does not read
+`make openrouter` fetches the data needed by all six targets once and
+generates their data and pages. It makes no inference calls and does not read
 private account analytics. This is an on-demand update command, not a scheduler.
 
 ## Refresh and reproduce
@@ -237,6 +238,81 @@ offloading. Do not label advertised prices or prompt-cache hits as NVMe activity
 The generated rankings pages carry that attribution and identify this project's
 classification, aggregation, and visualization as modifications. Retain the
 source timestamps and attribution when redistributing the data or figures.
+
+## Model lifetime and inference-demand projection
+
+`model-lifetime.html` loads `model-lifetime.json` locally. Visitors make no
+authenticated API calls. `make openrouter-lifetime` refreshes only the public
+text rankings and a dedicated `lifetime-catalog.json`, then recomputes the
+analysis. `make openrouter` includes this calculation in its shared refresh.
+
+```sh
+make openrouter-lifetime OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-11-16
+make test-openrouter
+node --test model-lifetime-math.test.js
+```
+
+The committed snapshot has 683 of 685 calendar dates from January 1, 2025,
+through November 16, 2026. June 15 and July 15, 2025 are missing. The exact
+request filters, API timestamps and SHA-256 source checksums are retained in
+`model-lifetime-provenance.json`. The reviewed registry is independent of
+the source API, and new ranked identities stay unknown until reviewed.
+
+The unit is an exact API permaslug, including dated and free variants. These
+are not necessarily distinct weight checkpoints. The open-weight registry
+assesses public weight availability at review; it does not establish that
+weights were available throughout each model's historical use. Read the
+[openness audit](../../research/model-lifetime-openness-audit.md) for evidence
+and current pending-release exclusions. Historical mappings have differing
+evidence strength; the current ten leaders received direct weight-file checks.
+
+Three clocks remain separate: observed days in the daily overall top 50,
+first-entry-to-sustained-exit duration, and release age. An operational exit
+requires 28 consecutive covered calendar days without an appearance. Missing
+dataset days interrupt that confirmation run. Short absences remain within
+an episode; returns after a confirmed exit create new episodes. First-episode
+survival is not the final-ever appearance date. Models present on the first
+archive day are excluded from fitted survival, and administrative censoring
+27 days before the cutoff leaves time to confirm prospective exits.
+
+The matched comparison uses first appearances January 2–March 31 in each of
+2025 and 2026. Both cohorts have at least 180 days of follow-up plus exit
+confirmation time in this snapshot. It includes brief top-50 appearances,
+not only established leaders. The 180-day restricted mean integrates the
+Kaplan–Meier survival curve. The 500-draw deterministic bootstrap clusters
+free/other variants of the same exact checkpoint stem; it does not cluster
+entire model families or remove platform and entrant-composition confounding.
+A separate non-free sensitivity is included.
+
+For today's ten highest-ranked confirmed-open API identities, historical
+analogue projections choose at most one first-episode top-ten observation
+per other checkpoint stem, within 14 days of the target episode's age.
+Remaining time is measured to sustained **overall top-50 exit**, not exit
+from the open-only top ten. At least ten analogues and three exits are
+required, with five still at risk at quantile crossings. Re-entry forecasts
+are suppressed. The middle 50% range describes historical variation, not a
+confidence or calibrated prediction interval. These forecasts have not been
+validated out of sample and should be treated as planning baselines.
+
+Observed token sums are minimums. On a covered absent-model date, the
+possible per-model contribution is bounded by the lesser of the rank-50
+cutoff and `other`; those bounds cannot be added across models because
+they share the same tail. Missing dates leave the full-window upper bound
+unknown. Pre-archive and pre-first-observation use are outside these bounds.
+The ratio of cohort observed minimums is **not** a lower bound on true
+demand growth. Request counts and average input/output lengths are absent.
+
+The browser scenarios add future tokens and an explicitly assumed post-exit
+tail to the observed minimum. They do not recover unknown historical tokens
+or become a complete lifetime measurement. Request equivalents divide by
+assumed input plus output length; the Sardana Figure 6 preset uses 285
+tokens/request. Parameter-based FLOPs are an uncached arithmetic proxy,
+not measured GPU-hours, hardware expenditure, or KV storage demand.
+
+Full histories remain in the compressed raw rankings. The derived JSON
+retains chart series only for the current ten leaders to keep page transfers
+small; calling `analyze_lifetime(..., include_history=True)` restores every
+series for further local analysis.
 
 **Catalog metadata:** Source: [OpenRouter Models API](https://openrouter.ai/api/v1/models?output_modalities=all),
 retrieved at `catalog.json` → `meta.as_of`. The Data API's CC BY grant is not
