@@ -72,7 +72,7 @@
             svg += `<path d="${path}" stroke="${colors[i % colors.length]}" stroke-width="3" fill="none"/>`
         })
         $('survival-chart').innerHTML = frame(
-            'Survival of the first top-50 prominence episode for matched entry cohorts',
+            'Share of models that have not yet begun their first confirmed 28-day absence from the top 50',
             w,
             h,
             svg,
@@ -90,7 +90,7 @@
         const comparison = data.cohort_comparison || {}
         if (comparison.ci && comparison.ci[0] <= 0 && comparison.ci[1] >= 0)
             $('cohort-conclusion').textContent =
-                'This sample does not establish that model prominence became shorter or longer. The point estimate increased, but the uncertainty interval includes both directions. These are first observed top-50 entrants, including brief appearances.'
+                'No clear evidence of a change. The uncertainty includes both shorter and longer spans. These data do not establish that models stayed in the top 50 longer in 2026.'
         else if (comparison.conclusion) $('cohort-conclusion').textContent = comparison.conclusion
         if (cohorts.length >= 2) {
             const first = cohorts[0],
@@ -99,7 +99,7 @@
                 `<strong>${fixed(comparison.mean_observed_180d_tokens_ratio)}× more observed tokens per entrant</strong><p>The mean token minimum in the first 180 days rose from ${compact(first.mean_observed_180d_tokens)} (${esc(first.label)}) to ${compact(last.mean_observed_180d_tokens)} (${esc(last.label)}). This is a ratio of observed minima, not a lower bound on the growth of true demand. Longer prompts, greater adoption, or a different model mix can all contribute.</p>`
         }
         const cards = cohorts.map((c) =>
-            metric(c.label, dayLabel(c.rmst_180_days), `Mean prominence within 180 days · ${c.n} entrants`),
+            metric(c.label, dayLabel(c.rmst_180_days), `Average time to exit · capped at 180 days · ${c.n} model IDs`),
         )
         if (comparison.difference_days != null) {
             const difference = comparison.difference_days
@@ -108,7 +108,7 @@
                     '2026 minus 2025',
                     `${difference > 0 ? '+' : ''}${fixed(difference)} days`,
                     comparison.ci
-                        ? `95% bootstrap interval: ${fixed(comparison.ci[0])} to ${fixed(comparison.ci[1])} days`
+                        ? `95% interval: ${fixed(comparison.ci[0])} to ${fixed(comparison.ci[1])} days${comparison.ci[0] <= 0 && comparison.ci[1] >= 0 ? ' · includes shorter and longer spans' : ''}`
                         : 'Matched-horizon cohort comparison',
                 ),
             )
@@ -117,7 +117,7 @@
         $('cohort-table').innerHTML = cohorts
             .map(
                 (c) =>
-                    `<tr><td>${esc(c.label)}<small>${esc(c.entry_start)} to ${esc(c.entry_end)}</small></td><td>${c.n}</td><td>${c.events_by_180 ?? c.events}</td><td>${c.censored}</td><td>${fixed(c.rmst_180_days)} days</td><td>${(c.rmst_180_ci || []).map((x) => fixed(x)).join('–')} days</td></tr>`,
+                    `<tr><td>${esc(c.label)}<small>${esc(c.entry_start)} to ${esc(c.entry_end)}</small></td><td>${c.n}</td><td>${c.events_by_180 ?? c.events}</td><td>${c.n - (c.events_by_180 ?? c.events)}</td><td>${fixed(c.rmst_180_days)} days</td><td>${(c.rmst_180_ci || []).map((x) => fixed(x)).join('–')} days</td></tr>`,
             )
             .join('')
         survivalChart()
@@ -131,7 +131,7 @@
             f.p25_remaining_days != null && f.p75_remaining_days != null
                 ? `Middle 50%: ${Math.round(f.p25_remaining_days)}–${Math.round(f.p75_remaining_days)} days`
                 : 'Middle 50% interval not fully estimable'
-        return `${dayLabel(f.median_remaining_days)} remaining<small>≈${Math.round((f.age_days || 0) + f.median_remaining_days)} days total current episode</small><small>${range}</small><small>${f.at_risk || 0} historical top-ten analogues</small>`
+        return `${dayLabel(f.median_remaining_days)} remaining<small>${range}</small><small>${f.at_risk || 0} historical top-ten analogues</small>`
     }
 
     function topSection() {
@@ -145,7 +145,7 @@
         const c = data.coverage.registry_counts || {}
         const unresolved = data.coverage.unclassified_latest || []
         $('classification-note').textContent =
-            `Registry: ${c.open ?? '?'} open, ${c.closed ?? '?'} closed, ${c.unknown ?? '?'} unresolved historical IDs. ${unresolved.length ? `${unresolved.length} latest-day IDs have unresolved openness, so this is a reviewed-subset ranking.` : 'All latest-day ranked IDs have reviewed openness.'} Current openness is applied retrospectively; an earlier period of closed access is not automatically excluded. Forecasts use earlier top-ten open-weight observations within ±14 days of current episode age, deduplicated by checkpoint stem with the target excluded. They are not individually calibrated.`
+            `Registry: ${c.open ?? '?'} open, ${c.closed ?? '?'} closed, ${c.unknown ?? '?'} unresolved historical IDs. ${unresolved.length ? `${unresolved.length} latest-day IDs have unresolved openness, so this is a reviewed-subset ranking.` : 'All latest-day ranked IDs have reviewed openness.'} Current openness is applied retrospectively; an earlier period of closed access is not automatically excluded. Forecasts use earlier top-ten open-weight observations within ±14 days of the target’s days since entry or return, deduplicated by checkpoint stem with the target excluded. They are not individually calibrated.`
     }
 
     function historyChart() {

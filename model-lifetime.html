@@ -41,7 +41,7 @@
                     <a href="data/openrouter/model-lifetime.json" download>Download analysis JSON ↗</a>
                 </div>
                 <p class="notice">
-                    <strong>“Lifetime” here means ranking prominence on OpenRouter.</strong>
+                    <strong>This page measures time before a prolonged drop out of OpenRouter’s top 50.</strong>
                     The source names the daily top 50 and pools everything else into
                     <code>other</code>
                     . Leaving the rankings does not mean a model stopped being used. Request counts and future demand
@@ -59,28 +59,45 @@
 
             <section class="panel" aria-labelledby="trend-title">
                 <p class="eyebrow">01 / HAS THE POPULARITY WINDOW CHANGED?</p>
-                <h2 id="trend-title">Compare equally observed entry cohorts</h2>
+                <h2 id="trend-title">Did models take longer to drop out in 2026?</h2>
                 <p id="cohort-conclusion" class="section-lead">
-                    The comparison uses a common 180-day horizon, including models still active at the end. It does not
-                    average only the models that have already left.
+                    Compare models first seen in January–March of each year. The averages and uncertainty below show
+                    whether this sample supports a change.
+                </p>
+                <p>
+                    <strong>What the days measure:</strong>
+                    calendar time from a model’s first top-50 appearance to the start of its first absence lasting 28
+                    consecutive days. Shorter absences count toward this span. We cap the comparison at 180 days; a
+                    model that has not dropped out by then contributes 180 days.
+                    <strong>These are not counts of days actually ranked in the top 50.</strong>
                 </p>
                 <div class="metrics" id="cohort-metrics"></div>
                 <div class="demand-finding" id="cohort-demand"></div>
                 <div class="chart-box">
                     <div class="chart-heading">
-                        <h3>Still in the first prominence episode</h3>
-                        <span class="muted">Survival probability · 180-day horizon</span>
+                        <h3>Models that have not yet had a 28-day absence</h3>
+                        <span class="muted">Share of each group · first 180 days</span>
                     </div>
                     <div id="survival-chart" class="chart" aria-live="polite"></div>
                     <div id="cohort-legend" class="legend"></div>
                 </div>
                 <p class="small">
-                    An exit requires 28 consecutive calendar days outside the overall top 50 with complete source
-                    coverage. Brief dips stay in the same episode; returns after a confirmed exit start a new episode.
-                    Cohort values are restricted mean survival times, not release-to-retirement ages.
+                    Once an absence reaches 28 days, we date the exit to the first day of that absence. The 28-day
+                    confirmation wait is not added to the measured span. A later return does not extend this first span.
+                    We require source coverage on all 28 days to confirm an exit.
                 </p>
                 <details>
-                    <summary>Show cohort estimates and uncertainty</summary>
+                    <summary>Example, exact estimates, and uncertainty</summary>
+                    <p>
+                        Example: 20 days ranked, 5 days outside the top 50, then 15 days ranked again, followed by 28
+                        days outside. The measured span is 40 days, although the model ranked on only 35 of them. The
+                        final 28 days confirm that the span ended. This span was previously labeled an “episode.”
+                    </p>
+                    <p>
+                        We compare first appearances from January 2 through March 31 in each year, including brief
+                        appearances. In statistical terms, the average is a 180-day restricted mean survival time. It
+                        includes models without an observed exit rather than averaging only those that dropped out.
+                    </p>
                     <div class="table-scroll">
                         <table>
                             <caption>
@@ -89,11 +106,11 @@
                             </caption>
                             <thead>
                                 <tr>
-                                    <th>Cohort</th>
-                                    <th>Models</th>
+                                    <th>Entry group</th>
+                                    <th>Model IDs</th>
                                     <th>Exits by 180d</th>
-                                    <th>Right-censored</th>
-                                    <th>Mean within 180 days</th>
+                                    <th>No exit by 180d</th>
+                                    <th>Average time to exit, capped at 180 days</th>
                                     <th>95% interval</th>
                                 </tr>
                             </thead>
@@ -116,7 +133,7 @@
                     <strong>model IDs</strong>
                     on the latest completed day. Forecasts estimate time until a sustained exit from the
                     <strong>overall top 50</strong>
-                    , using earlier top-ten open-weight observations at a similar episode age (±14 days).
+                    , using earlier top-ten open-weight models at a similar number of days since entry (±14 days).
                 </p>
                 <p class="small">
                     Exact dated versions and free variants remain separate. These are conditional historical baselines,
@@ -124,6 +141,11 @@
                     analogues, not a confidence interval. A missing median means the observed survival curve never
                     reaches that median with enough support. Pending weight releases are excluded even when OpenRouter
                     lists a Hugging Face ID.
+                </p>
+                <p class="small">
+                    “Days since entry or return” includes brief absences. A return after a confirmed 28-day absence
+                    starts a new count. Forecasts use the same exit definition as above; they do not predict continuous
+                    days in the top 50 or time until a model stops being used.
                 </p>
                 <div
                     class="table-scroll"
@@ -137,8 +159,8 @@
                                 <th>Open / overall rank</th>
                                 <th>Model ID</th>
                                 <th>Tokens on latest day</th>
-                                <th>Current episode age</th>
-                                <th>Estimated remaining top-50 time</th>
+                                <th>Days since entry or return</th>
+                                <th>Estimated days until a 28-day absence</th>
                                 <th>Observed tokens to date</th>
                             </tr>
                         </thead>
@@ -373,7 +395,7 @@
                 <div class="section-heading">
                     <div>
                         <p class="eyebrow">05 / A GROWING PLATFORM CHANGES THE INTERPRETATION</p>
-                        <h2 id="platform-title">Shorter prominence can coexist with more demand</h2>
+                        <h2 id="platform-title">More tokens does not necessarily mean a longer stay</h2>
                     </div>
                     <label class="compact" for="platform-measure">
                         View

@@ -164,11 +164,14 @@ def compare_cohorts(earlier, later):
     conclusion = "Insufficient follow-up for a matched 180-day comparison."
     if difference is not None:
         direction = "shorter" if difference < 0 else "longer"
-        conclusion = f"2026 Q1 entrants have {abs(difference):.1f} {direction} mean days before sustained top-50 exit within the first 180 days."
+        estimate = (f"The 2026 Q1 sample averages {abs(difference):.1f} days {direction} "
+                    "from first top-50 appearance to the start of its first 28-day absence, "
+                    "with each span capped at 180 days. Shorter absences count within the span.")
         if ci[0] <= 0 <= ci[1]:
-            conclusion += " The bootstrap interval includes no change; a directional trend is not established."
+            conclusion = ("No clear evidence of a change: the uncertainty includes both shorter and longer spans. "
+                          + estimate)
         else:
-            conclusion += " The bootstrap interval excludes no change, conditional on this cohort and classification."
+            conclusion = estimate + " The bootstrap interval excludes no change, conditional on this cohort and classification."
     old_tokens, new_tokens = earlier["mean_observed_180d_tokens"], later["mean_observed_180d_tokens"]
     return {"difference_days": difference, "ci": ci, "conclusion": conclusion,
             "mean_observed_180d_tokens_ratio": int(new_tokens) / int(old_tokens) if old_tokens and int(old_tokens) and new_tokens else None,

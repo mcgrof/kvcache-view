@@ -5,7 +5,7 @@
       -21.04395057766365,
       50.361473042362014
     ],
-    "conclusion": "2026 Q1 entrants have 12.7 longer mean days before sustained top-50 exit within the first 180 days. The bootstrap interval includes no change; a directional trend is not established.",
+    "conclusion": "No clear evidence of a change: the uncertainty includes both shorter and longer spans. The 2026 Q1 sample averages 12.7 days longer from first top-50 appearance to the start of its first 28-day absence, with each span capped at 180 days. Shorter absences count within the span.",
     "difference_days": 12.716791979949889,
     "mean_observed_180d_tokens_ratio": 20.419329634207887
   },
@@ -47839,7 +47839,7 @@
       -37.56385416666667,
       44.12260416666665
     ],
-    "conclusion": "2026 Q1 entrants have 1.9 longer mean days before sustained top-50 exit within the first 180 days. The bootstrap interval includes no change; a directional trend is not established.",
+    "conclusion": "No clear evidence of a change: the uncertainty includes both shorter and longer spans. The 2026 Q1 sample averages 1.9 days longer from first top-50 appearance to the start of its first 28-day absence, with each span capped at 180 days. Shorter absences count within the span.",
     "difference_days": 1.9499999999999886,
     "mean_observed_180d_tokens_ratio": 24.848087651201592
   },

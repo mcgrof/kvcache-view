@@ -4,6 +4,8 @@ Public OpenRouter text rankings through 2026-11-16 UTC cover 683 of 685 days sin
 
 The matched Q1 entrant comparison does **not establish shortening or lengthening**. Mean time to first sustained top-50 exit, capped at 180 days, is 66.8 days (2025, n=42) versus 79.5 days (2026, n=19). The difference is +12.7 days with a bootstrap interval from −21.0 to +50.4. Excluding free variants gives 71.8 versus 73.75 days, also inconclusive. These cohorts include brief top-50 appearances.
 
+In plain language, this measures calendar time from a model's first top-50 appearance until the start of its first absence lasting 28 consecutive covered days. Shorter absences count toward the span; the final 28-day confirmation wait does not. For example, 20 days ranked, 5 days absent, then 15 days ranked, followed by 28 days absent gives a 40-day span but only 35 days actually ranked. A later return does not extend this first span. “Episode lifetime” was the earlier label for this span; it is neither total days ranked nor time from release to retirement. The 2026 sample's higher average does **not** establish that models stayed in the top 50 longer in 2026.
+
 Mean individually observed tokens in the first 180 days rise from 0.200T to 4.090T: **20.4× observed minima**, not an identified growth rate for complete lifetime demand. Corresponding medians are 4.86B and 982.72B, illustrating substantial skew. Platform daily reported text traffic grows from 1.014T in January 2026 to 24.641T in October. Token growth need not equal request or physical compute growth.
 
 ## Current ten: historical projection and demand scenario

@@ -269,9 +269,13 @@ evidence strength; the current ten leaders received direct weight-file checks.
 Three clocks remain separate: observed days in the daily overall top 50,
 first-entry-to-sustained-exit duration, and release age. An operational exit
 requires 28 consecutive covered calendar days without an appearance. Missing
-dataset days interrupt that confirmation run. Short absences remain within
-an episode; returns after a confirmed exit create new episodes. First-episode
-survival is not the final-ever appearance date. Models present on the first
+dataset days interrupt that confirmation run. Short absences count within
+the entry-to-exit span (called an `episode` in the data schema); returns after
+a confirmed exit start a new span. The exit date is the start of the confirmed
+absence, so the 28-day confirmation wait is not added to its duration.
+For example, 20 days ranked, 5 days absent, 15 days ranked, then 28 days absent
+gives a 40-day span but only 35 days actually ranked. The first span ends even
+if the model later returns. Models present on the first
 archive day are excluded from fitted survival, and administrative censoring
 27 days before the cutoff leaves time to confirm prospective exits.
 
