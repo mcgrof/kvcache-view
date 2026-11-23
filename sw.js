@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kvcache-view-v9'
+const CACHE_NAME = 'kvcache-view-v10'
 const urlsToCache = [
     './',
     './index.html',
@@ -6,7 +6,9 @@ const urlsToCache = [
     './model-lifetime.js',
     './model-lifetime.css',
     './model-lifetime-math.js',
+    './model-lifetime-huggingface.js',
     './data/openrouter/model-lifetime.json',
+    './data/openrouter/huggingface-comparison.json',
     './thumbnails/model-lifetime.svg',
     './agentic-kv-economics.html',
     './cache-reuse-projections.html',
@@ -58,10 +60,10 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(req.url)
     const isAnalysisAsset =
         url.origin === self.location.origin &&
-        (/\/(openrouter|kv-offload(?:-math|-data)?|agentic-kv-economics|cache-reuse-projections|model-lifetime(?:-math)?)\.(css|js)$/.test(
+        (/\/(openrouter|kv-offload(?:-math|-data)?|agentic-kv-economics|cache-reuse-projections|model-lifetime(?:-math|-huggingface)?)\.(css|js)$/.test(
             url.pathname,
         ) ||
-            /\/data\/openrouter\/model-lifetime\.json$/.test(url.pathname))
+            /\/data\/openrouter\/(model-lifetime|huggingface-comparison)\.json$/.test(url.pathname))
 
     if (isHTML || isAnalysisAsset) {
         event.respondWith(

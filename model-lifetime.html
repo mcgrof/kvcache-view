@@ -13,6 +13,7 @@
         <link rel="stylesheet" href="model-lifetime.css" />
         <script src="model-lifetime-math.js" defer></script>
         <script src="model-lifetime.js" defer></script>
+        <script src="model-lifetime-huggingface.js" defer></script>
     </head>
     <body>
         <a class="skip" href="#main">Skip to content</a>
@@ -21,6 +22,7 @@
                 <a href="index.html">← All projections</a>
                 <a href="context-demand.html">Context demand</a>
                 <a href="agentic-kv-economics.html">Agentic KV retention</a>
+                <a href="#huggingface">Hugging Face comparison</a>
                 <a href="#method">Method &amp; sources</a>
             </nav>
             <header>
@@ -183,6 +185,7 @@
                         <option>Loading models…</option>
                     </select>
                 </label>
+                <p id="hf-selected-model" class="notice hf-selected" hidden></p>
                 <div class="chart-box">
                     <div class="chart-heading">
                         <h3 id="history-title">Observed daily traffic</h3>
@@ -417,8 +420,169 @@
                 </p>
             </section>
 
+            <section class="panel" id="huggingface" aria-labelledby="hf-title">
+                <p class="eyebrow">06 / A SECOND VIEW OF MODEL ADOPTION</p>
+                <h2 id="hf-title">Do downloads track hosted inference?</h2>
+                <p class="section-lead">
+                    Compare Hugging Face’s trailing 30-day downloads with OpenRouter’s nearest 30 days of reported
+                    tokens. One point represents one Hugging Face repository; verified OpenRouter aliases are combined.
+                    This comparison measures whether popular downloads also attract hosted traffic.
+                </p>
+                <div class="snapshot">
+                    <span class="dot"></span>
+                    <span id="hf-dates">Loading the dated Hugging Face comparison…</span>
+                    <a href="data/openrouter/huggingface-comparison.json" download>Download comparison JSON ↗</a>
+                </div>
+                <p id="hf-error" class="error" role="alert" hidden></p>
+                <p id="hf-result" class="section-lead" aria-live="polite"></p>
+                <div id="hf-persistence" class="demand-finding" hidden></div>
+                <div class="hf-controls">
+                    <label for="hf-sample">
+                        Models in the chart
+                        <select id="hf-sample">
+                            <option value="complete">All known aliases visible every day</option>
+                            <option value="recent_lower_bounds">
+                                All recently ranked models — includes missing traffic
+                            </option>
+                        </select>
+                    </label>
+                    <label for="hf-size">
+                        Model size
+                        <select id="hf-size">
+                            <option value="all">All sizes</option>
+                            <option value="small">10B parameters or less</option>
+                            <option value="medium">Over 10B through 100B</option>
+                            <option value="large">Over 100B</option>
+                            <option value="unknown">Size unavailable</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="hf-metrics" class="metrics" aria-live="polite"></div>
+                <p class="small">
+                    Rank correlation compares the ordering of models: +1 means the same order, 0 means no rank
+                    association, and −1 means the opposite order. The second measure compares the logarithms of the
+                    counts. Model size uses total parameters, including inactive MoE weights.
+                </p>
+                <div class="chart-box">
+                    <div class="chart-heading">
+                        <h3>Downloads versus OpenRouter tokens</h3>
+                        <span class="muted">Logarithmic axes · select a point for details</span>
+                    </div>
+                    <div id="hf-scatter" class="chart" aria-live="polite"></div>
+                    <div class="legend hf-legend">
+                        <span>
+                            <i class="hf-complete-dot"></i>
+                            All known aliases visible on all 30 days
+                        </span>
+                        <span>
+                            <i class="hf-partial-dot"></i>
+                            Some traffic hidden below the top 50
+                        </span>
+                    </div>
+                    <p class="small">
+                        An outlined point sits at its observed token minimum. Its vertical line extends to a
+                        cutoff-based upper bound, not a confidence interval. Models with no individually reported
+                        traffic stay in the table below; they are not plotted as zero usage.
+                    </p>
+                    <p id="hf-point-detail" class="hf-point-detail small" aria-live="polite">
+                        Select a point to see its repository, aliases, and traffic coverage.
+                    </p>
+                </div>
+                <p id="hf-coverage" class="small"></p>
+                <p class="notice">
+                    <strong>Downloads do not measure inference requests.</strong>
+                    Hugging Face counts qualifying file requests, including GET and HEAD requests for files such as
+                    <code>config.json</code>
+                    . A download can support no inference or a large deployment. These counts add evidence of
+                    distribution interest; they do not supply a request multiplier or extra days of model life.
+                </p>
+                <label class="search" for="hf-search">
+                    Find a repository, including former OpenRouter leaders
+                    <input id="hf-search" type="search" placeholder="Qwen2.5, Llama, DeepSeek…" />
+                </label>
+                <div
+                    class="table-scroll hf-table-scroll"
+                    tabindex="0"
+                    aria-label="Matched Hugging Face repositories; scroll horizontally on narrow screens"
+                >
+                    <table class="hf-table">
+                        <caption id="hf-table-caption">
+                            Current download interest can persist after a model leaves OpenRouter’s top 50.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>Hugging Face repository</th>
+                                <th>Downloads, last 30 days</th>
+                                <th>OpenRouter tokens, 30 days</th>
+                                <th>Days with a visible alias</th>
+                                <th>Total parameters</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hf-models"></tbody>
+                    </table>
+                </div>
+                <p id="hf-table-count" class="small"></p>
+                <details>
+                    <summary>What this adds to the projections—and what needs more evidence</summary>
+                    <p>
+                        The selected-model note above now shows its download activity alongside the OpenRouter demand
+                        scenario. A model can retain download interest after leaving the rankings. That is useful
+                        context for the assumed demand tail, but this snapshot cannot tell us its size or duration.
+                    </p>
+                    <p>
+                        The numeric lifetime forecasts still use OpenRouter history. Before downloads can change those
+                        forecasts, we need dated download histories and a test of whether they improve predictions on
+                        later, unseen data. Today’s downloads must not be used to explain an earlier exit. Successive
+                        30-day download counts overlap and cannot be added together as independent monthly totals.
+                    </p>
+                    <p>
+                        The first sample avoids unreported traffic for the known aliases but favors consistently popular
+                        models. The broader sample includes censored traffic, so its correlation describes observed
+                        minimums. Neither sample represents the full Hugging Face catalog or all inference. Bootstrap
+                        intervals resample repositories. They do not account for shared developers or model families, or
+                        remove those selection biases.
+                    </p>
+                    <p id="hf-alignment-note"></p>
+                    <p>
+                        Hugging Face announced OpenRouter routing for its language-model Inference Providers on
+                        <a href="https://huggingface.co/blog/openrouter">November 16, 2026</a>
+                        . Future trend comparisons need to consider that platform change; these download counts are
+                        still file activity, not routed inference counts.
+                    </p>
+                    <p>
+                        <a href="research/huggingface-adoption-analysis.md">Analysis and reproducibility notes</a>
+                        ·
+                        <a href="https://huggingface.co/docs/hub/models-download-stats">Hugging Face counting rules</a>
+                    </p>
+                </details>
+                <div class="related">
+                    <h3>Who has compared these signals before?</h3>
+                    <ul>
+                        <li>
+                            <a href="https://www.ifo.de/DocDL/cesifo1_wp13004.pdf">
+                                Birth, Life, and Death of AI Models
+                            </a>
+                            reports a 0.33 correlation between logged cumulative Hugging Face downloads and OpenRouter
+                            tokens, using 1,916 model-month observations for 251 models (Appendix A.2). Its cumulative
+                            comparison differs from the 30-day comparison here; 0.33 is not our result.
+                        </li>
+                        <li>
+                            <a href="https://arxiv.org/html/2604.07190v1">The ATOM Report</a>
+                            compares downloads, derivatives, and hosted inference. Its attention to model size motivates
+                            the size filter above: small models can dominate downloads while large models attract hosted
+                            traffic.
+                        </li>
+                        <li>
+                            <a href="https://arxiv.org/html/2512.03073v1">Economies of Open Intelligence</a>
+                            studies historical downloads with additional filtering. Its historical series and the public
+                            Hub counter use different measurement rules and should be kept distinct.
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
             <section class="panel" id="method" aria-labelledby="method-title">
-                <p class="eyebrow">06 / WHAT THIS STUDY CAN AND CANNOT TELL US</p>
+                <p class="eyebrow">07 / WHAT THIS STUDY CAN AND CANNOT TELL US</p>
                 <h2 id="method-title">Definitions, reproducibility, and related work</h2>
                 <div class="method-grid">
                     <article>

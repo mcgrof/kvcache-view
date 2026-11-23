@@ -1,0 +1,4380 @@
+{
+  "data": [
+    {
+      "created_at": "2024-03-11T15:50:54.000Z",
+      "downloads": 147122,
+      "downloads_all_time": 833970,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-04-16T03:10:13.000Z",
+      "likes": 1130,
+      "parameters_total": 34980831232,
+      "repo_id": "CohereLabs/c4ai-command-r-v01",
+      "requested_id": "CohereForAI/c4ai-command-r-v01",
+      "response_sha256": "bcc8af2505dd8ce9eb22519fbdc03d6b3d2f92d880fe635744f592f90eb30503",
+      "retrieved_at": "2026-11-23T20:44:32.573107Z",
+      "source_fields": {
+        "_id": "65ef285e326a1a5bd30e00d8",
+        "createdAt": "2024-03-11T15:50:54.000Z",
+        "downloads": 147122,
+        "downloadsAllTime": 833970,
+        "id": "CohereLabs/c4ai-command-r-v01",
+        "lastModified": "2025-04-16T03:10:13.000Z",
+        "likes": 1130,
+        "safetensors": {
+          "parameters": {
+            "F16": 34980831232
+          },
+          "total": 34980831232
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/CohereForAI/c4ai-command-r-v01?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-05T02:38:01.000Z",
+      "downloads": 8350,
+      "downloads_all_time": 97450,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-06-15T04:32:41.000Z",
+      "likes": 590,
+      "parameters_total": 30484303872,
+      "repo_id": "CohereLabs/North-Mini-Code-1.0",
+      "requested_id": "CohereLabs/North-Mini-Code-1.0",
+      "response_sha256": "2bebda27f6ecb55123d94638907925cd15da04fe27ba174054ddffc0d9be824b",
+      "retrieved_at": "2026-11-23T20:44:29.081801Z",
+      "source_fields": {
+        "_id": "6a22368979603ac03e6e8c39",
+        "createdAt": "2026-06-05T02:38:01.000Z",
+        "downloads": 8350,
+        "downloadsAllTime": 97450,
+        "id": "CohereLabs/North-Mini-Code-1.0",
+        "lastModified": "2026-06-15T04:32:41.000Z",
+        "likes": 590,
+        "safetensors": {
+          "parameters": {
+            "BF16": 30484303872
+          },
+          "total": 30484303872
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/CohereLabs/North-Mini-Code-1.0?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-08-19T07:40:11.000Z",
+      "downloads": 211,
+      "downloads_all_time": 98247,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-10-30T06:37:28.000Z",
+      "likes": 176,
+      "parameters_total": 32296476672,
+      "repo_id": "CohereLabs/c4ai-command-r-08-2024",
+      "requested_id": "CohereLabs/c4ai-command-r-08-2024",
+      "response_sha256": "55efd777ad324608fb4249ebe86fafce83e321254be1d1c1edb6281de5045d60",
+      "retrieved_at": "2026-11-23T20:44:29.081292Z",
+      "source_fields": {
+        "_id": "66c2f6dbfa92c9e00afca23d",
+        "createdAt": "2024-08-19T07:40:11.000Z",
+        "downloads": 211,
+        "downloadsAllTime": 98247,
+        "id": "CohereLabs/c4ai-command-r-08-2024",
+        "lastModified": "2025-10-30T06:37:28.000Z",
+        "likes": 176,
+        "safetensors": {
+          "parameters": {
+            "F16": 32296476672
+          },
+          "total": 32296476672
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/CohereLabs/c4ai-command-r-08-2024?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-08-21T09:23:17.000Z",
+      "downloads": 62,
+      "downloads_all_time": 262551,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-10-30T06:37:39.000Z",
+      "likes": 306,
+      "parameters_total": 103810674688,
+      "repo_id": "CohereLabs/c4ai-command-r-plus-08-2024",
+      "requested_id": "CohereLabs/c4ai-command-r-plus-08-2024",
+      "response_sha256": "f12b1010cb1a1926bc70923c3abfa5c55cb2a665999afe21889704fdd752a002",
+      "retrieved_at": "2026-11-23T20:44:29.083640Z",
+      "source_fields": {
+        "_id": "66c5b2052d2fcb957115fdc3",
+        "createdAt": "2024-08-21T09:23:17.000Z",
+        "downloads": 62,
+        "downloadsAllTime": 262551,
+        "id": "CohereLabs/c4ai-command-r-plus-08-2024",
+        "lastModified": "2025-10-30T06:37:39.000Z",
+        "likes": 306,
+        "safetensors": {
+          "parameters": {
+            "F16": 103810674688
+          },
+          "total": 103810674688
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/CohereLabs/c4ai-command-r-plus-08-2024?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-12-11T15:55:05.000Z",
+      "downloads": 1429,
+      "downloads_all_time": 402364,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-10-30T06:37:50.000Z",
+      "likes": 438,
+      "parameters_total": 8028033024,
+      "repo_id": "CohereLabs/c4ai-command-r7b-12-2024",
+      "requested_id": "CohereLabs/c4ai-command-r7b-12-2024",
+      "response_sha256": "a0e3f9cadfda02b493f2908acb6c56e7a42d3f018fa92389376a85e44c5cef9e",
+      "retrieved_at": "2026-11-23T20:44:32.614994Z",
+      "source_fields": {
+        "_id": "6759b5d9d98f3b3f28b54493",
+        "createdAt": "2024-12-11T15:55:05.000Z",
+        "downloads": 1429,
+        "downloadsAllTime": 402364,
+        "id": "CohereLabs/c4ai-command-r7b-12-2024",
+        "lastModified": "2025-10-30T06:37:50.000Z",
+        "likes": 438,
+        "safetensors": {
+          "parameters": {
+            "BF16": 8028033024
+          },
+          "total": 8028033024
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/CohereLabs/c4ai-command-r7b-12-2024?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2023-08-10T20:35:34.000Z",
+      "downloads": 2970,
+      "downloads_all_time": 743648,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-04-21T17:42:57.000Z",
+      "likes": 423,
+      "parameters_total": null,
+      "repo_id": "Gryphe/MythoMax-L2-13b",
+      "requested_id": "Gryphe/MythoMax-L2-13b",
+      "response_sha256": "9dea4320e6937a7da772db1d4f127ec3782fd24990ecf0af440faa0e8f059af0",
+      "retrieved_at": "2026-11-23T20:44:32.573416Z",
+      "source_fields": {
+        "_id": "64d54a162fe2c11264f18e92",
+        "createdAt": "2023-08-10T20:35:34.000Z",
+        "downloads": 2970,
+        "downloadsAllTime": 743648,
+        "id": "Gryphe/MythoMax-L2-13b",
+        "lastModified": "2024-04-21T17:42:57.000Z",
+        "likes": 423
+      },
+      "source_url": "https://huggingface.co/api/models/Gryphe/MythoMax-L2-13b?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-10-22T13:45:10.000Z",
+      "downloads": 112719,
+      "downloads_all_time": 3084416,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-19T11:38:46.000Z",
+      "likes": 1512,
+      "parameters_total": 228689764864,
+      "repo_id": "MiniMaxAI/MiniMax-M2",
+      "requested_id": "MiniMaxAI/MiniMax-M2",
+      "response_sha256": "621f0db302dd921050218e718e5da1c47b5bffe7393d7057dca00aaca1ad1a9f",
+      "retrieved_at": "2026-11-23T20:44:32.570552Z",
+      "source_fields": {
+        "_id": "68f8dfe68cb208be9702aa87",
+        "createdAt": "2025-10-22T13:45:10.000Z",
+        "downloads": 112719,
+        "downloadsAllTime": 3084416,
+        "id": "MiniMaxAI/MiniMax-M2",
+        "lastModified": "2026-11-19T11:38:46.000Z",
+        "likes": 1512,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1230021632,
+            "F32": 48774656,
+            "F8_E4M3": 227410968576
+          },
+          "total": 228689764864
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-M2?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-12-20T05:45:05.000Z",
+      "downloads": 13433,
+      "downloads_all_time": 519746,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-19T11:38:28.000Z",
+      "likes": 1372,
+      "parameters_total": 228689764864,
+      "repo_id": "MiniMaxAI/MiniMax-M2.1",
+      "requested_id": "MiniMaxAI/MiniMax-M2.1",
+      "response_sha256": "75c6751394baa7b393b5c91f5379ab43e9081419737ba2562bcff812e93f7030",
+      "retrieved_at": "2026-11-23T20:44:35.836505Z",
+      "source_fields": {
+        "_id": "694637e104ef97f56fb86495",
+        "createdAt": "2025-12-20T05:45:05.000Z",
+        "downloads": 13433,
+        "downloadsAllTime": 519746,
+        "id": "MiniMaxAI/MiniMax-M2.1",
+        "lastModified": "2026-11-19T11:38:28.000Z",
+        "likes": 1372,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1230021632,
+            "F32": 48774656,
+            "F8_E4M3": 227410968576
+          },
+          "total": 228689764864
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-M2.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-02-12T06:05:24.000Z",
+      "downloads": 686496,
+      "downloads_all_time": 6766195,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-19T11:38:17.000Z",
+      "likes": 1537,
+      "parameters_total": 228689764864,
+      "repo_id": "MiniMaxAI/MiniMax-M2.5",
+      "requested_id": "MiniMaxAI/MiniMax-M2.5",
+      "response_sha256": "033661d13d1dd4dbea5112a9a3e29cd29b6d17449934d9f03320e89950d84c9f",
+      "retrieved_at": "2026-11-23T20:44:35.795859Z",
+      "source_fields": {
+        "_id": "698d6da4e7e2097d03e4dbba",
+        "createdAt": "2026-02-12T06:05:24.000Z",
+        "downloads": 686496,
+        "downloadsAllTime": 6766195,
+        "id": "MiniMaxAI/MiniMax-M2.5",
+        "lastModified": "2026-11-19T11:38:17.000Z",
+        "likes": 1537,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1230021632,
+            "F32": 48774656,
+            "F8_E4M3": 227410968576
+          },
+          "total": 228689764864
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-M2.5?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-09T03:37:12.000Z",
+      "downloads": 200075,
+      "downloads_all_time": 8142907,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-26T07:08:13.000Z",
+      "likes": 1264,
+      "parameters_total": 228689764864,
+      "repo_id": "MiniMaxAI/MiniMax-M2.7",
+      "requested_id": "MiniMaxAI/MiniMax-M2.7",
+      "response_sha256": "51a20e4692bc4d1a66cd3d7dab80f1fd3a2896f973c7660efe8fdae3bda6cf0c",
+      "retrieved_at": "2026-11-23T20:44:35.790690Z",
+      "source_fields": {
+        "_id": "69d71ee848d2a47600feda6e",
+        "createdAt": "2026-04-09T03:37:12.000Z",
+        "downloads": 200075,
+        "downloadsAllTime": 8142907,
+        "id": "MiniMaxAI/MiniMax-M2.7",
+        "lastModified": "2026-10-26T07:08:13.000Z",
+        "likes": 1264,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1230021632,
+            "F32": 48774656,
+            "F8_E4M3": 227410968576
+          },
+          "total": 228689764864
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-M2.7?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-10-17T06:37:50.000Z",
+      "downloads": 150214,
+      "downloads_all_time": 157456,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-05T00:55:30.000Z",
+      "likes": 616,
+      "parameters_total": 220490854016,
+      "repo_id": "MiniMaxAI/MiniMax-M3.1-Flash",
+      "requested_id": "MiniMaxAI/MiniMax-M3.1-Flash",
+      "response_sha256": "092e7ce8b9a91a75ac74d5ee7435a3187adbf4104113a5d0a51ef0a2b4a1c71c",
+      "retrieved_at": "2026-11-23T20:44:35.831325Z",
+      "source_fields": {
+        "_id": "6ad317befccdebd3c36545b7",
+        "createdAt": "2026-10-17T06:37:50.000Z",
+        "downloads": 150214,
+        "downloadsAllTime": 157456,
+        "id": "MiniMaxAI/MiniMax-M3.1-Flash",
+        "lastModified": "2026-11-05T00:55:30.000Z",
+        "likes": 616,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3323222528,
+            "F32": 46339200,
+            "F8_E4M3": 10560208896,
+            "U8": 206561083392
+          },
+          "total": 220490854016
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-M3.1-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-01-12T13:48:31.000Z",
+      "downloads": 3084,
+      "downloads_all_time": 95134,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-03T05:13:03.000Z",
+      "likes": 656,
+      "parameters_total": 456089655296,
+      "repo_id": "MiniMaxAI/MiniMax-Text-01",
+      "requested_id": "MiniMaxAI/MiniMax-Text-01",
+      "response_sha256": "6b1a9480db4f0723bff59fdbca0351d2e5208453fca0c3365a5adba16a35fc09",
+      "retrieved_at": "2026-11-23T20:44:39.675710Z",
+      "source_fields": {
+        "_id": "6783c82f16b629ee1e96418c",
+        "createdAt": "2025-01-12T13:48:31.000Z",
+        "downloads": 3084,
+        "downloadsAllTime": 95134,
+        "id": "MiniMaxAI/MiniMax-Text-01",
+        "lastModified": "2025-07-03T05:13:03.000Z",
+        "likes": 656,
+        "safetensors": {
+          "parameters": {
+            "BF16": 454844733440,
+            "F32": 1244921856
+          },
+          "total": 456089655296
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/MiniMax-Text-01?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-02T07:49:31.000Z",
+      "downloads": 237630,
+      "downloads_all_time": 1175862,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-19T11:38:05.000Z",
+      "likes": 1608,
+      "parameters_total": 427040140160,
+      "repo_id": "MiniMaxAI/MiniMax-M3",
+      "requested_id": "MiniMaxAI/Minimax-M3",
+      "response_sha256": "1f6d8727cfe95a3afe669efb38ed083c861375bf9edc39047e15a75e41e1873a",
+      "retrieved_at": "2026-11-23T20:44:43.267536Z",
+      "source_fields": {
+        "_id": "6a1e8b0b751d8eee461fd678",
+        "createdAt": "2026-06-02T07:49:31.000Z",
+        "downloads": 237630,
+        "downloadsAllTime": 1175862,
+        "id": "MiniMaxAI/MiniMax-M3",
+        "lastModified": "2026-11-19T11:38:05.000Z",
+        "likes": 1608,
+        "safetensors": {
+          "parameters": {
+            "BF16": 426993800960,
+            "F32": 46339200
+          },
+          "total": 427040140160
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/MiniMaxAI/Minimax-M3?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-08-13T04:57:53.000Z",
+      "downloads": 1561,
+      "downloads_all_time": 959867,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-10-08T08:01:44.000Z",
+      "likes": 276,
+      "parameters_total": 405853388800,
+      "repo_id": "NousResearch/Hermes-3-Llama-3.1-405B",
+      "requested_id": "NousResearch/Hermes-3-Llama-3.1-405B",
+      "response_sha256": "912231324e4fcbdc71a9d5bd6da32242c110d9efb0edc53cf98e5d7fe6e90cb2",
+      "retrieved_at": "2026-11-23T20:44:39.676607Z",
+      "source_fields": {
+        "_id": "66bae7d1115bf3ff56f2ab8e",
+        "createdAt": "2024-08-13T04:57:53.000Z",
+        "downloads": 1561,
+        "downloadsAllTime": 959867,
+        "id": "NousResearch/Hermes-3-Llama-3.1-405B",
+        "lastModified": "2024-10-08T08:01:44.000Z",
+        "likes": 276,
+        "safetensors": {
+          "parameters": {
+            "BF16": 405853388800
+          },
+          "total": 405853388800
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/NousResearch/Hermes-3-Llama-3.1-405B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-07-29T14:27:57.000Z",
+      "downloads": 1977,
+      "downloads_all_time": 336316,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-09-08T07:51:00.000Z",
+      "likes": 146,
+      "parameters_total": 70553706496,
+      "repo_id": "NousResearch/Hermes-3-Llama-3.1-70B",
+      "requested_id": "NousResearch/Hermes-3-Llama-3.1-70B",
+      "response_sha256": "96fcdd2d9ff15165ce060de678104dbcd34c02ce9f30b601faf187edd08e027d",
+      "retrieved_at": "2026-11-23T20:44:39.634609Z",
+      "source_fields": {
+        "_id": "66a7a6ed5baa33fe01c27c87",
+        "createdAt": "2024-07-29T14:27:57.000Z",
+        "downloads": 1977,
+        "downloadsAllTime": 336316,
+        "id": "NousResearch/Hermes-3-Llama-3.1-70B",
+        "lastModified": "2024-09-08T07:51:00.000Z",
+        "likes": 146,
+        "safetensors": {
+          "parameters": {
+            "BF16": 70553706496
+          },
+          "total": 70553706496
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/NousResearch/Hermes-3-Llama-3.1-70B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-08-28T09:03:13.000Z",
+      "downloads": 539649,
+      "downloads_all_time": 37763774,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-02-06T05:18:08.000Z",
+      "likes": 1299,
+      "parameters_total": 8291375616,
+      "repo_id": "Qwen/Qwen2-VL-7B-Instruct",
+      "requested_id": "Qwen/Qwen2-VL-7B-Instruct",
+      "response_sha256": "6f6bb70b053048c6bb90fdde0931162fbbd0972d6865def15cd37dfe6e5ff40d",
+      "retrieved_at": "2026-11-23T20:44:43.321681Z",
+      "source_fields": {
+        "_id": "66cee7d175a88154443a4056",
+        "createdAt": "2024-08-28T09:03:13.000Z",
+        "downloads": 539649,
+        "downloadsAllTime": 37763774,
+        "id": "Qwen/Qwen2-VL-7B-Instruct",
+        "lastModified": "2025-02-06T05:18:08.000Z",
+        "likes": 1299,
+        "safetensors": {
+          "parameters": {
+            "BF16": 8291375616
+          },
+          "total": 8291375616
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen2-VL-7B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-09-16T11:56:31.000Z",
+      "downloads": 158647,
+      "downloads_all_time": 9232838,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-01-12T02:07:38.000Z",
+      "likes": 1055,
+      "parameters_total": 72706203648,
+      "repo_id": "Qwen/Qwen2.5-72B-Instruct",
+      "requested_id": "Qwen/Qwen2.5-72B-Instruct",
+      "response_sha256": "8237c630882451c5f126fc15fe6f9aa9762325439cf82478974170be4957ada0",
+      "retrieved_at": "2026-11-23T20:44:43.269891Z",
+      "source_fields": {
+        "_id": "66e81cefd1b1391042d0e47e",
+        "createdAt": "2024-09-16T11:56:31.000Z",
+        "downloads": 158647,
+        "downloadsAllTime": 9232838,
+        "id": "Qwen/Qwen2.5-72B-Instruct",
+        "lastModified": "2025-01-12T02:07:38.000Z",
+        "likes": 1055,
+        "safetensors": {
+          "parameters": {
+            "BF16": 72706203648
+          },
+          "total": 72706203648
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen2.5-72B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-09-16T11:55:40.000Z",
+      "downloads": 6420358,
+      "downloads_all_time": 196845462,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-01-12T02:10:10.000Z",
+      "likes": 2508,
+      "parameters_total": 7615616512,
+      "repo_id": "Qwen/Qwen2.5-7B-Instruct",
+      "requested_id": "Qwen/Qwen2.5-7B-Instruct",
+      "response_sha256": "03aa18bde7a4b33fa2e5312a9d5693b6d41cb521e84d081295535befad221cde",
+      "retrieved_at": "2026-11-23T20:44:43.268765Z",
+      "source_fields": {
+        "_id": "66e81cbcd683a3f4e5291bbf",
+        "createdAt": "2024-09-16T11:55:40.000Z",
+        "downloads": 6420358,
+        "downloadsAllTime": 196845462,
+        "id": "Qwen/Qwen2.5-7B-Instruct",
+        "lastModified": "2025-01-12T02:10:10.000Z",
+        "likes": 2508,
+        "safetensors": {
+          "parameters": {
+            "BF16": 7615616512
+          },
+          "total": 7615616512
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen2.5-7B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-11-06T07:49:50.000Z",
+      "downloads": 510794,
+      "downloads_all_time": 14275201,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-01-12T02:02:22.000Z",
+      "likes": 2219,
+      "parameters_total": 32763876352,
+      "repo_id": "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "requested_id": "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "response_sha256": "e05113734a77aebfff4950457859706f92d49649f721bc4a18c5d21602e1e1cb",
+      "retrieved_at": "2026-11-23T20:44:49.421695Z",
+      "source_fields": {
+        "_id": "672b1f9e956e6880fdb8c1e5",
+        "createdAt": "2024-11-06T07:49:50.000Z",
+        "downloads": 510794,
+        "downloadsAllTime": 14275201,
+        "id": "Qwen/Qwen2.5-Coder-32B-Instruct",
+        "lastModified": "2025-01-12T02:02:22.000Z",
+        "likes": 2219,
+        "safetensors": {
+          "parameters": {
+            "BF16": 32763876352
+          },
+          "total": 32763876352
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen2.5-Coder-32B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-01-27T04:12:04.000Z",
+      "downloads": 31399,
+      "downloads_all_time": 7736093,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-06-06T02:48:50.000Z",
+      "likes": 668,
+      "parameters_total": 73410777344,
+      "repo_id": "Qwen/Qwen2.5-VL-72B-Instruct",
+      "requested_id": "Qwen/Qwen2.5-VL-72B-Instruct",
+      "response_sha256": "a17ccead731e2bcebb4f91b9d2fb9271be2d0a62b2d062ef3bee10eeb17dfceb",
+      "retrieved_at": "2026-11-23T20:44:49.414829Z",
+      "source_fields": {
+        "_id": "6797079422990ae89b5aff86",
+        "createdAt": "2025-01-27T04:12:04.000Z",
+        "downloads": 31399,
+        "downloadsAllTime": 7736093,
+        "id": "Qwen/Qwen2.5-VL-72B-Instruct",
+        "lastModified": "2025-06-06T02:48:50.000Z",
+        "likes": 668,
+        "safetensors": {
+          "parameters": {
+            "BF16": 73410777344
+          },
+          "total": 73410777344
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen2.5-VL-72B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-04-27T03:42:45.000Z",
+      "downloads": 13479677,
+      "downloads_all_time": 52938469,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-26T03:49:23.000Z",
+      "likes": 555,
+      "parameters_total": 14768307200,
+      "repo_id": "Qwen/Qwen3-14B",
+      "requested_id": "Qwen/Qwen3-14B",
+      "response_sha256": "b04605f28eeebd7de033cf95caa97b4dbb76b743918e09aa66f5d96d900a5dad",
+      "retrieved_at": "2026-11-23T20:44:49.465918Z",
+      "source_fields": {
+        "_id": "680da7b53a9818192728e751",
+        "createdAt": "2025-04-27T03:42:45.000Z",
+        "downloads": 13479677,
+        "downloadsAllTime": 52938469,
+        "id": "Qwen/Qwen3-14B",
+        "lastModified": "2025-07-26T03:49:23.000Z",
+        "likes": 555,
+        "safetensors": {
+          "parameters": {
+            "BF16": 14768307200
+          },
+          "total": 14768307200
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-14B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-21T06:46:56.000Z",
+      "downloads": 49340,
+      "downloads_all_time": 1981142,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-17T06:52:55.000Z",
+      "likes": 814,
+      "parameters_total": 235093634560,
+      "repo_id": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "requested_id": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "response_sha256": "fc7d052c60cc6d62cafc27a83bc22d6ec7312e2fccaedfcb2c106a8fef3521d4",
+      "retrieved_at": "2026-11-23T20:44:49.417509Z",
+      "source_fields": {
+        "_id": "687de260234339fed21e768a",
+        "createdAt": "2025-07-21T06:46:56.000Z",
+        "downloads": 49340,
+        "downloadsAllTime": 1981142,
+        "id": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "lastModified": "2025-09-17T06:52:55.000Z",
+        "likes": 814,
+        "safetensors": {
+          "parameters": {
+            "BF16": 235093634560
+          },
+          "total": 235093634560
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-235B-A22B-Instruct-2507?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-25T04:59:05.000Z",
+      "downloads": 7199,
+      "downloads_all_time": 669416,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-08-17T08:20:17.000Z",
+      "likes": 420,
+      "parameters_total": 235093634560,
+      "repo_id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+      "requested_id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+      "response_sha256": "7e8a7472555024381e2cb81bf859f9215428622483a00e0dc43a5fdc6422defd",
+      "retrieved_at": "2026-11-23T20:44:52.693077Z",
+      "source_fields": {
+        "_id": "68830f190d96f185cd243ef5",
+        "createdAt": "2025-07-25T04:59:05.000Z",
+        "downloads": 7199,
+        "downloadsAllTime": 669416,
+        "id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+        "lastModified": "2025-08-17T08:20:17.000Z",
+        "likes": 420,
+        "safetensors": {
+          "parameters": {
+            "BF16": 235093634560
+          },
+          "total": 235093634560
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-235B-A22B-Thinking-2507?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-04-27T03:43:05.000Z",
+      "downloads": 1105988,
+      "downloads_all_time": 23657266,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-26T03:45:17.000Z",
+      "likes": 990,
+      "parameters_total": 30532122624,
+      "repo_id": "Qwen/Qwen3-30B-A3B",
+      "requested_id": "Qwen/Qwen3-30B-A3B",
+      "response_sha256": "65683372e1dc6e940e51cce908011ea7b6698ea32301b20096abcc8c6e9a0122",
+      "retrieved_at": "2026-11-23T20:44:52.694457Z",
+      "source_fields": {
+        "_id": "680da7c9aa6c98cb395660ac",
+        "createdAt": "2025-04-27T03:43:05.000Z",
+        "downloads": 1105988,
+        "downloadsAllTime": 23657266,
+        "id": "Qwen/Qwen3-30B-A3B",
+        "lastModified": "2025-07-26T03:45:17.000Z",
+        "likes": 990,
+        "safetensors": {
+          "parameters": {
+            "BF16": 30532122624
+          },
+          "total": 30532122624
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-30B-A3B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-28T07:31:27.000Z",
+      "downloads": 669727,
+      "downloads_all_time": 19065601,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-17T06:56:43.000Z",
+      "likes": 857,
+      "parameters_total": 30532122624,
+      "repo_id": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+      "requested_id": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+      "response_sha256": "9b164bb99ff757986c30748a737f14ff3f48ee0ba395245d8b6dac4c01dbe379",
+      "retrieved_at": "2026-11-23T20:44:52.693616Z",
+      "source_fields": {
+        "_id": "6887274f2626398dc2e9f540",
+        "createdAt": "2025-07-28T07:31:27.000Z",
+        "downloads": 669727,
+        "downloadsAllTime": 19065601,
+        "id": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+        "lastModified": "2025-09-17T06:56:43.000Z",
+        "likes": 857,
+        "safetensors": {
+          "parameters": {
+            "BF16": 30532122624
+          },
+          "total": 30532122624
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-30B-A3B-Instruct-2507?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-04-27T03:52:59.000Z",
+      "downloads": 3678732,
+      "downloads_all_time": 64929033,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-26T03:45:22.000Z",
+      "likes": 798,
+      "parameters_total": 32762123264,
+      "repo_id": "Qwen/Qwen3-32B",
+      "requested_id": "Qwen/Qwen3-32B",
+      "response_sha256": "f5571fabda67d47c882256fde1e73509a596b0a916b365a34541ba02b2dc54ef",
+      "retrieved_at": "2026-11-23T20:44:52.694165Z",
+      "source_fields": {
+        "_id": "680daa1b62e834e6fd9fdbdf",
+        "createdAt": "2025-04-27T03:52:59.000Z",
+        "downloads": 3678732,
+        "downloadsAllTime": 64929033,
+        "id": "Qwen/Qwen3-32B",
+        "lastModified": "2025-07-26T03:45:22.000Z",
+        "likes": 798,
+        "safetensors": {
+          "parameters": {
+            "BF16": 32762123264
+          },
+          "total": 32762123264
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-32B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-31T07:04:55.000Z",
+      "downloads": 1951394,
+      "downloads_all_time": 18058432,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-12-03T08:05:17.000Z",
+      "likes": 1354,
+      "parameters_total": 30532122624,
+      "repo_id": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "requested_id": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "response_sha256": "e235f8d6bdc5a29306fe766d7dd9a3fed91f8791f086b93ba5237495f72f4f30",
+      "retrieved_at": "2026-11-23T20:44:56.054712Z",
+      "source_fields": {
+        "_id": "688b1597e5e83e19d1b3238a",
+        "createdAt": "2025-07-31T07:04:55.000Z",
+        "downloads": 1951394,
+        "downloadsAllTime": 18058432,
+        "id": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+        "lastModified": "2025-12-03T08:05:17.000Z",
+        "likes": 1354,
+        "safetensors": {
+          "parameters": {
+            "BF16": 30532122624
+          },
+          "total": 30532122624
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-Coder-30B-A3B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-22T14:52:38.000Z",
+      "downloads": 42694,
+      "downloads_all_time": 1236397,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-08-21T10:18:07.000Z",
+      "likes": 1393,
+      "parameters_total": 480154875392,
+      "repo_id": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+      "requested_id": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+      "response_sha256": "da40b63b2f17df1f9934fe4b913fcbeaa539d491993b214c6fcc7df0373eb408",
+      "retrieved_at": "2026-11-23T20:44:56.052177Z",
+      "source_fields": {
+        "_id": "687fa5b678e85b9b93b7bac2",
+        "createdAt": "2025-07-22T14:52:38.000Z",
+        "downloads": 42694,
+        "downloadsAllTime": 1236397,
+        "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+        "lastModified": "2025-08-21T10:18:07.000Z",
+        "likes": 1393,
+        "safetensors": {
+          "parameters": {
+            "BF16": 480154875392
+          },
+          "total": 480154875392
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-Coder-480B-A35B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-01-30T15:08:18.000Z",
+      "downloads": 335985,
+      "downloads_all_time": 7685633,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-02-03T16:16:38.000Z",
+      "likes": 1753,
+      "parameters_total": 79674391296,
+      "repo_id": "Qwen/Qwen3-Coder-Next",
+      "requested_id": "Qwen/Qwen3-Coder-Next",
+      "response_sha256": "e7ff5d6479c0a073dce667f3ef78a54631100e9a786383cc30a241b4dac7140f",
+      "retrieved_at": "2026-11-23T20:44:56.051143Z",
+      "source_fields": {
+        "_id": "697cc96264f02a073172f2bd",
+        "createdAt": "2026-01-30T15:08:18.000Z",
+        "downloads": 335985,
+        "downloadsAllTime": 7685633,
+        "id": "Qwen/Qwen3-Coder-Next",
+        "lastModified": "2026-02-03T16:16:38.000Z",
+        "likes": 1753,
+        "safetensors": {
+          "parameters": {
+            "BF16": 79674391296
+          },
+          "total": 79674391296
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-Coder-Next?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-09T15:40:56.000Z",
+      "downloads": 124496,
+      "downloads_all_time": 16794875,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-17T06:57:40.000Z",
+      "likes": 1076,
+      "parameters_total": 81324862720,
+      "repo_id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+      "requested_id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+      "response_sha256": "ab4aedef239e13f6ced6ecdb5dcda5ffe2f36ff553a05b4157de430f59796d31",
+      "retrieved_at": "2026-11-23T20:44:56.056441Z",
+      "source_fields": {
+        "_id": "68c04a8865953b21d7f88ec6",
+        "createdAt": "2025-09-09T15:40:56.000Z",
+        "downloads": 124496,
+        "downloadsAllTime": 16794875,
+        "id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+        "lastModified": "2025-09-17T06:57:40.000Z",
+        "likes": 1076,
+        "safetensors": {
+          "parameters": {
+            "BF16": 81324862720
+          },
+          "total": 81324862720
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-Next-80B-A3B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-09T15:45:31.000Z",
+      "downloads": 43262,
+      "downloads_all_time": 2588256,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-15T09:12:48.000Z",
+      "likes": 504,
+      "parameters_total": 81324862720,
+      "repo_id": "Qwen/Qwen3-Next-80B-A3B-Thinking",
+      "requested_id": "Qwen/Qwen3-Next-80B-A3B-Thinking",
+      "response_sha256": "a7f4633bb81d17bc9d36a72863d5eba6d3143523432eb05f7c5471e3626b40d6",
+      "retrieved_at": "2026-11-23T20:44:58.979210Z",
+      "source_fields": {
+        "_id": "68c04b9ba4d1823e9b0ee2bd",
+        "createdAt": "2025-09-09T15:45:31.000Z",
+        "downloads": 43262,
+        "downloadsAllTime": 2588256,
+        "id": "Qwen/Qwen3-Next-80B-A3B-Thinking",
+        "lastModified": "2025-09-15T09:12:48.000Z",
+        "likes": 504,
+        "safetensors": {
+          "parameters": {
+            "BF16": 81324862720
+          },
+          "total": 81324862720
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-Next-80B-A3B-Thinking?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-22T03:54:32.000Z",
+      "downloads": 317103,
+      "downloads_all_time": 10125043,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-11-26T13:18:18.000Z",
+      "likes": 431,
+      "parameters_total": 235670022896,
+      "repo_id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+      "requested_id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+      "response_sha256": "376515f8be30670b2470f1f7ec71ca885d8ff84ef42a11952c6c38ab1ae8901b",
+      "retrieved_at": "2026-11-23T20:44:58.976224Z",
+      "source_fields": {
+        "_id": "68d0c878f7dc520a235be3c5",
+        "createdAt": "2025-09-22T03:54:32.000Z",
+        "downloads": 317103,
+        "downloadsAllTime": 10125043,
+        "id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+        "lastModified": "2025-11-26T13:18:18.000Z",
+        "likes": 431,
+        "safetensors": {
+          "parameters": {
+            "BF16": 235670022896
+          },
+          "total": 235670022896
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-VL-235B-A22B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-10-11T07:23:39.000Z",
+      "downloads": 5432237,
+      "downloads_all_time": 81868575,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-10-15T16:16:59.000Z",
+      "likes": 1274,
+      "parameters_total": 8767123696,
+      "repo_id": "Qwen/Qwen3-VL-8B-Instruct",
+      "requested_id": "Qwen/Qwen3-VL-8B-Instruct",
+      "response_sha256": "b126fb63a49216b19b5fb34fc338c1342e53cf6b4b3ef9402cb0026d5867b725",
+      "retrieved_at": "2026-11-23T20:44:58.975227Z",
+      "source_fields": {
+        "_id": "68ea05fb43df37d95ad2491d",
+        "createdAt": "2025-10-11T07:23:39.000Z",
+        "downloads": 5432237,
+        "downloadsAllTime": 81868575,
+        "id": "Qwen/Qwen3-VL-8B-Instruct",
+        "lastModified": "2025-10-15T16:16:59.000Z",
+        "likes": 1274,
+        "safetensors": {
+          "parameters": {
+            "BF16": 8767123696
+          },
+          "total": 8767123696
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3-VL-8B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-02-24T09:39:25.000Z",
+      "downloads": 1186531,
+      "downloads_all_time": 22243067,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-20T06:46:32.000Z",
+      "likes": 1564,
+      "parameters_total": 35951822704,
+      "repo_id": "Qwen/Qwen3.5-35B-A3B",
+      "requested_id": "Qwen/Qwen3.5-35B-A3B",
+      "response_sha256": "8825a9c3a840ddad423b5ebffcfd31fbc91bd7060104e8a4c7e7a180de25c518",
+      "retrieved_at": "2026-11-23T20:44:58.986219Z",
+      "source_fields": {
+        "_id": "699d71cd2b8317e9175c4457",
+        "createdAt": "2026-02-24T09:39:25.000Z",
+        "downloads": 1186531,
+        "downloadsAllTime": 22243067,
+        "id": "Qwen/Qwen3.5-35B-A3B",
+        "lastModified": "2026-11-20T06:46:32.000Z",
+        "likes": 1564,
+        "safetensors": {
+          "parameters": {
+            "BF16": 35951817904,
+            "F32": 4800
+          },
+          "total": 35951822704
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.5-35B-A3B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-02-16T04:55:12.000Z",
+      "downloads": 494031,
+      "downloads_all_time": 6708183,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-04-24T05:51:23.000Z",
+      "likes": 1585,
+      "parameters_total": 403397928944,
+      "repo_id": "Qwen/Qwen3.5-397B-A17B",
+      "requested_id": "Qwen/Qwen3.5-397B-A17B",
+      "response_sha256": "fa5df8255b4c3ec516effb4ba884c54038269f5d58dd3fe83d1ee01a98d97cc1",
+      "retrieved_at": "2026-11-23T20:45:02.576841Z",
+      "source_fields": {
+        "_id": "6992a330541b46136322b094",
+        "createdAt": "2026-02-16T04:55:12.000Z",
+        "downloads": 494031,
+        "downloadsAllTime": 6708183,
+        "id": "Qwen/Qwen3.5-397B-A17B",
+        "lastModified": "2026-04-24T05:51:23.000Z",
+        "likes": 1585,
+        "safetensors": {
+          "parameters": {
+            "BF16": 403397920304,
+            "F32": 8640
+          },
+          "total": 403397928944
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.5-397B-A17B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-02-27T12:58:26.000Z",
+      "downloads": 6302942,
+      "downloads_all_time": 78542020,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-03-02T00:51:43.000Z",
+      "likes": 2438,
+      "parameters_total": 9653104368,
+      "repo_id": "Qwen/Qwen3.5-9B",
+      "requested_id": "Qwen/Qwen3.5-9B",
+      "response_sha256": "d6497bc6ff463c2ebeb7ea32c0e1a67df98a89e78551db71ce08999491639fef",
+      "retrieved_at": "2026-11-23T20:45:02.577304Z",
+      "source_fields": {
+        "_id": "69a194f2d29af86e5f085743",
+        "createdAt": "2026-02-27T12:58:26.000Z",
+        "downloads": 6302942,
+        "downloadsAllTime": 78542020,
+        "id": "Qwen/Qwen3.5-9B",
+        "lastModified": "2026-03-02T00:51:43.000Z",
+        "likes": 2438,
+        "safetensors": {
+          "parameters": {
+            "BF16": 9653100528,
+            "F32": 3840
+          },
+          "total": 9653104368
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.5-9B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-21T07:50:43.000Z",
+      "downloads": 2324489,
+      "downloads_all_time": 31974095,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-20T06:46:39.000Z",
+      "likes": 2364,
+      "parameters_total": 27781427952,
+      "repo_id": "Qwen/Qwen3.6-27B",
+      "requested_id": "Qwen/Qwen3.6-27B",
+      "response_sha256": "a95aaa906bbae98ff3abb26aa318d2275b4c5f4bcf44356b8b845787b3c5c764",
+      "retrieved_at": "2026-11-23T20:45:02.575522Z",
+      "source_fields": {
+        "_id": "69e72c53d67c64360835c464",
+        "createdAt": "2026-04-21T07:50:43.000Z",
+        "downloads": 2324489,
+        "downloadsAllTime": 31974095,
+        "id": "Qwen/Qwen3.6-27B",
+        "lastModified": "2026-11-20T06:46:39.000Z",
+        "likes": 2364,
+        "safetensors": {
+          "parameters": {
+            "BF16": 27781427952
+          },
+          "total": 27781427952
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.6-27B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-15T05:59:19.000Z",
+      "downloads": 3448033,
+      "downloads_all_time": 36437691,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-07T04:41:52.000Z",
+      "likes": 3174,
+      "parameters_total": 35951822704,
+      "repo_id": "Qwen/Qwen3.6-35B-A3B",
+      "requested_id": "Qwen/Qwen3.6-35B-A3B",
+      "response_sha256": "408aead38040659c09ffe15ff33ea0319712d175379ad02bb20889f2730e83b2",
+      "retrieved_at": "2026-11-23T20:45:02.578237Z",
+      "source_fields": {
+        "_id": "69df2937a1a44a4df58e0dd5",
+        "createdAt": "2026-04-15T05:59:19.000Z",
+        "downloads": 3448033,
+        "downloadsAllTime": 36437691,
+        "id": "Qwen/Qwen3.6-35B-A3B",
+        "lastModified": "2026-11-07T04:41:52.000Z",
+        "likes": 3174,
+        "safetensors": {
+          "parameters": {
+            "BF16": 35951822704
+          },
+          "total": 35951822704
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.6-35B-A3B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-05T08:22:59.000Z",
+      "downloads": 6185088,
+      "downloads_all_time": 24704762,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-07T04:42:17.000Z",
+      "likes": 21670,
+      "parameters_total": 27781427952,
+      "repo_id": "Qwen/Qwen3.8-27B",
+      "requested_id": "Qwen/Qwen3.8-27B",
+      "response_sha256": "229c9a6f9943e022af902d8514bdb38233a6e2e8cacd0570495cab472aa436fa",
+      "retrieved_at": "2026-11-23T20:45:05.658470Z",
+      "source_fields": {
+        "_id": "6a72f2e302294c7d32dd278e",
+        "createdAt": "2026-08-05T08:22:59.000Z",
+        "downloads": 6185088,
+        "downloadsAllTime": 24704762,
+        "id": "Qwen/Qwen3.8-27B",
+        "lastModified": "2026-11-07T04:42:17.000Z",
+        "likes": 21670,
+        "safetensors": {
+          "parameters": {
+            "BF16": 27781427952
+          },
+          "total": 27781427952
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.8-27B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-24T08:24:59.000Z",
+      "downloads": 2147378,
+      "downloads_all_time": 6385601,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-07T04:42:40.000Z",
+      "likes": 7474,
+      "parameters_total": 179999981459,
+      "repo_id": "Qwen/Qwen3.8-Flash-Next",
+      "requested_id": "Qwen/Qwen3.8-Flash-Next",
+      "response_sha256": "90a2a7249853f937b55d434d1a67c5299aaf804852c2aeae64ffe750562eee60",
+      "retrieved_at": "2026-11-23T20:45:05.701397Z",
+      "source_fields": {
+        "_id": "6a8bffdb39eb84b2b2755a6e",
+        "createdAt": "2026-08-24T08:24:59.000Z",
+        "downloads": 2147378,
+        "downloadsAllTime": 6385601,
+        "id": "Qwen/Qwen3.8-Flash-Next",
+        "lastModified": "2026-11-07T04:42:40.000Z",
+        "likes": 7474,
+        "safetensors": {
+          "parameters": {
+            "BF16": 179999981424,
+            "I64": 35
+          },
+          "total": 179999981459
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.8-Flash-Next?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-08-12T13:14:04.000Z",
+      "downloads": 1119,
+      "downloads_all_time": 17444,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-08-25T13:34:59.000Z",
+      "likes": 70,
+      "parameters_total": null,
+      "repo_id": "Sao10K/L3.1-70B-Euryale-v2.2",
+      "requested_id": "Sao10K/L3.1-70B-Euryale-v2.2",
+      "response_sha256": "5fc27fdfdaa1f3067184bcef24486385a821e1978e902034798f73e5b2cca93c",
+      "retrieved_at": "2026-11-23T20:45:05.699017Z",
+      "source_fields": {
+        "_id": "66ba0a9c5b3a757a74d1265e",
+        "createdAt": "2024-08-12T13:14:04.000Z",
+        "downloads": 1119,
+        "downloadsAllTime": 17444,
+        "id": "Sao10K/L3.1-70B-Euryale-v2.2",
+        "lastModified": "2024-08-25T13:34:59.000Z",
+        "likes": 70
+      },
+      "source_url": "https://huggingface.co/api/models/Sao10K/L3.1-70B-Euryale-v2.2?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-12-07T23:22:12.000Z",
+      "downloads": 1145,
+      "downloads_all_time": 77614,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-12-08T10:53:31.000Z",
+      "likes": 117,
+      "parameters_total": 70553706496,
+      "repo_id": "Sao10K/L3.3-70B-Euryale-v2.3",
+      "requested_id": "Sao10K/L3.3-70B-Euryale-v2.3",
+      "response_sha256": "038c35fb27a569d44ea29d9a1978b88ec862d2f21ff4ea7a54a92f9c80b96a18",
+      "retrieved_at": "2026-11-23T20:45:05.700127Z",
+      "source_fields": {
+        "_id": "6754d8a45161b68196574123",
+        "createdAt": "2024-12-07T23:22:12.000Z",
+        "downloads": 1145,
+        "downloadsAllTime": 77614,
+        "id": "Sao10K/L3.3-70B-Euryale-v2.3",
+        "lastModified": "2024-12-08T10:53:31.000Z",
+        "likes": 117,
+        "safetensors": {
+          "parameters": {
+            "BF16": 70553706496
+          },
+          "total": 70553706496
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/Sao10K/L3.3-70B-Euryale-v2.3?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-10-23T14:48:15.000Z",
+      "downloads": 1199,
+      "downloads_all_time": 261930,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-11-07T10:45:22.000Z",
+      "likes": 25,
+      "parameters_total": 12247782400,
+      "repo_id": "TheDrummer/UnslopNemo-12B-v4.1",
+      "requested_id": "TheDrummer/UnslopNemo-12B-v4.1",
+      "response_sha256": "138ba83efa4340b6932a10695f5215d9fb41916eaec474b3e4217fa4806b290a",
+      "retrieved_at": "2026-11-23T20:45:09.055680Z",
+      "source_fields": {
+        "_id": "67190caffbddb924b1b7bf7c",
+        "createdAt": "2024-10-23T14:48:15.000Z",
+        "downloads": 1199,
+        "downloadsAllTime": 261930,
+        "id": "TheDrummer/UnslopNemo-12B-v4.1",
+        "lastModified": "2024-11-07T10:45:22.000Z",
+        "likes": 25,
+        "safetensors": {
+          "parameters": {
+            "BF16": 12247782400
+          },
+          "total": 12247782400
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/TheDrummer/UnslopNemo-12B-v4.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-27T13:37:38.000Z",
+      "downloads": 52685,
+      "downloads_all_time": 1666379,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-28T14:13:36.000Z",
+      "likes": 434,
+      "parameters_total": 310756322688,
+      "repo_id": "XiaomiMiMo/MiMo-V2.5",
+      "requested_id": "XiaomiMiMo/MiMo-V2.5",
+      "response_sha256": "e0f6ceb6e4c5df25db51938ec1e7ec717061c5739a6eac9d95bc013b7916c625",
+      "retrieved_at": "2026-11-23T20:45:09.056989Z",
+      "source_fields": {
+        "_id": "69ef66a2a4a9e4a05048320f",
+        "createdAt": "2026-04-27T13:37:38.000Z",
+        "downloads": 52685,
+        "downloadsAllTime": 1666379,
+        "id": "XiaomiMiMo/MiMo-V2.5",
+        "lastModified": "2026-10-28T14:13:36.000Z",
+        "likes": 434,
+        "safetensors": {
+          "parameters": {
+            "BF16": 4052024960,
+            "F32": 49295104,
+            "F8_E4M3": 306655002624
+          },
+          "total": 310756322688
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/XiaomiMiMo/MiMo-V2.5?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-27T12:52:53.000Z",
+      "downloads": 9307,
+      "downloads_all_time": 360727,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-28T14:14:01.000Z",
+      "likes": 772,
+      "parameters_total": 1023182841600,
+      "repo_id": "XiaomiMiMo/MiMo-V2.5-Pro",
+      "requested_id": "XiaomiMiMo/MiMo-V2.5-Pro",
+      "response_sha256": "99335139229612bf48c39232deef0685d918a2d0e4a9d548867f114cdba67d08",
+      "retrieved_at": "2026-11-23T20:45:09.057411Z",
+      "source_fields": {
+        "_id": "69ef5c251d65525815010fba",
+        "createdAt": "2026-04-27T12:52:53.000Z",
+        "downloads": 9307,
+        "downloadsAllTime": 360727,
+        "id": "XiaomiMiMo/MiMo-V2.5-Pro",
+        "lastModified": "2026-10-28T14:14:01.000Z",
+        "likes": 772,
+        "safetensors": {
+          "parameters": {
+            "BF16": 9450733440,
+            "F32": 162817920,
+            "F8_E4M3": 1013569290240
+          },
+          "total": 1023182841600
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/XiaomiMiMo/MiMo-V2.5-Pro?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-21T15:39:51.000Z",
+      "downloads": 43706,
+      "downloads_all_time": 156885,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-28T14:16:28.000Z",
+      "likes": 602,
+      "parameters_total": 310756322688,
+      "repo_id": "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+      "requested_id": "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+      "response_sha256": "26cdcb1588f4a6f1d39c511dbee08f139e5429b74fa6387251fd18cd66cd4d40",
+      "retrieved_at": "2026-11-23T20:45:09.011817Z",
+      "source_fields": {
+        "_id": "6ab14fc71e92143b484f4f8c",
+        "createdAt": "2026-09-21T15:39:51.000Z",
+        "downloads": 43706,
+        "downloadsAllTime": 156885,
+        "id": "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+        "lastModified": "2026-10-28T14:16:28.000Z",
+        "likes": 602,
+        "safetensors": {
+          "parameters": {
+            "BF16": 4101308032,
+            "F32": 12032,
+            "F8_E4M3": 3859808256,
+            "U8": 302795194368
+          },
+          "total": 310756322688
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/XiaomiMiMo/MiMo-V2.6-Flash-RL?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-21T15:39:33.000Z",
+      "downloads": 31481,
+      "downloads_all_time": 138541,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-28T14:16:57.000Z",
+      "likes": 834,
+      "parameters_total": 1024216603392,
+      "repo_id": "XiaomiMiMo/MiMo-V2.6-Pro-RL",
+      "requested_id": "XiaomiMiMo/MiMo-V2.6-Pro-RL",
+      "response_sha256": "12f64cb717fc8eae111fd721cc7f3c06b7276c8d6f0a79ebb53feeb78785f22e",
+      "retrieved_at": "2026-11-23T20:45:12.797742Z",
+      "source_fields": {
+        "_id": "6ab14fb5b6a2637b97d82406",
+        "createdAt": "2026-09-21T15:39:33.000Z",
+        "downloads": 31481,
+        "downloadsAllTime": 138541,
+        "id": "XiaomiMiMo/MiMo-V2.6-Pro-RL",
+        "lastModified": "2026-10-28T14:16:57.000Z",
+        "likes": 834,
+        "safetensors": {
+          "parameters": {
+            "BF16": 10647286656,
+            "F32": 26496,
+            "F8_E4M3": 13378781184,
+            "U8": 1000190509056
+          },
+          "total": 1024216603392
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/XiaomiMiMo/MiMo-V2.6-Pro-RL?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-09-20T03:23:10.000Z",
+      "downloads": 1609,
+      "downloads_all_time": 51288,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-11-25T19:30:34.000Z",
+      "likes": 67,
+      "parameters_total": 72706203648,
+      "repo_id": "anthracite-org/magnum-v4-72b",
+      "requested_id": "anthracite-org/magnum-v4-72b",
+      "response_sha256": "c7bfd1dc9ace62a4462615cbc5b9c5cdea61026a3d2c8369446b5edc9445f652",
+      "retrieved_at": "2026-11-23T20:45:12.796485Z",
+      "source_fields": {
+        "_id": "66ecea9e03b738ba70b5511c",
+        "createdAt": "2024-09-20T03:23:10.000Z",
+        "downloads": 1609,
+        "downloadsAllTime": 51288,
+        "id": "anthracite-org/magnum-v4-72b",
+        "lastModified": "2024-11-25T19:30:34.000Z",
+        "likes": 67,
+        "safetensors": {
+          "parameters": {
+            "BF16": 72706203648
+          },
+          "total": 72706203648
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/anthracite-org/magnum-v4-72b?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-01T03:35:06.000Z",
+      "downloads": 3396,
+      "downloads_all_time": 76139,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-17T06:12:23.000Z",
+      "likes": 192,
+      "parameters_total": 398635286016,
+      "repo_id": "arcee-ai/Trinity-Large-Thinking",
+      "requested_id": "arcee-ai/Trinity-Large-Thinking",
+      "response_sha256": "7798ef9cc89f6dbe085f38ff9ed292200637712c1983d06c7d24a3b8fde3afdd",
+      "retrieved_at": "2026-11-23T20:45:12.798120Z",
+      "source_fields": {
+        "_id": "69cc926ac9f40a193c7b6ea6",
+        "createdAt": "2026-04-01T03:35:06.000Z",
+        "downloads": 3396,
+        "downloadsAllTime": 76139,
+        "id": "arcee-ai/Trinity-Large-Thinking",
+        "lastModified": "2026-11-17T06:12:23.000Z",
+        "likes": 192,
+        "safetensors": {
+          "parameters": {
+            "BF16": 398635272192,
+            "F32": 13824
+          },
+          "total": 398635286016
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/arcee-ai/Trinity-Large-Thinking?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-01-20T03:46:07.000Z",
+      "downloads": 1526931,
+      "downloads_all_time": 52053814,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-03-27T04:01:59.000Z",
+      "likes": 14484,
+      "parameters_total": 684489845504,
+      "repo_id": "deepseek-ai/DeepSeek-R1",
+      "requested_id": "deepseek-ai/DeepSeek-R1",
+      "response_sha256": "48279d13e89286a6241d7ef07f0c054d6532cbb1ec3edc23aff248a16a1c5057",
+      "retrieved_at": "2026-11-23T20:45:12.798478Z",
+      "source_fields": {
+        "_id": "678dc6fff905d106be796d8a",
+        "createdAt": "2025-01-20T03:46:07.000Z",
+        "downloads": 1526931,
+        "downloadsAllTime": 52053814,
+        "id": "deepseek-ai/DeepSeek-R1",
+        "lastModified": "2025-03-27T04:01:59.000Z",
+        "likes": 14484,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3918786560,
+            "F32": 15104,
+            "F8_E4M3": 680571043840
+          },
+          "total": 684489845504
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-R1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-05-28T09:46:42.000Z",
+      "downloads": 148463,
+      "downloads_all_time": 17202732,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-05-29T11:37:44.000Z",
+      "likes": 2501,
+      "parameters_total": 684531386000,
+      "repo_id": "deepseek-ai/DeepSeek-R1-0528",
+      "requested_id": "deepseek-ai/DeepSeek-R1-0528",
+      "response_sha256": "38d0a683f64903cc22ad7f218268b1505c6e0621bdc5f9c69d8911f01fa1282f",
+      "retrieved_at": "2026-11-23T20:45:15.611090Z",
+      "source_fields": {
+        "_id": "6836db82a3626cb7b5343be8",
+        "createdAt": "2025-05-28T09:46:42.000Z",
+        "downloads": 148463,
+        "downloadsAllTime": 17202732,
+        "id": "deepseek-ai/DeepSeek-R1-0528",
+        "lastModified": "2025-05-29T11:37:44.000Z",
+        "likes": 2501,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3918786560,
+            "F32": 41555600,
+            "F8_E4M3": 680571043840
+          },
+          "total": 684531386000
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-R1-0528?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-12-25T12:52:23.000Z",
+      "downloads": 1181236,
+      "downloads_all_time": 23972638,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-03-27T04:01:45.000Z",
+      "likes": 4469,
+      "parameters_total": 684489845504,
+      "repo_id": "deepseek-ai/DeepSeek-V3",
+      "requested_id": "deepseek-ai/DeepSeek-V3",
+      "response_sha256": "7e4612ff0ad0f92368c074afe8225d2cfdf051456a9f2bad83ad7e9a8dc68d9a",
+      "retrieved_at": "2026-11-23T20:45:15.612103Z",
+      "source_fields": {
+        "_id": "676c000762cee1f3abc3ed5f",
+        "createdAt": "2024-12-25T12:52:23.000Z",
+        "downloads": 1181236,
+        "downloadsAllTime": 23972638,
+        "id": "deepseek-ai/DeepSeek-V3",
+        "lastModified": "2025-03-27T04:01:45.000Z",
+        "likes": 4469,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3918786560,
+            "F32": 15104,
+            "F8_E4M3": 680571043840
+          },
+          "total": 684489845504
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-03-24T09:28:22.000Z",
+      "downloads": 139140,
+      "downloads_all_time": 10624961,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-03-27T04:01:53.000Z",
+      "likes": 3226,
+      "parameters_total": 684531386000,
+      "repo_id": "deepseek-ai/DeepSeek-V3-0324",
+      "requested_id": "deepseek-ai/DeepSeek-V3-0324",
+      "response_sha256": "784561e0af193fdfede6e076caf44a2d00d9a84b8fb4b5b97807c7406daecb3f",
+      "retrieved_at": "2026-11-23T20:45:15.612412Z",
+      "source_fields": {
+        "_id": "67e125b6c185423c1e404364",
+        "createdAt": "2025-03-24T09:28:22.000Z",
+        "downloads": 139140,
+        "downloadsAllTime": 10624961,
+        "id": "deepseek-ai/DeepSeek-V3-0324",
+        "lastModified": "2025-03-27T04:01:53.000Z",
+        "likes": 3226,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3918786560,
+            "F32": 41555600,
+            "F8_E4M3": 680571043840
+          },
+          "total": 684531386000
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3-0324?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-08-21T02:37:52.000Z",
+      "downloads": 323380,
+      "downloads_all_time": 3744861,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-05T11:30:15.000Z",
+      "likes": 868,
+      "parameters_total": 684531386000,
+      "repo_id": "deepseek-ai/DeepSeek-V3.1",
+      "requested_id": "deepseek-ai/DeepSeek-V3.1",
+      "response_sha256": "1878559b1e2b03056e610f2dd70b6fb2c819220b2dd29f95a4c1bbc4cfe4a2bd",
+      "retrieved_at": "2026-11-23T20:45:15.568848Z",
+      "source_fields": {
+        "_id": "68a686808e8db90f8998697a",
+        "createdAt": "2025-08-21T02:37:52.000Z",
+        "downloads": 323380,
+        "downloadsAllTime": 3744861,
+        "id": "deepseek-ai/DeepSeek-V3.1",
+        "lastModified": "2025-09-05T11:30:15.000Z",
+        "likes": 868,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3918786560,
+            "F32": 41555600,
+            "F8_E4M3": 680571043840
+          },
+          "total": 684531386000
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-22T04:56:04.000Z",
+      "downloads": 9422,
+      "downloads_all_time": 283006,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-29T01:52:07.000Z",
+      "likes": 385,
+      "parameters_total": 684531386000,
+      "repo_id": "deepseek-ai/DeepSeek-V3.1-Terminus",
+      "requested_id": "deepseek-ai/DeepSeek-V3.1-Terminus",
+      "response_sha256": "f9785b0a766de9c58a39853d80fe97898c48dba1671620afe94cf856f839dc73",
+      "retrieved_at": "2026-11-23T20:45:19.169040Z",
+      "source_fields": {
+        "_id": "68d0d6e49597b03cc65021d6",
+        "createdAt": "2025-09-22T04:56:04.000Z",
+        "downloads": 9422,
+        "downloadsAllTime": 283006,
+        "id": "deepseek-ai/DeepSeek-V3.1-Terminus",
+        "lastModified": "2025-09-29T01:52:07.000Z",
+        "likes": 385,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3917742080,
+            "F32": 42600080,
+            "F8_E4M3": 680571043840
+          },
+          "total": 684531386000
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3.1-Terminus?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-12-01T02:34:49.000Z",
+      "downloads": 10955766,
+      "downloads_all_time": 42019152,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-12-01T11:04:59.000Z",
+      "likes": 1616,
+      "parameters_total": 685355329792,
+      "repo_id": "deepseek-ai/DeepSeek-V3.2",
+      "requested_id": "deepseek-ai/DeepSeek-V3.2",
+      "response_sha256": "fbb2a9644893b5b88a5e3199cc87c7b6127c023f5b1254fc75604e281c1836e1",
+      "retrieved_at": "2026-11-23T20:45:19.188008Z",
+      "source_fields": {
+        "_id": "692cfec93b25b81d09307b94",
+        "createdAt": "2025-12-01T02:34:49.000Z",
+        "downloads": 10955766,
+        "downloadsAllTime": 42019152,
+        "id": "deepseek-ai/DeepSeek-V3.2",
+        "lastModified": "2025-12-01T11:04:59.000Z",
+        "likes": 1616,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3946184704,
+            "F32": 1075456,
+            "F8_E4M3": 681408069632
+          },
+          "total": 685355329792
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3.2?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-29T06:07:26.000Z",
+      "downloads": 66852,
+      "downloads_all_time": 1645708,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-11-18T02:39:54.000Z",
+      "likes": 1025,
+      "parameters_total": 685396921376,
+      "repo_id": "deepseek-ai/DeepSeek-V3.2-Exp",
+      "requested_id": "deepseek-ai/DeepSeek-V3.2-Exp",
+      "response_sha256": "788ae6cf100db95f91b04ee9a061974aed7a8be8acc9992ae98f24ed2da2361f",
+      "retrieved_at": "2026-11-23T20:45:19.187226Z",
+      "source_fields": {
+        "_id": "68da221e75098b1868dc16ef",
+        "createdAt": "2025-09-29T06:07:26.000Z",
+        "downloads": 66852,
+        "downloadsAllTime": 1645708,
+        "id": "deepseek-ai/DeepSeek-V3.2-Exp",
+        "lastModified": "2025-11-18T02:39:54.000Z",
+        "likes": 1025,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3946184704,
+            "F32": 42667040,
+            "F8_E4M3": 681408069632
+          },
+          "total": 685396921376
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3.2-Exp?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-11-28T03:00:02.000Z",
+      "downloads": 2498,
+      "downloads_all_time": 287125,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-12-01T11:06:03.000Z",
+      "likes": 748,
+      "parameters_total": 685396921376,
+      "repo_id": "deepseek-ai/DeepSeek-V3.2-Speciale",
+      "requested_id": "deepseek-ai/DeepSeek-V3.2-Speciale",
+      "response_sha256": "74a4ef14818072a2b3a5a2c68cafc77d8c9e90b597061e5b712716b8d20dbefd",
+      "retrieved_at": "2026-11-23T20:45:19.124243Z",
+      "source_fields": {
+        "_id": "69291032810168634e77914f",
+        "createdAt": "2025-11-28T03:00:02.000Z",
+        "downloads": 2498,
+        "downloadsAllTime": 287125,
+        "id": "deepseek-ai/DeepSeek-V3.2-Speciale",
+        "lastModified": "2025-12-01T11:06:03.000Z",
+        "likes": 748,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3946184704,
+            "F32": 42667040,
+            "F8_E4M3": 681408069632
+          },
+          "total": 685396921376
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V3.2-Speciale?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-22T06:04:20.000Z",
+      "downloads": 1008931,
+      "downloads_all_time": 14119591,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-06-22T12:12:13.000Z",
+      "likes": 2425,
+      "parameters_total": 290944616402,
+      "repo_id": "deepseek-ai/DeepSeek-V4-Flash",
+      "requested_id": "deepseek-ai/DeepSeek-V4-Flash",
+      "response_sha256": "889edc0c1a31e3d469f39428776d25df37052fa359f1455787326e64c9a0d60c",
+      "retrieved_at": "2026-11-23T20:45:21.973461Z",
+      "source_fields": {
+        "_id": "69e864e440a44c9fb7c54efc",
+        "createdAt": "2026-04-22T06:04:20.000Z",
+        "downloads": 1008931,
+        "downloadsAllTime": 14119591,
+        "id": "deepseek-ai/DeepSeek-V4-Flash",
+        "lastModified": "2026-06-22T12:12:13.000Z",
+        "likes": 2425,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1415259264,
+            "F32": 36168018,
+            "F8_E4M3": 6023020544,
+            "I64": 2327040,
+            "I8": 283467841536
+          },
+          "total": 290944616402
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-07-31T07:30:24.000Z",
+      "downloads": 1188548,
+      "downloads_all_time": 13525695,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-01T03:07:41.000Z",
+      "likes": 4125,
+      "parameters_total": 304180418494,
+      "repo_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+      "requested_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+      "response_sha256": "f04244a4d537c549f1665113e45ddba5881c445942e3a31f7ef596b7daecde21",
+      "retrieved_at": "2026-11-23T20:45:22.018764Z",
+      "source_fields": {
+        "_id": "6a6c4f10abfe36920d2f90a1",
+        "createdAt": "2026-07-31T07:30:24.000Z",
+        "downloads": 1188548,
+        "downloadsAllTime": 13525695,
+        "id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+        "lastModified": "2026-08-01T03:07:41.000Z",
+        "likes": 4125,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1483567488,
+            "F32": 37741630,
+            "F8_E4M3": 6304038912,
+            "I64": 2327040,
+            "I8": 296352743424
+          },
+          "total": 304180418494
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Flash-0731?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-31T06:16:18.000Z",
+      "downloads": 28436,
+      "downloads_all_time": 1279909,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-01T09:22:10.000Z",
+      "likes": 972,
+      "parameters_total": 304646824126,
+      "repo_id": "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp",
+      "requested_id": "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp",
+      "response_sha256": "ec4ad7571e9b8fc6b2cf83af70d1e46b30043337788d4af94f0550012bac4d4e",
+      "retrieved_at": "2026-11-23T20:45:22.016513Z",
+      "source_fields": {
+        "_id": "6a951c32379de35b0d189f6e",
+        "createdAt": "2026-08-31T06:16:18.000Z",
+        "downloads": 28436,
+        "downloadsAllTime": 1279909,
+        "id": "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp",
+        "lastModified": "2026-09-01T09:22:10.000Z",
+        "likes": 972,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1949960576,
+            "F32": 37754174,
+            "F8_E4M3": 6304038912,
+            "I64": 2327040,
+            "I8": 296352743424
+          },
+          "total": 304646824126
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Flash-Vision-Exp?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-22T06:04:45.000Z",
+      "downloads": 293160,
+      "downloads_all_time": 11283204,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-06-22T12:12:50.000Z",
+      "likes": 5736,
+      "parameters_total": 1598839674782,
+      "repo_id": "deepseek-ai/DeepSeek-V4-Pro",
+      "requested_id": "deepseek-ai/DeepSeek-V4-Pro",
+      "response_sha256": "923b0df9972a7283efa1e64739c87ec871d1dcfb45df7f5c008c626c6fba16ea",
+      "retrieved_at": "2026-11-23T20:45:22.017217Z",
+      "source_fields": {
+        "_id": "69e864fd6b68f7e6cfc63ca3",
+        "createdAt": "2026-04-22T06:04:45.000Z",
+        "downloads": 293160,
+        "downloadsAllTime": 11283204,
+        "id": "deepseek-ai/DeepSeek-V4-Pro",
+        "lastModified": "2026-06-22T12:12:50.000Z",
+        "likes": 5736,
+        "safetensors": {
+          "parameters": {
+            "BF16": 2816899328,
+            "F32": 87776414,
+            "F8_E4M3": 23169335296,
+            "I64": 2327040,
+            "I8": 1572763336704
+          },
+          "total": 1598839674782
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Pro?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-13T03:05:06.000Z",
+      "downloads": 40344,
+      "downloads_all_time": 425767,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-13T16:28:28.000Z",
+      "likes": 926,
+      "parameters_total": 1650497936906,
+      "repo_id": "deepseek-ai/DeepSeek-V4-Pro-0813",
+      "requested_id": "deepseek-ai/DeepSeek-V4-Pro-0813",
+      "response_sha256": "7c0421079e227f365f2b0b1ac0b74a6b62239b139f4a68b20a38a362e0acfec1",
+      "retrieved_at": "2026-11-23T20:45:24.967177Z",
+      "source_fields": {
+        "_id": "6a7d346291824bcb9cd27db7",
+        "createdAt": "2026-08-13T03:05:06.000Z",
+        "downloads": 40344,
+        "downloadsAllTime": 425767,
+        "id": "deepseek-ai/DeepSeek-V4-Pro-0813",
+        "lastModified": "2026-08-13T16:28:28.000Z",
+        "likes": 926,
+        "safetensors": {
+          "parameters": {
+            "BF16": 2954820352,
+            "F32": 90530058,
+            "F8_E4M3": 23952621568,
+            "I64": 2327040,
+            "I8": 1623497637888
+          },
+          "total": 1650497936906
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Pro-0813?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-10T02:17:58.000Z",
+      "downloads": 1217500,
+      "downloads_all_time": 3550463,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-16T09:27:28.000Z",
+      "likes": 5062,
+      "parameters_total": 763205315794,
+      "repo_id": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "requested_id": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "response_sha256": "e7ccf573f591c9c4036ea86bd9bed788fac8217080c5691d9eb91f82b4458687",
+      "retrieved_at": "2026-11-23T20:45:24.961574Z",
+      "source_fields": {
+        "_id": "6aa213563d5b3527359d1af2",
+        "createdAt": "2026-09-10T02:17:58.000Z",
+        "downloads": 1217500,
+        "downloadsAllTime": 3550463,
+        "id": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "lastModified": "2026-10-16T09:27:28.000Z",
+        "likes": 5062,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1976441856,
+            "F32": 42307282,
+            "F8_E4M3": 204015223296,
+            "I8": 557171343360
+          },
+          "total": 763205315794
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4.1-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-10-17T02:40:38.000Z",
+      "downloads": 524232,
+      "downloads_all_time": 615298,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-10T02:22:56.000Z",
+      "likes": 6614,
+      "parameters_total": 763205315794,
+      "repo_id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+      "requested_id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+      "response_sha256": "878512c59e14331e9c06d2feca85452c101376b0dde246d443ea7edf78ce2001",
+      "retrieved_at": "2026-11-23T20:45:24.961932Z",
+      "source_fields": {
+        "_id": "6ad2e0265a59c8bc18707765",
+        "createdAt": "2026-10-17T02:40:38.000Z",
+        "downloads": 524232,
+        "downloadsAllTime": 615298,
+        "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+        "lastModified": "2026-11-10T02:22:56.000Z",
+        "likes": 6614,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1976441856,
+            "F32": 42307282,
+            "F8_E4M3": 204015223296,
+            "I8": 557171343360
+          },
+          "total": 763205315794
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4.1-Flash-1017?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-09T07:33:17.000Z",
+      "downloads": 3696,
+      "downloads_all_time": 10865,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-15T08:00:55.000Z",
+      "likes": 297,
+      "parameters_total": 288443400864,
+      "repo_id": "dots-studio/dots3-note-prev",
+      "requested_id": "dots-studio/dots3-note-prev",
+      "response_sha256": "d61f5ee5a50b7e0d0a791478f4e77c92462320f217706297f3b4e6e5f7862cc4",
+      "retrieved_at": "2026-11-23T20:45:24.972964Z",
+      "source_fields": {
+        "_id": "6a782d3d344372f6d2f3605d",
+        "createdAt": "2026-08-09T07:33:17.000Z",
+        "downloads": 3696,
+        "downloadsAllTime": 10865,
+        "id": "dots-studio/dots3-note-prev",
+        "lastModified": "2026-08-15T08:00:55.000Z",
+        "likes": 297,
+        "safetensors": {
+          "parameters": {
+            "BF16": 288443388736,
+            "F32": 12128
+          },
+          "total": 288443400864
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/dots-studio/dots3-note-prev?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-06-24T08:05:04.000Z",
+      "downloads": 21669,
+      "downloads_all_time": 5375473,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-08-27T19:41:54.000Z",
+      "likes": 579,
+      "parameters_total": 27227128320,
+      "repo_id": "google/gemma-2-27b-it",
+      "requested_id": "google/gemma-2-27b-it",
+      "response_sha256": "166d348ee3a751860d5916cea7a88b2239b48d6b04bc72cd9cc0ef0fb72bc8a9",
+      "retrieved_at": "2026-11-23T20:45:28.534032Z",
+      "source_fields": {
+        "_id": "667928b020ff491d38a652ad",
+        "createdAt": "2024-06-24T08:05:04.000Z",
+        "downloads": 21669,
+        "downloadsAllTime": 5375473,
+        "id": "google/gemma-2-27b-it",
+        "lastModified": "2024-08-27T19:41:54.000Z",
+        "likes": 579,
+        "safetensors": {
+          "parameters": {
+            "BF16": 27227128320
+          },
+          "total": 27227128320
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/google/gemma-2-27b-it?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-03-01T19:11:34.000Z",
+      "downloads": 407654,
+      "downloads_all_time": 23699438,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-03-21T20:28:56.000Z",
+      "likes": 925,
+      "parameters_total": 12187325040,
+      "repo_id": "google/gemma-3-12b-it",
+      "requested_id": "google/gemma-3-12b-it",
+      "response_sha256": "f22773329a37124ae9012e85367bf6c86a35a03a7a278d92aa0e917dea3f848b",
+      "retrieved_at": "2026-11-23T20:45:28.577843Z",
+      "source_fields": {
+        "_id": "67c35be6eae05d8f94fae4c2",
+        "createdAt": "2025-03-01T19:11:34.000Z",
+        "downloads": 407654,
+        "downloadsAllTime": 23699438,
+        "id": "google/gemma-3-12b-it",
+        "lastModified": "2025-03-21T20:28:56.000Z",
+        "likes": 925,
+        "safetensors": {
+          "parameters": {
+            "BF16": 12187325040
+          },
+          "total": 12187325040
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/google/gemma-3-12b-it?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-03-01T19:10:19.000Z",
+      "downloads": 251540,
+      "downloads_all_time": 17820160,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-03-21T20:29:02.000Z",
+      "likes": 2074,
+      "parameters_total": 27432406640,
+      "repo_id": "google/gemma-3-27b-it",
+      "requested_id": "google/gemma-3-27b-it",
+      "response_sha256": "ce722df55f0890f065890db96ce3bc58869bf0e1b985aa65aa0c7c8eb2898c75",
+      "retrieved_at": "2026-11-23T20:45:28.576924Z",
+      "source_fields": {
+        "_id": "67c35b9bb236f0d365bf29d3",
+        "createdAt": "2025-03-01T19:10:19.000Z",
+        "downloads": 251540,
+        "downloadsAllTime": 17820160,
+        "id": "google/gemma-3-27b-it",
+        "lastModified": "2025-03-21T20:29:02.000Z",
+        "likes": 2074,
+        "safetensors": {
+          "parameters": {
+            "BF16": 27432406640
+          },
+          "total": 27432406640
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/google/gemma-3-27b-it?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-02-20T21:20:07.000Z",
+      "downloads": 1141877,
+      "downloads_all_time": 28663597,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-03-21T20:20:53.000Z",
+      "likes": 1707,
+      "parameters_total": 4300079472,
+      "repo_id": "google/gemma-3-4b-it",
+      "requested_id": "google/gemma-3-4b-it",
+      "response_sha256": "7fda56e1c38d13dc068adb3619725e211f088a42394bd9f9513b46df874cebe4",
+      "retrieved_at": "2026-11-23T20:45:28.533052Z",
+      "source_fields": {
+        "_id": "67b79c8700245b72c5706777",
+        "createdAt": "2025-02-20T21:20:07.000Z",
+        "downloads": 1141877,
+        "downloadsAllTime": 28663597,
+        "id": "google/gemma-3-4b-it",
+        "lastModified": "2025-03-21T20:20:53.000Z",
+        "likes": 1707,
+        "safetensors": {
+          "parameters": {
+            "BF16": 4300079472
+          },
+          "total": 4300079472
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/google/gemma-3-4b-it?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-03-11T21:25:57.000Z",
+      "downloads": 4701565,
+      "downloads_all_time": 77668794,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-20T16:42:12.000Z",
+      "likes": 1802,
+      "parameters_total": 25805936206,
+      "repo_id": "google/gemma-4-26B-A4B-it",
+      "requested_id": "google/gemma-4-26B-A4B-it",
+      "response_sha256": "258bf974aeee2ce6ddeffcd582b3d3f04f2c639e89909b255761c7faa7dca5a4",
+      "retrieved_at": "2026-11-23T20:45:31.556829Z",
+      "source_fields": {
+        "_id": "69b1dde5d77b87bf05eff3f9",
+        "createdAt": "2026-03-11T21:25:57.000Z",
+        "downloads": 4701565,
+        "downloadsAllTime": 77668794,
+        "id": "google/gemma-4-26B-A4B-it",
+        "lastModified": "2026-07-20T16:42:12.000Z",
+        "likes": 1802,
+        "safetensors": {
+          "parameters": {
+            "BF16": 25805936206
+          },
+          "total": 25805936206
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/google/gemma-4-26B-A4B-it?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-03-11T18:22:36.000Z",
+      "downloads": 5678445,
+      "downloads_all_time": 75748478,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-20T16:42:18.000Z",
+      "likes": 4453,
+      "parameters_total": 31273088876,
+      "repo_id": "google/gemma-4-31B-it",
+      "requested_id": "google/gemma-4-31B-it",
+      "response_sha256": "115e6c03cd263e040ebe589d1901dbdb1f8264965fe0fdf5007c7f305f48bba3",
+      "retrieved_at": "2026-11-23T20:45:31.554107Z",
+      "source_fields": {
+        "_id": "69b1b2ec895b2d5026e6bc2e",
+        "createdAt": "2026-03-11T18:22:36.000Z",
+        "downloads": 5678445,
+        "downloadsAllTime": 75748478,
+        "id": "google/gemma-4-31B-it",
+        "lastModified": "2026-07-20T16:42:18.000Z",
+        "likes": 4453,
+        "safetensors": {
+          "parameters": {
+            "BF16": 31273088876
+          },
+          "total": 31273088876
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/google/gemma-4-31B-it?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-29T03:19:36.000Z",
+      "downloads": 3135,
+      "downloads_all_time": 11724,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-24T09:07:21.000Z",
+      "likes": 508,
+      "parameters_total": 1025414425344,
+      "repo_id": "inclusionAI/Ling-2.6-1T",
+      "requested_id": "inclusionAI/Ling-2.6-1T",
+      "response_sha256": "24addf58dbaa402adc826556b6479f3bca56066e6fd70d4b4bc52e1d6db549e3",
+      "retrieved_at": "2026-11-23T20:45:31.553543Z",
+      "source_fields": {
+        "_id": "69f178c87037218bedde8515",
+        "createdAt": "2026-04-29T03:19:36.000Z",
+        "downloads": 3135,
+        "downloadsAllTime": 11724,
+        "id": "inclusionAI/Ling-2.6-1T",
+        "lastModified": "2026-09-24T09:07:21.000Z",
+        "likes": 508,
+        "safetensors": {
+          "parameters": {
+            "BF16": 15919881728,
+            "F32": 19712,
+            "F8_E4M3": 1009494523904
+          },
+          "total": 1025414425344
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-2.6-1T?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-28T03:27:56.000Z",
+      "downloads": 3477,
+      "downloads_all_time": 39796,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-24T09:05:57.000Z",
+      "likes": 506,
+      "parameters_total": 107494409216,
+      "repo_id": "inclusionAI/Ling-2.6-flash",
+      "requested_id": "inclusionAI/Ling-2.6-flash",
+      "response_sha256": "f80607488ebac3dff0b4567a6c5174d0b766f8564fb780fcc6bbb010b8d2f779",
+      "retrieved_at": "2026-11-23T20:45:31.508265Z",
+      "source_fields": {
+        "_id": "69f0293c173654c428b6a190",
+        "createdAt": "2026-04-28T03:27:56.000Z",
+        "downloads": 3477,
+        "downloadsAllTime": 39796,
+        "id": "inclusionAI/Ling-2.6-flash",
+        "lastModified": "2026-09-24T09:05:57.000Z",
+        "likes": 506,
+        "safetensors": {
+          "parameters": {
+            "BF16": 107494401024,
+            "F32": 8192
+          },
+          "total": 107494409216
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-2.6-flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-02T16:14:41.000Z",
+      "downloads": 7625,
+      "downloads_all_time": 53243,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-12T11:46:10.000Z",
+      "likes": 442,
+      "parameters_total": 127486405600,
+      "repo_id": "inclusionAI/Ling-3.0-flash",
+      "requested_id": "inclusionAI/Ling-3.0-flash",
+      "response_sha256": "bc4697ea99c3abb4fb973a01471da4d3324f1500a68912803909c3cc3fbcd5b6",
+      "retrieved_at": "2026-11-23T20:45:34.645165Z",
+      "source_fields": {
+        "_id": "6a6f6cf134c714cf6381ccb4",
+        "createdAt": "2026-08-02T16:14:41.000Z",
+        "downloads": 7625,
+        "downloadsAllTime": 53243,
+        "id": "inclusionAI/Ling-3.0-flash",
+        "lastModified": "2026-10-12T11:46:10.000Z",
+        "likes": 442,
+        "safetensors": {
+          "parameters": {
+            "BF16": 127486240128,
+            "F32": 165472
+          },
+          "total": 127486405600
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-3.0-flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-03T06:09:53.000Z",
+      "downloads": 2793,
+      "downloads_all_time": 6966,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-24T08:53:46.000Z",
+      "likes": 134,
+      "parameters_total": 127486405600,
+      "repo_id": "inclusionAI/Ling-3.0-flash-Fin",
+      "requested_id": "inclusionAI/Ling-3.0-flash-Fin",
+      "response_sha256": "2d6678da2b2e4e5e9c87d38e9d34ce35f88d741c28ee5d763c819740e80e8621",
+      "retrieved_at": "2026-11-23T20:45:34.645815Z",
+      "source_fields": {
+        "_id": "6a990f31efab14e0b49e017e",
+        "createdAt": "2026-09-03T06:09:53.000Z",
+        "downloads": 2793,
+        "downloadsAllTime": 6966,
+        "id": "inclusionAI/Ling-3.0-flash-Fin",
+        "lastModified": "2026-09-24T08:53:46.000Z",
+        "likes": 134,
+        "safetensors": {
+          "parameters": {
+            "BF16": 127486240128,
+            "F32": 165472
+          },
+          "total": 127486405600
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-3.0-flash-Fin?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-10-19T17:30:04.000Z",
+      "downloads": 2713,
+      "downloads_all_time": 3172,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-22T14:53:04.000Z",
+      "likes": 89,
+      "parameters_total": 127486405600,
+      "repo_id": "inclusionAI/Ling-3.0-flash-Sante",
+      "requested_id": "inclusionAI/Ling-3.0-flash-Sante",
+      "response_sha256": "0e6ea237574d9e4a1bc90b3654cb5269a292c1345601f3a8b47dd60be3539b07",
+      "retrieved_at": "2026-11-23T20:45:34.602556Z",
+      "source_fields": {
+        "_id": "6ad6539cc100f970ee1caea7",
+        "createdAt": "2026-10-19T17:30:04.000Z",
+        "downloads": 2713,
+        "downloadsAllTime": 3172,
+        "id": "inclusionAI/Ling-3.0-flash-Sante",
+        "lastModified": "2026-10-22T14:53:04.000Z",
+        "likes": 89,
+        "safetensors": {
+          "parameters": {
+            "BF16": 127486240128,
+            "F32": 165472
+          },
+          "total": 127486405600
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-3.0-flash-Sante?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-04T15:24:37.000Z",
+      "downloads": 7696,
+      "downloads_all_time": 32112,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-24T09:02:45.000Z",
+      "likes": 130,
+      "parameters_total": 124848460496,
+      "repo_id": "inclusionAI/Ling-3.0-flash-VL",
+      "requested_id": "inclusionAI/Ling-3.0-flash-VL",
+      "response_sha256": "75b481ccece30fa8028109c0dd5135bf57e81d93fd44cd40425a8467d913823f",
+      "retrieved_at": "2026-11-23T20:45:34.644229Z",
+      "source_fields": {
+        "_id": "6a9ae2b5ebdfbb25cdc8269e",
+        "createdAt": "2026-09-04T15:24:37.000Z",
+        "downloads": 7696,
+        "downloadsAllTime": 32112,
+        "id": "inclusionAI/Ling-3.0-flash-VL",
+        "lastModified": "2026-09-24T09:02:45.000Z",
+        "likes": 130,
+        "safetensors": {
+          "parameters": {
+            "BF16": 124848295536,
+            "F32": 164960
+          },
+          "total": 124848460496
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-3.0-flash-VL?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-10-13T11:16:41.000Z",
+      "downloads": 5968,
+      "downloads_all_time": 10428,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-23T12:56:20.000Z",
+      "likes": 182,
+      "parameters_total": 572120680768,
+      "repo_id": "inclusionAI/Ling-3.1-flash",
+      "requested_id": "inclusionAI/Ling-3.1-flash",
+      "response_sha256": "2822d23602a9585c283c3b87c59aece20be198497d16064785a0322695f73aad",
+      "retrieved_at": "2026-11-23T20:45:38.119203Z",
+      "source_fields": {
+        "_id": "6ace13194fb50e5096dfb0f7",
+        "createdAt": "2026-10-13T11:16:41.000Z",
+        "downloads": 5968,
+        "downloadsAllTime": 10428,
+        "id": "inclusionAI/Ling-3.1-flash",
+        "lastModified": "2026-11-23T12:56:20.000Z",
+        "likes": 182,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1491619712,
+            "F32": 555456,
+            "F8_E4M3": 570628505600
+          },
+          "total": 572120680768
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-3.1-flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "error": "HTTP 401",
+      "http_status": 401,
+      "repo_id": "inclusionAI/Ling-3.2-flash",
+      "requested_id": "inclusionAI/Ling-3.2-flash",
+      "retrieved_at": "2026-11-23T20:45:38.121602Z",
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ling-3.2-flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-05-14T08:10:02.000Z",
+      "downloads": 2507,
+      "downloads_all_time": 12413,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-24T09:04:25.000Z",
+      "likes": 107,
+      "parameters_total": 1025414425344,
+      "repo_id": "inclusionAI/Ring-2.6-1T",
+      "requested_id": "inclusionAI/Ring-2.6-1T",
+      "response_sha256": "a5f1c299965d9afa55780a97beae89348463d581ad63823c4647e9767e9d3b9c",
+      "retrieved_at": "2026-11-23T20:45:38.122566Z",
+      "source_fields": {
+        "_id": "6a05835a4aa635cadceb2b7e",
+        "createdAt": "2026-05-14T08:10:02.000Z",
+        "downloads": 2507,
+        "downloadsAllTime": 12413,
+        "id": "inclusionAI/Ring-2.6-1T",
+        "lastModified": "2026-09-24T09:04:25.000Z",
+        "likes": 107,
+        "safetensors": {
+          "parameters": {
+            "BF16": 15919881728,
+            "F32": 19712,
+            "F8_E4M3": 1009494523904
+          },
+          "total": 1025414425344
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/inclusionAI/Ring-2.6-1T?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-09-18T15:12:47.000Z",
+      "downloads": 1349582,
+      "downloads_all_time": 110495371,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-10-24T15:07:51.000Z",
+      "likes": 2029,
+      "parameters_total": 1235814400,
+      "repo_id": "meta-llama/Llama-3.2-1B-Instruct",
+      "requested_id": "meta-llama/Llama-3.2-1B-Instruct",
+      "response_sha256": "ce9d3f1d4858abd530289e9f4b206a5aa6e2c4efc82f0fa6375b4ec2094d49de",
+      "retrieved_at": "2026-11-23T20:45:38.119789Z",
+      "source_fields": {
+        "_id": "66eaedefece5ee215637cc82",
+        "createdAt": "2024-09-18T15:12:47.000Z",
+        "downloads": 1349582,
+        "downloadsAllTime": 110495371,
+        "id": "meta-llama/Llama-3.2-1B-Instruct",
+        "lastModified": "2024-10-24T15:07:51.000Z",
+        "likes": 2029,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1235814400
+          },
+          "total": 1235814400
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Llama-3.2-1B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-09-18T15:19:20.000Z",
+      "downloads": 659130,
+      "downloads_all_time": 51180516,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-10-24T15:07:29.000Z",
+      "likes": 3078,
+      "parameters_total": 3212749824,
+      "repo_id": "meta-llama/Llama-3.2-3B-Instruct",
+      "requested_id": "meta-llama/Llama-3.2-3B-Instruct",
+      "response_sha256": "8e8407e1732234861748881c8e351f53c7c3e4478fd78aa652a8aed42ea9132d",
+      "retrieved_at": "2026-11-23T20:45:41.580667Z",
+      "source_fields": {
+        "_id": "66eaef786865fea1324edb5d",
+        "createdAt": "2024-09-18T15:19:20.000Z",
+        "downloads": 659130,
+        "downloadsAllTime": 51180516,
+        "id": "meta-llama/Llama-3.2-3B-Instruct",
+        "lastModified": "2024-10-24T15:07:29.000Z",
+        "likes": 3078,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3212749824
+          },
+          "total": 3212749824
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Llama-3.2-3B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-11-26T16:08:47.000Z",
+      "downloads": 236296,
+      "downloads_all_time": 15162454,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-12-21T18:28:01.000Z",
+      "likes": 3225,
+      "parameters_total": 70553706496,
+      "repo_id": "meta-llama/Llama-3.3-70B-Instruct",
+      "requested_id": "meta-llama/Llama-3.3-70B-Instruct",
+      "response_sha256": "4c46d25367e1ceb84a26c7c7ad158fde49adf005e888d7755d93b942d4c56045",
+      "retrieved_at": "2026-11-23T20:45:41.599154Z",
+      "source_fields": {
+        "_id": "6745f28f9333dfcc06268b1e",
+        "createdAt": "2024-11-26T16:08:47.000Z",
+        "downloads": 236296,
+        "downloadsAllTime": 15162454,
+        "id": "meta-llama/Llama-3.3-70B-Instruct",
+        "lastModified": "2024-12-21T18:28:01.000Z",
+        "likes": 3225,
+        "safetensors": {
+          "parameters": {
+            "BF16": 70553706496
+          },
+          "total": 70553706496
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Llama-3.3-70B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-04-01T22:17:20.000Z",
+      "downloads": 16096,
+      "downloads_all_time": 765978,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-05-22T23:46:12.000Z",
+      "likes": 528,
+      "parameters_total": 401583781376,
+      "repo_id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+      "requested_id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+      "response_sha256": "879107cbda74940fcb79282ce55561262fec8dc44c8b21d1d9713ccb37a5b06e",
+      "retrieved_at": "2026-11-23T20:45:41.581494Z",
+      "source_fields": {
+        "_id": "67ec65f01f4eb5e17ef8d7ed",
+        "createdAt": "2025-04-01T22:17:20.000Z",
+        "downloads": 16096,
+        "downloadsAllTime": 765978,
+        "id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+        "lastModified": "2025-05-22T23:46:12.000Z",
+        "likes": 528,
+        "safetensors": {
+          "parameters": {
+            "BF16": 401583781376
+          },
+          "total": 401583781376
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Llama-4-Maverick-17B-128E-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-04-02T13:34:17.000Z",
+      "downloads": 110815,
+      "downloads_all_time": 7954663,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-05-22T23:44:50.000Z",
+      "likes": 1399,
+      "parameters_total": 108641793536,
+      "repo_id": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "requested_id": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "response_sha256": "c3224b821db8c576b796d25eefb50c1aeef1f151ac44d6e9002fc789605e8564",
+      "retrieved_at": "2026-11-23T20:45:41.581975Z",
+      "source_fields": {
+        "_id": "67ed3cd9290a7f9d3301f9c1",
+        "createdAt": "2025-04-02T13:34:17.000Z",
+        "downloads": 110815,
+        "downloadsAllTime": 7954663,
+        "id": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+        "lastModified": "2025-05-22T23:44:50.000Z",
+        "likes": 1399,
+        "safetensors": {
+          "parameters": {
+            "BF16": 108641793536
+          },
+          "total": 108641793536
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Llama-4-Scout-17B-16E-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-07-16T16:07:46.000Z",
+      "downloads": 92278,
+      "downloads_all_time": 24667301,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-12-15T01:55:33.000Z",
+      "likes": 1033,
+      "parameters_total": 70553706496,
+      "repo_id": "meta-llama/Llama-3.1-70B-Instruct",
+      "requested_id": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+      "response_sha256": "83f960790628277341106e9f69ed4c587edfdd3fa485fefecea01331b00ad25b",
+      "retrieved_at": "2026-11-23T20:45:47.778536Z",
+      "source_fields": {
+        "_id": "66969ad27a033bf62173f3e2",
+        "createdAt": "2024-07-16T16:07:46.000Z",
+        "downloads": 92278,
+        "downloadsAllTime": 24667301,
+        "id": "meta-llama/Llama-3.1-70B-Instruct",
+        "lastModified": "2024-12-15T01:55:33.000Z",
+        "likes": 1033,
+        "safetensors": {
+          "parameters": {
+            "BF16": 70553706496
+          },
+          "total": 70553706496
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3.1-70B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-07-18T08:56:00.000Z",
+      "downloads": 3965297,
+      "downloads_all_time": 195358937,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2024-09-25T17:00:57.000Z",
+      "likes": 9084,
+      "parameters_total": 8030261248,
+      "repo_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "requested_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "response_sha256": "d517ffd0eed65a7ecdc63151ba43d35a38b521f4eb4eb3e34e237308651375f4",
+      "retrieved_at": "2026-11-23T20:45:47.780786Z",
+      "source_fields": {
+        "_id": "6698d8a0653e4babe21e1e7d",
+        "createdAt": "2024-07-18T08:56:00.000Z",
+        "downloads": 3965297,
+        "downloadsAllTime": 195358937,
+        "id": "meta-llama/Llama-3.1-8B-Instruct",
+        "lastModified": "2024-09-25T17:00:57.000Z",
+        "likes": 9084,
+        "safetensors": {
+          "parameters": {
+            "BF16": 8030261248
+          },
+          "total": 8030261248
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3.1-8B-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "error": "HTTP 401",
+      "http_status": 401,
+      "repo_id": "microsoft/WizardLM-2-8x22B",
+      "requested_id": "microsoft/WizardLM-2-8x22B",
+      "retrieved_at": "2026-11-23T20:45:44.696466Z",
+      "source_url": "https://huggingface.co/api/models/microsoft/WizardLM-2-8x22B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-12-11T11:47:29.000Z",
+      "downloads": 155848,
+      "downloads_all_time": 14980405,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-14T14:22:25.000Z",
+      "likes": 2345,
+      "parameters_total": 14659507200,
+      "repo_id": "microsoft/phi-4",
+      "requested_id": "microsoft/phi-4",
+      "response_sha256": "57a776a002db0fb3d89d2b0957e91d50376256bff9d8b3049b356598292420da",
+      "retrieved_at": "2026-11-23T20:45:44.735178Z",
+      "source_fields": {
+        "_id": "67597bd1b9cdca50cb621f94",
+        "createdAt": "2024-12-11T11:47:29.000Z",
+        "downloads": 155848,
+        "downloadsAllTime": 14980405,
+        "id": "microsoft/phi-4",
+        "lastModified": "2026-07-14T14:22:25.000Z",
+        "likes": 2345,
+        "safetensors": {
+          "parameters": {
+            "BF16": 14659507200
+          },
+          "total": 14659507200
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/microsoft/phi-4?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-11-28T17:32:09.000Z",
+      "downloads": 7208,
+      "downloads_all_time": 361415,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-15T12:19:49.000Z",
+      "likes": 359,
+      "parameters_total": 125025988608,
+      "repo_id": "mistralai/Devstral-2-123B-Instruct-2512",
+      "requested_id": "mistralai/Devstral-2-123B-Instruct-2512",
+      "response_sha256": "f1289fbaed71dcbb18864005acdbe588e06a49cb78fa7c640b04477af807af94",
+      "retrieved_at": "2026-11-23T20:45:47.777464Z",
+      "source_fields": {
+        "_id": "6929dc99c913fbc94d7e80a3",
+        "createdAt": "2025-11-28T17:32:09.000Z",
+        "downloads": 7208,
+        "downloadsAllTime": 361415,
+        "id": "mistralai/Devstral-2-123B-Instruct-2512",
+        "lastModified": "2026-07-15T12:19:49.000Z",
+        "likes": 359,
+        "safetensors": {
+          "parameters": {
+            "BF16": 3223400448,
+            "F8_E4M3": 121802588160
+          },
+          "total": 125025988608
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Devstral-2-123B-Instruct-2512?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-10-31T08:43:24.000Z",
+      "downloads": 227422,
+      "downloads_all_time": 2658418,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-15T12:20:59.000Z",
+      "likes": 355,
+      "parameters_total": 13945031680,
+      "repo_id": "mistralai/Ministral-3-14B-Instruct-2512",
+      "requested_id": "mistralai/Ministral-3-14B-Instruct-2512",
+      "response_sha256": "8d6d34f7d01f9d06064ae3073efb9e5865e8ad233259e5fb9fd12e4d4934b7c7",
+      "retrieved_at": "2026-11-23T20:45:47.779352Z",
+      "source_fields": {
+        "_id": "690476ac3413941a8e66e205",
+        "createdAt": "2025-10-31T08:43:24.000Z",
+        "downloads": 227422,
+        "downloadsAllTime": 2658418,
+        "id": "mistralai/Ministral-3-14B-Instruct-2512",
+        "lastModified": "2026-07-15T12:20:59.000Z",
+        "likes": 355,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1781550080,
+            "F8_E4M3": 12163481600
+          },
+          "total": 13945031680
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Ministral-3-14B-Instruct-2512?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-10-31T08:43:35.000Z",
+      "downloads": 90933,
+      "downloads_all_time": 1340594,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-15T12:22:08.000Z",
+      "likes": 243,
+      "parameters_total": 8918026240,
+      "repo_id": "mistralai/Ministral-3-8B-Instruct-2512",
+      "requested_id": "mistralai/Ministral-3-8B-Instruct-2512",
+      "response_sha256": "2952934a2dea13aeaa10d04b5e1a90bd55a578882d73a96b6c8312b29c0350bb",
+      "retrieved_at": "2026-11-23T20:45:51.114831Z",
+      "source_fields": {
+        "_id": "690476b740eb8cf228ccccba",
+        "createdAt": "2025-10-31T08:43:35.000Z",
+        "downloads": 90933,
+        "downloadsAllTime": 1340594,
+        "id": "mistralai/Ministral-3-8B-Instruct-2512",
+        "lastModified": "2026-07-15T12:22:08.000Z",
+        "likes": 243,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1502496768,
+            "F8_E4M3": 7415529472
+          },
+          "total": 8918026240
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Ministral-3-8B-Instruct-2512?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-10-15T09:20:23.000Z",
+      "downloads": 63107,
+      "downloads_all_time": 8622686,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-31T10:39:07.000Z",
+      "likes": 604,
+      "parameters_total": 8019808256,
+      "repo_id": "mistralai/Ministral-8B-Instruct-2410",
+      "requested_id": "mistralai/Ministral-8B-Instruct-2410",
+      "response_sha256": "84b3ae25682d4f60a6a2aa4860f589e5539b815e4b8bba281bc1b32d331c5483",
+      "retrieved_at": "2026-11-23T20:45:51.073815Z",
+      "source_fields": {
+        "_id": "670e33d70162d8dbf0f3c7f8",
+        "createdAt": "2024-10-15T09:20:23.000Z",
+        "downloads": 63107,
+        "downloadsAllTime": 8622686,
+        "id": "mistralai/Ministral-8B-Instruct-2410",
+        "lastModified": "2025-07-31T10:39:07.000Z",
+        "likes": 604,
+        "safetensors": {
+          "parameters": {
+            "BF16": 8019808256
+          },
+          "total": 8019808256
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Ministral-8B-Instruct-2410?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-11-28T18:05:12.000Z",
+      "downloads": 2754,
+      "downloads_all_time": 19029,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-15T12:22:43.000Z",
+      "likes": 260,
+      "parameters_total": null,
+      "repo_id": "mistralai/Mistral-Large-3-675B-Instruct-2512",
+      "requested_id": "mistralai/Mistral-Large-3-675B-Instruct-2512",
+      "response_sha256": "ba36fa231735bf5af420781ad8055b5ea25d017593a1014534affe837110d073",
+      "retrieved_at": "2026-11-23T20:45:51.114443Z",
+      "source_fields": {
+        "_id": "6929e4588140f6beb4b85965",
+        "createdAt": "2025-11-28T18:05:12.000Z",
+        "downloads": 2754,
+        "downloadsAllTime": 19029,
+        "id": "mistralai/Mistral-Large-3-675B-Instruct-2512",
+        "lastModified": "2026-07-15T12:22:43.000Z",
+        "likes": 260
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Large-3-675B-Instruct-2512?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-30T18:35:13.000Z",
+      "downloads": 21591,
+      "downloads_all_time": 21686,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-02T18:30:59.000Z",
+      "likes": 1683,
+      "parameters_total": null,
+      "repo_id": "mistralai/Mistral-Large-4-1T-A52B",
+      "requested_id": "mistralai/Mistral-Large-4-1T-A52B",
+      "response_sha256": "f66c9ba897305ee5456f04a47096bc2b8b5c84b5b998b244ab6374615d18e34f",
+      "retrieved_at": "2026-11-23T20:45:51.158850Z",
+      "source_fields": {
+        "_id": "6abd56613b342d55f86efe9d",
+        "createdAt": "2026-09-30T18:35:13.000Z",
+        "downloads": 21591,
+        "downloadsAllTime": 21686,
+        "id": "mistralai/Mistral-Large-4-1T-A52B",
+        "lastModified": "2026-11-02T18:30:59.000Z",
+        "likes": 1683
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Large-4-1T-A52B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-07-24T11:27:22.000Z",
+      "downloads": 3490,
+      "downloads_all_time": 5048715,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-28T17:16:38.000Z",
+      "likes": 872,
+      "parameters_total": 122610069504,
+      "repo_id": "mistralai/Mistral-Large-Instruct-2407",
+      "requested_id": "mistralai/Mistral-Large-Instruct-2407",
+      "response_sha256": "d9cfc124b2f21b2198adcab45d1254a49c6fc7871d415fcf190f1f03199dab6b",
+      "retrieved_at": "2026-11-23T20:45:53.996219Z",
+      "source_fields": {
+        "_id": "66a0e51a16c91392d42c263d",
+        "createdAt": "2024-07-24T11:27:22.000Z",
+        "downloads": 3490,
+        "downloadsAllTime": 5048715,
+        "id": "mistralai/Mistral-Large-Instruct-2407",
+        "lastModified": "2025-07-28T17:16:38.000Z",
+        "likes": 872,
+        "safetensors": {
+          "parameters": {
+            "BF16": 122610069504
+          },
+          "total": 122610069504
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Large-Instruct-2407?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-11-14T20:03:52.000Z",
+      "downloads": 14509,
+      "downloads_all_time": 4949427,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-28T17:19:27.000Z",
+      "likes": 289,
+      "parameters_total": 122610069504,
+      "repo_id": "mistralai/Mistral-Large-Instruct-2411",
+      "requested_id": "mistralai/Mistral-Large-Instruct-2411",
+      "response_sha256": "21e612b7987ff6d2f296fe26bbcbba6d10538a59b3afbc5b334fe1669e7b6181",
+      "retrieved_at": "2026-11-23T20:45:53.947838Z",
+      "source_fields": {
+        "_id": "673657a8517b82b436cb7e4c",
+        "createdAt": "2024-11-14T20:03:52.000Z",
+        "downloads": 14509,
+        "downloadsAllTime": 4949427,
+        "id": "mistralai/Mistral-Large-Instruct-2411",
+        "lastModified": "2025-07-28T17:19:27.000Z",
+        "likes": 289,
+        "safetensors": {
+          "parameters": {
+            "BF16": 122610069504
+          },
+          "total": 122610069504
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Large-Instruct-2411?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-03-31T09:50:20.000Z",
+      "downloads": 14173,
+      "downloads_all_time": 1124575,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-15T12:23:17.000Z",
+      "likes": 497,
+      "parameters_total": 127704210176,
+      "repo_id": "mistralai/Mistral-Medium-3.5-128B",
+      "requested_id": "mistralai/Mistral-Medium-3.5-128B",
+      "response_sha256": "5e29c04c14d8479c7dc0785ad10e85b1fc5c09e3ba1696000577752379cbbe4d",
+      "retrieved_at": "2026-11-23T20:45:53.997290Z",
+      "source_fields": {
+        "_id": "69cb98dc5fddeedae351721a",
+        "createdAt": "2026-03-31T09:50:20.000Z",
+        "downloads": 14173,
+        "downloadsAllTime": 1124575,
+        "id": "mistralai/Mistral-Medium-3.5-128B",
+        "lastModified": "2026-07-15T12:23:17.000Z",
+        "likes": 497,
+        "safetensors": {
+          "parameters": {
+            "BF16": 5901622016,
+            "F8_E4M3": 121802588160
+          },
+          "total": 127704210176
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Medium-3.5-128B?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-07-17T17:26:49.000Z",
+      "downloads": 86229,
+      "downloads_all_time": 10721725,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-28T17:16:02.000Z",
+      "likes": 1742,
+      "parameters_total": 12247782400,
+      "repo_id": "mistralai/Mistral-Nemo-Instruct-2407",
+      "requested_id": "mistralai/Mistral-Nemo-Instruct-2407",
+      "response_sha256": "090bc802886d1dbd40cff1c001d53f65cca4290da1d6dc594a0d254359f8f731",
+      "retrieved_at": "2026-11-23T20:45:53.994908Z",
+      "source_fields": {
+        "_id": "6697fed91020a9a4cdcca032",
+        "createdAt": "2024-07-17T17:26:49.000Z",
+        "downloads": 86229,
+        "downloadsAllTime": 10721725,
+        "id": "mistralai/Mistral-Nemo-Instruct-2407",
+        "lastModified": "2025-07-28T17:16:02.000Z",
+        "likes": 1742,
+        "safetensors": {
+          "parameters": {
+            "BF16": 12247782400
+          },
+          "total": 12247782400
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Nemo-Instruct-2407?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-01-28T13:30:13.000Z",
+      "downloads": 81909,
+      "downloads_all_time": 7470676,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-28T17:26:22.000Z",
+      "likes": 993,
+      "parameters_total": 23572403200,
+      "repo_id": "mistralai/Mistral-Small-24B-Instruct-2501",
+      "requested_id": "mistralai/Mistral-Small-24B-Instruct-2501",
+      "response_sha256": "b8778c44f4c2f60a17adbb59f71152eb2f14b7777feb257ce47543ffc38cf063",
+      "retrieved_at": "2026-11-23T20:45:57.514475Z",
+      "source_fields": {
+        "_id": "6798dbe54a10be7109f954f2",
+        "createdAt": "2025-01-28T13:30:13.000Z",
+        "downloads": 81909,
+        "downloadsAllTime": 7470676,
+        "id": "mistralai/Mistral-Small-24B-Instruct-2501",
+        "lastModified": "2025-07-28T17:26:22.000Z",
+        "likes": 993,
+        "safetensors": {
+          "parameters": {
+            "BF16": 23572403200
+          },
+          "total": 23572403200
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Small-24B-Instruct-2501?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-03-11T17:04:58.000Z",
+      "downloads": 154777,
+      "downloads_all_time": 4839489,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-12-22T10:15:41.000Z",
+      "likes": 1408,
+      "parameters_total": 24011361280,
+      "repo_id": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+      "requested_id": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+      "response_sha256": "2c47f37f3acafbdcb04b8f7c794c6cf610b24c9d638574b58dbe15424f8b893f",
+      "retrieved_at": "2026-11-23T20:45:57.516622Z",
+      "source_fields": {
+        "_id": "67d06d3a789ed9bc5a5b327d",
+        "createdAt": "2025-03-11T17:04:58.000Z",
+        "downloads": 154777,
+        "downloadsAllTime": 4839489,
+        "id": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+        "lastModified": "2025-12-22T10:15:41.000Z",
+        "likes": 1408,
+        "safetensors": {
+          "parameters": {
+            "BF16": 24011361280
+          },
+          "total": 24011361280
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Small-3.1-24B-Instruct-2503?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-06-19T17:41:13.000Z",
+      "downloads": 108920,
+      "downloads_all_time": 5686004,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-12-22T10:16:55.000Z",
+      "likes": 647,
+      "parameters_total": 24011361280,
+      "repo_id": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "requested_id": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "response_sha256": "1c1f2de236eec62f3d16ce24a514d76ad5845fd54b637766341c03d3dc7c9f0c",
+      "retrieved_at": "2026-11-23T20:45:57.515241Z",
+      "source_fields": {
+        "_id": "68544bb908d8c86c86e4781e",
+        "createdAt": "2025-06-19T17:41:13.000Z",
+        "downloads": 108920,
+        "downloadsAllTime": 5686004,
+        "id": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+        "lastModified": "2025-12-22T10:16:55.000Z",
+        "likes": 647,
+        "safetensors": {
+          "parameters": {
+            "BF16": 24011361280
+          },
+          "total": 24011361280
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Small-3.2-24B-Instruct-2506?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2024-04-16T20:08:01.000Z",
+      "downloads": 35279,
+      "downloads_all_time": 6383100,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-07-24T16:41:56.000Z",
+      "likes": 780,
+      "parameters_total": 140630071296,
+      "repo_id": "mistralai/Mixtral-8x22B-Instruct-v0.1",
+      "requested_id": "mistralai/Mixtral-8x22B-Instruct-v0.1",
+      "response_sha256": "1be37f77778601bc8d4b3ecd5e8b7d3b620d6a8e9d0bb37c8bd617d855c8f5b0",
+      "retrieved_at": "2026-11-23T20:45:57.558590Z",
+      "source_fields": {
+        "_id": "661edaa1ad7da531790110ce",
+        "createdAt": "2024-04-16T20:08:01.000Z",
+        "downloads": 35279,
+        "downloadsAllTime": 6383100,
+        "id": "mistralai/Mixtral-8x22B-Instruct-v0.1",
+        "lastModified": "2025-07-24T16:41:56.000Z",
+        "likes": 780,
+        "safetensors": {
+          "parameters": {
+            "BF16": 140630071296
+          },
+          "total": 140630071296
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/mistralai/Mixtral-8x22B-Instruct-v0.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-11T00:55:12.000Z",
+      "downloads": 223766,
+      "downloads_all_time": 4779513,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-04-23T02:08:36.000Z",
+      "likes": 3009,
+      "parameters_total": 1026408235864,
+      "repo_id": "moonshotai/Kimi-K2-Instruct",
+      "requested_id": "moonshotai/Kimi-K2-Instruct",
+      "response_sha256": "7138bceaee1aface8510f42164cf67c00a790d376d183c4951cbe49e16a4d6fc",
+      "retrieved_at": "2026-11-23T20:46:00.659583Z",
+      "source_fields": {
+        "_id": "687060f05721fba56ca177a8",
+        "createdAt": "2025-07-11T00:55:12.000Z",
+        "downloads": 223766,
+        "downloadsAllTime": 4779513,
+        "id": "moonshotai/Kimi-K2-Instruct",
+        "lastModified": "2026-04-23T02:08:36.000Z",
+        "likes": 3009,
+        "safetensors": {
+          "parameters": {
+            "BF16": 2514970968,
+            "F32": 23040,
+            "F8_E4M3": 1023893241856
+          },
+          "total": 1026408235864
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K2-Instruct?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-03T03:34:36.000Z",
+      "downloads": 9757,
+      "downloads_all_time": 5220102,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-01-30T04:50:25.000Z",
+      "likes": 790,
+      "parameters_total": 1026408240256,
+      "repo_id": "moonshotai/Kimi-K2-Instruct-0905",
+      "requested_id": "moonshotai/Kimi-K2-Instruct-0905",
+      "response_sha256": "303977bd2dc1eabcc6bacc0045f8371f797b89ca85a78437f010f703f09b5559",
+      "retrieved_at": "2026-11-23T20:46:00.617209Z",
+      "source_fields": {
+        "_id": "68b7b74cf359c986356bdef1",
+        "createdAt": "2025-09-03T03:34:36.000Z",
+        "downloads": 9757,
+        "downloadsAllTime": 5220102,
+        "id": "moonshotai/Kimi-K2-Instruct-0905",
+        "lastModified": "2026-01-30T04:50:25.000Z",
+        "likes": 790,
+        "safetensors": {
+          "parameters": {
+            "BF16": 2514975360,
+            "F32": 23040,
+            "F8_E4M3": 1023893241856
+          },
+          "total": 1026408240256
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K2-Instruct-0905?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-11-04T08:25:31.000Z",
+      "downloads": 61867,
+      "downloads_all_time": 2020259,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-01-30T04:49:39.000Z",
+      "likes": 1733,
+      "parameters_total": 1026408240256,
+      "repo_id": "moonshotai/Kimi-K2-Thinking",
+      "requested_id": "moonshotai/Kimi-K2-Thinking",
+      "response_sha256": "bcbf02f8081079c8e841bd5636cfd4c42e4c116443567839752c3cb82593825d",
+      "retrieved_at": "2026-11-23T20:46:00.618105Z",
+      "source_fields": {
+        "_id": "6909b87b734dd24dd19da3ef",
+        "createdAt": "2025-11-04T08:25:31.000Z",
+        "downloads": 61867,
+        "downloadsAllTime": 2020259,
+        "id": "moonshotai/Kimi-K2-Thinking",
+        "lastModified": "2026-01-30T04:49:39.000Z",
+        "likes": 1733,
+        "safetensors": {
+          "parameters": {
+            "BF16": 11722193536,
+            "F32": 23040,
+            "I32": 1014686023680
+          },
+          "total": 1026408240256
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K2-Thinking?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-01-01T06:06:03.000Z",
+      "downloads": 336923,
+      "downloads_all_time": 16592955,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-20T02:36:04.000Z",
+      "likes": 2903,
+      "parameters_total": 1026879376368,
+      "repo_id": "moonshotai/Kimi-K2.5",
+      "requested_id": "moonshotai/Kimi-K2.5",
+      "response_sha256": "fc86b8473cf8c1cd47836635d3764b34e1d350c56dccbba8bfd2b268de040dcb",
+      "retrieved_at": "2026-11-23T20:46:00.617854Z",
+      "source_fields": {
+        "_id": "69560ecbf73b42a14aa67455",
+        "createdAt": "2026-01-01T06:06:03.000Z",
+        "downloads": 336923,
+        "downloadsAllTime": 16592955,
+        "id": "moonshotai/Kimi-K2.5",
+        "lastModified": "2026-11-20T02:36:04.000Z",
+        "likes": 2903,
+        "safetensors": {
+          "parameters": {
+            "BF16": 12193329648,
+            "F32": 23040,
+            "I32": 1014686023680
+          },
+          "total": 1026879376368
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K2.5?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-14T04:23:36.000Z",
+      "downloads": 178257,
+      "downloads_all_time": 8800549,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-05-19T09:01:54.000Z",
+      "likes": 1648,
+      "parameters_total": 1026879376368,
+      "repo_id": "moonshotai/Kimi-K2.6",
+      "requested_id": "moonshotai/Kimi-K2.6",
+      "response_sha256": "702fd5ce4b28dc192df7869bba7a77669e6b03962d46bcd8465dbb1880f50afc",
+      "retrieved_at": "2026-11-23T20:46:04.634562Z",
+      "source_fields": {
+        "_id": "69ddc148e75532a1d02c97c7",
+        "createdAt": "2026-04-14T04:23:36.000Z",
+        "downloads": 178257,
+        "downloadsAllTime": 8800549,
+        "id": "moonshotai/Kimi-K2.6",
+        "lastModified": "2026-05-19T09:01:54.000Z",
+        "likes": 1648,
+        "safetensors": {
+          "parameters": {
+            "BF16": 12193329648,
+            "F32": 23040,
+            "I32": 1014686023680
+          },
+          "total": 1026879376368
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K2.6?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-11T07:51:47.000Z",
+      "downloads": 323691,
+      "downloads_all_time": 2291988,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-06-15T07:49:29.000Z",
+      "likes": 1434,
+      "parameters_total": 1026879376368,
+      "repo_id": "moonshotai/Kimi-K2.7-Code",
+      "requested_id": "moonshotai/Kimi-K2.7-Code",
+      "response_sha256": "cbac92fa755d5e98a7193cbdd08d93ff9da4f094912632910d3827e2cbf5ee2e",
+      "retrieved_at": "2026-11-23T20:46:04.633814Z",
+      "source_fields": {
+        "_id": "6a2a691312d31e23df8c42f5",
+        "createdAt": "2026-06-11T07:51:47.000Z",
+        "downloads": 323691,
+        "downloadsAllTime": 2291988,
+        "id": "moonshotai/Kimi-K2.7-Code",
+        "lastModified": "2026-06-15T07:49:29.000Z",
+        "likes": 1434,
+        "safetensors": {
+          "parameters": {
+            "BF16": 12193329648,
+            "F32": 23040,
+            "I32": 1014686023680
+          },
+          "total": 1026879376368
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K2.7-Code?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-13T06:42:57.000Z",
+      "downloads": 708831,
+      "downloads_all_time": 6439157,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-20T02:36:10.000Z",
+      "likes": 12022,
+      "parameters_total": 2779931837184,
+      "repo_id": "moonshotai/Kimi-K3",
+      "requested_id": "moonshotai/Kimi-K3",
+      "response_sha256": "f8a7f52cf7806d4c13400291771d42157467cea4952ff407b0888bc2f623cdc0",
+      "retrieved_at": "2026-11-23T20:46:04.593785Z",
+      "source_fields": {
+        "_id": "6a2cfbf15c4b5ce712d08eb6",
+        "createdAt": "2026-06-13T06:42:57.000Z",
+        "downloads": 708831,
+        "downloadsAllTime": 6439157,
+        "id": "moonshotai/Kimi-K3",
+        "lastModified": "2026-11-20T02:36:10.000Z",
+        "likes": 12022,
+        "safetensors": {
+          "parameters": {
+            "BF16": 57179884544,
+            "F32": 11122432,
+            "U8": 2722740830208
+          },
+          "total": 2779931837184
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K3?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-11-02T04:13:51.000Z",
+      "downloads": 73560,
+      "downloads_all_time": 73560,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-05T07:11:43.000Z",
+      "likes": 2438,
+      "parameters_total": 2780110363392,
+      "repo_id": "moonshotai/Kimi-K3.1-Pro",
+      "requested_id": "moonshotai/Kimi-K3.1-Pro",
+      "response_sha256": "9358218c8a7f5cc48c333527928e6b57d5a9c0fa1ef7342aae7bcb0782fbc9f0",
+      "retrieved_at": "2026-11-23T20:46:04.683211Z",
+      "source_fields": {
+        "_id": "6ae80dff1c312ffa6afa6a6c",
+        "createdAt": "2026-11-02T04:13:51.000Z",
+        "downloads": 73560,
+        "downloadsAllTime": 73560,
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "lastModified": "2026-11-05T07:11:43.000Z",
+        "likes": 2438,
+        "safetensors": {
+          "parameters": {
+            "BF16": 57358410752,
+            "F32": 11122432,
+            "U8": 2722740830208
+          },
+          "total": 2780110363392
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/moonshotai/Kimi-K3.1-Pro?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-08T11:01:41.000Z",
+      "downloads": 1634,
+      "downloads_all_time": 36145,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-17T05:52:53.000Z",
+      "likes": 680,
+      "parameters_total": 396802360816,
+      "repo_id": "nex-agi/Nex-N2.5-Pro",
+      "requested_id": "nex-agi/Nex-N2.5-Pro",
+      "response_sha256": "80d73ea19ea6beaea3794e0e3063bd8e4993ebec9a7c8fedd322c831c48dd1ac",
+      "retrieved_at": "2026-11-23T20:46:07.919399Z",
+      "source_fields": {
+        "_id": "6a9feb150b61df7b2644db97",
+        "createdAt": "2026-09-08T11:01:41.000Z",
+        "downloads": 1634,
+        "downloadsAllTime": 36145,
+        "id": "nex-agi/Nex-N2.5-Pro",
+        "lastModified": "2026-09-17T05:52:53.000Z",
+        "likes": 680,
+        "safetensors": {
+          "parameters": {
+            "BF16": 10255304176,
+            "F8_E4M3": 386547056640
+          },
+          "total": 396802360816
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/nex-agi/Nex-N2.5-Pro?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-12-04T03:37:11.000Z",
+      "downloads": 953425,
+      "downloads_all_time": 12149585,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-24T23:50:04.000Z",
+      "likes": 841,
+      "parameters_total": 31577937344,
+      "repo_id": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+      "requested_id": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+      "response_sha256": "77b89cd792f9203b5ddb3b4e1e2a7bc403472b50c30c589e29f834129205e7ea",
+      "retrieved_at": "2026-11-23T20:46:07.969656Z",
+      "source_fields": {
+        "_id": "693101e726c69e7dca6b650d",
+        "createdAt": "2025-12-04T03:37:11.000Z",
+        "downloads": 953425,
+        "downloadsAllTime": 12149585,
+        "id": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+        "lastModified": "2026-08-24T23:50:04.000Z",
+        "likes": 841,
+        "safetensors": {
+          "parameters": {
+            "BF16": 31577934400,
+            "F32": 5888
+          },
+          "total": 31577937344
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-03-10T18:32:42.000Z",
+      "downloads": 23672,
+      "downloads_all_time": 2691273,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-24T23:48:25.000Z",
+      "likes": 293,
+      "parameters_total": 123611012096,
+      "repo_id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8",
+      "requested_id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8",
+      "response_sha256": "ef811293b9f857d830d1d20c9106b6d311cb13b419c85d7cb3eb72312b8b7b94",
+      "retrieved_at": "2026-11-23T20:46:07.920045Z",
+      "source_fields": {
+        "_id": "69b063caead3ef8d6b76a9f9",
+        "createdAt": "2026-03-10T18:32:42.000Z",
+        "downloads": 23672,
+        "downloadsAllTime": 2691273,
+        "id": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8",
+        "lastModified": "2026-08-24T23:48:25.000Z",
+        "likes": 293,
+        "safetensors": {
+          "parameters": {
+            "BF16": 4723465216,
+            "F32": 20992,
+            "F8_E4M3": 118887546880
+          },
+          "total": 123611012096
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-03T14:50:04.000Z",
+      "downloads": 849867,
+      "downloads_all_time": 3138872,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-24T23:47:18.000Z",
+      "likes": 390,
+      "parameters_total": 560524578816,
+      "repo_id": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16",
+      "requested_id": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16",
+      "response_sha256": "ca8205ef5c80a38be52f54cc0aa6de9cb5a7e39544e1535987fc67603b3191f2",
+      "retrieved_at": "2026-11-23T20:46:07.918026Z",
+      "source_fields": {
+        "_id": "6a203f1c01730f26f9c4c3f8",
+        "createdAt": "2026-06-03T14:50:04.000Z",
+        "downloads": 849867,
+        "downloadsAllTime": 3138872,
+        "id": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16",
+        "lastModified": "2026-08-24T23:47:18.000Z",
+        "likes": 390,
+        "safetensors": {
+          "parameters": {
+            "BF16": 560524578816,
+            "F32": 25088
+          },
+          "total": 560524578816
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-01T06:55:21.000Z",
+      "downloads": 701585,
+      "downloads_all_time": 2396616,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-24T23:46:27.000Z",
+      "likes": 281,
+      "parameters_total": 31577937344,
+      "repo_id": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16",
+      "requested_id": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16",
+      "response_sha256": "bf031e6ffc580a923015a9fe66bfb47d20fed167617549c41f8c6a9ac5f9c7ab",
+      "retrieved_at": "2026-11-23T20:46:11.109152Z",
+      "source_fields": {
+        "_id": "6a6d98598cf49b059474f8ea",
+        "createdAt": "2026-08-01T06:55:21.000Z",
+        "downloads": 701585,
+        "downloadsAllTime": 2396616,
+        "id": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16",
+        "lastModified": "2026-08-24T23:46:27.000Z",
+        "likes": 281,
+        "safetensors": {
+          "parameters": {
+            "BF16": 32913263168,
+            "F32": 3072
+          },
+          "total": 31577937344
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-10-12T15:32:06.000Z",
+      "downloads": 77219,
+      "downloads_all_time": 113687,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-22T17:24:14.000Z",
+      "likes": 140,
+      "parameters_total": 124453395976,
+      "repo_id": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
+      "requested_id": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
+      "response_sha256": "528898cf5e00092d374796330f4e7c605b37888e6cc4b830ff6e58288a8b9cff",
+      "retrieved_at": "2026-11-23T20:46:11.107587Z",
+      "source_fields": {
+        "_id": "6accfd768202bcb37f78fade",
+        "createdAt": "2026-10-12T15:32:06.000Z",
+        "downloads": 77219,
+        "downloadsAllTime": 113687,
+        "id": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
+        "lastModified": "2026-10-22T17:24:14.000Z",
+        "likes": 140,
+        "safetensors": {
+          "parameters": {
+            "BF16": 124453374976,
+            "F32": 20998,
+            "I64": 2
+          },
+          "total": 124453395976
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-08-04T22:33:06.000Z",
+      "downloads": 2306473,
+      "downloads_all_time": 62956920,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-08-26T17:25:03.000Z",
+      "likes": 5557,
+      "parameters_total": 116829156672,
+      "repo_id": "openai/gpt-oss-120b",
+      "requested_id": "openai/gpt-oss-120b",
+      "response_sha256": "5e5e4f34ac6d40298078474c2d80aa2547b4a6ece5ad3d38516f43e73a59a4ff",
+      "retrieved_at": "2026-11-23T20:46:11.151352Z",
+      "source_fields": {
+        "_id": "68913522f16f3c8aaffccf1f",
+        "createdAt": "2025-08-04T22:33:06.000Z",
+        "downloads": 2306473,
+        "downloadsAllTime": 62956920,
+        "id": "openai/gpt-oss-120b",
+        "lastModified": "2025-08-26T17:25:03.000Z",
+        "likes": 5557,
+        "safetensors": {
+          "parameters": {
+            "BF16": 2167371072,
+            "U8": 114661785600
+          },
+          "total": 116829156672
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/openai/gpt-oss-120b?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-08-04T22:33:29.000Z",
+      "downloads": 5464001,
+      "downloads_all_time": 111209298,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-08-26T17:25:47.000Z",
+      "likes": 5343,
+      "parameters_total": 20914757184,
+      "repo_id": "openai/gpt-oss-20b",
+      "requested_id": "openai/gpt-oss-20b",
+      "response_sha256": "2810e5bbdd32d26e1d4ba0cbe6bf5b496e5dac7c8ae38c996a8a50dbc07a116e",
+      "retrieved_at": "2026-11-23T20:46:11.108346Z",
+      "source_fields": {
+        "_id": "68913539bd3d0a833438591d",
+        "createdAt": "2025-08-04T22:33:29.000Z",
+        "downloads": 5464001,
+        "downloadsAllTime": 111209298,
+        "id": "openai/gpt-oss-20b",
+        "lastModified": "2025-08-26T17:25:47.000Z",
+        "likes": 5343,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1804459584,
+            "U8": 19110297600
+          },
+          "total": 20914757184
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/openai/gpt-oss-20b?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-18T18:51:08.000Z",
+      "downloads": 38562,
+      "downloads_all_time": 848031,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-01-14T18:38:05.000Z",
+      "likes": 294,
+      "parameters_total": 21511953984,
+      "repo_id": "openai/gpt-oss-safeguard-20b",
+      "requested_id": "openai/gpt-oss-safeguard-20b",
+      "response_sha256": "2b9c5c05d905118e80b5693939b61d9cd62b0dfe5e45af9ef1cd6a39fdff27c1",
+      "retrieved_at": "2026-11-23T20:46:14.637410Z",
+      "source_fields": {
+        "_id": "68cc549cade527b0974c2505",
+        "createdAt": "2025-09-18T18:51:08.000Z",
+        "downloads": 38562,
+        "downloadsAllTime": 848031,
+        "id": "openai/gpt-oss-safeguard-20b",
+        "lastModified": "2026-01-14T18:38:05.000Z",
+        "likes": 294,
+        "safetensors": {
+          "parameters": {
+            "BF16": 1804459584,
+            "U8": 19707494400
+          },
+          "total": 21511953984
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/openai/gpt-oss-safeguard-20b?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-07-13T13:58:35.000Z",
+      "downloads": 311045,
+      "downloads_all_time": 993147,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-19T15:40:11.000Z",
+      "likes": 1087,
+      "parameters_total": 117561977600,
+      "repo_id": "poolside/Laguna-S-2.1",
+      "requested_id": "poolside/Laguna-S-2.1",
+      "response_sha256": "dd25eb05ab4796f66c791ab07e94c3f5c5baf1b2c536fe3a767a6decec2f688e",
+      "retrieved_at": "2026-11-23T20:46:14.595351Z",
+      "source_fields": {
+        "_id": "6a54ef0b62869082b568f3ec",
+        "createdAt": "2026-07-13T13:58:35.000Z",
+        "downloads": 311045,
+        "downloadsAllTime": 993147,
+        "id": "poolside/Laguna-S-2.1",
+        "lastModified": "2026-08-19T15:40:11.000Z",
+        "likes": 1087,
+        "safetensors": {
+          "parameters": {
+            "BF16": 117561977600
+          },
+          "total": 117561977600
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/poolside/Laguna-S-2.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-20T14:14:26.000Z",
+      "downloads": 378566,
+      "downloads_all_time": 1124867,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-19T15:41:00.000Z",
+      "likes": 271,
+      "parameters_total": 33442617088,
+      "repo_id": "poolside/Laguna-XS-2.1",
+      "requested_id": "poolside/Laguna-XS-2.1",
+      "response_sha256": "3fa7ce0eb246071e384b72c2e14f0d343beefa55c1278af3fca82f5a695aa74a",
+      "retrieved_at": "2026-11-23T20:46:14.636581Z",
+      "source_fields": {
+        "_id": "6a36a0427251293c9fcd1bf6",
+        "createdAt": "2026-06-20T14:14:26.000Z",
+        "downloads": 378566,
+        "downloadsAllTime": 1124867,
+        "id": "poolside/Laguna-XS-2.1",
+        "lastModified": "2026-08-19T15:41:00.000Z",
+        "likes": 271,
+        "safetensors": {
+          "parameters": {
+            "BF16": 33442617088
+          },
+          "total": 33442617088
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/poolside/Laguna-XS-2.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-23T20:50:45.000Z",
+      "downloads": 460300,
+      "downloads_all_time": 1677685,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-22T08:53:28.000Z",
+      "likes": 320,
+      "parameters_total": 33442617088,
+      "repo_id": "poolside/Laguna-XS.2",
+      "requested_id": "poolside/Laguna-XS.2",
+      "response_sha256": "219004522a32c7216cee793679c314c668bfd8d24a8cf5cfec391d576943510e",
+      "retrieved_at": "2026-11-23T20:46:14.642038Z",
+      "source_fields": {
+        "_id": "69ea86258ae7e80e6ce4d234",
+        "createdAt": "2026-04-23T20:50:45.000Z",
+        "downloads": 460300,
+        "downloadsAllTime": 1677685,
+        "id": "poolside/Laguna-XS.2",
+        "lastModified": "2026-09-22T08:53:28.000Z",
+        "likes": 320,
+        "safetensors": {
+          "parameters": {
+            "BF16": 33442617088
+          },
+          "total": 33442617088
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/poolside/Laguna-XS.2?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-02-01T08:03:45.000Z",
+      "downloads": 163752,
+      "downloads_all_time": 2048967,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-03-17T05:54:33.000Z",
+      "likes": 847,
+      "parameters_total": 199384301376,
+      "repo_id": "stepfun-ai/Step-3.5-Flash",
+      "requested_id": "stepfun-ai/Step-3.5-Flash",
+      "response_sha256": "36b34185c4131a09c5de7644c1e37f6ddd8d1ba33bc41a934e33a6c9ba23a07b",
+      "retrieved_at": "2026-11-23T20:46:17.934044Z",
+      "source_fields": {
+        "_id": "697f08e18b0dd3ffab869789",
+        "createdAt": "2026-02-01T08:03:45.000Z",
+        "downloads": 163752,
+        "downloadsAllTime": 2048967,
+        "id": "stepfun-ai/Step-3.5-Flash",
+        "lastModified": "2026-03-17T05:54:33.000Z",
+        "likes": 847,
+        "safetensors": {
+          "parameters": {
+            "BF16": 199384289280,
+            "F32": 12096
+          },
+          "total": 199384301376
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/stepfun-ai/Step-3.5-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-05-23T02:13:46.000Z",
+      "downloads": 10126,
+      "downloads_all_time": 416869,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-06-03T04:11:57.000Z",
+      "likes": 464,
+      "parameters_total": 201365316160,
+      "repo_id": "stepfun-ai/Step-3.7-Flash",
+      "requested_id": "stepfun-ai/Step-3.7-Flash",
+      "response_sha256": "cf27259d34f5e5451978ce09d59a5438a0c952827923a15779ca3659fea1cc0e",
+      "retrieved_at": "2026-11-23T20:46:17.935123Z",
+      "source_fields": {
+        "_id": "6a110d5abf07261a989071d8",
+        "createdAt": "2026-05-23T02:13:46.000Z",
+        "downloads": 10126,
+        "downloadsAllTime": 416869,
+        "id": "stepfun-ai/Step-3.7-Flash",
+        "lastModified": "2026-06-03T04:11:57.000Z",
+        "likes": 464,
+        "safetensors": {
+          "parameters": {
+            "BF16": 201365304064,
+            "F32": 12096
+          },
+          "total": 201365316160
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/stepfun-ai/Step-3.7-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-09-20T03:15:06.000Z",
+      "downloads": 9613,
+      "downloads_all_time": 12967,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-15T01:28:10.000Z",
+      "likes": 149,
+      "parameters_total": 604339504832,
+      "repo_id": "stepfun-ai/Step-5-Preview",
+      "requested_id": "stepfun-ai/Step-5-Preview",
+      "response_sha256": "b2033c5fe56e7c1691c751edf4910a548c95998b55d8f00ae808e7537af8586e",
+      "retrieved_at": "2026-11-23T20:46:17.934889Z",
+      "source_fields": {
+        "_id": "6aaf4fbaafd69b39eac495d5",
+        "createdAt": "2026-09-20T03:15:06.000Z",
+        "downloads": 9613,
+        "downloadsAllTime": 12967,
+        "id": "stepfun-ai/Step-5-Preview",
+        "lastModified": "2026-10-15T01:28:10.000Z",
+        "likes": 149,
+        "safetensors": {
+          "parameters": {
+            "BF16": 39615980288,
+            "F32": 2433984,
+            "F8_E4M3": 564721090560
+          },
+          "total": 604339504832
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/stepfun-ai/Step-5-Preview?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-07-02T13:23:54.000Z",
+      "downloads": 643874,
+      "downloads_all_time": 1758762,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-20T07:01:39.000Z",
+      "likes": 994,
+      "parameters_total": 298786155776,
+      "repo_id": "tencent/Hy3",
+      "requested_id": "tencent/Hy3",
+      "response_sha256": "8a8b6316400c1fd2a2000e140109c896259c0037ae54bd5c651c840497e5b396",
+      "retrieved_at": "2026-11-23T20:46:17.935789Z",
+      "source_fields": {
+        "_id": "6a46666a9df197cf7b7bed77",
+        "createdAt": "2026-07-02T13:23:54.000Z",
+        "downloads": 643874,
+        "downloadsAllTime": 1758762,
+        "id": "tencent/Hy3",
+        "lastModified": "2026-07-20T07:01:39.000Z",
+        "likes": 994,
+        "safetensors": {
+          "parameters": {
+            "BF16": 298786140416,
+            "F32": 15360
+          },
+          "total": 298786155776
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/tencent/Hy3?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-13T06:07:57.000Z",
+      "downloads": 114454,
+      "downloads_all_time": 610852,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-04-23T14:59:42.000Z",
+      "likes": 314,
+      "parameters_total": 298786155776,
+      "repo_id": "tencent/Hy3-preview",
+      "requested_id": "tencent/Hy3-preview",
+      "response_sha256": "a1887e3bd6fe8bf204bee3fcdf0f3f5ffb2693e9820fc2e3c1bfb7f01523d1cd",
+      "retrieved_at": "2026-11-23T20:46:21.040631Z",
+      "source_fields": {
+        "_id": "69dc883d5021cbd47435b0b1",
+        "createdAt": "2026-04-13T06:07:57.000Z",
+        "downloads": 114454,
+        "downloadsAllTime": 610852,
+        "id": "tencent/Hy3-preview",
+        "lastModified": "2026-04-23T14:59:42.000Z",
+        "likes": 314,
+        "safetensors": {
+          "parameters": {
+            "BF16": 298786140416,
+            "F32": 15360
+          },
+          "total": 298786155776
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/tencent/Hy3-preview?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-27T08:52:40.000Z",
+      "downloads": 10649,
+      "downloads_all_time": 51230,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-28T14:58:32.000Z",
+      "likes": 571,
+      "parameters_total": 779960992733,
+      "repo_id": "tencent/Hy4-preview",
+      "requested_id": "tencent/Hy4-preview",
+      "response_sha256": "bd7f5059ca055fba0cf6557910eb07e16d7991daec06f8d5cb12ecf391294e04",
+      "retrieved_at": "2026-11-23T20:46:21.041415Z",
+      "source_fields": {
+        "_id": "6a8ffad85abf6076edef5789",
+        "createdAt": "2026-08-27T08:52:40.000Z",
+        "downloads": 10649,
+        "downloadsAllTime": 51230,
+        "id": "tencent/Hy4-preview",
+        "lastModified": "2026-08-28T14:58:32.000Z",
+        "likes": 571,
+        "safetensors": {
+          "parameters": {
+            "BF16": 779930197312,
+            "F32": 30795421
+          },
+          "total": 779960992733
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/tencent/Hy4-preview?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-07-14T13:23:14.000Z",
+      "downloads": 955523,
+      "downloads_all_time": 3288291,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-07-23T17:27:17.000Z",
+      "likes": 1875,
+      "parameters_total": 952377623626,
+      "repo_id": "thinkingmachines/Inkling",
+      "requested_id": "thinkingmachines/Inkling",
+      "response_sha256": "bcc20352e82591788b907a6c6b2be7eb693fbad829be39904d9076c4adcade3c",
+      "retrieved_at": "2026-11-23T20:46:21.039451Z",
+      "source_fields": {
+        "_id": "6a563842cb785d0d06a1cb7d",
+        "createdAt": "2026-07-14T13:23:14.000Z",
+        "downloads": 955523,
+        "downloadsAllTime": 3288291,
+        "id": "thinkingmachines/Inkling",
+        "lastModified": "2026-07-23T17:27:17.000Z",
+        "likes": 1875,
+        "safetensors": {
+          "parameters": {
+            "BF16": 952377607178,
+            "F32": 16448
+          },
+          "total": 952377623626
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/thinkingmachines/Inkling?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-11-04T19:51:05.000Z",
+      "downloads": 55885,
+      "downloads_all_time": 55885,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-11-20T14:09:59.000Z",
+      "likes": 1440,
+      "parameters_total": 594050672720,
+      "repo_id": "thinkingmachines/Inkling-2-Small",
+      "requested_id": "thinkingmachines/Inkling-2-Small",
+      "response_sha256": "28ab2e0e7227c4d5419c26d781e5eddc0f3d1f9c7664793ab9918b597dbddcb0",
+      "retrieved_at": "2026-11-23T20:46:21.040092Z",
+      "source_fields": {
+        "_id": "6aeb8ca905f37ecf15ddc0eb",
+        "createdAt": "2026-11-04T19:51:05.000Z",
+        "downloads": 55885,
+        "downloadsAllTime": 55885,
+        "id": "thinkingmachines/Inkling-2-Small",
+        "lastModified": "2026-11-20T14:09:59.000Z",
+        "likes": 1440,
+        "safetensors": {
+          "parameters": {
+            "BF16": 6981765120,
+            "F32": 565328,
+            "F8_E4M3": 97844723712,
+            "U8": 489223618560
+          },
+          "total": 594050672720
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/thinkingmachines/Inkling-2-Small?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-20T03:25:36.000Z",
+      "downloads": 129468,
+      "downloads_all_time": 1379188,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-08-11T13:27:03.000Z",
+      "likes": 1439,
+      "parameters_total": 358337791296,
+      "repo_id": "zai-org/GLM-4.5",
+      "requested_id": "zai-org/GLM-4.5",
+      "response_sha256": "2153604fbbedeb1fe05f637ecee332021bd9c0dd5128e044de5d5761779932b1",
+      "retrieved_at": "2026-11-23T20:46:25.424181Z",
+      "source_fields": {
+        "_id": "687c61b066d1fc7f73788fc2",
+        "createdAt": "2025-07-20T03:25:36.000Z",
+        "downloads": 129468,
+        "downloadsAllTime": 1379188,
+        "id": "zai-org/GLM-4.5",
+        "lastModified": "2025-08-11T13:27:03.000Z",
+        "likes": 1439,
+        "safetensors": {
+          "parameters": {
+            "BF16": 358337776896,
+            "F32": 14400
+          },
+          "total": 358337791296
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-4.5?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-07-20T03:25:55.000Z",
+      "downloads": 884002,
+      "downloads_all_time": 6617347,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-08-11T13:25:37.000Z",
+      "likes": 650,
+      "parameters_total": 110468824832,
+      "repo_id": "zai-org/GLM-4.5-Air",
+      "requested_id": "zai-org/GLM-4.5-Air",
+      "response_sha256": "e6beef4a3b7f9979a6b5babeed329c1ca1abdc8b6d8708ab0cb7b312a81304c3",
+      "retrieved_at": "2026-11-23T20:46:25.421684Z",
+      "source_fields": {
+        "_id": "687c61c324649ecb26a748f0",
+        "createdAt": "2025-07-20T03:25:55.000Z",
+        "downloads": 884002,
+        "downloadsAllTime": 6617347,
+        "id": "zai-org/GLM-4.5-Air",
+        "lastModified": "2025-08-11T13:25:37.000Z",
+        "likes": 650,
+        "safetensors": {
+          "parameters": {
+            "BF16": 110468818944,
+            "F32": 5888
+          },
+          "total": 110468824832
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-4.5-Air?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-08-10T13:55:30.000Z",
+      "downloads": 15683,
+      "downloads_all_time": 1091541,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-10-25T13:20:10.000Z",
+      "likes": 726,
+      "parameters_total": 107710933120,
+      "repo_id": "zai-org/GLM-4.5V",
+      "requested_id": "zai-org/GLM-4.5V",
+      "response_sha256": "de4a5ee038d218270045cd6bcdae0235a8b825d0c55d26b258a7dc2721728615",
+      "retrieved_at": "2026-11-23T20:46:25.400477Z",
+      "source_fields": {
+        "_id": "6898a4d2873aa6ebca0f8822",
+        "createdAt": "2025-08-10T13:55:30.000Z",
+        "downloads": 15683,
+        "downloadsAllTime": 1091541,
+        "id": "zai-org/GLM-4.5V",
+        "lastModified": "2025-10-25T13:20:10.000Z",
+        "likes": 726,
+        "safetensors": {
+          "parameters": {
+            "BF16": 107710927360,
+            "F32": 5760
+          },
+          "total": 107710933120
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-4.5V?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-09-29T18:22:51.000Z",
+      "downloads": 23556,
+      "downloads_all_time": 852183,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2025-09-30T10:17:45.000Z",
+      "likes": 1245,
+      "parameters_total": 356785898816,
+      "repo_id": "zai-org/GLM-4.6",
+      "requested_id": "zai-org/GLM-4.6",
+      "response_sha256": "2e029e23b5e4c9baeb9e8f6164371f3e94dd51925f87ebc876d87f1f9d13f45d",
+      "retrieved_at": "2026-11-23T20:46:25.424529Z",
+      "source_fields": {
+        "_id": "68dace7bccfdaf8c81d0243d",
+        "createdAt": "2025-09-29T18:22:51.000Z",
+        "downloads": 23556,
+        "downloadsAllTime": 852183,
+        "id": "zai-org/GLM-4.6",
+        "lastModified": "2025-09-30T10:17:45.000Z",
+        "likes": 1245,
+        "safetensors": {
+          "parameters": {
+            "BF16": 356785884416,
+            "F32": 14400
+          },
+          "total": 356785898816
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-4.6?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2025-12-22T07:45:52.000Z",
+      "downloads": 50371,
+      "downloads_all_time": 965394,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-01-29T08:05:58.000Z",
+      "likes": 2074,
+      "parameters_total": 358337791296,
+      "repo_id": "zai-org/GLM-4.7",
+      "requested_id": "zai-org/GLM-4.7",
+      "response_sha256": "7c8f6c7b4fcc2ac1442a862211eb0b7e55da6769d8509844805e3672a8975ea5",
+      "retrieved_at": "2026-11-23T20:46:28.274621Z",
+      "source_fields": {
+        "_id": "6948f730f8f6daad510a791b",
+        "createdAt": "2025-12-22T07:45:52.000Z",
+        "downloads": 50371,
+        "downloadsAllTime": 965394,
+        "id": "zai-org/GLM-4.7",
+        "lastModified": "2026-01-29T08:05:58.000Z",
+        "likes": 2074,
+        "safetensors": {
+          "parameters": {
+            "BF16": 358337776896,
+            "F32": 14400
+          },
+          "total": 358337791296
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-4.7?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-01-19T06:28:10.000Z",
+      "downloads": 1142183,
+      "downloads_all_time": 16189553,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-01-29T08:06:19.000Z",
+      "likes": 1915,
+      "parameters_total": 31221488576,
+      "repo_id": "zai-org/GLM-4.7-Flash",
+      "requested_id": "zai-org/GLM-4.7-Flash",
+      "response_sha256": "3bf75900c39bba293ed70a90213f224c6568d76b810d2fc62f106bdd112c69bb",
+      "retrieved_at": "2026-11-23T20:46:28.275118Z",
+      "source_fields": {
+        "_id": "696dcefa357a4070754b027e",
+        "createdAt": "2026-01-19T06:28:10.000Z",
+        "downloads": 1142183,
+        "downloadsAllTime": 16189553,
+        "id": "zai-org/GLM-4.7-Flash",
+        "lastModified": "2026-01-29T08:06:19.000Z",
+        "likes": 1915,
+        "safetensors": {
+          "parameters": {
+            "BF16": 31221485568,
+            "F32": 3008
+          },
+          "total": 31221488576
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-4.7-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-02-11T04:55:46.000Z",
+      "downloads": 792901,
+      "downloads_all_time": 3448929,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-08-11T07:36:34.000Z",
+      "likes": 2144,
+      "parameters_total": 753864139008,
+      "repo_id": "zai-org/GLM-5",
+      "requested_id": "zai-org/GLM-5",
+      "response_sha256": "851c4d44f31780194c409d2efceb5fc04fa318c12b3bb7ecb7ca8acbc38314f6",
+      "retrieved_at": "2026-11-23T20:46:28.273594Z",
+      "source_fields": {
+        "_id": "698c0bd27f65d407e253418c",
+        "createdAt": "2026-02-11T04:55:46.000Z",
+        "downloads": 792901,
+        "downloadsAllTime": 3448929,
+        "id": "zai-org/GLM-5",
+        "lastModified": "2026-08-11T07:36:34.000Z",
+        "likes": 2144,
+        "safetensors": {
+          "parameters": {
+            "BF16": 753864119552,
+            "F32": 19456
+          },
+          "total": 753864139008
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-5?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-04-03T09:28:47.000Z",
+      "downloads": 492662,
+      "downloads_all_time": 2062287,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-05-13T08:10:58.000Z",
+      "likes": 1853,
+      "parameters_total": 753864139008,
+      "repo_id": "zai-org/GLM-5.1",
+      "requested_id": "zai-org/GLM-5.1",
+      "response_sha256": "7e0cae4b65f79f8666e4940dfd6c493aca06883cc937d30644529dbd03bbd13d",
+      "retrieved_at": "2026-11-23T20:46:28.274094Z",
+      "source_fields": {
+        "_id": "69cf884fa91383ae4eaaf4aa",
+        "createdAt": "2026-04-03T09:28:47.000Z",
+        "downloads": 492662,
+        "downloadsAllTime": 2062287,
+        "id": "zai-org/GLM-5.1",
+        "lastModified": "2026-05-13T08:10:58.000Z",
+        "likes": 1853,
+        "safetensors": {
+          "parameters": {
+            "BF16": 753864119552,
+            "F32": 19456
+          },
+          "total": 753864139008
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-5.1?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-06-16T07:39:20.000Z",
+      "downloads": 1010841,
+      "downloads_all_time": 5863862,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-09-01T11:36:01.000Z",
+      "likes": 5217,
+      "parameters_total": 753329940480,
+      "repo_id": "zai-org/GLM-5.2",
+      "requested_id": "zai-org/GLM-5.2",
+      "response_sha256": "3e38a398e1867ab41581b5bc36aa439c45a46625e4753343c61a2ffb18634545",
+      "retrieved_at": "2026-11-23T20:46:31.750971Z",
+      "source_fields": {
+        "_id": "6a30fda88514bfa5f01a33b6",
+        "createdAt": "2026-06-16T07:39:20.000Z",
+        "downloads": 1010841,
+        "downloadsAllTime": 5863862,
+        "id": "zai-org/GLM-5.2",
+        "lastModified": "2026-09-01T11:36:01.000Z",
+        "likes": 5217,
+        "safetensors": {
+          "parameters": {
+            "BF16": 753329921024,
+            "F32": 19456
+          },
+          "total": 753329940480
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-5.2?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-25T06:42:50.000Z",
+      "downloads": 1262104,
+      "downloads_all_time": 4649016,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-14T12:22:48.000Z",
+      "likes": 2534,
+      "parameters_total": 753329940480,
+      "repo_id": "zai-org/GLM-5.3",
+      "requested_id": "zai-org/GLM-5.3",
+      "response_sha256": "953b8e62ec1cb759a0ebbece2fea3dade9dfb5428eb21a44adbf586a061721f6",
+      "retrieved_at": "2026-11-23T20:46:31.751288Z",
+      "source_fields": {
+        "_id": "6a8d396a6f0233a6c0d8c4f2",
+        "createdAt": "2026-08-25T06:42:50.000Z",
+        "downloads": 1262104,
+        "downloadsAllTime": 4649016,
+        "id": "zai-org/GLM-5.3",
+        "lastModified": "2026-10-14T12:22:48.000Z",
+        "likes": 2534,
+        "safetensors": {
+          "parameters": {
+            "BF16": 2103729152,
+            "F32": 19456,
+            "F8_E4M3": 751226191872
+          },
+          "total": 753329940480
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-5.3?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    },
+    {
+      "created_at": "2026-08-25T06:43:14.000Z",
+      "downloads": 6383668,
+      "downloads_all_time": 17265599,
+      "error": null,
+      "http_status": 200,
+      "last_modified": "2026-10-15T06:32:52.000Z",
+      "likes": 3318,
+      "parameters_total": 321323031390,
+      "repo_id": "zai-org/GLM-5.3-Flash",
+      "requested_id": "zai-org/GLM-5.3-Flash",
+      "response_sha256": "4aa73c21c7060d6674999cfe09dae6b597c3dfd93563080c07e207d109d543ba",
+      "retrieved_at": "2026-11-23T20:46:31.753177Z",
+      "source_fields": {
+        "_id": "6a8d39822a943ad8a2f2ea50",
+        "createdAt": "2026-08-25T06:43:14.000Z",
+        "downloads": 6383668,
+        "downloadsAllTime": 17265599,
+        "id": "zai-org/GLM-5.3-Flash",
+        "lastModified": "2026-10-15T06:32:52.000Z",
+        "likes": 3318,
+        "safetensors": {
+          "parameters": {
+            "BF16": 6926096640,
+            "F32": 295518,
+            "F8_E4M3": 314396639232
+          },
+          "total": 321323031390
+        }
+      },
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-5.3-Flash?expand%5B%5D=downloads&expand%5B%5D=downloadsAllTime&expand%5B%5D=likes&expand%5B%5D=createdAt&expand%5B%5D=lastModified&expand%5B%5D=safetensors"
+    }
+  ],
+  "meta": {
+    "counting_rules": "https://huggingface.co/docs/hub/models-download-stats",
+    "download_window": "Trailing 30 days as reported by HF; exact counter boundaries unpublished",
+    "fields": [
+      "downloads",
+      "downloadsAllTime",
+      "likes",
+      "createdAt",
+      "lastModified",
+      "safetensors"
+    ],
+    "retrieval_completed_at": "2026-11-23T20:46:31.753722Z",
+    "retrieved_at": "2026-11-23T20:44:24.798983Z",
+    "source": "Hugging Face public model metadata API"
+  }
+}

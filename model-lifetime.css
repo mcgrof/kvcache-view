@@ -708,3 +708,66 @@ pre {
     color: #becfe0;
     margin: 7px 0 0;
 }
+
+.hf-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 18px;
+    margin: 22px 0;
+}
+.hf-selected {
+    border-left-color: var(--violet);
+}
+.hf-legend i {
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.hf-legend .hf-complete-dot {
+    background: var(--cyan);
+}
+.hf-legend .hf-partial-dot {
+    border-color: var(--amber);
+}
+.hf-point {
+    cursor: pointer;
+}
+.hf-point:hover .hf-marker,
+.hf-point:focus .hf-marker {
+    stroke: var(--ink);
+    stroke-width: 3;
+}
+.hf-point-detail {
+    min-height: 66px;
+    overflow-wrap: anywhere;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+}
+.hf-point-detail small {
+    display: inline;
+    margin-left: 6px;
+}
+.hf-table {
+    min-width: 870px;
+}
+.hf-table-scroll {
+    max-height: 600px;
+}
+.hf-aliases {
+    margin-top: 8px;
+    padding-top: 0;
+    border: 0;
+}
+.hf-aliases summary {
+    font-size: 0.73rem;
+    margin-bottom: 5px;
+}
+@media (max-width: 600px) {
+    .hf-controls {
+        grid-template-columns: 1fr;
+    }
+    .hf-table-scroll {
+        max-height: 460px;
+    }
+}

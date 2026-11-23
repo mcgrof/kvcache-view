@@ -14,6 +14,7 @@ OPENROUTER_START ?= 2025-01-01
 OPENROUTER_END ?=
 OPENROUTER_OFFLINE ?= 0
 OPENROUTER_FULL_REFRESH ?= 0
+HF_SNAPSHOT_DATE ?=
 OPENROUTER_ARGS = --start '$(OPENROUTER_START)' $(if $(OPENROUTER_END),--end '$(OPENROUTER_END)') $(if $(filter 1,$(OPENROUTER_OFFLINE)),--offline) $(if $(filter 1,$(OPENROUTER_FULL_REFRESH)),--full-refresh)
 PRETTIER ?= npx --no-install prettier
 
@@ -54,6 +55,11 @@ openrouter-cache:
 ## openrouter-lifetime: Refresh popularity lifetimes and inference-demand projections
 openrouter-lifetime:
 	@$(PYTHON) -m scripts.openrouter lifetime $(OPENROUTER_ARGS)
+
+.PHONY: openrouter-huggingface
+## openrouter-huggingface: Compare dated Hugging Face downloads with OpenRouter traffic
+openrouter-huggingface:
+	@$(PYTHON) -m scripts.openrouter.huggingface_refresh $(if $(OPENROUTER_END),--end '$(OPENROUTER_END)') $(if $(HF_SNAPSHOT_DATE),--snapshot-date '$(HF_SNAPSHOT_DATE)') $(if $(filter 1,$(OPENROUTER_OFFLINE)),--offline)
 
 ## openrouter-render: Rebuild all OpenRouter pages from saved data without network access
 openrouter-render:
@@ -233,6 +239,8 @@ help:
 	@echo "  make openrouter-context          Context-bucket demand"
 	@echo "  make openrouter-cache            Cache prices and telemetry availability"
 	@echo "  make openrouter-lifetime         Model lifetimes and inference demand"
+	@echo "  make openrouter-huggingface      Hugging Face downloads and OpenRouter comparison"
+	@echo "  HF_SNAPSHOT_DATE=YYYY-MM-DD       Dated HF snapshot for offline comparison"
 	@echo "  make openrouter-render           Offline rebuild from committed snapshots"
 	@echo "  OPENROUTER_END=YYYY-MM-DD         Reproduce a specific UTC cutoff"
 	@echo "  OPENROUTER_FULL_REFRESH=1         Refetch older history as well"

@@ -133,7 +133,8 @@ https://[your-username].github.io/kvcache-view/
 The site also includes reproducible, source-attributed views of public demand:
 
 - [Lifetime of a Model](model-lifetime.html): open-weight popularity lifetimes,
-  historical exits, and inference-demand scenarios for the latest reviewed top ten.
+  historical exits, inference-demand scenarios for the latest reviewed top ten,
+  and a [Hugging Face download comparison](model-lifetime.html#huggingface).
 - [Hybrid Architecture Trends](hybrid-trends.html): Mamba hybrids, linear-attention hybrids, and regular attention, including sparse attention.
 - [Attention Style Trends](attention-trends.html): full, sparse, and local attention, linear and Mamba hybrids, and independently described KV representations.
 - [Context Demand](context-demand.html): all five request-context buckets, a focused January–September 2026 comparison, and architecture shares, alongside OpenRouter's cache findings.
@@ -152,6 +153,7 @@ Individual targets are `openrouter-hybrid-trends`, `openrouter-attention-trends`
 ```sh
 make openrouter-comparison OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-10-18
 make openrouter-lifetime OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-11-16
+make openrouter-huggingface OPENROUTER_OFFLINE=1 OPENROUTER_END=2026-11-22 HF_SNAPSHOT_DATE=2026-11-23
 ```
 
 Updates default to yesterday in UTC, preserve historical data, and refresh a
@@ -170,6 +172,12 @@ The [research notes](research/model-lifetime-sources.md) connect these measureme
 to Sardana et al.'s lifetime inference demand and related lifecycle studies.
 The [November 17 snapshot](research/model-lifetime-analysis-2026-11-17.md)
 records the findings, current ten projections and explicit demand scenarios.
+The [Hugging Face adoption study](research/huggingface-adoption-analysis.md)
+compares trailing downloads with a nearby 30-day token window, groups verified
+API aliases by weight repository, and shows how incomplete ranking coverage
+changes the correlation. Downloads supply context, not a conversion into requests
+or an unvalidated extension of model lifetime. `openrouter-huggingface` is a
+separate refresh target that preserves dated metadata snapshots.
 
 ## Agentic KV retention and compute projections
 

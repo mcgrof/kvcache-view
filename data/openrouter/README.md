@@ -5,6 +5,7 @@ These files support six public pages:
 | Page | Update target | Data |
 | --- | --- | --- |
 | `model-lifetime.html` | `make openrouter-lifetime` | Exact open-weight API identities, ranking episodes, matched cohorts, historical-peer survival, and demand scenarios |
+| `model-lifetime.html#huggingface` | `make openrouter-huggingface` | Hugging Face downloads versus nearby OpenRouter traffic, using one observation per mapped weight repository |
 | `hybrid-trends.html` | `make openrouter-hybrid-trends` | Daily text tokens grouped by reviewed sequence-mixer architecture |
 | `attention-trends.html` | `make openrouter-attention-trends` | Attention patterns and hybrids, with separately documented KV representations |
 | `context-demand.html` | `make openrouter-context` | All five API request-context buckets, overall text traffic, and a January–September 2026 study |
@@ -358,3 +359,39 @@ Verify the calculator with `node --test architecture-memory.test.js` and the ful
 OpenRouter pipeline with `make test-openrouter`. Existing attention/hybrid rolling
 pages retain their own dated manifests; the comparison regenerates the fixed
 study directly, rather than combining those pages' different snapshots.
+
+## Hugging Face adoption comparison
+
+`make openrouter-huggingface` collects public metadata for explicitly mapped,
+confirmed-open repositories and an independent 30-day OpenRouter ranking window.
+It writes dated inputs under `huggingface/` and the page's
+`huggingface-comparison.json`. It does not silently refresh the existing lifetime
+snapshot or change its projections. HF requests need no credential; the rankings
+request uses `OPEN_ROUTER_API` under the same restrictions as the other collectors.
+
+```sh
+make openrouter-huggingface OPENROUTER_OFFLINE=1 \
+    OPENROUTER_END=2026-11-22 HF_SNAPSHOT_DATE=2026-11-23
+```
+
+The November 23 HF counters are compared with October 24–November 22 OpenRouter
+traffic. HF's exact counter boundaries are not supplied by the endpoint. One
+repository contributes one observation after grouping its known API aliases.
+Primary statistics require every known alias to be reported for all 30 days;
+secondary statistics use observed minima and do not correct for hidden traffic.
+Repository bootstrap intervals do not remove developer dependence or selection
+bias. Historical models with no named traffic remain in the table, outside the
+correlation sample. A changed HF repository ID is excluded pending mapping review,
+and failed lookups remain missing rather than zero.
+
+The saved metadata retains downloads, cumulative downloads, likes, creation and
+modification timestamps, total Safetensors parameters, selected source fields,
+query URLs, retrieval timestamps, and response hashes. Download counts are file
+request activity, not unique users or inference calls. Source-file hashes and
+OpenRouter CC BY 4.0 attribution are embedded in the derived JSON. The public
+HF metadata is identified separately; the OpenRouter license is not asserted to
+cover Hugging Face data. No prompts, private analytics, or credentials are saved.
+
+See [results, sources, and the forecast-validation plan](../../research/huggingface-adoption-analysis.md).
+Dated snapshots provide a starting point for a future panel. No scheduled task is
+configured, and today's counters are not backfilled into earlier forecast dates.
